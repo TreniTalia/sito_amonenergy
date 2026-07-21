@@ -1,0 +1,43 @@
+---
+import { getCollection } from 'astro:content';
+import Base from '../layouts/Base.astro';
+import PageHero from '../components/PageHero.astro';
+import GalleryGrid from '../components/GalleryGrid.astro';
+import Lightbox from '../components/Lightbox.astro';
+import CtaBand from '../components/CtaBand.astro';
+
+const progetti = (await getCollection('progetti')).sort((a, b) => a.data.ordine - b.data.ordine);
+
+const breadcrumb = {
+  '@context': 'https://schema.org',
+  '@type': 'BreadcrumbList',
+  itemListElement: [
+    { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://amonenergy.it/' },
+    { '@type': 'ListItem', position: 2, name: 'Progetti', item: 'https://amonenergy.it/progetti/' },
+  ],
+};
+---
+
+<Base
+  title="Progetti"
+  description="Sottostazioni AT/MT realizzate da Amon Energy per parchi eolici e fotovoltaici nel Centro-Sud Italia: un archivio d'opera."
+  structuredData={[breadcrumb]}
+>
+  <PageHero
+    eyebrow="Archivio d'opera"
+    h1="Quello che abbiamo costruito."
+    sub="Sottostazioni elettriche AT/MT per parchi eolici e fotovoltaici, presentate con i dati di ogni realizzazione."
+  />
+
+  <GalleryGrid entries={progetti} />
+
+  <section class="wrap pb-20 lg:pb-28 text-center">
+    <p class="text-headline" style="max-width: 24ch; margin-inline: auto;">
+      Vuoi vedere cosa possiamo costruire per te?
+    </p>
+  </section>
+
+  <CtaBand />
+
+  <Lightbox />
+</Base>

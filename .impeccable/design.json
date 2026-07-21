@@ -1,0 +1,122 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-07-19T00:00:00.000Z",
+  "title": "Design System: Amon Energy",
+  "extensions": {
+    "colorMeta": {
+      "navy-950": { "role": "neutral", "displayName": "Deep Navy", "canonical": "#0A2A44", "tonalRamp": ["#0A2A44", "#103B5F", "#1D5585", "#E8EFF5"] },
+      "navy-900": { "role": "primary", "displayName": "Amon Navy", "canonical": "#103B5F", "tonalRamp": ["#0A2A44", "#103B5F", "#1D5585", "#E8EFF5"] },
+      "navy-700": { "role": "neutral", "displayName": "Navy Hover", "canonical": "#1D5585", "tonalRamp": ["#0A2A44", "#103B5F", "#1D5585", "#E8EFF5"] },
+      "navy-100": { "role": "neutral", "displayName": "Pale Navy", "canonical": "#E8EFF5", "tonalRamp": ["#0A2A44", "#103B5F", "#1D5585", "#E8EFF5"] },
+      "leaf-500": { "role": "tertiary", "displayName": "Signal Leaf", "canonical": "#3E8E5A" },
+      "signal-400": { "role": "secondary", "displayName": "Circuit Blue", "canonical": "#4FB3D9" },
+      "paper": { "role": "neutral", "displayName": "Paper", "canonical": "#FAFBFC" },
+      "ink": { "role": "neutral", "displayName": "Ink", "canonical": "#16222E" }
+    },
+    "typographyMeta": {
+      "display": { "displayName": "Display", "purpose": "H1 hero headline only, one per page." },
+      "headline": { "displayName": "Headline", "purpose": "H2 section titles." },
+      "body": { "displayName": "Body", "purpose": "Running copy, capped at 65ch measure." },
+      "label": { "displayName": "Eyebrow / Label", "purpose": "Uppercase section-opener kicker, paired with the short dash." }
+    },
+    "shadows": [],
+    "motion": [
+      { "name": "ease-out-signature", "value": "cubic-bezier(0.22, 1, 0.36, 1)", "purpose": "Gallery photo slow-zoom on hover and scroll-reveal transitions (0.7-1.2s)." },
+      { "name": "wave-drift", "value": "linear, ~24s loop", "purpose": "Barely-perceptible continuous horizontal drift of the signal-wave SVG divider; suggested default pending final tuning. Disabled entirely under prefers-reduced-motion." }
+    ],
+    "breakpoints": [
+      { "name": "base", "value": "360px" },
+      { "name": "sm", "value": "640px" },
+      { "name": "md", "value": "768px" },
+      { "name": "lg", "value": "1024px" },
+      { "name": "xl", "value": "1280px" }
+    ]
+  },
+  "components": [
+    {
+      "name": "Button Primary",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "Primary CTA on light backgrounds, e.g. \"Chiamaci ora\" in the hero.",
+      "html": "<a class=\"ds-btn-primary\" href=\"tel:+390881377590\">Chiamaci ora</a>",
+      "css": ".ds-btn-primary { display: inline-flex; align-items: center; justify-content: center; background: #103B5F; color: #FAFBFC; padding: 14px 32px; border-radius: 6px; font-family: 'Inter Variable', sans-serif; font-weight: 500; text-decoration: none; transition: background 0.2s ease-out; } .ds-btn-primary:hover { background: #1D5585; } .ds-btn-primary:focus-visible { outline: 2px solid #4FB3D9; outline-offset: 2px; }"
+    },
+    {
+      "name": "Button On Dark",
+      "kind": "button",
+      "refersTo": "button-on-dark",
+      "description": "CTA placed on a dark navy surface, e.g. the CtaBand or hero secondary action.",
+      "html": "<a class=\"ds-btn-on-dark\" href=\"/servizi/\">Scopri i servizi</a>",
+      "css": ".ds-btn-on-dark { display: inline-flex; align-items: center; justify-content: center; background: #FAFBFC; color: #0A2A44; padding: 14px 32px; border-radius: 6px; font-family: 'Inter Variable', sans-serif; font-weight: 500; text-decoration: none; transition: background 0.2s ease-out, color 0.2s ease-out; } .ds-btn-on-dark:hover { background: #4FB3D9; color: #0A2A44; } .ds-btn-on-dark:focus-visible { outline: 2px solid #4FB3D9; outline-offset: 2px; }"
+    },
+    {
+      "name": "Service Card",
+      "kind": "card",
+      "refersTo": "card-service",
+      "description": "One of the 5 service cards on the home page and services hub.",
+      "html": "<div class=\"ds-card-service\"><svg class=\"ds-card-service-icon\" width=\"28\" height=\"28\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"#3E8E5A\" stroke-width=\"2\"><path d=\"M13 2 3 14h7l-1 8 10-12h-7z\"/></svg><h3 class=\"ds-card-service-title\">Laboratorio mobile ricerca guasti</h3><p class=\"ds-card-service-text\">Unità Centrix 2.0 attrezzata per localizzare e riparare guasti su cavi MT. Reperibilità 24h, 365 giorni l'anno.</p></div>",
+      "css": ".ds-card-service { background: #FAFBFC; color: #16222E; border: 1px solid #E8EFF5; border-radius: 2px; padding: 24px; transition: border-color 0.2s ease-out, transform 0.2s ease-out; } .ds-card-service:hover { border-color: #1D5585; transform: translateY(-2px); } .ds-card-service-icon { margin-bottom: 12px; } .ds-card-service-title { font-family: 'Archivo Variable', sans-serif; font-weight: 700; font-size: 1.125rem; margin: 0 0 8px; } .ds-card-service-text { font-family: 'Inter Variable', sans-serif; font-size: 0.9375rem; line-height: 1.65; margin: 0; }"
+    },
+    {
+      "name": "Eyebrow",
+      "kind": "custom",
+      "refersTo": "label",
+      "description": "Section-opening kicker: short dash + uppercase tracked label, used before every H2.",
+      "html": "<div class=\"ds-eyebrow\"><span class=\"ds-eyebrow-dash\"></span><span class=\"ds-eyebrow-label\">Cerca guasti</span></div>",
+      "css": ".ds-eyebrow { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; } .ds-eyebrow-dash { width: 32px; height: 2px; background: #4FB3D9; display: block; } .ds-eyebrow-label { font-family: 'Archivo Variable', sans-serif; font-weight: 600; font-size: 0.8rem; letter-spacing: 0.1em; text-transform: uppercase; color: #4FB3D9; }"
+    },
+    {
+      "name": "kV Chip",
+      "kind": "chip",
+      "refersTo": "card-service",
+      "description": "Tabular-figure kV rating tag on each Progetti gallery item — the most identity-carrying data point of each project.",
+      "html": "<span class=\"ds-chip-kv\">150/30 kV</span>",
+      "css": ".ds-chip-kv { display: inline-block; font-family: 'Inter Variable', sans-serif; font-variant-numeric: tabular-nums; font-weight: 500; font-size: 0.8125rem; letter-spacing: 0.02em; color: #FAFBFC; background: #103B5F; padding: 4px 10px; border-radius: 2px; }"
+    },
+    {
+      "name": "Header Navigation",
+      "kind": "nav",
+      "refersTo": "button-on-dark",
+      "description": "Sticky header: transparent over the dark hero, solidifies to navy-950 on scroll. Persistent tel: CTA at every breakpoint.",
+      "html": "<header class=\"ds-header\"><nav class=\"ds-header-nav\"><a href=\"/azienda/\">Azienda</a><a href=\"/servizi/\">Servizi</a><a href=\"/progetti/\">Progetti</a><a href=\"/contatti/\">Contatti</a></nav><a class=\"ds-header-cta\" href=\"tel:+390881377590\">0881 377590</a></header>",
+      "css": ".ds-header { display: flex; align-items: center; justify-content: space-between; padding: 20px 32px; background: transparent; transition: background 0.2s ease-out; } .ds-header.ds-header--scrolled { background: #0A2A44; } .ds-header-nav { display: flex; gap: 32px; } .ds-header-nav a { font-family: 'Inter Variable', sans-serif; font-weight: 500; color: #FAFBFC; text-decoration: none; } .ds-header-cta { font-family: 'Inter Variable', sans-serif; font-weight: 600; color: #FAFBFC; border: 1px solid #4FB3D9; border-radius: 6px; padding: 8px 16px; text-decoration: none; transition: background 0.2s ease-out; } .ds-header-cta:hover { background: #1D5585; }"
+    }
+  ],
+  "narrative": {
+    "northStar": "Industrial Precision",
+    "overview": "This is the term the client's own 2024 brochure already earned, and it's the standard the site is held to: the site should read like the print collateral of a serious electrical-engineering contractor — deep navy, generous white space, confident large-scale type, one restrained signature graphic — not like a SaaS product landing page. Every decision below defaults to restraint. The system rejects gradients, glassmorphism, decorative card shadows, and the stock-photography-and-superlative vocabulary of the prior WordPress site.\n\nDensity is generous but purposeful: sections carry one idea each (per PRODUCT.md's Design Principles), separated by real vertical space rather than dividers or shadows. The one permitted piece of ornament is the signal-wave motif — a thin electrical-waveform line, lifted directly from the brochure, used as a section divider with a barely-perceptible horizontal drift. Everything else earns its place through structure (borders, type scale, color role) rather than decoration.",
+    "keyCharacteristics": [
+      "Deep navy + paper-white base, with leaf-green and signal-blue reserved for small, deliberate accents only",
+      "Large, confident, geometric-expanded display type paired with a neutral, highly readable body face",
+      "Flat surfaces throughout — depth comes from borders and translucent dark overlay panels, never box-shadow",
+      "One recurring signature element (the signal wave), not a library of decorative motifs",
+      "Mobile-first, touch-parity by construction: nothing shown only on hover"
+    ],
+    "rules": [
+      { "name": "The Leaf Rarity Rule", "body": "leaf-500 never fills a background, a button, or a section. It appears only as a small accent — an icon, a chip, a bullet — and its rarity is what keeps it feeling like the logo's signature color rather than a UI color.", "section": "colors" },
+      { "name": "The Navy Ramp Rule", "body": "navy-950 → navy-900 → navy-700 → navy-100 is a single continuous tonal ramp, not four unrelated colors. Any new navy-family need should sit on this same ramp.", "section": "colors" },
+      { "name": "The No-Fluff Rule", "body": "Copy is short, factual, and technically specific (norms, equipment, kV ratings) rather than motivational. If a sentence could appear on any B2B site regardless of industry, cut it.", "section": "typography" },
+      { "name": "The Deliberate Eyebrow Rule", "body": "The eyebrow-dash-title pattern is inherited directly from the client's print brochure — it is brand continuity, not a default scaffold. Apply it as a single consistent system, and vary section rhythm through spacing, StatBar, marquee, and full-bleed gallery breaks so the eyebrow doesn't become the only structural device on the page.", "section": "typography" },
+      { "name": "The Flat-by-Default Rule", "body": "No box-shadow anywhere in the system, including the mobile nav panel, sticky header, and lightbox. Where a SaaS pattern would reach for a shadow, use a border, a background-color shift, or a navy-950 translucent panel instead.", "section": "elevation" }
+    ],
+    "dos": [
+      "Do keep leaf-500 to micro-accents only — an icon, a chip, a bullet.",
+      "Do build all depth from 1px borders and navy-950 translucent panels, never box-shadow.",
+      "Do write explicit, task-specific button labels (\"Chiamaci ora\", \"Scrivici via email\"), never \"Invia\" / \"Submit\".",
+      "Do cap body copy at 65ch measure at every breakpoint.",
+      "Do keep the two radius scales distinct: 6px for buttons, 2px for cards/containers.",
+      "Do keep the tel: CTA visible in the header at every breakpoint, and in the mobile sticky bar below md.",
+      "Do show gallery captions, metadata, and chip tags by default — never hover-only.",
+      "Do disable the signal-wave drift, StatBar counters, and all scroll-reveal animation under prefers-reduced-motion."
+    ],
+    "donts": [
+      "Don't use leaf-500 as a section or button background — it is a logo accent, not a UI color.",
+      "Don't add box-shadow to cards, the mobile nav panel, the sticky header, or the lightbox.",
+      "Don't use gradients, background-clip: text, or glassmorphism anywhere.",
+      "Don't use stock photography of \"smiling guys in hardhats\" — source real photography of the actual substations, vans, and control room.",
+      "Don't build the projects gallery as Pinterest-style masonry, a uniform square-thumbnail grid, an autoplay carousel, a 50%-black-overlay-with-centered-title, or a flip/tilt hover card.",
+      "Don't use pill-shaped buttons; radius is 6px, full stop.",
+      "Don't let the eyebrow-dash pattern become the only section-opening device on a page."
+    ]
+  }
+}

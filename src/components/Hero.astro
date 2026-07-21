@@ -1,0 +1,101 @@
+---
+import { Image } from 'astro:assets';
+import heroImg from '../assets/img/photos/substation-wide.jpg';
+import WaveDivider from './WaveDivider.astro';
+
+interface Props {
+  eyebrow: string;
+  h1: string;
+  sub: string;
+  ctaPrimaria: string;
+  ctaPrimariaHref: string;
+  ctaSecondaria: string;
+  ctaSecondariaHref: string;
+}
+
+const { eyebrow, h1, sub, ctaPrimaria, ctaPrimariaHref, ctaSecondaria, ctaSecondariaHref } = Astro.props;
+
+const facts = ['Centro-Sud Italia', 'Reperibilità 24/7', 'Sottostazioni fino a 150 kV'];
+---
+
+<section class="hero relative isolate flex min-h-[88svh] flex-col justify-end overflow-hidden text-paper">
+  <Image
+    src={heroImg}
+    alt="Stazione elettrica di trasformazione AT/MT realizzata da Amon Energy per un parco eolico in Puglia"
+    class="hero-img absolute inset-0 h-full w-full object-cover"
+    widths={[768, 1280, 1600, 2000]}
+    sizes="100vw"
+    loading="eager"
+    fetchpriority="high"
+  />
+  <div class="hero-scrim absolute inset-0"></div>
+
+  <div class="relative z-10 wrap-wide pb-14 pt-32 lg:pb-20 lg:pt-40">
+    <div class="max-w-xl md:max-w-2xl lg:max-w-3xl xl:max-w-4xl 2xl:max-w-5xl">
+      <div class="ds-eyebrow" data-reveal style="--reveal-delay:80ms">
+        <span class="ds-live-dot" aria-hidden="true"></span>
+        <span class="ds-eyebrow-label" style="color: var(--color-green-400)">{eyebrow}</span>
+      </div>
+
+      <h1 class="text-hero" data-reveal style="--reveal-delay:160ms">{h1}</h1>
+
+      <p class="measure mt-6 text-lg text-paper/85 lg:text-xl" data-reveal style="--reveal-delay:260ms">
+        {sub}
+      </p>
+
+      <div class="mt-9 flex flex-col gap-4 sm:flex-row" data-reveal style="--reveal-delay:360ms">
+        <a href={ctaPrimariaHref} class="ds-btn-on-dark justify-center">{ctaPrimaria}</a>
+        <a href={ctaSecondariaHref} class="ds-btn-ghost justify-center">{ctaSecondaria}</a>
+      </div>
+
+      <ul class="mt-12 hidden flex-wrap items-center gap-x-6 gap-y-2 sm:flex" data-reveal style="--reveal-delay:460ms">
+        {
+          facts.map((f, i) => (
+            <>
+              {i > 0 && <li aria-hidden="true" class="h-1 w-1 rounded-full bg-green-400/70" />}
+              <li class="text-sm font-medium tracking-wide text-paper/75">{f}</li>
+            </>
+          ))
+        }
+      </ul>
+    </div>
+  </div>
+
+  <div class="relative z-10">
+    <WaveDivider tone="signal" animated />
+  </div>
+</section>
+
+<style>
+  .hero-scrim {
+    background:
+      linear-gradient(
+        to top,
+        color-mix(in srgb, var(--color-navy-950) 96%, transparent) 0%,
+        color-mix(in srgb, var(--color-navy-950) 88%, transparent) 22%,
+        color-mix(in srgb, var(--color-navy-950) 55%, transparent) 55%,
+        color-mix(in srgb, var(--color-navy-950) 30%, transparent) 100%
+      ),
+      linear-gradient(
+        to right,
+        color-mix(in srgb, var(--color-navy-950) 70%, transparent) 0%,
+        transparent 60%
+      );
+  }
+
+  .hero-img {
+    transform: scale(1.06);
+    animation: hero-zoom 18s var(--ease-out-expo) forwards;
+  }
+  @keyframes hero-zoom {
+    to {
+      transform: scale(1);
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .hero-img {
+      animation: none;
+      transform: none;
+    }
+  }
+</style>

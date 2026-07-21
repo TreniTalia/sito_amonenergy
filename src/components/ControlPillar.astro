@@ -1,0 +1,177 @@
+---
+import { Image } from 'astro:assets';
+import controlRoom from '../assets/img/photos/control-room.jpg';
+
+interface Props {
+  eyebrow: string;
+  titolo: string;
+  testo: string;
+  /** Link target for the section CTA. */
+  href?: string;
+}
+
+const { eyebrow, titolo, testo, href = '/servizi/monitoraggio-e-controllo/' } = Astro.props;
+
+const sistemi = [
+  {
+    tag: 'Control Room',
+    titolo: 'Sorveglianza 24/7/365',
+    testo:
+      '5 tecnici e 1 supervisore dedicati. Tripla ridondanza internet e infrastruttura su cloud AWS: gli impianti restano sorvegliati anche in caso di doppio guasto.',
+    specs: ['24/7/365', '3 linee internet', 'Cloud AWS'],
+  },
+  {
+    tag: 'RCS',
+    titolo: 'Remote Control System',
+    testo:
+      'Sistema proprietario di monitoraggio e controllo: analisi guasti in tempo reale, richiusura automatica, reset protezioni da remoto, storicizzazione dati e sistema ticket integrato.',
+    specs: ['Richiusura automatica', 'Web App', 'Integrazione SCADA'],
+  },
+  {
+    tag: 'CCI',
+    titolo: "Controllore Centrale d'Impianto",
+    testo:
+      'Conforme a CEI 0-16 V5 e alla Delibera ARERA 564/2025/R/eel. Lettura contatori e gestione del teledistacco A72 inclusi.',
+    specs: ['CEI 0-16 V5', 'ARERA 564/2025', 'Teledistacco A72'],
+  },
+];
+
+const tiers = [
+  { nome: 'Basic', desc: 'Monitoraggio di base e richiusura automatica.', color: 'var(--color-tier-basic)' },
+  { nome: 'Advance', desc: 'In più: acquisizione dati da campo e reset protezioni da remoto.', color: 'var(--color-tier-advance)' },
+  { nome: 'Pro', desc: 'In più: analisi avanzate, integrazione SCADA e interfaccia grafica personalizzata.', color: 'var(--color-tier-pro)' },
+];
+---
+
+<section class="control relative isolate overflow-hidden bg-green-950 text-paper">
+  <div class="control-glow" aria-hidden="true"></div>
+
+  <div class="wrap-wide relative z-10 py-24 lg:py-32">
+    <!-- Intro + live monitor -->
+    <div class="grid items-center gap-12 lg:grid-cols-[1.05fr_0.95fr] lg:gap-16">
+      <div>
+        <div class="ds-eyebrow" data-reveal>
+          <span class="ds-live-dot" aria-hidden="true"></span>
+          <span class="ds-eyebrow-label ds-eyebrow-label--signal">{eyebrow}</span>
+        </div>
+        <h2 class="text-control max-w-[18ch]" data-reveal style="--reveal-delay:80ms">{titolo}</h2>
+        <p class="measure mt-6 text-lg text-green-200" data-reveal style="--reveal-delay:160ms">{testo}</p>
+        <a
+          href={href}
+          class="ds-btn-signal mt-9 inline-flex"
+          data-reveal
+          style="--reveal-delay:240ms"
+        >
+          Scopri monitoraggio e controllo
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6" /></svg>
+        </a>
+      </div>
+
+      <!-- Live monitor panel -->
+      <figure class="monitor ds-panel overflow-hidden" data-reveal style="--reveal-delay:120ms">
+        <div class="flex items-center gap-2 border-b border-green-400/20 px-4 py-3">
+          <span class="h-2.5 w-2.5 rounded-full bg-tier-pro/80"></span>
+          <span class="h-2.5 w-2.5 rounded-full bg-tier-advance/80"></span>
+          <span class="h-2.5 w-2.5 rounded-full bg-tier-basic/80"></span>
+          <span class="ml-3 truncate font-display text-xs font-semibold uppercase tracking-[0.12em] text-green-200/80">
+            Amon · Control Room — Castelluccio dei Sauri (FG)
+          </span>
+        </div>
+        <div class="relative">
+          <Image
+            src={controlRoom}
+            alt="La Control Room di Amon Energy: operatore davanti al muro sinottico SCADA che monitora gli impianti in tempo reale"
+            class="aspect-[16/11] w-full object-cover"
+            widths={[600, 900, 1200]}
+            sizes="(min-width: 1024px) 46vw, 100vw"
+          />
+          <div class="scanline" aria-hidden="true"></div>
+          <div class="absolute left-3 top-3 flex items-center gap-2 rounded-full bg-green-950/70 px-3 py-1.5 backdrop-blur-sm">
+            <span class="ds-live-dot" aria-hidden="true"></span>
+            <span class="font-display text-[0.7rem] font-bold uppercase tracking-[0.14em] text-green-200">Live · 24/7</span>
+          </div>
+        </div>
+      </figure>
+    </div>
+
+    <!-- Three systems -->
+    <div class="mt-20 grid gap-5 md:grid-cols-3 lg:mt-24 lg:gap-6">
+      {
+        sistemi.map((s, i) => (
+          <article class="ds-panel flex flex-col p-7 lg:p-8" data-reveal style={`--reveal-delay:${i * 100}ms`}>
+            <span class="ds-pill self-start">{s.tag}</span>
+            <h3 class="mt-5 font-display text-xl font-bold tracking-tight">{s.titolo}</h3>
+            <p class="mt-3 text-sm leading-relaxed text-green-200/90">{s.testo}</p>
+            <ul class="mt-6 flex flex-wrap gap-2 border-t border-green-400/15 pt-5">
+              {s.specs.map((spec) => (
+                <li class="rounded-[2px] bg-green-400/10 px-2.5 py-1 font-display text-[0.72rem] font-medium tracking-wide text-green-200">
+                  {spec}
+                </li>
+              ))}
+            </ul>
+          </article>
+        ))
+      }
+    </div>
+
+    <!-- RCS tiers -->
+    <div class="mt-16 lg:mt-20" data-reveal>
+      <p class="mb-6 flex items-center gap-3 font-display text-sm font-semibold uppercase tracking-[0.12em] text-green-200/70">
+        <span class="h-[2px] w-8 bg-green-400"></span>
+        Piattaforma RCS — tre versioni
+      </p>
+      <div class="grid gap-4 sm:grid-cols-3">
+        {
+          tiers.map((t) => (
+            <div class="relative rounded-[4px] border border-green-400/18 bg-green-900/40 p-6" style={`--tier:${t.color}`}>
+              <span class="absolute inset-x-0 top-0 h-[3px] rounded-t-[4px]" style="background: var(--tier)" aria-hidden="true" />
+              <h4 class="font-display text-lg font-bold" style="color: var(--tier)">{t.nome}</h4>
+              <p class="mt-2 text-sm leading-relaxed text-green-200/85">{t.desc}</p>
+            </div>
+          ))
+        }
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  .control-glow {
+    position: absolute;
+    inset: 0;
+    background:
+      radial-gradient(60% 55% at 78% 8%, color-mix(in srgb, var(--color-green-500) 26%, transparent), transparent 70%),
+      radial-gradient(50% 60% at 0% 100%, color-mix(in srgb, var(--color-green-700) 40%, transparent), transparent 70%);
+    z-index: 0;
+  }
+  .monitor {
+    box-shadow: 0 40px 80px -40px color-mix(in srgb, var(--color-green-400) 30%, transparent);
+  }
+  .scanline {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      to bottom,
+      transparent 0%,
+      color-mix(in srgb, var(--color-green-400) 14%, transparent) 50%,
+      transparent 100%
+    );
+    height: 40%;
+    animation: scan 4.5s var(--ease-signature) infinite;
+    pointer-events: none;
+    mix-blend-mode: screen;
+  }
+  @keyframes scan {
+    0% {
+      transform: translateY(-110%);
+    }
+    100% {
+      transform: translateY(320%);
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .scanline {
+      display: none;
+    }
+  }
+</style>

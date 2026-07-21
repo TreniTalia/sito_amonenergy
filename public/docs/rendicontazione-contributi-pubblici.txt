@@ -1,0 +1,10 @@
+PLACEHOLDER — Rendicontazione contributi pubblici
+
+Questo documento è un segnaposto. Il PDF originale con la rendicontazione degli
+aiuti di Stato (L. 124/2017, D.L. 34/2019) va recuperato dal sito attuale di
+Amon Energy e caricato in questo percorso come:
+
+  /public/docs/rendicontazione-contributi-pubblici.pdf
+
+Aggiornare il link corrispondente nel footer (src/components/Footer.astro) da
+".txt" a ".pdf" una volta caricato il file reale.

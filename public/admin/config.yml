@@ -1,0 +1,162 @@
+# Configurazione Sveltia CMS per il sito Amon Energy.
+#
+# ATTENZIONE — placeholder da aggiornare prima del go-live:
+#   1. `backend.repo` sotto: sostituire "amonenergy/sito-amonenergy" con il vero
+#      owner/repo GitHub una volta creata la repository.
+#   2. `backend.base_url` / `backend.auth_endpoint`: da impostare solo se si usa
+#      l'autenticazione via Worker Cloudflare (sveltia-cms-auth) — vedi docs/CMS-SETUP.md.
+#      Se assenti, Sveltia usa il flusso OAuth GitHub di default (richiede comunque
+#      un provider OAuth configurato — vedi docs/CMS-SETUP.md).
+#   3. Questo file non è stato ancora validato contro un'istanza Sveltia CMS live:
+#      rivedere i widget e gli hint dopo il primo test reale del pannello.
+
+backend:
+  name: github
+  repo: amonenergy/sito-amonenergy # PLACEHOLDER — aggiornare con l'owner/repo reale
+  branch: main
+
+# Commit diretto su main: per due editor interni il flusso bozze/review è
+# complessità inutile (SPEC §2.3).
+publish_mode: simple
+
+media_folder: "src/assets/img/progetti"
+public_folder: "/src/assets/img/progetti"
+
+i18n: false
+
+collections:
+  - name: "progetti"
+    label: "Progetti"
+    label_singular: "Progetto"
+    description: "Le opere dell'archivio progetti — una scheda per sottostazione."
+    folder: "src/content/progetti"
+    create: true
+    delete: true
+    slug: "{{slug}}"
+    identifier_field: "titolo"
+    summary: "{{titolo}} — {{kv}}"
+    media_folder: "/src/assets/img/progetti"
+    public_folder: "/src/assets/img/progetti"
+    fields:
+      - { label: "Titolo", name: "titolo", widget: "string", hint: "Es. \"Stazione elettrica Troia\"." }
+      - { label: "Tensione (kV)", name: "kv", widget: "string", hint: "Es. \"150/30 kV\". Se non ancora nota, lasciare \"[DATO DA CONFERMARE]\"." }
+      - { label: "Committente", name: "committente", widget: "string" }
+      - { label: "Provincia", name: "provincia", widget: "string", hint: "Sigla, es. FG, PZ, AV." }
+      - { label: "Tipologia", name: "tipologia", widget: "string", default: "Sottostazione AT/MT" }
+      - { label: "Immagine", name: "immagine", widget: "image", hint: "Orizzontale, almeno 1600px sul lato lungo." }
+      - { label: "Testo alternativo immagine", name: "immagineAlt", widget: "string", hint: "Descrizione della foto per l'accessibilità, es. \"Trasformatore di potenza della stazione 150/30 kV di Troia al tramonto\"." }
+      - { label: "Foto a tutta larghezza (full-bleed)", name: "full", widget: "boolean", default: false, hint: "Attivare solo su una foto ogni 3 per mantenere il ritmo della griglia — se non sei sicuro, lascia disattivato." }
+      - { label: "Ordine", name: "ordine", widget: "number", value_type: "int", hint: "Ordine di comparsa nella galleria (1, 2, 3…)." }
+      - { label: "Descrizione", name: "body", widget: "markdown", hint: "2-3 righe: cosa è stato costruito e per cosa." }
+
+  - name: "servizi"
+    label: "Servizi"
+    description: "Le 5 schede servizio — corrispondono 1:1 alle pagine di /servizi/."
+    files:
+      - name: "laboratorio-mobile"
+        label: "Laboratorio mobile ricerca guasti"
+        file: "src/content/servizi/laboratorio-mobile.md"
+        fields: &servizio_fields
+          - { label: "Titolo", name: "titolo", widget: "string" }
+          - { label: "Frase (sotto il titolo nella pagina servizio)", name: "frase", widget: "string" }
+          - { label: "Testo breve (per le card home/hub)", name: "excerpt", widget: "text" }
+          - { label: "Icona (nome Lucide, es. \"lucide:truck\")", name: "icona", widget: "string" }
+          - { label: "Ordine", name: "ordine", widget: "number", value_type: "int" }
+          - { label: "Immagine (opzionale)", name: "immagine", widget: "image", required: false }
+          - label: "Punti elenco (titolo + 2 righe)"
+            name: "punti"
+            widget: "list"
+            required: false
+            fields:
+              - { label: "Titolo punto", name: "titolo", widget: "string" }
+              - { label: "Testo punto", name: "testo", widget: "text" }
+          - { label: "Testo introduttivo/di chiusura", name: "body", widget: "markdown" }
+      - name: "verifiche-strumentali"
+        label: "Verifiche strumentali"
+        file: "src/content/servizi/verifiche-strumentali.md"
+        fields: *servizio_fields
+      - name: "monitoraggio-e-controllo"
+        label: "Monitoraggio e controllo"
+        file: "src/content/servizi/monitoraggio-e-controllo.md"
+        fields: *servizio_fields
+      - name: "costruzioni"
+        label: "Costruzioni"
+        file: "src/content/servizi/costruzioni.md"
+        fields: *servizio_fields
+      - name: "gestione-e-manutenzione"
+        label: "Gestione e manutenzione"
+        file: "src/content/servizi/gestione-e-manutenzione.md"
+        fields: *servizio_fields
+
+  - name: "pagine"
+    label: "Pagine"
+    description: "Testi editabili delle pagine fisse del sito."
+    files:
+      - name: "home"
+        label: "Home"
+        file: "src/content/pagine/home.yaml"
+        fields:
+          - { label: "Tipo pagina", name: "pagina", widget: "hidden", default: "home" }
+          - label: "Hero (prima schermata)"
+            name: "hero"
+            widget: "object"
+            fields:
+              - { label: "Eyebrow (etichetta sopra il titolo)", name: "eyebrow", widget: "string" }
+              - { label: "Titolo grande (H1)", name: "h1", widget: "text", hint: "Questa è la frase grande nella prima schermata della home." }
+              - { label: "Sottotitolo", name: "sub", widget: "text" }
+              - { label: "Testo bottone Chiama", name: "ctaPrimaria", widget: "string" }
+              - { label: "Testo bottone Servizi", name: "ctaSecondaria", widget: "string" }
+          - label: "Chi siamo in breve"
+            name: "chiSiamoBreve"
+            widget: "object"
+            fields:
+              - { label: "Testo", name: "testo", widget: "text" }
+              - { label: "Link (di solito /azienda/)", name: "link", widget: "string" }
+          - label: "Numeri (StatBar)"
+            name: "statbar"
+            widget: "list"
+            hint: "4 numeri mostrati in home. Quelli segnati come \"dato finto\" vanno sostituiti con i valori reali prima del go-live."
+            fields:
+              - { label: "Valore (es. \"120+\" o \"850 MW\")", name: "valore", widget: "string" }
+              - { label: "Etichetta", name: "label", widget: "string" }
+              - { label: "È un dato finto/segnaposto?", name: "finto", widget: "boolean", default: true }
+          - label: "Perché Amon Energy (3 punti)"
+            name: "percheAmon"
+            widget: "list"
+            fields:
+              - { label: "Titolo", name: "titolo", widget: "string" }
+              - { label: "Testo", name: "testo", widget: "text" }
+          - { label: "Titolo sezione clienti", name: "marqueeTitolo", widget: "string" }
+
+      - name: "azienda"
+        label: "Azienda"
+        file: "src/content/pagine/azienda.yaml"
+        fields:
+          - { label: "Tipo pagina", name: "pagina", widget: "hidden", default: "azienda" }
+          - { label: "Eyebrow (etichetta sopra il titolo)", name: "eyebrow", widget: "string" }
+          - { label: "Titolo grande (H1)", name: "h1", widget: "text" }
+          - { label: "Storia", name: "storia", widget: "text" }
+          - { label: "Missione", name: "missione", widget: "text", hint: "Testo redatto dai soli fatti noti — da far validare dal cliente." }
+          - { label: "Tempestività d'intervento (testo raggio d'azione)", name: "raggioAzione", widget: "text" }
+          - label: "Strumentazione (elenco tag)"
+            name: "strumentazione"
+            widget: "list"
+            field: { label: "Strumento", name: "item", widget: "string" }
+
+      - name: "contatti"
+        label: "Contatti"
+        file: "src/content/pagine/contatti.yaml"
+        fields:
+          - { label: "Tipo pagina", name: "pagina", widget: "hidden", default: "contatti" }
+          - { label: "Titolo grande (H1)", name: "h1", widget: "text" }
+          - { label: "Sottotitolo", name: "sub", widget: "text" }
+          - { label: "Orari", name: "orari", widget: "string" }
+
+      - name: "servizi-hub"
+        label: "Servizi (pagina hub)"
+        file: "src/content/pagine/servizi.yaml"
+        fields:
+          - { label: "Tipo pagina", name: "pagina", widget: "hidden", default: "servizi" }
+          - { label: "Eyebrow (etichetta sopra il titolo)", name: "eyebrow", widget: "string" }
+          - { label: "Titolo grande (H1)", name: "h1", widget: "text" }
+          - { label: "Sottotitolo", name: "sub", widget: "text" }

@@ -1,0 +1,7 @@
+pagina: "servizi"
+
+# NOTA: hero della pagina hub non fornito verbatim nello spec (§4.3 descrive solo
+# le 5 sottopagine). Testo redatto in tono coerente col resto del sito, da rivedere.
+eyebrow: "I nostri servizi"
+h1: "Un partner tecnico per ogni fase dell'impianto."
+sub: "Dalla costruzione alla gestione quotidiana: cinque aree di specializzazione per impianti AT/MT ed energie rinnovabili."

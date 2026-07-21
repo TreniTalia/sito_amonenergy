@@ -1,0 +1,35 @@
+---
+import { getEntry } from 'astro:content';
+import Base from '../layouts/Base.astro';
+import ContactChannels from '../components/ContactChannels.astro';
+import MapFacade from '../components/MapFacade.astro';
+import { contatti } from '../data/contatti.ts';
+
+const pagina = await getEntry('pagine', 'contatti');
+if (!pagina || pagina.data.pagina !== 'contatti') throw new Error('pagine/contatti.yaml missing or malformed');
+const { h1, sub, orari } = pagina.data;
+
+const breadcrumb = {
+  '@context': 'https://schema.org',
+  '@type': 'BreadcrumbList',
+  itemListElement: [
+    { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://amonenergy.it/' },
+    { '@type': 'ListItem', position: 2, name: 'Contatti', item: 'https://amonenergy.it/contatti/' },
+  ],
+};
+---
+
+<Base
+  title="Contatti"
+  description={`Chiama ${contatti.telefono} o scrivi a ${contatti.email}: nessun modulo da compilare, rispondiamo direttamente.`}
+  structuredData={[breadcrumb]}
+  headerTransparent={false}
+>
+  <section class="wrap py-20 lg:py-28 grid gap-16 lg:grid-cols-2 lg:gap-20 items-start">
+    <ContactChannels h1={h1} sub={sub} orari={orari} />
+    <div>
+      <MapFacade />
+      <p class="mt-6 text-ink/75 font-semibold">{contatti.indirizzo}</p>
+    </div>
+  </section>
+</Base>

@@ -1,0 +1,56 @@
+---
+import { Image } from 'astro:assets';
+import type { ImageMetadata } from 'astro';
+import WaveDivider from './WaveDivider.astro';
+
+interface Props {
+  eyebrow: string;
+  h1: string;
+  sub?: string;
+  /** Visual world: navy (field) or green (control). */
+  tone?: 'navy' | 'green';
+  /** Optional full-bleed background photo. */
+  image?: ImageMetadata;
+  imageAlt?: string;
+}
+
+const { eyebrow, h1, sub, tone = 'navy', image, imageAlt = '' } = Astro.props;
+
+const bg = tone === 'green' ? 'bg-green-950' : 'bg-navy-950';
+const dashClass = tone === 'green' ? 'ds-eyebrow-dash--signal' : '';
+const labelClass = tone === 'green' ? 'ds-eyebrow-label--signal' : '';
+const scrim = tone === 'green' ? 'bg-green-950/82' : 'bg-navy-950/82';
+const waveTone = tone === 'green' ? 'green' : 'signal';
+---
+
+<section class:list={['relative isolate overflow-hidden text-paper', bg]}>
+  {
+    image && (
+      <>
+        <Image
+          src={image}
+          alt={imageAlt}
+          class="absolute inset-0 h-full w-full object-cover"
+          widths={[768, 1280, 1600]}
+          sizes="100vw"
+          loading="eager"
+        />
+        <div class:list={['absolute inset-0', scrim]} />
+      </>
+    )
+  }
+
+  <div class="wrap-wide relative z-10 pb-16 pt-32 lg:pb-24 lg:pt-40">
+    <div class="ds-eyebrow" data-reveal>
+      {tone === 'green' && <span class="ds-live-dot" aria-hidden="true" />}
+      <span class:list={['ds-eyebrow-dash', dashClass]} style={tone === 'green' ? 'display:none' : ''}></span>
+      <span class:list={['ds-eyebrow-label', labelClass]}>{eyebrow}</span>
+    </div>
+    <h1 class="text-display max-w-[20ch]" data-reveal style="--reveal-delay:80ms">{h1}</h1>
+    {sub && <p class="measure mt-5 text-lg text-paper/80" data-reveal style="--reveal-delay:160ms">{sub}</p>}
+  </div>
+
+  <div class="relative z-10">
+    <WaveDivider tone={waveTone} animated />
+  </div>
+</section>

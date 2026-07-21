@@ -1,0 +1,40 @@
+---
+import { Image } from 'astro:assets';
+import mapImg from '../assets/img/map-static.svg';
+import { contatti } from '../data/contatti.ts';
+
+const embedSrc = `https://www.google.com/maps?q=${encodeURIComponent(contatti.indirizzo)}&output=embed`;
+---
+
+<div class="map-facade relative" style="aspect-ratio: 4 / 3;">
+  <Image src={mapImg} alt={`Mappa: ${contatti.indirizzo}`} class="absolute inset-0 w-full h-full object-cover" widths={[400, 800, 1200]} sizes="(min-width: 1024px) 50vw, 100vw" />
+  <button type="button" class="map-open ds-btn-on-dark absolute inset-0 m-auto w-fit h-fit">
+    Apri la mappa
+  </button>
+  <iframe
+    class="map-iframe absolute inset-0 w-full h-full hidden"
+    data-src={embedSrc}
+    title={`Mappa: ${contatti.indirizzo}`}
+    loading="lazy"
+    referrerpolicy="no-referrer-when-downgrade"
+  ></iframe>
+</div>
+
+<p class="mt-4">
+  <a href={contatti.mapsUrl} target="_blank" rel="noopener noreferrer" class="font-semibold text-navy-900 hover:text-navy-700 transition-colors">
+    Ottieni indicazioni →
+  </a>
+</p>
+
+<script>
+  const button = document.querySelector<HTMLButtonElement>('.map-open');
+  const iframe = document.querySelector<HTMLIFrameElement>('.map-iframe');
+
+  button?.addEventListener('click', () => {
+    if (!iframe) return;
+    const src = iframe.dataset.src;
+    if (src) iframe.src = src;
+    iframe.classList.remove('hidden');
+    button.remove();
+  });
+</script>

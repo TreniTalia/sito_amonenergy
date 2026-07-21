@@ -1,0 +1,154 @@
+---
+import { contatti } from '../data/contatti.ts';
+import Logo from './Logo.astro';
+
+interface Props {
+  /** True when this page opens on a dark hero, so the header can start transparent. */
+  transparent?: boolean;
+}
+
+const { transparent = true } = Astro.props;
+
+const serviziLinks = [
+  { href: '/servizi/laboratorio-mobile/', label: 'Laboratorio mobile ricerca guasti' },
+  { href: '/servizi/verifiche-strumentali/', label: 'Verifiche strumentali' },
+  { href: '/servizi/monitoraggio-e-controllo/', label: 'Monitoraggio e controllo' },
+  { href: '/servizi/costruzioni/', label: 'Costruzioni' },
+  { href: '/servizi/gestione-e-manutenzione/', label: 'Gestione e manutenzione' },
+];
+---
+
+<header class="ds-header fixed top-0 z-40 w-full" data-transparent={transparent ? 'true' : 'false'}>
+  <div class="wrap flex items-center justify-between py-4 md:py-5">
+    <a href="/" class="shrink-0 text-paper" aria-label="Amon Energy, torna alla home">
+      <Logo size={34} class="max-[380px]:[--mono-h:28px]" />
+    </a>
+
+    <nav class="hidden md:flex items-center gap-8" aria-label="Navigazione principale">
+      <a href="/azienda/" class="font-medium">Azienda</a>
+
+      <div class="group relative">
+        <button type="button" class="flex items-center gap-1 font-medium" aria-haspopup="true">
+          Servizi
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
+        </button>
+        <div class="invisible opacity-0 group-hover:visible group-hover:opacity-100 group-focus-within:visible group-focus-within:opacity-100 absolute left-0 top-full pt-3 transition-opacity duration-150 min-w-72">
+          <ul class="bg-navy-950 border border-navy-700 rounded-[2px] py-2">
+            {serviziLinks.map((s) => (
+              <li>
+                <a href={s.href} class="block px-5 py-3 text-sm text-paper hover:bg-navy-700 transition-colors">
+                  {s.label}
+                </a>
+              </li>
+            ))}
+          </ul>
+        </div>
+      </div>
+
+      <a href="/progetti/" class="font-medium">Progetti</a>
+      <a href="/contatti/" class="font-medium">Contatti</a>
+    </nav>
+
+    <div class="flex items-center gap-3">
+      <a href={contatti.telefonoHref} class="ds-header-cta inline-flex" aria-label={`Chiama ${contatti.telefono}`}>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true" class="shrink-0"><path d="M13.832 16.568a1 1 0 0 0 1.213-.303l.355-.465A2 2 0 0 1 17 15h3a2 2 0 0 1 2 2v3a2 2 0 0 1-2 2A18 18 0 0 1 2 4a2 2 0 0 1 2-2h3a2 2 0 0 1 2 2v3a2 2 0 0 1-.428 1.235l-.5.436A1 1 0 0 0 8.048 10c1.1 2.062 3.892 4.854 5.784 6.568"/></svg>
+        <span class="hidden sm:inline">{contatti.telefono}</span>
+        <span class="hidden xs:inline sm:hidden">Chiama</span>
+      </a>
+
+      <button type="button" id="nav-toggle" class="md:hidden text-paper p-2" aria-expanded="false" aria-controls="mobile-nav" aria-label="Apri il menu">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div id="mobile-nav" class="fixed inset-0 z-50 bg-navy-950 flex flex-col justify-between p-6 translate-x-full transition-transform duration-300 md:hidden" style="transition-timing-function: var(--ease-signature);">
+  <div>
+    <div class="flex items-center justify-between mb-10">
+      <span class="text-paper"><Logo size={30} /></span>
+      <button type="button" id="nav-close" class="text-paper p-2" aria-label="Chiudi il menu">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12"/></svg>
+      </button>
+    </div>
+    <nav class="flex flex-col gap-1" aria-label="Navigazione mobile">
+      <a href="/azienda/" class="text-paper text-2xl py-3 border-b border-navy-700">Azienda</a>
+      <details class="border-b border-navy-700">
+        <summary class="text-paper text-2xl py-3 cursor-pointer list-none flex items-center justify-between">
+          Servizi
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
+        </summary>
+        <ul class="pb-3">
+          {serviziLinks.map((s) => (
+            <li>
+              <a href={s.href} class="block text-paper/80 text-base py-2">{s.label}</a>
+            </li>
+          ))}
+        </ul>
+      </details>
+      <a href="/progetti/" class="text-paper text-2xl py-3 border-b border-navy-700">Progetti</a>
+      <a href="/contatti/" class="text-paper text-2xl py-3 border-b border-navy-700">Contatti</a>
+    </nav>
+  </div>
+
+  <div class="flex flex-col gap-3">
+    <a href={contatti.telefonoHref} class="ds-btn-on-dark w-full">Chiamaci: {contatti.telefono}</a>
+    <a href={`mailto:${contatti.email}`} class="text-paper/80 text-center text-sm py-2">{contatti.email}</a>
+  </div>
+</div>
+
+<script>
+  const header = document.querySelector<HTMLElement>('.ds-header');
+  const toggle = document.getElementById('nav-toggle');
+  const close = document.getElementById('nav-close');
+  const panel = document.getElementById('mobile-nav');
+
+  const onScroll = () => {
+    if (!header) return;
+    const solid = header.dataset.transparent !== 'true' || window.scrollY > 40;
+    header.classList.toggle('ds-header--scrolled', solid);
+  };
+  onScroll();
+  window.addEventListener('scroll', onScroll, { passive: true });
+
+  const openNav = () => {
+    panel?.classList.remove('translate-x-full');
+    toggle?.setAttribute('aria-expanded', 'true');
+    document.body.style.overflow = 'hidden';
+  };
+  const closeNav = () => {
+    panel?.classList.add('translate-x-full');
+    toggle?.setAttribute('aria-expanded', 'false');
+    document.body.style.overflow = '';
+  };
+  toggle?.addEventListener('click', openNav);
+  close?.addEventListener('click', closeNav);
+</script>
+
+<style>
+  .ds-header {
+    background: transparent;
+    color: var(--color-paper);
+    transition: background-color 0.25s var(--ease-signature);
+  }
+  .ds-header[data-transparent='false'],
+  .ds-header--scrolled {
+    background-color: var(--color-navy-950);
+  }
+
+  .ds-header-cta {
+    align-items: center;
+    gap: 8px;
+    font-family: var(--font-body);
+    font-weight: 600;
+    color: var(--color-paper);
+    border: 1px solid var(--color-signal-400);
+    border-radius: var(--radius-btn);
+    padding: 8px 16px;
+    text-decoration: none;
+    transition: background-color 0.2s var(--ease-signature);
+  }
+  .ds-header-cta:hover {
+    background-color: var(--color-navy-700);
+  }
+</style>

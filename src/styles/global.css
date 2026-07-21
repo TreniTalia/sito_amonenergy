@@ -1,0 +1,426 @@
+@import "tailwindcss";
+
+/* wdth.css carries both the weight (100-900) and width (62%-125%) axes in
+   one variable file — needed for the Expanded heading treatment. */
+@import "@fontsource-variable/archivo/wdth.css";
+@import "@fontsource-variable/inter";
+/* Source Serif 4 — the "authority" face of the green Control world (echoes the
+   serif wordmark of the company presentation). Field world stays Archivo. */
+@import "@fontsource-variable/source-serif-4";
+
+@theme {
+  /* Extra breakpoint below Tailwind's default `sm` (640px), used only to
+     collapse the header's tel: CTA to an icon on very narrow phones. */
+  --breakpoint-xs: 400px;
+  /* Above 2xl (1536) — the 27-32" / 4K band. Content is allowed to breathe
+     wider and type scales up instead of stranding a 1200px column in a void. */
+  --breakpoint-3xl: 1920px;
+
+  /* ---- Field world (navy): construction, substations, fault-finding ---- */
+  --color-navy-950: #0a2a44;
+  --color-navy-900: #103b5f;
+  --color-navy-800: #14486f;
+  --color-navy-700: #1d5585;
+  --color-navy-300: #7ea6c4;
+  --color-navy-100: #e8eff5;
+
+  /* ---- Control world (green): Control Room, RCS, CCI, 24/7 monitoring ---- */
+  --color-green-950: #061c12;
+  --color-green-900: #0b2c1d;
+  --color-green-800: #123f2a;
+  --color-green-700: #1a5335;
+  --color-green-600: #227244;
+  --color-green-500: #3e8e5a; /* the logo leaf — shared bridge accent */
+  --color-green-400: #4fd07f; /* live "signal" green — telemetry, pulse, glow */
+  --color-green-200: #bfe6cd;
+
+  /* RCS tier accents (from the presentation) */
+  --color-tier-basic: #43b26a;
+  --color-tier-advance: #e0912f;
+  --color-tier-pro: #e05a3d;
+
+  /* Shared */
+  --color-signal-400: #4fb3d9; /* circuit blue — field-world signal accent */
+  --color-paper: #fafbfc;
+  --color-ink: #16222e;
+
+  --font-display: "Archivo Variable", sans-serif;
+  --font-body: "Inter Variable", sans-serif;
+  --font-serif: "Source Serif 4 Variable", "Source Serif 4", Georgia, serif;
+
+  --radius-btn: 6px;
+  --radius-card: 2px;
+
+  /* Motion — exponential ease-outs only (no bounce/elastic). */
+  --ease-signature: cubic-bezier(0.22, 1, 0.36, 1); /* out-quint-ish */
+  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+
+  /* Semantic z-index scale — never arbitrary 999s. */
+  --z-sticky: 30;
+  --z-header: 40;
+  --z-mobilebar: 45;
+  --z-modal: 50;
+  --z-skip: 100;
+}
+
+@layer base {
+  body {
+    background: var(--color-paper);
+    color: var(--color-ink);
+    font-family: var(--font-body);
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--color-signal-400);
+    outline-offset: 2px;
+  }
+
+  ::selection {
+    background: var(--color-green-500);
+    color: #fff;
+  }
+
+  .measure {
+    max-width: 68ch;
+  }
+  .measure-tight {
+    max-width: 54ch;
+  }
+
+  /* Layout system. Default column tops out ~1280, but on the 4K/32" band the
+     content max-width and side gutters grow so nothing floats in dead space. */
+  .wrap {
+    width: 100%;
+    max-width: 1280px;
+    margin-inline: auto;
+    padding-inline: clamp(1.25rem, 5vw, 3rem);
+  }
+  .wrap-wide {
+    width: 100%;
+    max-width: 1600px;
+    margin-inline: auto;
+    padding-inline: clamp(1.25rem, 5vw, 3.5rem);
+  }
+  @media (min-width: 1920px) {
+    .wrap {
+      max-width: 1440px;
+    }
+    .wrap-wide {
+      max-width: 1840px;
+    }
+  }
+
+  /* ---- Type scale (fluid, scales into large viewports) ---- */
+  .text-hero {
+    font-family: var(--font-display);
+    font-weight: 800;
+    font-stretch: 125%;
+    font-size: clamp(2.75rem, 1.4rem + 4.4vw, 5.75rem);
+    line-height: 1.02;
+    letter-spacing: -0.03em;
+    text-wrap: balance;
+  }
+  .text-display {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-stretch: 125%;
+    font-size: clamp(2.4rem, 1.6rem + 2.6vw, 4rem);
+    line-height: 1.05;
+    letter-spacing: -0.02em;
+    text-wrap: balance;
+  }
+  .text-headline {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-stretch: 125%;
+    font-size: clamp(1.9rem, 1.3rem + 1.9vw, 3rem);
+    line-height: 1.12;
+    letter-spacing: -0.015em;
+    text-wrap: balance;
+  }
+  /* Control-world display — serif, for the RCS / Control Room narrative. */
+  .text-control {
+    font-family: var(--font-serif);
+    font-weight: 600;
+    font-size: clamp(2rem, 1.3rem + 2.4vw, 3.4rem);
+    line-height: 1.08;
+    letter-spacing: -0.015em;
+    text-wrap: balance;
+  }
+  .text-serif {
+    font-family: var(--font-serif);
+    letter-spacing: -0.01em;
+  }
+
+  .tnum {
+    font-variant-numeric: tabular-nums;
+    font-feature-settings: "tnum" 1;
+  }
+
+  .skip-link {
+    position: absolute;
+    top: -100%;
+    left: 0.5rem;
+    z-index: var(--z-skip);
+    background: var(--color-navy-950);
+    color: var(--color-paper);
+    padding: 0.75rem 1.25rem;
+    border-radius: var(--radius-btn);
+    transition: top 0.15s var(--ease-signature);
+  }
+  .skip-link:focus {
+    top: 0.5rem;
+  }
+}
+
+@layer components {
+  /* ---------- Buttons ---------- */
+  .ds-btn-primary {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    background: var(--color-navy-900);
+    color: var(--color-paper);
+    padding: 15px 32px;
+    border-radius: var(--radius-btn);
+    font-family: var(--font-body);
+    font-weight: 600;
+    text-decoration: none;
+    transition:
+      background 0.2s var(--ease-signature),
+      transform 0.2s var(--ease-signature);
+  }
+  .ds-btn-primary:hover {
+    background: var(--color-navy-700);
+    transform: translateY(-1px);
+  }
+
+  .ds-btn-on-dark {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    background: var(--color-paper);
+    color: var(--color-navy-950);
+    padding: 15px 32px;
+    border-radius: var(--radius-btn);
+    font-family: var(--font-body);
+    font-weight: 600;
+    text-decoration: none;
+    transition:
+      background 0.2s var(--ease-signature),
+      color 0.2s var(--ease-signature),
+      transform 0.2s var(--ease-signature);
+  }
+  .ds-btn-on-dark:hover {
+    background: var(--color-signal-400);
+    color: var(--color-navy-950);
+    transform: translateY(-1px);
+  }
+
+  .ds-btn-ghost {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    color: var(--color-paper);
+    border: 1px solid color-mix(in srgb, var(--color-paper) 40%, transparent);
+    border-radius: var(--radius-btn);
+    padding: 14px 30px;
+    font-weight: 600;
+    text-decoration: none;
+    transition:
+      border-color 0.2s var(--ease-signature),
+      background 0.2s var(--ease-signature);
+  }
+  .ds-btn-ghost:hover {
+    border-color: var(--color-paper);
+    background: color-mix(in srgb, var(--color-paper) 8%, transparent);
+  }
+
+  /* Control-world button — used on green surfaces. */
+  .ds-btn-signal {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    background: var(--color-green-400);
+    color: var(--color-green-950);
+    padding: 15px 32px;
+    border-radius: var(--radius-btn);
+    font-weight: 700;
+    text-decoration: none;
+    transition:
+      background 0.2s var(--ease-signature),
+      transform 0.2s var(--ease-signature),
+      box-shadow 0.3s var(--ease-signature);
+  }
+  .ds-btn-signal:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 0 0 1px var(--color-green-400), 0 8px 30px -8px var(--color-green-400);
+  }
+
+  /* ---------- Cards ---------- */
+  .ds-card-service {
+    background: var(--color-paper);
+    color: var(--color-ink);
+    border: 1px solid var(--color-navy-100);
+    border-radius: var(--radius-card);
+    padding: 28px;
+    transition:
+      border-color 0.25s var(--ease-signature),
+      transform 0.25s var(--ease-signature),
+      background 0.25s var(--ease-signature);
+  }
+  .ds-card-service:hover {
+    border-color: var(--color-navy-700);
+    transform: translateY(-3px);
+  }
+
+  /* ---------- Eyebrow ---------- */
+  .ds-eyebrow {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 18px;
+  }
+  .ds-eyebrow-dash {
+    width: 32px;
+    height: 2px;
+    display: block;
+    background: var(--color-signal-400);
+  }
+  .ds-eyebrow-dash--leaf {
+    background: var(--color-green-500);
+  }
+  .ds-eyebrow-dash--signal {
+    background: var(--color-green-400);
+  }
+  .ds-eyebrow-label {
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-stretch: 110%;
+    font-size: 0.8rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--color-signal-400);
+  }
+  .ds-eyebrow-label--leaf {
+    color: var(--color-green-500);
+  }
+  .ds-eyebrow-label--signal {
+    color: var(--color-green-400);
+  }
+  .ds-eyebrow-label--ink {
+    color: color-mix(in srgb, var(--color-ink) 60%, transparent);
+  }
+
+  /* ---------- Chips / pills ---------- */
+  .ds-chip-kv {
+    display: inline-block;
+    font-family: var(--font-body);
+    font-variant-numeric: tabular-nums;
+    font-weight: 600;
+    font-size: 0.8125rem;
+    letter-spacing: 0.02em;
+    color: var(--color-paper);
+    background: var(--color-navy-900);
+    padding: 4px 10px;
+    border-radius: var(--radius-card);
+  }
+  .ds-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: 0.72rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    padding: 6px 12px;
+    border-radius: 999px;
+    border: 1px solid color-mix(in srgb, var(--color-green-400) 45%, transparent);
+    color: var(--color-green-200);
+  }
+
+  /* Live indicator dot — the 24/7 heartbeat of the Control world. */
+  .ds-live-dot {
+    position: relative;
+    width: 9px;
+    height: 9px;
+    border-radius: 999px;
+    background: var(--color-green-400);
+    flex-shrink: 0;
+  }
+  .ds-live-dot::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: 999px;
+    background: var(--color-green-400);
+    animation: live-ping 2.4s var(--ease-out-expo) infinite;
+  }
+
+  /* Control-world glass panel — the ONE deliberate use of translucency,
+     reserved for telemetry panels over the dark green drench. */
+  .ds-panel {
+    background: color-mix(in srgb, var(--color-green-900) 70%, transparent);
+    border: 1px solid color-mix(in srgb, var(--color-green-400) 22%, transparent);
+    border-radius: 4px;
+  }
+}
+
+/* Flat-by-Default: the field world uses no box-shadow. The only glow/shadow in
+   the system is the green signal glow, which belongs to the Control world. */
+
+/* ---------- Motion primitives ---------- */
+@keyframes live-ping {
+  0% {
+    transform: scale(1);
+    opacity: 0.6;
+  }
+  70%,
+  100% {
+    transform: scale(2.6);
+    opacity: 0;
+  }
+}
+
+/* Scroll reveal — enhances an already-visible default (content is visible; the
+   class only adds a small entrance). Never gates visibility. */
+[data-reveal] {
+  opacity: 1;
+}
+@media (prefers-reduced-motion: no-preference) {
+  [data-reveal] {
+    opacity: 0;
+    transform: translateY(18px);
+    transition:
+      opacity 0.7s var(--ease-out-expo),
+      transform 0.7s var(--ease-out-expo);
+    transition-delay: var(--reveal-delay, 0ms);
+  }
+  [data-reveal].is-visible {
+    opacity: 1;
+    transform: none;
+  }
+  /* Safety net: if JS never runs, content still shows after load. */
+  .no-js [data-reveal] {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

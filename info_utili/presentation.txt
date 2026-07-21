@@ -1,0 +1,188 @@
+AMON ENERGY
+
+Company Presentation
+
+Presentazione Aziendale
+
+ Energy Professionals / Professionisti dell'Energia
+
+                                      info@amonenergy.it | www.amonenergy.it | Tel. 0881377590 | Castelluccio dei Sauri (FG)
+02          Amon Energy S.r.l.
+
+                  Over 20 years of experience: founded in 2000 as PL System (later Energy System),
+                  building 100+ HV/MV substations and managing O&M contracts on 30+ stations
+WHO WE ARE        across Southern Italy. Acquired by BayWa r.e. Group in 2019. In 2020, Mario
+                  Palumbo and Ludovico Lombardi founded Amon Energy S.r.l.
+Chi siamo         Oltre 20 anni di esperienza: fondata nel 2000 come PL System (poi Energy System),
+                  con 100+ stazioni AT/MT realizzate e contratti O&M su 30+ stazioni nel Sud Italia.
+                  Acquisita dal Gruppo BayWa r.e. nel 2019. Nel 2020, Mario Palumbo e Ludovico
+                  Lombardi fondano Amon Energy S.r.l.
+                  HQ: Castelluccio dei Sauri (FG) -- 5,000 m² facility with strategic spare parts
+                  warehouse (third-party logistics available)
+                  Sede unica: Castelluccio dei Sauri (FG) -- capannone 5.000 m² con magazzino
+                  ricambi strategici (gestione conto terzi disponibile)
+                  Network of qualified subcontractors across Italy for MV cable duct repairs and
+                  civil works
+                  Rete di sub-appaltatori qualificati in tutta Italia per riparazioni su cavidotti MT e
+                  lavorazioni civili
+
+                  Dedicated Control Room: 5 technicians + 1 supervisor, 24/7/365
+                  Control Room dedicata: 5 tecnici + 1 supervisore, 24/7/365
+O&M Services / Servizi O&M
+
+RI  Responsible for Electrical Systems (RI)                              24  24/7/365 Monitoring
+
+    Gestore Impianto (RI)                                                    Monitoraggio 24/7/365
+
+Qualified personnel per CEI EN 50110-1 & CEI 11-27. Full responsibility  Dedicated Control Room, continuous remote monitoring with minimum
+for safety and electrical operations.                                    response times.
+Personale qualificato CEI EN 50110-1 e CEI 11-27. Piena responsabilità   Control Room con personale dedicato, monitoraggio remoto continuo e
+sulla sicurezza e operatività elettrica.                                 tempi di reazione minimi.
+
+DG  Diagnostics & Maintenance                                            CY  Cybersecurity & Compliance
+
+    Diagnostica & Manutenzione                                               Cybersecurity & Conformità
+
+Centrix 2.0 mobile labs, ISA systems (CBA 1000, T2000), PD testing, IR   ISO 27001 and NIS2 certification processes currently underway.
+thermography, cable integrity.                                           Processi di certificazione ISO 27001 e NIS2 attualmente in corso.
+Laboratori mobili Centrix 2.0, sistemi ISA (CBA 1000, T2000), prove PD,
+termografia IR, integrità cavi.
+Equipment / Strumentazione
+
+Cable Fault Location                    HV Testing / Insulation                                                             Protection & CT/VT Testing
+Ricerca Guasti Cavi                     Prove AT / Isolamento                                                               Verifiche Protezioni & TA/TV
+2 Mobile Fault Location Labs            Megger HV Test 80kV                                                                 DRTS/64
+2 Laboratori Mobili per ricerca guasto  b2 HVA68TD+PD                                                                       ISA CBA 1000, ISA T2000
+1 TD&PD Diagnostics Lab for MV cables                                                                                       ISA STS5000 + TD500
+1 Lab. Diagnostica TD&PD su cavi MT
+
+Fiber Optics                            Thermography & Analysis                                                             Photovoltaic
+Fibra Ottica                            Termografia & Analisi                                                               Fotovoltaico
+8000MAX-Q1 OTDR                         Thermal Camera                                                                      HT Solar IV
+INNO Instrument View 7                  HT VEGA 74, HT4005N
+
+                                        All devices certified and calibrated / Tutti i dispositivi certificati e calibrati
+O&M Experience & References / Esperienza O&M e Riferimenti
+
+140+ MV Plants under active O&M contracts / Impianti MT in gestione O&M attiva
+
+HV Asset References / Riferimenti impianti AT
+
+1  Metlen                                      25 MW BESS -- Built & H24 Monitoring Contract       Construction & H24 monitoring of HV/BESS assets
+                                               25 MW BESS -- Costruzione e Monitoraggio H24        Costruzione e monitoraggio H24 impianti AT/BESS
+
+2  Alberona Wind Farm                          25 MW Wind Farm (Enercon) -- O&M Contract +         Full O&M: HV substation, internal MV grid, HV cable
+                                               Terna Dispatching                                   + Terna dispatching management
+3  Eco Puglia / Dolomiti Energia               Parco Eolico 25 MW (Enercon) -- O&M +               O&M completo: SSE AT, rete MT interna, cavo AT +
+                                               Dispacciamento Terna                                gestione dispacciamento Terna
+4  AREN Group
+                                               Wind Farms Troia & Foggia -- 18 MW + 12 MW --       Full O&M: HV substations, MV grids, HV cables + full
+                                               Partial substation construction + Full O&M &        dispatching management
+                                               Dispatching                                         O&M completo: SSE AT, reti MT, cavi AT + gestione
+                                               Parchi Troia e Foggia -- 18+12 MW -- Realiz. parz.  completa dispacciamento
+                                               stazione + O&M completo e dispacciamento
+                                                                                                   Full O&M: HV substation, internal MV grid, HV cable
+                                               Banzi Wind Farm -- 40 MW -- Construction & Full     O&M completo: SSE AT, rete MT interna, cavo AT
+                                               O&M Contract
+                                               Parco Eolico Banzi -- 40 MW -- Costruzione e O&M
+                                               Completo
+Key Clients / Clienti Principali
+
+        50+                                            20+                                    24/7
+
+                         Clients in portfolio                      Years of experience                  Continuous monitoring
+                       Clienti nel portafoglio                      Anni di esperienza                  Monitoraggio continuo
+
+Client selection / Selezione dei partner:       STE Energy                              Eco Puglia Energia
+                                                E-Distribuzione                         Fortore Energia S.p.A.
+     EDPR                                       Acrosswind SRL                          Aquilonia Wind Srl
+                                                Agrowind Fortore S.R.L.                 Gruppo Metlen
+     Crossenergy S.r.l.                         Gruppo Dolomiti Energia                 Altenia
+                                                Hope                                    Circet
+     Tozzi Sud
+
+     Sistemi Energetici S.p.A.
+     Gruppo AREN
+     Siemens
+Remote Control System (RCS) / Sistema di Controllo Remoto
+
+ Control Room & Infrastructure
+ Control Room & Infrastruttura
+
+Physical Location                             Triple Internet Redundancy                      AWS Cloud Infrastructure
+Sede fisica                                   Tripla ridondanza internet                      Infrastruttura cloud AWS
+
+Control Room physically located in            3 independent internet lines (different         All workstations and monitoring systems run
+Castelluccio dei Sauri (FG) -- strategically  operators/technologies) ensure maximum          on AWS servers. In case of site issues, the
+positioned to cover the entire Central and    continuity of service even in the event of      entire infrastructure remains reachable from
+Southern Italy in minimum response times.     single or double outages.                       any PC worldwide, guaranteeing maximum
+                                                                                              service continuity.
+Control Room ubicata fisicamente a            3 linee internet indipendenti
+Castelluccio dei Sauri (FG), per garantire    (operatori/tecnologie diverse) garantiscono la  Tutti i PC sono su server AWS: in caso di
+copertura su tutto il Centro-Sud Italia.      massima continuità anche in caso di doppio      problemi in sede, l'infrastruttura è sempre
+                                              guasto.                                         raggiungibile da qualsiasi PC, garantendo
+                                                                                              massima continuità.
+RCS Platform / Piattaforma RCS
+
+Monitoring & control system for renewable energy plants / Sistema di monitoraggio e controllo per impianti rinnovabili
+
+Real-time fault analysis & auto-reclosure algorithm                             RCS Versions
+Analisi guasti in tempo reale e algoritmo di richiusura automatico              Versioni RCS
+
+Full plant monitoring: voltages, currents, UPS, protections                         Basic
+Monitoraggio completo: tensioni, correnti, UPS, protezioni in campo
+                                                                             Core monitoring & auto-reclosure
+Alarm management & automatic email notifications                       Monitoraggio base e richiusura automatica
+Gestione allarmi e notifiche email automatiche
+                                                                                  Advance
+Remote protection reset (Advance & Pro versions)
+Reset protezioni da remoto (versioni Advance e Pro)                       + Field data acquisition & remote reset
+                                                                         + Acquisizione da campo e reset remoto
+Historical data logging & performance analysis reports
+Storicizzazione dati e report di analisi performance                                 Pro
+
+Integrated ticket system for technical support                       + Full analytics, SCADA integration & custom UI
+Sistema ticket integrato per assistenza tecnica                           + Analisi avanzate, SCADA e UI custom
+
+Web App -- accessible from any device, desktop & mobile
+Web App -- accessibile da qualsiasi dispositivo, desktop e mobile
+
+SCADA integration & custom graphical interface
+Integrazione SCADA e personalizzazione grafica dell'interfaccia
+Project Workflow / Flusso Operativo -- Licata
+
+                                   CONTROL ROOM H24
+
+                                                   SCADA Monitoring + RCS
+                                                  Monitoraggio SCADA + RCS
+
+                                              Event / Alarm
+
+                                                     Evento / Allarme
+
+   Owner Notification                   Remote Resolution                    Technical Office
+    Notifica Proprietario                 Risoluzione Remota                    Ufficio Tecnico
+
+Known contacts / Indirizzi noti      Immediate attempt / Tentativo   Remote support / Supporto remoto
+                                                  immediato
+                                                                                                                              Team + Mobile Lab
+                                   if needed / se                                                                                 Team + Laboratorio Mobile
+                                   necessario
+                                                                                                                                    Dispatch from Castelluccio dei Sauri
+                                      On-site Technician
+                                          Tecnico in Sito
+
+                                 Field intervention / Intervento in
+                                                stazione
+AMON ENERGY
+
+Get in Touch / Contatti
+
+Legal HQ / Sede legale Castelluccio dei Sauri (FG) 71025, Via Roma 105 | 5,000 m² facility
+HQ & Operations / Sede unica Castelluccio dei Sauri (FG) 71025, Via Roma 105
+Tel. 0881 377590
+Email info@amonenergy.it
+PEC amonenergy@pec.it
+Web www.amonenergy.it
+P.IVA 03042590640
+

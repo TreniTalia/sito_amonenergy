@@ -1,0 +1,49 @@
+---
+import { clienti } from '../data/clienti.ts';
+
+interface Props {
+  titolo: string;
+}
+
+const { titolo } = Astro.props;
+---
+
+<section class="bg-paper border-y border-navy-100 py-12 lg:py-16 overflow-hidden">
+  <p class="wrap ds-eyebrow-label" style="color: var(--color-navy-700); margin-bottom: 1.5rem;">{titolo}</p>
+  <div class="marquee-track flex items-center gap-16" aria-label={`Clienti: ${clienti.join(', ')}`}>
+    {
+      [0, 1].map((rep) => (
+        <div class="flex items-center gap-16 shrink-0" aria-hidden={rep === 1}>
+          {clienti.map((nome) => (
+            <span class="text-headline whitespace-nowrap" style="font-size: 1.5rem; color: var(--color-navy-700); opacity: 0.6;">
+              {nome}
+            </span>
+          ))}
+        </div>
+      ))
+    }
+  </div>
+</section>
+
+<style>
+  .marquee-track {
+    width: max-content;
+    animation: marquee-scroll 36s linear infinite;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .marquee-track {
+      animation: none;
+      flex-wrap: wrap;
+    }
+  }
+
+  @keyframes marquee-scroll {
+    from {
+      transform: translateX(0);
+    }
+    to {
+      transform: translateX(-50%);
+    }
+  }
+</style>

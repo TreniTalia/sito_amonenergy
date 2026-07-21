@@ -1,0 +1,214 @@
+<dialog id="gallery-lightbox" class="gallery-lightbox" aria-label="Galleria progetti">
+  <button type="button" class="lb-close" aria-label="Chiudi">
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12"/></svg>
+  </button>
+
+  <button type="button" class="lb-nav lb-prev" aria-label="Immagine precedente">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg>
+  </button>
+  <button type="button" class="lb-nav lb-next" aria-label="Immagine successiva">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg>
+  </button>
+
+  <div class="lb-stage">
+    <img class="lb-img" alt="" />
+  </div>
+
+  <div class="lb-card">
+    <div>
+      <span class="lb-index" aria-hidden="true"></span>
+      <span class="ds-chip-kv lb-kv"></span>
+      <h3 class="lb-titolo"></h3>
+      <p class="lb-meta"></p>
+    </div>
+    <p class="lb-counter" aria-hidden="true"></p>
+  </div>
+</dialog>
+
+<script>
+  const dialog = document.getElementById('gallery-lightbox') as HTMLDialogElement | null;
+  if (dialog) {
+    const img = dialog.querySelector<HTMLImageElement>('.lb-img')!;
+    const indexEl = dialog.querySelector<HTMLElement>('.lb-index')!;
+    const kvEl = dialog.querySelector<HTMLElement>('.lb-kv')!;
+    const titoloEl = dialog.querySelector<HTMLElement>('.lb-titolo')!;
+    const metaEl = dialog.querySelector<HTMLElement>('.lb-meta')!;
+    const counterEl = dialog.querySelector<HTMLElement>('.lb-counter')!;
+    const closeBtn = dialog.querySelector<HTMLButtonElement>('.lb-close')!;
+    const prevBtn = dialog.querySelector<HTMLButtonElement>('.lb-prev')!;
+    const nextBtn = dialog.querySelector<HTMLButtonElement>('.lb-next')!;
+
+    const triggers = Array.from(document.querySelectorAll<HTMLAnchorElement>('.js-lightbox-trigger'));
+    let current = 0;
+
+    const preload = (i: number) => {
+      const t = triggers[i];
+      if (!t) return;
+      const preloadImg = new Image();
+      preloadImg.src = t.dataset.fullSrc ?? '';
+    };
+
+    const show = (i: number) => {
+      const t = triggers[i];
+      if (!t) return;
+      current = i;
+      img.src = t.dataset.fullSrc ?? '';
+      img.alt = t.dataset.alt ?? '';
+      indexEl.textContent = t.dataset.indexLabel ?? '';
+      kvEl.textContent = t.dataset.kv ?? '';
+      titoloEl.textContent = t.dataset.titolo ?? '';
+      metaEl.textContent = `${t.dataset.committente ?? ''} · ${t.dataset.provincia ?? ''} · ${t.dataset.tipologia ?? ''}`;
+      const total = t.dataset.total ?? String(triggers.length);
+      counterEl.textContent = `${t.dataset.indexLabel} / ${String(Number(total)).padStart(2, '0')}`;
+      preload(i + 1);
+      preload(i - 1);
+    };
+
+    const open = (i: number) => {
+      show(i);
+      dialog.showModal();
+    };
+
+    triggers.forEach((trigger, i) => {
+      trigger.addEventListener('click', (e) => {
+        e.preventDefault();
+        open(i);
+      });
+    });
+
+    closeBtn.addEventListener('click', () => dialog.close());
+    dialog.addEventListener('click', (e) => {
+      if (e.target === dialog) dialog.close();
+    });
+
+    const go = (delta: number) => {
+      const next = (current + delta + triggers.length) % triggers.length;
+      show(next);
+    };
+    prevBtn.addEventListener('click', () => go(-1));
+    nextBtn.addEventListener('click', () => go(1));
+
+    dialog.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowLeft') go(-1);
+      if (e.key === 'ArrowRight') go(1);
+    });
+
+    let touchStartX = 0;
+    dialog.addEventListener('pointerdown', (e) => {
+      touchStartX = e.clientX;
+    });
+    dialog.addEventListener('pointerup', (e) => {
+      const delta = e.clientX - touchStartX;
+      if (Math.abs(delta) > 50) go(delta > 0 ? -1 : 1);
+    });
+  }
+</script>
+
+<style>
+  .gallery-lightbox {
+    border: none;
+    padding: 0;
+    max-width: 100vw;
+    max-height: 100vh;
+    width: 100%;
+    height: 100%;
+    background: color-mix(in oklab, var(--color-navy-950) 95%, transparent);
+    color: var(--color-paper);
+  }
+
+  .gallery-lightbox::backdrop {
+    background: var(--color-navy-950);
+  }
+
+  .gallery-lightbox[open] {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .lb-stage {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+    min-height: 0;
+  }
+
+  .lb-img {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+  }
+
+  .lb-close {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    z-index: 2;
+    color: var(--color-paper);
+    padding: 0.75rem;
+  }
+
+  .lb-nav {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 2;
+    width: 44px;
+    height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--color-paper);
+    border: 1px solid color-mix(in oklab, var(--color-paper) 30%, transparent);
+    border-radius: var(--radius-btn);
+  }
+  .lb-prev {
+    left: 1rem;
+  }
+  .lb-next {
+    right: 1rem;
+  }
+
+  .lb-card {
+    flex-shrink: 0;
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 1.25rem 1.5rem;
+    border-top: 1px solid var(--color-navy-700);
+  }
+
+  .lb-index {
+    font-family: var(--font-body);
+    font-variant-numeric: tabular-nums;
+    font-size: 0.8125rem;
+    color: var(--color-signal-400);
+  }
+
+  .lb-kv {
+    margin-left: 0.75rem;
+  }
+
+  .lb-titolo {
+    margin-top: 0.5rem;
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: 1.125rem;
+  }
+
+  .lb-meta {
+    margin-top: 0.25rem;
+    font-size: 0.8125rem;
+    color: color-mix(in oklab, var(--color-paper) 65%, transparent);
+  }
+
+  .lb-counter {
+    font-family: var(--font-body);
+    font-variant-numeric: tabular-nums;
+    font-size: 0.875rem;
+    color: color-mix(in oklab, var(--color-paper) 60%, transparent);
+    white-space: nowrap;
+  }
+</style>

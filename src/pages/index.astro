@@ -1,0 +1,173 @@
+---
+import { getCollection, getEntry } from 'astro:content';
+import { Image } from 'astro:assets';
+import Base from '../layouts/Base.astro';
+import Hero from '../components/Hero.astro';
+import ServiceCard from '../components/ServiceCard.astro';
+import ControlPillar from '../components/ControlPillar.astro';
+import StatBar from '../components/StatBar.astro';
+import ClientMarquee from '../components/ClientMarquee.astro';
+import CtaBand from '../components/CtaBand.astro';
+import coverageMap from '../assets/img/photos/coverage-map.jpg';
+import { contatti } from '../data/contatti.ts';
+
+const home = await getEntry('pagine', 'home');
+if (!home || home.data.pagina !== 'home') throw new Error('pagine/home.yaml missing or malformed');
+const { hero, chiSiamoBreve, controllo, statbar, percheAmon, marqueeTitolo } = home.data;
+
+const servizi = (await getCollection('servizi')).sort((a, b) => a.data.ordine - b.data.ordine);
+const progettiPreview = (await getCollection('progetti'))
+  .sort((a, b) => a.data.ordine - b.data.ordine)
+  .slice(0, 3);
+---
+
+<Base
+  title="Impianti elettrici AT/MT/BT e rinnovabili nel Centro-Sud Italia"
+  description="Amon Energy: costruzione, verifiche strumentali, ricerca guasti e monitoraggio 24/7 di impianti eolici e fotovoltaici in Centro-Sud Italia."
+>
+  <Hero
+    eyebrow={hero.eyebrow}
+    h1={hero.h1}
+    sub={hero.sub}
+    ctaPrimaria={hero.ctaPrimaria}
+    ctaPrimariaHref={contatti.telefonoHref}
+    ctaSecondaria={hero.ctaSecondaria}
+    ctaSecondariaHref="/servizi/"
+  />
+
+  <!-- Chi siamo + copertura -->
+  <section class="wrap-wide py-20 lg:py-28">
+    <div class="grid items-center gap-12 lg:grid-cols-[1.1fr_0.9fr] lg:gap-20">
+      <div data-reveal>
+        <div class="ds-eyebrow">
+          <span class="ds-eyebrow-dash"></span>
+          <span class="ds-eyebrow-label">Chi siamo</span>
+        </div>
+        <p class="measure text-xl leading-relaxed text-ink/90">{chiSiamoBreve.testo}</p>
+        <a
+          href={chiSiamoBreve.link}
+          class="mt-7 inline-flex items-center gap-2 font-semibold text-navy-900 transition-colors hover:text-navy-700"
+        >
+          Conosci l'azienda
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6" /></svg>
+        </a>
+      </div>
+      <figure class="relative" data-reveal style="--reveal-delay:120ms">
+        <div class="overflow-hidden rounded-[2px] border border-navy-100">
+          <Image
+            src={coverageMap}
+            alt="Mappa del raggio d'azione di Amon Energy: la sede di Castelluccio dei Sauri (FG) copre l'intero Centro-Sud Italia"
+            class="w-full object-cover"
+            widths={[500, 800, 1100]}
+            sizes="(min-width: 1024px) 42vw, 100vw"
+          />
+        </div>
+        <figcaption class="mt-3 text-sm text-ink/60">
+          Sede unica a Castelluccio dei Sauri (FG), baricentrica sul Centro-Sud Italia.
+        </figcaption>
+      </figure>
+    </div>
+  </section>
+
+  <!-- Servizi -->
+  <section class="wrap-wide pb-20 lg:pb-28">
+    <div class="ds-eyebrow" data-reveal>
+      <span class="ds-eyebrow-dash ds-eyebrow-dash--leaf"></span>
+      <span class="ds-eyebrow-label ds-eyebrow-label--leaf">Cosa facciamo</span>
+    </div>
+    <div class="mb-12 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between" data-reveal>
+      <h2 class="text-headline max-w-[16ch]">Costruiamo, verifichiamo, cerchiamo guasti e gestiamo.</h2>
+      <a href="/servizi/" class="hidden shrink-0 font-semibold text-navy-900 hover:text-navy-700 sm:inline-flex">
+        Tutti i servizi →
+      </a>
+    </div>
+    <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 lg:gap-6">
+      {
+        servizi.map((s, i) => (
+          <div data-reveal style={`--reveal-delay:${(i % 3) * 90}ms`}>
+            <ServiceCard
+              titolo={s.data.titolo}
+              excerpt={s.data.excerpt}
+              icona={s.data.icona}
+              href={`/servizi/${s.id}/`}
+              index={i + 1}
+              accent={s.id === 'monitoraggio-e-controllo' ? 'signal' : 'leaf'}
+            />
+          </div>
+        ))
+      }
+    </div>
+  </section>
+
+  <!-- Mondo del controllo: RCS + CCI -->
+  {
+    controllo && (
+      <ControlPillar eyebrow={controllo.eyebrow} titolo={controllo.titolo} testo={controllo.testo} />
+    )
+  }
+
+  <!-- Realizzazioni -->
+  <section class="wrap-wide py-20 lg:py-28">
+    <div class="mb-10 flex items-end justify-between gap-4">
+      <div data-reveal>
+        <div class="ds-eyebrow">
+          <span class="ds-eyebrow-dash"></span>
+          <span class="ds-eyebrow-label">Realizzazioni</span>
+        </div>
+        <h2 class="text-headline">Stazioni elettriche che abbiamo costruito.</h2>
+      </div>
+      <a href="/progetti/" class="hidden shrink-0 font-semibold text-navy-900 hover:text-navy-700 sm:inline-flex">
+        Tutti i progetti →
+      </a>
+    </div>
+    <div class="grid gap-5 sm:grid-cols-2 lg:grid-cols-3 lg:gap-6">
+      {
+        progettiPreview.map((p, i) => (
+          <a href="/progetti/" class="group block" data-reveal style={`--reveal-delay:${i * 90}ms`}>
+            <div class="relative overflow-hidden rounded-[2px]" style="aspect-ratio: 16 / 11;">
+              <Image
+                src={p.data.immagine}
+                alt={p.data.immagineAlt}
+                class="h-full w-full object-cover transition-transform duration-700 group-hover:scale-[1.05]"
+                style="transition-timing-function: var(--ease-signature);"
+                widths={[400, 800, 1200]}
+                sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"
+              />
+              <span class="ds-chip-kv absolute left-3 top-3">{p.data.kv}</span>
+            </div>
+            <div class="mt-4">
+              <h3 class="font-display text-lg font-bold tracking-tight text-ink">{p.data.titolo}</h3>
+              <p class="mt-1 text-sm text-ink/60">{p.data.tipologia} · prov. {p.data.provincia}</p>
+            </div>
+          </a>
+        ))
+      }
+    </div>
+    <a href="/progetti/" class="mt-8 inline-flex font-semibold text-navy-900 sm:hidden">Tutti i progetti →</a>
+  </section>
+
+  <StatBar items={statbar} nota="Numeri dell'operatività Amon Energy" />
+
+  <!-- Perché Amon -->
+  <section class="wrap-wide py-20 lg:py-28">
+    <div class="ds-eyebrow" data-reveal>
+      <span class="ds-eyebrow-dash"></span>
+      <span class="ds-eyebrow-label">Perché Amon Energy</span>
+    </div>
+    <div class="mt-10 grid gap-x-8 gap-y-12 sm:grid-cols-3">
+      {
+        percheAmon.map((p, i) => (
+          <div data-reveal style={`--reveal-delay:${i * 90}ms`}>
+            <span class="tnum font-display text-sm font-semibold text-green-500">0{i + 1}</span>
+            <h3 class="mt-3 font-display text-2xl font-bold tracking-tight text-ink">{p.titolo}</h3>
+            <p class="mt-3 leading-relaxed text-ink/70">{p.testo}</p>
+          </div>
+        ))
+      }
+    </div>
+  </section>
+
+  <ClientMarquee titolo={marqueeTitolo} />
+
+  <CtaBand />
+</Base>

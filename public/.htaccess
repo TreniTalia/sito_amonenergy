@@ -1,0 +1,25 @@
+# --- Redirect 301 dai vecchi URL WordPress ---
+Redirect 301 /laboratorio-mobile/ /servizi/laboratorio-mobile/
+Redirect 301 /centrix/ /servizi/laboratorio-mobile/
+Redirect 301 /verifiche-strumentali/ /servizi/verifiche-strumentali/
+Redirect 301 /monitoraggio-controllo/ /servizi/monitoraggio-e-controllo/
+Redirect 301 /gestione-e-manutenzione/ /servizi/gestione-e-manutenzione/
+Redirect 301 /repowering-e-revamping-eolico/ /servizi/costruzioni/
+Redirect 301 /i-nostri-clienti/ /azienda/
+Redirect 301 /lavora-con-noi/ /azienda/
+Redirect 301 /consulenza/ /contatti/
+
+# --- 404 custom ---
+ErrorDocument 404 /404.html
+
+# --- Cache asset con hash nel nome (Astro li fingerprinta) ---
+<IfModule mod_expires.c>
+  ExpiresActive On
+  ExpiresByType text/html "access plus 0 seconds"
+  ExpiresByType text/css "access plus 1 year"
+  ExpiresByType application/javascript "access plus 1 year"
+  ExpiresByType image/avif "access plus 1 year"
+  ExpiresByType image/webp "access plus 1 year"
+  ExpiresByType image/svg+xml "access plus 1 year"
+  ExpiresByType font/woff2 "access plus 1 year"
+</IfModule>

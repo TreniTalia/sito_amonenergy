@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="800" height="800" viewBox="0 0 800 800">
+  <rect width="800" height="800" fill="#0A2A44"/>
+  <rect x="1" y="1" width="798" height="798" fill="none" stroke="#1D5585" stroke-width="2"/>
+  <circle cx="400" cy="420" r="260" fill="none" stroke="#4FB3D9" stroke-width="1.5" stroke-dasharray="6 6" opacity="0.6"/>
+  <circle cx="400" cy="420" r="8" fill="#4FB3D9"/>
+  <text x="400" y="360" font-family="Arial, sans-serif" font-size="22" fill="#4FB3D9" text-anchor="middle" letter-spacing="3">PLACEHOLDER</text>
+  <text x="400" y="700" font-family="Arial, sans-serif" font-size="18" fill="#FAFBFC" text-anchor="middle">mappa-raggio-azione.svg — ridisegnare la mappa Italia della brochure p.5</text>
+</svg>

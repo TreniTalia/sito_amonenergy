@@ -1,0 +1,76 @@
+---
+import { contatti } from '../data/contatti.ts';
+import Logo from './Logo.astro';
+
+const serviziLinks = [
+  { href: '/servizi/laboratorio-mobile/', label: 'Laboratorio mobile ricerca guasti' },
+  { href: '/servizi/verifiche-strumentali/', label: 'Verifiche strumentali' },
+  { href: '/servizi/monitoraggio-e-controllo/', label: 'Monitoraggio e controllo' },
+  { href: '/servizi/costruzioni/', label: 'Costruzioni' },
+  { href: '/servizi/gestione-e-manutenzione/', label: 'Gestione e manutenzione' },
+];
+
+const year = new Date().getFullYear();
+---
+
+<footer class="bg-navy-950 text-paper">
+  <div class="wrap-wide py-16 lg:py-24 grid gap-12 sm:grid-cols-2 lg:grid-cols-3">
+    <div>
+      <Logo size={32} />
+      <p class="mt-4 text-paper/70 measure">Professionisti dell'energia.</p>
+      <a
+        href={contatti.linkedin}
+        class="inline-flex items-center gap-2 mt-6 text-sm text-paper/80 hover:text-signal-400 transition-colors"
+        target="_blank"
+        rel="noopener noreferrer"
+      >
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M19 3a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2zM8.34 18v-8.4H5.67V18zM7.01 8.48a1.55 1.55 0 1 0 0-3.1 1.55 1.55 0 0 0 0 3.1zM18.34 18v-4.68c0-2.5-1.33-3.67-3.11-3.67a2.68 2.68 0 0 0-2.43 1.34V9.6h-2.67s.03.75 0 8.4h2.67v-4.69c0-.25.02-.5.1-.68a1.5 1.5 0 0 1 1.37-1c.96 0 1.35.74 1.35 1.81V18z"/></svg>
+        LinkedIn
+      </a>
+    </div>
+
+    <div>
+      <p class="ds-eyebrow-label" style="color: var(--color-paper); opacity: 0.6;">Servizi</p>
+      <ul class="mt-4 flex flex-col gap-3">
+        {serviziLinks.map((s) => (
+          <li><a href={s.href} class="text-paper/80 hover:text-signal-400 transition-colors">{s.label}</a></li>
+        ))}
+      </ul>
+    </div>
+
+    <div>
+      <p class="ds-eyebrow-label" style="color: var(--color-paper); opacity: 0.6;">Contatti</p>
+      <ul class="mt-4 flex flex-col gap-3 text-paper/80">
+        <li>{contatti.indirizzo}</li>
+        <li><a href={contatti.telefonoHref} class="hover:text-signal-400 transition-colors">{contatti.telefono}</a></li>
+        <li><a href={`mailto:${contatti.email}`} class="hover:text-signal-400 transition-colors">{contatti.email}</a></li>
+        <li><a href={`mailto:${contatti.pec}`} class="hover:text-signal-400 transition-colors">{contatti.pec}</a></li>
+        <li>P.IVA {contatti.piva}</li>
+        <li>Codice FE {contatti.codiceFE}</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="border-t border-navy-700">
+    <div class="wrap-wide py-8 text-xs text-paper/55">
+      <p>
+        Amon Energy S.r.l. ha beneficiato di aiuti di Stato ai sensi della L. 124/2017 e del D.L. 34/2019.
+        L'elenco è consultabile nel Registro Nazionale degli Aiuti di Stato su
+        {' '}<a href={`https://www.rna.gov.it/RegistroNazionaleTrasparenza/faces/pages/TrasparenzaAiuto.jspx?codiceFiscale=${contatti.piva}`} class="underline hover:text-signal-400" target="_blank" rel="noopener noreferrer">rna.gov.it</a>
+        {' '}(C.F. {contatti.piva}), oppure nel documento di
+        {' '}<a href="/docs/rendicontazione-contributi-pubblici.txt" class="underline hover:text-signal-400">rendicontazione contributi pubblici</a>{' '}
+        (segnaposto — sostituire con il PDF originale prima del go-live).
+      </p>
+    </div>
+  </div>
+
+  <div class="border-t border-navy-700">
+    <div class="wrap-wide py-6 flex flex-col sm:flex-row items-center justify-between gap-3 text-sm text-paper/60">
+      <p>© {year} {contatti.ragioneSociale}</p>
+      <div class="flex items-center gap-6">
+        <a href="/privacy-policy/" class="hover:text-signal-400 transition-colors">Privacy Policy</a>
+        <span>P.IVA {contatti.piva}</span>
+      </div>
+    </div>
+  </div>
+</footer>

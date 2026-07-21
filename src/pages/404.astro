@@ -1,0 +1,20 @@
+---
+import Base from '../layouts/Base.astro';
+---
+
+<Base title="Pagina non trovata" description="La pagina richiesta non esiste o è stata spostata." headerTransparent={false}>
+  <section class="wrap py-32 lg:py-40 text-center">
+    <p class="ds-eyebrow-label justify-center flex">Errore 404</p>
+    <h1 class="text-display mt-4">Questa pagina non esiste.</h1>
+    <p class="measure mx-auto mt-5 text-lg text-ink/75" style="line-height: 1.65;">
+      Il link potrebbe essere obsoleto o la pagina è stata spostata. Prova a tornare alla home o a
+      contattarci direttamente.
+    </p>
+    <div class="mt-10 flex flex-col sm:flex-row justify-center gap-4">
+      <a href="/" class="ds-btn-primary justify-center">Torna alla home</a>
+      <a href="/contatti/" class="ds-btn-primary justify-center" style="background: transparent; border: 1px solid var(--color-navy-700);">
+        Contattaci
+      </a>
+    </div>
+  </section>
+</Base>

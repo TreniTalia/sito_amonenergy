@@ -1,0 +1,129 @@
+---
+import '../styles/global.css';
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
+import MobileStickyBar from '../components/MobileStickyBar.astro';
+import { contatti } from '../data/contatti.ts';
+
+interface Props {
+  title: string;
+  description: string;
+  /** Extra JSON-LD objects for this page (Service, BreadcrumbList, ...). Organization/LocalBusiness is always injected. */
+  structuredData?: Record<string, unknown>[];
+  ogImage?: string;
+  /** False for pages with no dark hero at the top (e.g. Contatti), so the header starts solid. */
+  headerTransparent?: boolean;
+}
+
+const { title, description, structuredData = [], ogImage = '/og-image.jpg', headerTransparent = true } = Astro.props;
+
+const canonicalURL = new URL(Astro.url.pathname, Astro.site);
+
+// Town-center coordinates for Castelluccio dei Sauri (FG) — public geodata, not
+// street-level verified. Confirm precision before relying on it for local-search ranking.
+const organization = {
+  '@context': 'https://schema.org',
+  '@type': ['Organization', 'LocalBusiness', 'ElectricalUtility'],
+  name: contatti.ragioneSociale,
+  url: Astro.site?.toString(),
+  telephone: contatti.telefono,
+  email: contatti.email,
+  address: {
+    '@type': 'PostalAddress',
+    streetAddress: 'Via Roma 105',
+    postalCode: '71025',
+    addressLocality: 'Castelluccio dei Sauri',
+    addressRegion: 'FG',
+    addressCountry: 'IT',
+  },
+  geo: {
+    '@type': 'GeoCoordinates',
+    latitude: 41.30579,
+    longitude: 15.48281,
+  },
+  areaServed: 'Centro-Sud Italia',
+  sameAs: [contatti.linkedin],
+};
+
+const jsonLdBlocks = [organization, ...structuredData];
+---
+
+<!doctype html>
+<html lang="it" class="no-js">
+  <head>
+    <script is:inline>
+      document.documentElement.classList.remove('no-js');
+    </script>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="canonical" href={canonicalURL} />
+    <meta name="generator" content={Astro.generator} />
+
+    <title>{title} | Amon Energy</title>
+    <meta name="description" content={description} />
+
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content={`${title} | Amon Energy`} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonicalURL} />
+    <meta property="og:image" content={new URL(ogImage, Astro.site)} />
+    <meta property="og:locale" content="it_IT" />
+
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={`${title} | Amon Energy`} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={new URL(ogImage, Astro.site)} />
+
+    {
+      jsonLdBlocks.map((block) => (
+        <script type="application/ld+json" set:html={JSON.stringify(block)} is:inline />
+      ))
+    }
+  </head>
+  <body>
+    <a href="#main" class="skip-link">Vai al contenuto</a>
+    <Header transparent={headerTransparent} />
+    <main id="main" class:list={['pb-14 md:pb-0', { 'pt-28 lg:pt-32': !headerTransparent }]}>
+      <slot />
+    </main>
+    <Footer />
+    <MobileStickyBar />
+
+    <script>
+      // Scroll reveal — progressive enhancement. Content is visible by default
+      // (CSS only hides it when motion is allowed AND js is present); the observer
+      // just adds the entrance. Staggered per-container via --reveal-delay.
+      const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      const els = Array.from(document.querySelectorAll<HTMLElement>('[data-reveal]'));
+      const revealAll = () => els.forEach((el) => el.classList.add('is-visible'));
+
+      if (prefersReduced || !('IntersectionObserver' in window)) {
+        revealAll();
+      } else {
+        const io = new IntersectionObserver(
+          (entries, obs) => {
+            entries.forEach((entry) => {
+              if (entry.isIntersecting) {
+                entry.target.classList.add('is-visible');
+                obs.unobserve(entry.target);
+              }
+            });
+          },
+          { threshold: 0.12, rootMargin: '0px 0px -6% 0px' },
+        );
+        els.forEach((el) => io.observe(el));
+
+        // Failsafe: content must never stay hidden. If the observer never fires
+        // for an element (background tab, headless renderer, deep-link past the
+        // fold), reveal everything after a short grace period so no section
+        // ships blank. Below-fold reveals still animate normally on scroll.
+        window.addEventListener(
+          'load',
+          () => window.setTimeout(revealAll, 2500),
+          { once: true },
+        );
+      }
+    </script>
+  </body>
+</html>

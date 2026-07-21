@@ -1,0 +1,42 @@
+---
+import { Image } from 'astro:assets';
+import ctaImg from '../assets/img/photos/substation-banzi-dusk.jpg';
+import { contatti } from '../data/contatti.ts';
+
+interface Props {
+  headline?: string;
+}
+
+const { headline = 'Un guasto non aspetta. Nemmeno noi.' } = Astro.props;
+---
+
+<section class="relative isolate overflow-hidden text-paper">
+  <Image
+    src={ctaImg}
+    alt="Stazione elettrica di trasformazione al tramonto, in agro di Banzi e Montemilone (PZ)"
+    class="absolute inset-0 h-full w-full object-cover"
+    widths={[768, 1280, 1600]}
+    sizes="100vw"
+    loading="lazy"
+  />
+  <div class="absolute inset-0 bg-navy-950/85"></div>
+
+  <div class="wrap relative z-10 flex flex-col items-center gap-8 py-24 text-center lg:py-32">
+    <p class="text-display max-w-[18ch]" data-reveal>{headline}</p>
+    <p class="max-w-[46ch] text-lg text-paper/80" data-reveal style="--reveal-delay:100ms">
+      Parla direttamente con chi mette le mani sugli impianti. Niente form, niente attese: una
+      telefonata e siamo operativi.
+    </p>
+    <div class="flex w-full flex-col gap-4 sm:w-auto sm:flex-row" data-reveal style="--reveal-delay:200ms">
+      <a href={contatti.telefonoHref} class="ds-btn-on-dark justify-center">
+        Chiamaci: {contatti.telefono}
+      </a>
+      <a
+        href={`mailto:${contatti.email}?subject=Richiesta%20informazioni`}
+        class="ds-btn-ghost justify-center"
+      >
+        Scrivici via email
+      </a>
+    </div>
+  </div>
+</section>

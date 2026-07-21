@@ -1,0 +1,129 @@
+---
+import { getImage, Image } from 'astro:assets';
+import { render, type CollectionEntry } from 'astro:content';
+import GalleryCardContent from './GalleryCardContent.astro';
+
+interface Props {
+  entry: CollectionEntry<'progetti'>;
+  index: number;
+  total: number;
+  variant: 'a' | 'b' | 'c';
+}
+
+const { entry, index, total, variant } = Astro.props;
+const { immagine, immagineAlt } = entry.data;
+
+const fullImage = await getImage({ src: immagine, width: 1920 });
+const { Content } = await render(entry);
+const { titolo, kv, committente, provincia, tipologia } = entry.data;
+const indexLabel = String(index + 1).padStart(2, '0');
+---
+
+{
+  variant === 'c' ? (
+    <div class="relative" style="left: 50%; right: 50%; margin-left: -50vw; margin-right: -50vw; width: 100vw;">
+      <a
+        href={fullImage.src}
+        class="js-lightbox-trigger gallery-reveal block relative overflow-hidden group"
+        style="aspect-ratio: 21 / 9;"
+        data-index={index}
+        data-total={total}
+        data-full-src={fullImage.src}
+        data-alt={immagineAlt}
+        data-index-label={indexLabel}
+        data-titolo={titolo}
+        data-kv={kv}
+        data-committente={committente}
+        data-provincia={provincia}
+        data-tipologia={tipologia}
+      >
+        <Image
+          src={immagine}
+          alt={immagineAlt}
+          class="w-full h-full object-cover transition-transform duration-[1.2s] gallery-zoom"
+          style="transition-timing-function: var(--ease-signature);"
+          widths={[640, 1024, 1600, 1920]}
+          sizes="100vw"
+        />
+      </a>
+      <div class="gallery-reveal gallery-reveal--delayed bg-navy-950 lg:bg-navy-950/85 lg:backdrop-blur-sm lg:absolute lg:bottom-0 lg:left-0 lg:max-w-md lg:m-8">
+        <div class="wrap py-8 lg:py-6 lg:px-6 lg:max-w-none lg:mx-0">
+          <GalleryCardContent entry={entry} index={index} onDark={true}>
+            <Content />
+          </GalleryCardContent>
+        </div>
+      </div>
+    </div>
+  ) : (
+    <div class="wrap">
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-x-6 lg:items-end">
+        <a
+          href={fullImage.src}
+          class:list={[
+            'js-lightbox-trigger gallery-reveal block relative overflow-hidden group',
+            variant === 'a' ? 'lg:col-span-8 lg:order-1' : 'lg:col-span-8 lg:order-2',
+          ]}
+          style="aspect-ratio: 16 / 10;"
+          data-index={index}
+          data-total={total}
+          data-full-src={fullImage.src}
+          data-alt={immagineAlt}
+          data-index-label={indexLabel}
+          data-titolo={titolo}
+          data-kv={kv}
+          data-committente={committente}
+          data-provincia={provincia}
+          data-tipologia={tipologia}
+        >
+          <Image
+            src={immagine}
+            alt={immagineAlt}
+            class="w-full h-full object-cover transition-transform duration-[1.2s] gallery-zoom"
+            style="transition-timing-function: var(--ease-signature);"
+            widths={[640, 1024, 1600]}
+            sizes="(min-width: 1024px) 66vw, 100vw"
+          />
+        </a>
+        <div class:list={['gallery-reveal gallery-reveal--delayed', variant === 'a' ? 'lg:col-span-4 lg:order-2' : 'lg:col-span-4 lg:order-1']}>
+          <GalleryCardContent entry={entry} index={index}>
+            <Content />
+          </GalleryCardContent>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+<style>
+  @media (hover: hover) and (pointer: fine) {
+    .group:hover .gallery-zoom {
+      transform: scale(1.04);
+    }
+  }
+
+  .gallery-reveal {
+    opacity: 0;
+    transform: translateY(24px);
+    transition:
+      opacity 0.7s var(--ease-signature),
+      transform 0.7s var(--ease-signature);
+  }
+  .gallery-reveal.is-visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  .gallery-reveal--delayed.is-visible {
+    transition-delay: 80ms;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .gallery-reveal {
+      opacity: 1;
+      transform: none;
+      transition: none;
+    }
+    .gallery-zoom {
+      transition: none;
+    }
+  }
+</style>

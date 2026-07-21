@@ -1,0 +1,52 @@
+name: Deploy
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build
+        run: npm run build
+
+      # NOTA IMPORTANTE sulla scelta dell'azione: la spec indica SFTP (protocollo SSH,
+      # tipicamente porta 22 o una porta custom su SiteGround). SamKirkland/FTP-Deploy-Action
+      # (citata nella spec) supporta solo FTP e FTPS, NON il vero SFTP — è un errore comune
+      # confondere i due protocolli. Questo workflow usa wlixcc/SFTP-Deploy-Action, che
+      # implementa SFTP reale. Verificare i nomi esatti degli input contro il README
+      # dell'azione (https://github.com/wlixcc/SFTP-Deploy-Action) prima del primo deploy:
+      # potrebbero essere cambiati rispetto a quanto scritto qui. In alternativa, se
+      # SiteGround espone solo FTP/FTPS per il piano attivo, si può tornare a
+      # SamKirkland/FTP-Deploy-Action con protocol: ftps.
+      - name: Deploy via SFTP a SiteGround
+        uses: wlixcc/SFTP-Deploy-Action@v1.2.4
+        with:
+          server: ${{ secrets.SFTP_HOST }}
+          username: ${{ secrets.SFTP_USER }}
+          password: ${{ secrets.SFTP_PASS }}
+          port: ${{ secrets.SFTP_PORT }}
+          local_path: './dist/*'
+          remote_path: '/public_html/'
+          sftpArgs: '-o ConnectTimeout=5'
+
+      - name: Purge cache statica SiteGround
+        run: |
+          echo "Nessuna purge automatica configurata."
+          echo "Se il piano SiteGround espone l'API SG Optimizer / SG CLI, sostituire"
+          echo "questo step con la chiamata di purge (richiede un token nei secrets)."
+          echo "In assenza: Site Tools -> Speed -> Caching -> Purge, un click manuale."
+          echo "Vedi README.md, sezione Deploy, per i dettagli."

@@ -1,0 +1,68 @@
+---
+import Base from '../layouts/Base.astro';
+import { contatti } from '../data/contatti.ts';
+
+const breadcrumb = {
+  '@context': 'https://schema.org',
+  '@type': 'BreadcrumbList',
+  itemListElement: [
+    { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://amonenergy.it/' },
+    { '@type': 'ListItem', position: 2, name: 'Privacy Policy', item: 'https://amonenergy.it/privacy-policy/' },
+  ],
+};
+---
+
+<Base
+  title="Privacy Policy"
+  description="Informativa sul trattamento dei dati personali di Amon Energy S.r.l."
+  structuredData={[breadcrumb]}
+  headerTransparent={false}
+>
+  <section class="wrap py-20 lg:py-28">
+    <div class="max-w-3xl">
+      <h1 class="text-headline">Privacy Policy</h1>
+
+      <p class="mt-6 text-sm text-navy-700 bg-navy-100 inline-block px-4 py-2" style="border-radius: 2px;">
+        Segnaposto — testo da far validare da un legale prima del go-live. Non è il testo del sito
+        precedente, che faceva riferimento a un modulo di contatto qui non presente.
+      </p>
+
+      <div class="mt-10 measure" style="line-height: 1.75;">
+        <p>
+          {contatti.ragioneSociale}, con sede in {contatti.indirizzo}, P.IVA {contatti.piva} ("Titolare"),
+          tratta i dati personali degli utenti di questo sito nel rispetto del
+          Regolamento (UE) 2016/679 (GDPR) e della normativa italiana applicabile.
+        </p>
+
+        <h2 class="text-headline mt-10" style="font-size: 1.375rem;">Dati trattati</h2>
+        <p class="mt-3">
+          Questo sito non contiene moduli di contatto, non utilizza cookie di profilazione né
+          strumenti di analisi che raccolgono dati personali. I soli dati personali trattati dal
+          Titolare sono quelli che l'utente comunica spontaneamente contattando l'azienda per
+          telefono ({contatti.telefono}) o via email ({contatti.email}, {contatti.pec}).
+        </p>
+
+        <h2 class="text-headline mt-10" style="font-size: 1.375rem;">Finalità e base giuridica</h2>
+        <p class="mt-3">
+          I dati comunicati via telefono o email sono trattati al solo fine di rispondere alla
+          richiesta dell'utente, sulla base del legittimo interesse del Titolare a gestire i
+          contatti commerciali in entrata o, ove applicabile, delle misure precontrattuali
+          richieste dall'interessato.
+        </p>
+
+        <h2 class="text-headline mt-10" style="font-size: 1.375rem;">Conservazione</h2>
+        <p class="mt-3">
+          I dati sono conservati per il tempo necessario a gestire la richiesta e gli eventuali
+          rapporti commerciali che ne derivano, salvi gli obblighi di legge in materia fiscale e
+          contabile.
+        </p>
+
+        <h2 class="text-headline mt-10" style="font-size: 1.375rem;">Diritti dell'interessato</h2>
+        <p class="mt-3">
+          L'utente può richiedere in qualsiasi momento accesso, rettifica, cancellazione o
+          limitazione del trattamento dei propri dati scrivendo a {contatti.email} o {contatti.pec}.
+        </p>
+      </div>
+    </div>
+  </section>
+</Base>

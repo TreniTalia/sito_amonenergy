@@ -1,0 +1,41 @@
+pagina: "home"
+
+hero:
+  eyebrow: "Professionisti dell'energia"
+  h1: "Costruiamo, verifichiamo e gestiamo l'energia del Centro-Sud Italia."
+  sub: "Sottostazioni AT/MT, verifiche strumentali, ricerca guasti e monitoraggio 24/7 per impianti eolici e fotovoltaici. Dalla nostra sede di Castelluccio dei Sauri (FG), sul posto in giornata."
+  ctaPrimaria: "Chiamaci: 0881 377590"
+  ctaSecondaria: "Scopri i servizi"
+
+chiSiamoBreve:
+  testo: "Oltre 20 anni di esperienza nella costruzione di stazioni AT/MT e nella gestione O&M di impianti rinnovabili nel Sud Italia. Un'unica sede operativa da 5.000 m² a Castelluccio dei Sauri (FG), baricentrica sul Centro-Sud, con magazzino ricambi strategico e Control Room attiva 24/7/365."
+  link: "/azienda/"
+
+controllo:
+  eyebrow: "Control Room · RCS · CCI"
+  titolo: "Il cuore digitale dei tuoi impianti, sempre acceso."
+  testo: "Dalla nostra Control Room in Puglia sorvegliamo gli impianti in tempo reale, 24 ore su 24. Il sistema proprietario RCS analizza i guasti e richiude in automatico; il Controllore Centrale d'Impianto (CCI) tiene tutto conforme alle norme. Quando serve un intervento, il team parte dalla sede con il laboratorio mobile."
+
+statbar:
+  - valore: "140+"
+    label: "impianti MT in gestione O&M"
+    finto: false
+  - valore: "50+"
+    label: "clienti nel portafoglio"
+    finto: false
+  - valore: "20+"
+    label: "anni di esperienza del team"
+    finto: false
+  - valore: "24/7"
+    label: "monitoraggio continuo, 365 giorni"
+    finto: false
+
+percheAmon:
+  - titolo: "Rapidità"
+    testo: "Sede operativa a Castelluccio dei Sauri (FG), baricentrica: raggiungiamo la maggior parte degli impianti del Centro-Sud in poche ore, con reperibilità 24h."
+  - titolo: "Affidabilità"
+    testo: "Personale qualificato CEI EN 50110-1 e CEI 11-27, con oltre 100 stazioni AT/MT realizzate e piena responsabilità sulla sicurezza e l'operatività elettrica."
+  - titolo: "Tecnologia"
+    testo: "Control Room 24/7, sistema RCS proprietario e laboratori mobili Centrix 2.0 con strumentazione ISA, Megger HV 80kV, OTDR e termografia — tutta certificata e calibrata."
+
+marqueeTitolo: "Si affidano a noi"
