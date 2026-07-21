@@ -2,7 +2,7 @@
 import { getEntry } from 'astro:content';
 import Base from '../../layouts/Base.astro';
 import ServizioBody from '../../components/ServizioBody.astro';
-import heroImage from '../../assets/img/photos/substation-wide.jpg';
+import heroImage from '../../assets/img/photos/costruzione-banzi-panoramica.jpg';
 
 const entry = await getEntry('servizi', 'costruzioni');
 if (!entry) throw new Error('servizi/costruzioni.md missing');
@@ -32,6 +32,6 @@ const structuredData = [
   <ServizioBody
     entry={entry}
     heroImage={heroImage}
-    heroImageAlt="Stazione elettrica di trasformazione AT/MT costruita da Amon Energy per un parco eolico"
+    heroImageAlt="Cantiere di una stazione elettrica AT/MT in costruzione: campate di sbarre e isolatori durante il montaggio"
   />
 </Base>

@@ -4,9 +4,9 @@ import { Image } from 'astro:assets';
 import Base from '../layouts/Base.astro';
 import PageHero from '../components/PageHero.astro';
 import CtaBand from '../components/CtaBand.astro';
-import storiaImg from '../assets/img/photos/substation-troia.jpg';
+import storiaImg from '../assets/img/photos/tecnico-fotovoltaico.jpg';
 import mappaImg from '../assets/img/photos/coverage-map.jpg';
-import vanImg from '../assets/img/photos/centrix-van.png';
+import vanImg from '../assets/img/photos/van-laboratorio-aperto.jpg';
 
 const azienda = await getEntry('pagine', 'azienda');
 if (!azienda || azienda.data.pagina !== 'azienda') throw new Error('pagine/azienda.yaml missing or malformed');
@@ -40,8 +40,8 @@ const breadcrumb = {
     <figure class="overflow-hidden rounded-[2px] border border-navy-100" data-reveal style="--reveal-delay:120ms">
       <Image
         src={storiaImg}
-        alt="Stazione elettrica di trasformazione 150/30 kV realizzata da Amon Energy a Troia (FG)"
-        class="w-full object-cover"
+        alt="Tecnico Amon Energy durante una misura strumentale in un impianto fotovoltaico"
+        class="aspect-[4/5] w-full object-cover"
         widths={[500, 800, 1100]}
         sizes="(min-width: 1024px) 46vw, 100vw"
       />
@@ -105,11 +105,11 @@ const breadcrumb = {
             }
           </div>
         </div>
-        <figure class="rounded-[2px] border border-navy-900/10 bg-paper p-8" data-reveal style="--reveal-delay:120ms">
+        <figure class="overflow-hidden rounded-[2px] border border-navy-900/10" data-reveal style="--reveal-delay:120ms">
           <Image
             src={vanImg}
-            alt="Furgone laboratorio mobile Centrix 2.0 di Amon Energy"
-            class="w-full object-contain"
+            alt="Il laboratorio mobile di Amon Energy con la strumentazione di prova a bordo, in campo durante un intervento"
+            class="w-full object-cover"
             widths={[400, 800]}
             sizes="(min-width: 1024px) 46vw, 100vw"
           />

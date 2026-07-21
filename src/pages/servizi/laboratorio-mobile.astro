@@ -2,7 +2,8 @@
 import { getEntry } from 'astro:content';
 import Base from '../../layouts/Base.astro';
 import ServizioBody from '../../components/ServizioBody.astro';
-import vanImage from '../../assets/img/photos/centrix-van.png';
+import heroImage from '../../assets/img/photos/laboratorio-van-cabina.jpg';
+import vanImage from '../../assets/img/photos/laboratorio-operatore.jpg';
 
 const entry = await getEntry('servizi', 'laboratorio-mobile');
 if (!entry) throw new Error('servizi/laboratorio-mobile.md missing');
@@ -31,8 +32,9 @@ const structuredData = [
 <Base title={entry.data.titolo} description={entry.data.excerpt} structuredData={structuredData}>
   <ServizioBody
     entry={entry}
+    heroImage={heroImage}
+    heroImageAlt="Il laboratorio mobile di Amon Energy in campo durante un intervento di ricerca guasti su una cabina MT"
     bodyImage={vanImage}
-    bodyImageAlt="Furgone laboratorio mobile Centrix 2.0 di Amon Energy, attrezzato per la ricerca guasti su cavi MT"
-    bodyImageContain
+    bodyImageAlt="Tecnico Amon Energy al lavoro sulla consolle Megger Centrix 2.0 all'interno del laboratorio mobile"
   />
 </Base>

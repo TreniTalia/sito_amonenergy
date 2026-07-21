@@ -2,7 +2,8 @@
 import { getEntry } from 'astro:content';
 import Base from '../../layouts/Base.astro';
 import ServizioBody from '../../components/ServizioBody.astro';
-import instrImage from '../../assets/img/photos/instr-drts.png';
+import heroImage from '../../assets/img/photos/verifiche-sfra-bushing.jpg';
+import instrImage from '../../assets/img/photos/verifiche-sfra.jpg';
 
 const entry = await getEntry('servizi', 'verifiche-strumentali');
 if (!entry) throw new Error('servizi/verifiche-strumentali.md missing');
@@ -31,8 +32,9 @@ const structuredData = [
 <Base title={entry.data.titolo} description={entry.data.excerpt} structuredData={structuredData}>
   <ServizioBody
     entry={entry}
+    heroImage={heroImage}
+    heroImageAlt="Verifica strumentale su un trafo AT/MT: pinza di misura applicata alla boccola durante la prova SFRA"
     bodyImage={instrImage}
-    bodyImageAlt="Sistema di prova relè DRTS/64 usato da Amon Energy per le verifiche sulle protezioni AT/MT"
-    bodyImageContain
+    bodyImageAlt="Trafo di potenza AT/MT con cavi di prova collegati durante le verifiche strumentali SFRA di Amon Energy"
   />
 </Base>
