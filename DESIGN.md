@@ -121,8 +121,8 @@ system (see `src/styles/global.css`, the source of truth):
 - **Buttons** — one coherent system: `.ds-btn-primary` (navy gradient), `.ds-btn-on-dark`
   (frosted white), `.ds-btn-ghost` (glass outline on dark), `.ds-btn-secondary` (glass on
   light), `.ds-btn-signal` (green). All CTAs share identical metrics.
-- **Signature ornament** — the "energy flow": a `<canvas>` conductor with luminous current
-  packets + sparks (`WaveDivider.astro`), static under `prefers-reduced-motion`.
+- **Signature ornament** — the "energy flow" spark gap (`WaveDivider.astro`), a WebGL
+  Jacob's ladder; see §5 below for the full spec.
 
 What still holds from below: the navy+green palette and roles, the two-world (field/control)
 art direction, the type scale, accessibility (WCAG 2.2 AA, reduced-motion, 44px targets),
@@ -227,8 +227,16 @@ Flat by default, everywhere, with no exceptions carved out for floating UI (conf
 - **Persistent CTA:** a `tel:` button stays visible in the header at every breakpoint (icon-only under 400px).
 - **Mobile:** hamburger opens a full-height `navy-950` panel with large nav items and contact info at the base; a 56px sticky bottom bar with two 50/50 "Chiama" / "Email" buttons stays pinned below `md`, respecting `env(safe-area-inset-bottom)`.
 
-### Signal Wave (signature component)
-The one decorative element in the system: a thin SVG waveform line (electrical-signal shape, lifted from the brochure) used as a divider between sections and, more prominently, at the base of the hero. Animates with a barely-perceptible continuous horizontal drift; fully static under `prefers-reduced-motion`. No other decorative motif is permitted alongside it.
+### Spark Gap (signature component — `WaveDivider.astro`)
+The one decorative element in the system, and the only place in the site where motion is the subject rather than a transition. A full-width band closing the hero of every page: a 1px conductor hairline runs in from both edges and terminates at two electrodes that diverge slightly as they rise — a spark gap. Between them an arc strikes at the narrow foot, climbs while it stretches and destabilises, then breaks and restrikes, on an irregular cadence (~1.6–2.9 s live, ~0.3–1.2 s dark). It is a Jacob's ladder, not a waveform: no sine, no travelling particles, no sparks thrown off.
+
+- **Render:** WebGL via `ogl` (`Renderer` / `Program` / `Mesh` / `Triangle` imported by path, ~40 kB raw across four chunks), one fullscreen-triangle fragment shader. Glow is a distance field around the filament — a hot core plus two Gaussian falloffs — so the light is continuous, never stacked translucent layers. Premultiplied alpha makes it add to the dark hero instead of veiling it.
+- **Filament shape:** fBm with *linear* interpolation, so the channel is straight runs meeting at sharp kinks. Displacement is pinned to zero at the electrodes; amplitude and bow grow with the climb and run away just before the break. Two counter-scrolling noise samples keep it shimmering in place rather than sliding sideways.
+- **Restraint rules:** the arc is thin and cold. `signal`/`navy` tones carry no green at all — a green bloom at this size would break the Leaf Rarity Rule; green is the subject only in the `green` (Control world) tone. Light fades out near both band edges so nothing hard-cuts at the boundary with the next section.
+- **`animated={false}`** (dividers on light sections) never loads WebGL: it renders the same spark gap cold, in CSS, as a hairline and two pins. Same for the pre-hydration and no-WebGL fallback.
+- **`prefers-reduced-motion`:** one frame, drawn once, frozen mid-climb.
+
+No other decorative motif is permitted alongside it.
 
 ## 6. Do's and Don'ts
 

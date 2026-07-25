@@ -1,7 +1,0 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="1920" height="1080" viewBox="0 0 1920 1080">
-  <rect width="1920" height="1080" fill="#0A2A44"/>
-  <path d="M0 720 L1920 720" stroke="#103B5F" stroke-width="2"/>
-  <path d="M0 760 L200 760 L260 620 L320 900 L380 760 L1920 760" fill="none" stroke="#1D5585" stroke-width="3"/>
-  <text x="960" y="520" font-family="Arial, sans-serif" font-size="34" fill="#4FB3D9" text-anchor="middle" letter-spacing="4">PLACEHOLDER</text>
-  <text x="960" y="575" font-family="Arial, sans-serif" font-size="26" fill="#FAFBFC" text-anchor="middle">hero-sottostazione.jpg — foto sottostazione al tramonto, brochure p.8</text>
-</svg>

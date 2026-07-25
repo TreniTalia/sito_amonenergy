@@ -1,10 +1,14 @@
 ---
 /**
- * Energy flow — the signature ornament, rebuilt on <canvas> as a live current:
- * a luminous conductor with energy "comets" streaming along it and sparks
- * flicking off, additively blended for a real electrical glow. Draws a single
- * static frame (no motion) under prefers-reduced-motion, and a CSS fallback
- * line if JS never runs.
+ * Energy flow — the signature ornament, rebuilt as a *Jacob's ladder*: two
+ * diverging electrodes at the edges of the band, an arc that strikes at the
+ * narrow gap, climbs while it stretches and destabilises, then breaks and
+ * restrikes. Rendered on WebGL (ogl) with a distance-field glow so the light
+ * is continuous rather than stacked from translucent layers.
+ *
+ * `animated={false}` never touches WebGL — it renders a cold, static spark gap
+ * in CSS, which is what a divider on a light section should be.
+ * Under `prefers-reduced-motion` the arc is drawn once, frozen mid-climb.
  */
 interface Props {
   tone?: 'signal' | 'navy' | 'green';
@@ -15,249 +19,489 @@ interface Props {
 const { tone = 'signal', animated = false, class: className = '' } = Astro.props;
 ---
 
-<div
-  class:list={['energy-flow', className]}
-  data-tone={tone}
-  data-animated={animated ? 'true' : 'false'}
-  aria-hidden="true"
->
-  <canvas class="energy-canvas"></canvas>
-</div>
+{
+  animated ? (
+    <div class:list={['energy-flow', className]} data-tone={tone} aria-hidden="true">
+      <canvas class="energy-canvas" />
+    </div>
+  ) : (
+    <div class:list={['energy-flow energy-flow--cold', className]} data-tone={tone} aria-hidden="true">
+      <span class="energy-rod energy-rod--l" />
+      <span class="energy-gap" />
+      <span class="energy-rod energy-rod--r" />
+    </div>
+  )
+}
 
 <style>
   .energy-flow {
     position: relative;
     width: 100%;
-    height: 92px;
-    overflow: visible;
+    height: 108px;
     line-height: 0;
   }
-  /* No-JS / pre-hydration fallback: a faint static conductor line. */
-  .energy-flow::before {
+
+  /* No-JS / pre-hydration fallback for the animated band: the conductor at
+     rest, broken by the gap in the middle. */
+  .energy-flow:not(.energy-flow--cold)::before {
     content: '';
     position: absolute;
-    inset: 50% 0 auto 0;
+    inset: auto 0 30% 0;
     height: 1px;
     background: linear-gradient(
       90deg,
       transparent,
-      color-mix(in srgb, var(--color-signal-400) 45%, transparent),
-      color-mix(in srgb, var(--color-green-400) 55%, transparent),
-      color-mix(in srgb, var(--color-signal-400) 45%, transparent),
+      var(--tone-rod) 14%,
+      var(--tone-rod) 36.5%,
+      transparent 37%,
+      transparent 63%,
+      var(--tone-rod) 63.5%,
+      var(--tone-rod) 86%,
       transparent
     );
-    opacity: 0.5;
   }
   .energy-flow.is-ready::before {
     display: none;
   }
+
   .energy-canvas {
     display: block;
     width: 100%;
     height: 100%;
   }
+
+  /* ---- Cold variant: a spark gap at rest, no glow, no motion ---- */
+  .energy-flow--cold {
+    height: 72px;
+  }
+  .energy-rod,
+  .energy-gap {
+    position: absolute;
+    display: block;
+  }
+  .energy-rod {
+    bottom: 38%;
+    width: 1px;
+    height: 26%;
+    background: linear-gradient(to top, var(--tone-rod), transparent);
+  }
+  .energy-rod--l {
+    left: 36.5%;
+    transform: skewX(-7deg);
+    transform-origin: bottom;
+  }
+  .energy-rod--r {
+    right: 36.5%;
+    transform: skewX(7deg);
+    transform-origin: bottom;
+  }
+  .energy-gap {
+    inset: auto 0 38% 0;
+    height: 1px;
+    background: linear-gradient(
+      90deg,
+      transparent,
+      var(--tone-rod) 14%,
+      var(--tone-rod) 36.5%,
+      transparent 37%,
+      transparent 63%,
+      var(--tone-rod) 63.5%,
+      var(--tone-rod) 86%,
+      transparent
+    );
+  }
+
+  /* Tone tokens shared by both variants. */
+  .energy-flow[data-tone='signal'] {
+    --tone-glow: var(--color-signal-400);
+    --tone-rod: color-mix(in srgb, var(--color-navy-700) 55%, transparent);
+  }
+  .energy-flow[data-tone='green'] {
+    --tone-glow: var(--color-green-400);
+    --tone-rod: color-mix(in srgb, var(--color-green-700) 60%, transparent);
+  }
+  .energy-flow[data-tone='navy'] {
+    --tone-glow: var(--color-navy-300);
+    --tone-rod: color-mix(in srgb, var(--color-navy-700) 45%, transparent);
+  }
 </style>
 
 <script>
-  type Palette = { a: string; b: string; core: string; glow: string };
+  import type { Renderer as OGLRenderer, Program as OGLProgram, Mesh as OGLMesh } from 'ogl';
 
-  const PALETTES: Record<string, Palette> = {
-    signal: { a: 'rgba(79,179,217,0)', b: 'rgba(79,208,127,0.9)', core: '#eaffff', glow: '#57c8ff' },
-    green: { a: 'rgba(62,142,90,0)', b: 'rgba(79,208,127,0.95)', core: '#e9fff0', glow: '#4fd07f' },
-    navy: { a: 'rgba(126,166,196,0)', b: 'rgba(79,179,217,0.85)', core: '#eaf6ff', glow: '#7ea6c4' },
+  type Tone = 'signal' | 'navy' | 'green';
+  type RGB = [number, number, number];
+
+  interface Palette {
+    core: RGB; // white-hot channel
+    glow: RGB; // the arc's own colour
+    halo: RGB; // wide bloom spilling into the band
+    rod: RGB; // the electrodes: structure, not light
+    intensity: number;
+  }
+
+  const PALETTES: Record<Tone, Palette> = {
+    // Field world: a cold blue arc. Leaf-green stays out of it — it is a logo
+    // accent, and a green bloom this size would break the Leaf Rarity Rule.
+    signal: {
+      core: [0.92, 0.98, 1.0],
+      glow: [0.31, 0.7, 0.85], // signal-400
+      halo: [0.17, 0.45, 0.62],
+      rod: [0.31, 0.43, 0.55],
+      intensity: 1.0,
+    },
+    // Control world: this is where green is the subject, not an accent.
+    green: {
+      core: [0.93, 1.0, 0.96],
+      glow: [0.31, 0.82, 0.5], // green-400
+      halo: [0.1, 0.36, 0.22],
+      rod: [0.27, 0.46, 0.35],
+      intensity: 0.95,
+    },
+    navy: {
+      core: [0.92, 0.97, 1.0],
+      glow: [0.49, 0.65, 0.77],
+      halo: [0.11, 0.3, 0.46],
+      rod: [0.28, 0.4, 0.51],
+      intensity: 0.8,
+    },
   };
 
-  interface Spark {
-    x: number;
-    y: number;
-    vx: number;
-    vy: number;
-    life: number;
-    max: number;
-    r: number;
-  }
-  interface Packet {
-    t: number; // -0.2 .. 1.2 along the conductor
-    speed: number;
-    len: number; // trail length in px
-    size: number;
-  }
+  const VERT = `
+    attribute vec2 uv;
+    attribute vec2 position;
+    varying vec2 vUv;
+    void main() {
+      vUv = uv;
+      gl_Position = vec4(position, 0.0, 1.0);
+    }
+  `;
+
+  const FRAG = `
+    precision highp float;
+
+    varying vec2 vUv;
+
+    uniform vec2  uRes;      // CSS px
+    uniform float uTime;     // seconds, monotonic
+    uniform float uSeed;     // re-rolled per strike
+    uniform float uClimb;    // 0 at the gap, 1 at the electrode tips
+    uniform float uGhost;    // climb of the fading ionised channel
+    uniform float uLife;     // brightness envelope (0 between strikes)
+    uniform float uAmp;      // instability of the filament, px
+    uniform vec3  uBranch;   // x: centre (0-1), y: half-width, z: strength
+    uniform vec3  uCore;
+    uniform vec3  uGlow;
+    uniform vec3  uHalo;
+    uniform vec3  uRod;
+    uniform float uIntensity;
+
+    const float PI = 3.14159265;
+
+    float hash11(float n) {
+      return fract(sin(n * 127.1) * 43758.5453123);
+    }
+
+    // Deliberately *linear* interpolation: smoothstep would give rounded ripples,
+    // and an arc is made of straight runs meeting at sharp kinks.
+    float vnoise(float x) {
+      float i = floor(x);
+      return mix(hash11(i), hash11(i + 1.0), fract(x));
+    }
+
+    // 3 octaves, remapped to roughly -0.5 .. 0.5
+    float fbm(float x) {
+      float s = 0.0;
+      float a = 0.55;
+      float norm = 0.0;
+      for (int i = 0; i < 3; i++) {
+        s += a * vnoise(x);
+        norm += a;
+        x = x * 2.37 + 11.3;
+        a *= 0.5;
+      }
+      return s / norm - 0.5;
+    }
+
+    float sdSeg(vec2 p, vec2 a, vec2 b) {
+      vec2 pa = p - a;
+      vec2 ba = b - a;
+      float h = clamp(dot(pa, ba) / dot(ba, ba), 0.0, 1.0);
+      return length(pa - ba * h);
+    }
+
+    // The filament: a bow between the two contact points, displaced by noise
+    // that is pinned to zero where it meets the electrodes. The two counter-
+    // scrolling samples keep the channel shimmering in place instead of
+    // sliding sideways like a waveform.
+    float arcY(float x, float xL, float xR, float yA, float arch, float amp, float t, float seed) {
+      float u = clamp((x - xL) / max(1.0, xR - xL), 0.0, 1.0);
+      float bow = sin(PI * u);
+      float pin = pow(bow, 0.5);
+      float y = yA + bow * arch;
+      float n = 0.5 * fbm(x * 0.0115 + t * 1.9 + seed) + 0.5 * fbm(x * 0.0115 - t * 1.5 + seed * 3.7);
+      y += n * amp * pin;
+      y += fbm(x * 0.038 + t * 4.3 + seed * 2.7) * amp * 0.42 * pin;
+      return y;
+    }
+
+    void main() {
+      vec2 p = vUv * uRes;
+      float W = uRes.x;
+      float H = uRes.y;
+
+      // A spark gap, not a full-width discharge: the conductor runs in from
+      // both edges and stops at two electrodes; the event happens between them.
+      float halfGap = clamp(W * 0.135, 88.0, 230.0);
+      float cx = W * 0.5;
+      float lean = 6.0;
+      float footY = H * 0.27;
+      float tipY = H * 0.56;
+
+      vec2 lFoot = vec2(cx - halfGap, footY);
+      vec2 lTip = vec2(cx - halfGap - lean, tipY);
+      vec2 rFoot = vec2(cx + halfGap, footY);
+      vec2 rTip = vec2(cx + halfGap + lean, tipY);
+
+      vec3 col = vec3(0.0);
+
+      // Conductor: a hairline arriving from each edge, terminated by the pins.
+      float dLine = abs(p.y - footY);
+      float outside = step(p.x, lFoot.x) + step(rFoot.x, p.x);
+      float edgeFade = smoothstep(0.0, W * 0.14, min(p.x, W - p.x));
+      col += uRod * (1.0 - smoothstep(0.0, 1.1, dLine)) * 0.4 * outside * edgeFade;
+
+      float dRod = min(sdSeg(p, lFoot, lTip), sdSeg(p, rFoot, rTip));
+      col += uRod * (1.0 - smoothstep(0.2, 1.2, dRod)) * 0.7;
+
+      if (uLife > 0.001) {
+        float c = uClimb;
+        float yA = mix(footY, tipY, c);
+        float xL = mix(lFoot.x, lTip.x, c);
+        float xR = mix(rFoot.x, rTip.x, c);
+        float arch = H * mix(0.02, 0.17, c);
+
+        float span = smoothstep(xL - 4.0, xL + 7.0, p.x) * (1.0 - smoothstep(xR - 7.0, xR + 4.0, p.x));
+
+        // Mains-frequency shimmer travelling along the channel.
+        float flicker = 0.8 + 0.2 * vnoise(uTime * 41.0 + p.x * 0.02);
+        float lum = uLife * span;
+
+        // --- ionised channel left behind by the climbing arc
+        float cg = max(0.0, uGhost);
+        float yAg = mix(footY, tipY, cg);
+        float xLg = mix(lFoot.x, lTip.x, cg);
+        float xRg = mix(rFoot.x, rTip.x, cg);
+        float yg = arcY(p.x, xLg, xRg, yAg, H * mix(0.02, 0.17, cg), uAmp * 0.8, uTime - 0.1, uSeed);
+        float dg = abs(p.y - yg);
+        col += uHalo * exp(-dg * dg * 0.008) * 0.2 * lum;
+
+        // --- main filament, with perpendicular (not vertical) distance
+        float y0 = arcY(p.x, xL, xR, yA, arch, uAmp, uTime, uSeed);
+        float y1 = arcY(p.x + 2.0, xL, xR, yA, arch, uAmp, uTime, uSeed);
+        float slope = (y1 - y0) * 0.5;
+        float d = abs(p.y - y0) * inversesqrt(1.0 + slope * slope);
+
+        // The channel is not uniformly hot: brightness travels along it.
+        float chan = 0.5 + 0.5 * vnoise(p.x * 0.035 + uTime * 7.0 + uSeed);
+        float bright = lum * flicker;
+        col += uCore * (1.0 - smoothstep(0.0, 0.85, d)) * (0.4 + 0.55 * chan) * bright;
+        col += uGlow * exp(-d * d * 0.08) * 0.38 * bright;
+        col += uHalo * exp(-d * d * 0.004) * 0.22 * bright;
+
+        // --- fork: a short-lived stub peeling off the channel
+        float u = clamp((p.x - xL) / max(1.0, xR - xL), 0.0, 1.0);
+        float bm = 1.0 - smoothstep(0.0, max(0.02, uBranch.y), abs(u - uBranch.x));
+        bm = bm * bm * uBranch.z;
+        if (bm > 0.001) {
+          float yb = y0 + fbm(p.x * 0.026 + uSeed * 5.1 + uTime * 2.4) * H * 0.5 * bm;
+          float db = abs(p.y - yb);
+          col += uCore * (1.0 - smoothstep(0.0, 0.8, db)) * 0.42 * bright * bm;
+          col += uGlow * exp(-db * db * 0.08) * 0.2 * bright * bm;
+        }
+
+        // --- incandescent contact points on the electrodes
+        float dl = length(p - vec2(xL, yA));
+        float dr = length(p - vec2(xR, yA));
+        col += uCore * (exp(-dl * dl * 0.03) + exp(-dr * dr * 0.03)) * 0.4 * uLife;
+      }
+
+      // Never let light hard-cut at the band edges — the lower one is the
+      // boundary with the next, light section.
+      col *= uIntensity * smoothstep(0.0, 7.0, p.y) * (1.0 - smoothstep(H - 11.0, H, p.y));
+      float a = clamp(max(max(col.r, col.g), col.b), 0.0, 1.0);
+      gl_FragColor = vec4(min(col, vec3(1.0)), a);
+    }
+  `;
 
   const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const smoothstep = (a: number, b: number, x: number) => {
+    const t = Math.min(1, Math.max(0, (x - a) / (b - a)));
+    return t * t * (3 - 2 * t);
+  };
 
-  function initEnergyFlow(root: HTMLElement) {
+  async function initEnergyFlow(root: HTMLElement) {
     const canvas = root.querySelector<HTMLCanvasElement>('.energy-canvas');
     if (!canvas) return;
-    const ctx = canvas.getContext('2d');
-    if (!ctx) return;
 
-    const animated = root.dataset.animated === 'true' && !prefersReduced;
-    const pal = PALETTES[root.dataset.tone || 'signal'] ?? PALETTES.signal;
+    // Imported by path, not through the `ogl` barrel: Rollup will not shake a
+    // barrel behind a dynamic import, and pulling it whole costs ~130 kB for
+    // four classes. See src/types/ogl-deep.d.ts.
+    let Renderer: typeof import('ogl').Renderer;
+    let Program: typeof import('ogl').Program;
+    let Mesh: typeof import('ogl').Mesh;
+    let Triangle: typeof import('ogl').Triangle;
+    try {
+      [{ Renderer }, { Program }, { Mesh }, { Triangle }] = await Promise.all([
+        import('ogl/src/core/Renderer.js'),
+        import('ogl/src/core/Program.js'),
+        import('ogl/src/core/Mesh.js'),
+        import('ogl/src/extras/Triangle.js'),
+      ]);
+    } catch {
+      return; // ogl unavailable — the CSS resting gap stays
+    }
 
-    let W = 0;
-    let H = 0;
-    let mid = 0;
-    let amp = 0;
-    const K = (Math.PI * 2) / 330; // wavelength ~330px
+    const pal = PALETTES[(root.dataset.tone as Tone) || 'signal'] ?? PALETTES.signal;
 
-    const yAt = (x: number, phase: number) => mid + Math.sin(x * K + phase) * amp;
+    let renderer: OGLRenderer;
+    let program: OGLProgram;
+    let mesh: OGLMesh;
+    try {
+      renderer = new Renderer({
+        canvas,
+        alpha: true,
+        premultipliedAlpha: true, // blend becomes ONE / 1-SRC_ALPHA — light adds
+        depth: false,
+        antialias: false,
+        dpr: Math.min(window.devicePixelRatio || 1, 2),
+      });
+      program = new Program(renderer.gl, {
+        vertex: VERT,
+        fragment: FRAG,
+        transparent: true,
+        depthTest: false,
+        uniforms: {
+          uRes: { value: [1, 1] },
+          uTime: { value: 0 },
+          uSeed: { value: Math.random() * 100 },
+          uClimb: { value: 0 },
+          uGhost: { value: 0 },
+          uLife: { value: 0 },
+          uAmp: { value: 3 },
+          uBranch: { value: [0.5, 0.12, 0] },
+          uCore: { value: pal.core },
+          uGlow: { value: pal.glow },
+          uHalo: { value: pal.halo },
+          uRod: { value: pal.rod },
+          uIntensity: { value: pal.intensity },
+        },
+      });
+      mesh = new Mesh(renderer.gl, { geometry: new Triangle(renderer.gl), program });
+    } catch {
+      return; // no WebGL — the CSS resting gap stays
+    }
+
+    const u = program.uniforms;
+    let H = 1;
 
     const resize = () => {
-      const dpr = Math.min(window.devicePixelRatio || 1, 2);
       const rect = root.getBoundingClientRect();
-      W = Math.max(1, rect.width);
-      H = Math.max(1, rect.height);
-      canvas.width = Math.round(W * dpr);
-      canvas.height = Math.round(H * dpr);
-      canvas.style.width = W + 'px';
-      canvas.style.height = H + 'px';
-      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-      mid = H / 2;
-      amp = Math.min(H * 0.24, 22);
-      grad = null;
+      const w = Math.max(1, Math.round(rect.width));
+      H = Math.max(1, Math.round(rect.height));
+      renderer.setSize(w, H);
+      u.uRes.value = [w, H];
     };
 
-    // Energy comets travelling along the wire, staggered and at varied speeds.
-    const packets: Packet[] = Array.from({ length: 5 }, (_, i) => ({
-      t: -0.2 + i * 0.26,
-      speed: 0.0016 + Math.random() * 0.0016,
-      len: 70 + Math.random() * 60,
-      size: 2.1 + Math.random() * 1.1,
-    }));
-    const sparks: Spark[] = [];
+    // ---- the ladder cycle: strike at the gap, climb, stretch, break, pause.
+    let live = false;
+    let t = 0; // seconds inside the current strike
+    let dur = 0;
+    let wait = 0.25 + Math.random() * 0.5;
+    let blink = 0;
+    // A fork has its own short lifecycle so it fades in and out instead of popping.
+    let bT = 0;
+    let bDur = 0.4;
+    let bC = 0.5;
+    let bW = 0.12;
 
-    let grad: CanvasGradient | null = null;
-    const buildGrad = () => {
-      grad = ctx.createLinearGradient(0, 0, W, 0);
-      grad.addColorStop(0, pal.a);
-      grad.addColorStop(0.5, pal.b);
-      grad.addColorStop(1, pal.a);
+    const rollBranch = () => {
+      bT = 0;
+      bDur = 0.25 + Math.random() * 0.45;
+      bC = 0.18 + Math.random() * 0.64;
+      bW = 0.07 + Math.random() * 0.14;
     };
 
-    const trace = (phase: number, dy: number) => {
-      ctx.beginPath();
-      for (let x = 0; x <= W; x += 5) {
-        const y = yAt(x, phase) + dy;
-        x === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
-      }
-    };
-
-    // Glow is built from additive translucent layers (no per-shape shadowBlur,
-    // which is the expensive path) so the animation stays smooth.
-    const dot = (x: number, y: number, r: number, color: string, alpha: number) => {
-      ctx.beginPath();
-      ctx.arc(x, y, r, 0, Math.PI * 2);
-      ctx.fillStyle = color;
-      ctx.globalAlpha = alpha;
-      ctx.fill();
-    };
-
-    const drawConductor = (phase: number) => {
-      if (!grad) buildGrad();
-      ctx.strokeStyle = grad as CanvasGradient;
-      ctx.lineCap = 'round';
-      // wide soft halo
-      trace(phase, 0);
-      ctx.globalAlpha = 0.2;
-      ctx.lineWidth = 6;
-      ctx.stroke();
-      // faint echoes
-      ctx.globalAlpha = 0.08;
-      ctx.lineWidth = 1;
-      trace(phase, -6);
-      ctx.stroke();
-      trace(phase, 6);
-      ctx.stroke();
-      // bright core
-      trace(phase, 0);
-      ctx.globalAlpha = 0.9;
-      ctx.lineWidth = 1.5;
-      ctx.stroke();
-      ctx.globalAlpha = 1;
-    };
-
-    const drawComet = (p: Packet, phase: number) => {
-      const headX = p.t * W;
-      const steps = 16;
-      const dx = p.len / steps;
-      for (let i = steps; i >= 0; i--) {
-        const x = headX - i * dx;
-        if (x < -12 || x > W + 12) continue;
-        const y = yAt(x, phase);
-        const f = 1 - i / steps; // 0 tail -> 1 head
-        // soft glow layer
-        dot(x, y, p.size * (1.6 + f * 2.4), pal.glow, f * 0.16);
-        // core
-        dot(x, y, p.size * (0.3 + f * 0.7), i === 0 ? pal.core : pal.glow, f * 0.9);
-      }
-      // extra bright head
-      const hy = yAt(headX, phase);
-      if (headX > -12 && headX < W + 12) {
-        dot(headX, hy, p.size * 3.4, pal.glow, 0.22);
-        dot(headX, hy, p.size * 0.9, pal.core, 1);
-      }
-      ctx.globalAlpha = 1;
-
-      // occasionally throw a spark off the head
-      if (headX > 0 && headX < W && Math.random() < 0.05 && sparks.length < 50) {
-        sparks.push({
-          x: headX,
-          y: hy,
-          vx: 0.6 + Math.random() * 1.2,
-          vy: (Math.random() - 0.5) * 2.2,
-          life: 0,
-          max: 24 + Math.random() * 20,
-          r: 0.9 + Math.random() * 1.1,
-        });
-      }
-    };
-
-    const drawSparks = () => {
-      for (let i = sparks.length - 1; i >= 0; i--) {
-        const s = sparks[i];
-        s.life++;
-        s.x += s.vx;
-        s.y += s.vy;
-        s.vy += 0.04;
-        const f = 1 - s.life / s.max;
-        if (f <= 0) {
-          sparks.splice(i, 1);
-          continue;
+    const step = (dt: number) => {
+      if (!live) {
+        wait -= dt;
+        if (wait <= 0) {
+          live = true;
+          t = 0;
+          dur = 1.6 + Math.random() * 1.3;
+          u.uSeed.value = Math.random() * 100;
+          rollBranch();
         }
-        dot(s.x, s.y, s.r * f * 2.4, pal.glow, f * 0.25);
-        dot(s.x, s.y, s.r * f, pal.core, f);
+      } else {
+        t += dt;
+        if (t >= dur) {
+          live = false;
+          wait = 0.3 + Math.random() * 0.85;
+        }
       }
-      ctx.globalAlpha = 1;
+
+      bT += dt;
+      if (bT > bDur) rollBranch();
+
+      const p = live ? Math.min(1, t / dur) : 0;
+      // Climbs slowly out of the gap, then accelerates as the channel lengthens.
+      const climb = Math.pow(p, 1.5);
+
+      // Restrike stutter: real arcs drop out for a frame or two.
+      blink -= dt;
+      if (live && p > 0.12 && blink < -0.08 && Math.random() < dt * 2.2) blink = 0.02 + Math.random() * 0.05;
+
+      const ignition = Math.min(1, p / 0.012);
+      const flash = 1 + 2.4 * Math.exp(-p / 0.03);
+      const fade = 1 - smoothstep(0.88, 1, p);
+      const stutter = blink > 0 ? 0.12 : 1;
+
+      u.uClimb.value = climb;
+      u.uGhost.value = Math.max(0, climb - 0.05);
+      u.uLife.value = live ? ignition * flash * fade * stutter : 0;
+      // Instability grows with length, then runs away just before the break.
+      u.uAmp.value = H * (0.06 + 0.15 * climb) + H * 0.16 * Math.max(0, (p - 0.88) / 0.12);
+      u.uBranch.value = [bC, bW, Math.sin((Math.PI * Math.min(bT, bDur)) / bDur) * 0.9];
+    };
+
+    const staticFrame = () => {
+      // Frozen mid-climb: the arc reads as an object, not as an animation.
+      u.uTime.value = 4.2;
+      u.uClimb.value = Math.pow(0.45, 1.5);
+      u.uGhost.value = 0;
+      u.uLife.value = 1;
+      u.uAmp.value = H * 0.09;
+      u.uBranch.value = [0.62, 0.13, 0.55];
+      renderer.render({ scene: mesh });
     };
 
     let raf = 0;
     let running = false;
+    let last = 0;
 
     const frame = (now: number) => {
-      const phase = now * 0.0006;
-      ctx.clearRect(0, 0, W, H);
-      ctx.globalCompositeOperation = 'source-over';
-      drawConductor(phase);
-      ctx.globalCompositeOperation = 'lighter';
-      for (const p of packets) {
-        p.t += p.speed;
-        if (p.t > 1.25) p.t = -0.25;
-        drawComet(p, phase);
-      }
-      drawSparks();
-      ctx.globalCompositeOperation = 'source-over';
+      const dt = Math.min(0.05, (now - last) / 1000);
+      last = now;
+      u.uTime.value += dt;
+      step(dt);
+      renderer.render({ scene: mesh });
       raf = requestAnimationFrame(frame);
-    };
-
-    const staticFrame = () => {
-      ctx.clearRect(0, 0, W, H);
-      ctx.globalCompositeOperation = 'source-over';
-      drawConductor(0.5);
     };
 
     const start = () => {
       if (running) return;
       running = true;
+      last = performance.now();
       raf = requestAnimationFrame(frame);
     };
     const stop = () => {
@@ -267,29 +511,57 @@ const { tone = 'signal', animated = false, class: className = '' } = Astro.props
 
     resize();
     root.classList.add('is-ready');
-    window.addEventListener('resize', () => {
-      resize();
-      if (!animated || !running) staticFrame();
-    });
 
-    if (!animated) {
+    if (prefersReduced) {
       staticFrame();
+      window.addEventListener('resize', () => {
+        resize();
+        staticFrame();
+      });
       return;
     }
 
-    // Only animate while on screen.
+    let visible = true;
+
+    window.addEventListener('resize', () => {
+      resize();
+      if (!running) renderer.render({ scene: mesh });
+    });
+    document.addEventListener('visibilitychange', () => {
+      if (document.hidden) stop();
+      else if (visible) start();
+    });
+
+    // Default to running: the observer's job is to *pause* the loop once the
+    // band scrolls away, never to gate it from ever starting.
+    start();
     if ('IntersectionObserver' in window) {
       const io = new IntersectionObserver(
         (entries) => {
-          for (const en of entries) en.isIntersecting ? start() : stop();
+          for (const en of entries) {
+            visible = en.isIntersecting;
+            visible && !document.hidden ? start() : stop();
+          }
         },
         { threshold: 0 },
       );
       io.observe(root);
-    } else {
-      start();
     }
   }
 
-  document.querySelectorAll<HTMLElement>('.energy-flow').forEach(initEnergyFlow);
+  // Only mount WebGL once the band is actually near the viewport, so `ogl`
+  // is fetched off the critical path.
+  // The band always sits inside the first viewport, so there is nothing to gain
+  // from a viewport-triggered mount — just keep `ogl` off the critical path.
+  const mountAll = () => {
+    document.querySelectorAll<HTMLElement>('.energy-flow:not(.energy-flow--cold)').forEach((root) => {
+      void initEnergyFlow(root);
+    });
+  };
+
+  if ('requestIdleCallback' in window) {
+    window.requestIdleCallback(mountAll, { timeout: 800 });
+  } else {
+    setTimeout(mountAll, 200);
+  }
 </script>
