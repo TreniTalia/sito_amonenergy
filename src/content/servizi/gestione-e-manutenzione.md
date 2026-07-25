@@ -2,7 +2,7 @@
 titolo: "Gestione e manutenzione"
 frase: "O&M completo di impianti eolici, fotovoltaici, cabine MT e sottostazioni."
 excerpt: "O&M completo di impianti, cabine MT e SSE, con manutenzione predittiva."
-icona: "lucide:settings"
+icona: "fa6-solid:gears"
 ordine: 5
 punti:
   - titolo: "O&M impianti eolici e fotovoltaici"

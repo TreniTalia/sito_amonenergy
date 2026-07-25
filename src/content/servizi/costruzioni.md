@@ -2,7 +2,7 @@
 titolo: "Costruzioni"
 frase: "Stazioni elettriche AT/MT chiavi in mano, per parchi eolici e fotovoltaici."
 excerpt: "Stazioni elettriche AT/MT chiavi in mano per parchi eolici e fotovoltaici."
-icona: "lucide:hard-hat"
+icona: "fa6-solid:helmet-safety"
 ordine: 4
 punti:
   - titolo: "Cabine e sottostazioni"

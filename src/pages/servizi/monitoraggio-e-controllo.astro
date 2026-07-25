@@ -180,11 +180,11 @@ const structuredData = [
           {
             tiers.map((t, i) => (
               <div
-                class="relative flex flex-col rounded-[4px] border border-green-400/18 bg-green-900/40 p-7"
+                class="relative flex flex-col overflow-hidden rounded-[var(--radius-sm)] border border-green-400/18 bg-green-900/40 p-7"
                 style={`--tier:${t.color}; --reveal-delay:${i * 90}ms`}
                 data-reveal
               >
-                <span class="absolute inset-x-0 top-0 h-[3px] rounded-t-[4px]" style="background: var(--tier)" aria-hidden="true" />
+                <span class="absolute inset-x-0 top-0 h-[3px]" style="background: var(--tier)" aria-hidden="true" />
                 <h3 class="font-display text-2xl font-bold" style="color: var(--tier)">{t.nome}</h3>
                 <p class="mt-2 text-sm leading-relaxed text-green-200/85">{t.desc}</p>
                 <ul class="mt-5 flex flex-col gap-2 border-t border-green-400/15 pt-5">

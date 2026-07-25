@@ -2,7 +2,7 @@
 titolo: "Verifiche strumentali"
 frase: "Verifiche strumentali su protezioni, interruttori, trasformatori e cavi AT/MT."
 excerpt: "Protezioni AT/MT (CEI 0-16/0-21), interruttori, trasformatori, termografia, SFRA, scariche parziali."
-icona: "lucide:clipboard-check"
+icona: "fa6-solid:clipboard-check"
 ordine: 2
 punti:
   - titolo: "Verifica protezioni AT/MT (CEI 0-16/0-21)"

@@ -1,4 +1,5 @@
 ---
+import { Icon } from 'astro-icon/components';
 import { contatti } from '../data/contatti.ts';
 import Logo from './Logo.astro';
 
@@ -10,89 +11,98 @@ interface Props {
 const { transparent = true } = Astro.props;
 
 const serviziLinks = [
-  { href: '/servizi/laboratorio-mobile/', label: 'Laboratorio mobile ricerca guasti' },
-  { href: '/servizi/verifiche-strumentali/', label: 'Verifiche strumentali' },
-  { href: '/servizi/monitoraggio-e-controllo/', label: 'Monitoraggio e controllo' },
-  { href: '/servizi/costruzioni/', label: 'Costruzioni' },
-  { href: '/servizi/gestione-e-manutenzione/', label: 'Gestione e manutenzione' },
+  { href: '/servizi/laboratorio-mobile/', label: 'Laboratorio mobile ricerca guasti', icon: 'fa6-solid:truck-fast' },
+  { href: '/servizi/verifiche-strumentali/', label: 'Verifiche strumentali', icon: 'fa6-solid:clipboard-check' },
+  { href: '/servizi/monitoraggio-e-controllo/', label: 'Monitoraggio e controllo', icon: 'fa6-solid:desktop' },
+  { href: '/servizi/costruzioni/', label: 'Costruzioni', icon: 'fa6-solid:helmet-safety' },
+  { href: '/servizi/gestione-e-manutenzione/', label: 'Gestione e manutenzione', icon: 'fa6-solid:gears' },
 ];
 ---
 
-<header class="ds-header fixed top-0 z-40 w-full" data-transparent={transparent ? 'true' : 'false'}>
-  <div class="wrap flex items-center justify-between py-4 md:py-5">
-    <a href="/" class="shrink-0 text-paper" aria-label="Amon Energy, torna alla home">
-      <Logo size={30} class="max-[380px]:[--logo-h:24px]" />
-    </a>
-
-    <nav class="hidden md:flex items-center gap-8" aria-label="Navigazione principale">
-      <a href="/azienda/" class="font-medium">Azienda</a>
-
-      <div class="group relative">
-        <button type="button" class="flex items-center gap-1 font-medium" aria-haspopup="true">
-          Servizi
-          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
-        </button>
-        <div class="invisible opacity-0 group-hover:visible group-hover:opacity-100 group-focus-within:visible group-focus-within:opacity-100 absolute left-0 top-full pt-3 transition-opacity duration-150 min-w-72">
-          <ul class="bg-navy-950 border border-navy-700 rounded-[2px] py-2">
-            {serviziLinks.map((s) => (
-              <li>
-                <a href={s.href} class="block px-5 py-3 text-sm text-paper hover:bg-navy-700 transition-colors">
-                  {s.label}
-                </a>
-              </li>
-            ))}
-          </ul>
-        </div>
-      </div>
-
-      <a href="/progetti/" class="font-medium">Progetti</a>
-      <a href="/contatti/" class="font-medium">Contatti</a>
-    </nav>
-
-    <div class="flex items-center gap-3">
-      <a href={contatti.telefonoHref} class="ds-header-cta inline-flex" aria-label={`Chiama ${contatti.telefono}`}>
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true" class="shrink-0"><path d="M13.832 16.568a1 1 0 0 0 1.213-.303l.355-.465A2 2 0 0 1 17 15h3a2 2 0 0 1 2 2v3a2 2 0 0 1-2 2A18 18 0 0 1 2 4a2 2 0 0 1 2-2h3a2 2 0 0 1 2 2v3a2 2 0 0 1-.428 1.235l-.5.436A1 1 0 0 0 8.048 10c1.1 2.062 3.892 4.854 5.784 6.568"/></svg>
-        <span class="hidden sm:inline">{contatti.telefono}</span>
-        <span class="hidden xs:inline sm:hidden">Chiama</span>
+<header class="ds-header fixed inset-x-0 top-0 z-40" data-transparent={transparent ? 'true' : 'false'}>
+  <div class="wrap-wide pt-3 md:pt-4">
+    <div class="ds-navbar flex items-center justify-between gap-4 rounded-[var(--radius-panel)] py-2.5 pl-5 pr-2.5 md:pl-7 md:pr-3">
+      <a href="/" class="flex shrink-0 items-center text-paper" aria-label="Amon Energy, torna alla home">
+        <Logo variant="full" size={26} class="max-[420px]:[--logo-h:22px]" />
       </a>
 
-      <button type="button" id="nav-toggle" class="md:hidden text-paper p-2" aria-expanded="false" aria-controls="mobile-nav" aria-label="Apri il menu">
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
-      </button>
+      <nav class="hidden md:flex items-center gap-1" aria-label="Navigazione principale">
+        <a href="/azienda/" class="ds-nav-link">Azienda</a>
+
+        <div class="group relative">
+          <button type="button" class="ds-nav-link inline-flex items-center gap-1.5" aria-haspopup="true">
+            Servizi
+            <Icon name="fa6-solid:chevron-down" class="text-[0.6rem] opacity-70 transition-transform duration-200 group-hover:rotate-180" />
+          </button>
+          <div class="invisible opacity-0 translate-y-1 group-hover:visible group-hover:opacity-100 group-hover:translate-y-0 group-focus-within:visible group-focus-within:opacity-100 group-focus-within:translate-y-0 absolute left-1/2 top-full -translate-x-1/2 pt-4 transition-all duration-200 min-w-[19rem]" style="transition-timing-function: var(--ease-signature);">
+            <ul class="glass-dark rounded-[var(--radius-card)] p-2">
+              {serviziLinks.map((s) => (
+                <li>
+                  <a href={s.href} class="flex items-center gap-3 rounded-[var(--radius-sm)] px-3 py-2.5 text-sm text-paper/90 transition-colors hover:bg-white/10">
+                    <Icon name={s.icon} class="text-[0.95rem] text-green-400" />
+                    {s.label}
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </div>
+
+        <a href="/progetti/" class="ds-nav-link">Progetti</a>
+        <a href="/contatti/" class="ds-nav-link">Contatti</a>
+      </nav>
+
+      <div class="flex items-center gap-2">
+        <a href={contatti.telefonoHref} class="ds-header-cta" aria-label={`Chiama ${contatti.telefono}`}>
+          <Icon name="fa6-solid:phone" class="shrink-0 text-[0.85rem]" />
+          <span class="hidden sm:inline">{contatti.telefono}</span>
+          <span class="hidden xs:inline sm:hidden">Chiama</span>
+        </a>
+
+        <button type="button" id="nav-toggle" class="md:hidden grid h-11 w-11 place-items-center rounded-[var(--radius-sm)] text-paper transition-colors hover:bg-white/10" aria-expanded="false" aria-controls="mobile-nav" aria-label="Apri il menu">
+          <Icon name="fa6-solid:bars" class="text-lg" />
+        </button>
+      </div>
     </div>
   </div>
 </header>
 
-<div id="mobile-nav" class="fixed inset-0 z-50 bg-navy-950 flex flex-col justify-between p-6 translate-x-full transition-transform duration-300 md:hidden" style="transition-timing-function: var(--ease-signature);">
+<div id="mobile-nav" class="mobile-nav fixed inset-0 z-50 flex flex-col justify-between p-6 translate-x-full transition-transform duration-300 md:hidden" style="transition-timing-function: var(--ease-signature);">
   <div>
     <div class="flex items-center justify-between mb-10">
-      <span class="text-paper"><Logo size={30} /></span>
-      <button type="button" id="nav-close" class="text-paper p-2" aria-label="Chiudi il menu">
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12"/></svg>
+      <span class="text-paper"><Logo size={28} /></span>
+      <button type="button" id="nav-close" class="grid h-11 w-11 place-items-center rounded-[var(--radius-sm)] text-paper transition-colors hover:bg-white/10" aria-label="Chiudi il menu">
+        <Icon name="fa6-solid:xmark" class="text-xl" />
       </button>
     </div>
     <nav class="flex flex-col gap-1" aria-label="Navigazione mobile">
-      <a href="/azienda/" class="text-paper text-2xl py-3 border-b border-navy-700">Azienda</a>
-      <details class="border-b border-navy-700">
+      <a href="/azienda/" class="text-paper text-2xl py-3 border-b border-white/10">Azienda</a>
+      <details class="border-b border-white/10">
         <summary class="text-paper text-2xl py-3 cursor-pointer list-none flex items-center justify-between">
           Servizi
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
+          <Icon name="fa6-solid:chevron-down" class="text-sm opacity-70" />
         </summary>
         <ul class="pb-3">
           {serviziLinks.map((s) => (
             <li>
-              <a href={s.href} class="block text-paper/80 text-base py-2">{s.label}</a>
+              <a href={s.href} class="flex items-center gap-3 text-paper/80 text-base py-2.5">
+                <Icon name={s.icon} class="text-sm text-green-400" />
+                {s.label}
+              </a>
             </li>
           ))}
         </ul>
       </details>
-      <a href="/progetti/" class="text-paper text-2xl py-3 border-b border-navy-700">Progetti</a>
-      <a href="/contatti/" class="text-paper text-2xl py-3 border-b border-navy-700">Contatti</a>
+      <a href="/progetti/" class="text-paper text-2xl py-3 border-b border-white/10">Progetti</a>
+      <a href="/contatti/" class="text-paper text-2xl py-3 border-b border-white/10">Contatti</a>
     </nav>
   </div>
 
   <div class="flex flex-col gap-3">
-    <a href={contatti.telefonoHref} class="ds-btn-on-dark w-full">Chiamaci: {contatti.telefono}</a>
+    <a href={contatti.telefonoHref} class="ds-btn-on-dark w-full">
+      <Icon name="fa6-solid:phone" class="text-[0.85rem]" />
+      Chiamaci: {contatti.telefono}
+    </a>
     <a href={`mailto:${contatti.email}`} class="text-paper/80 text-center text-sm py-2">{contatti.email}</a>
   </div>
 </div>
@@ -127,28 +137,68 @@ const serviziLinks = [
 
 <style>
   .ds-header {
-    background: transparent;
     color: var(--color-paper);
-    transition: background-color 0.25s var(--ease-signature);
   }
-  .ds-header[data-transparent='false'],
-  .ds-header--scrolled {
-    background-color: var(--color-navy-950);
+
+  /* The floating glass island. Starts airy over the hero, frosts up on scroll. */
+  .ds-navbar {
+    background: var(--glass-sheen), color-mix(in srgb, var(--color-navy-950) 48%, transparent);
+    backdrop-filter: blur(22px) saturate(170%);
+    -webkit-backdrop-filter: blur(22px) saturate(170%);
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    box-shadow: 0 10px 34px -14px rgba(4, 16, 28, 0.55), inset 0 1px 0 rgba(255, 255, 255, 0.14);
+    transition:
+      background-color 0.3s var(--ease-signature),
+      box-shadow 0.3s var(--ease-signature);
+  }
+  .ds-header[data-transparent='false'] .ds-navbar,
+  .ds-header--scrolled .ds-navbar {
+    background: var(--glass-sheen), color-mix(in srgb, var(--color-navy-950) 78%, transparent);
+    box-shadow: 0 12px 36px -14px rgba(4, 16, 28, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.14);
+  }
+
+  .ds-nav-link {
+    display: inline-flex;
+    align-items: center;
+    padding: 8px 14px;
+    border-radius: var(--radius-pill);
+    font-weight: 500;
+    color: var(--color-paper);
+    text-decoration: none;
+    transition:
+      background-color 0.2s var(--ease-signature),
+      color 0.2s var(--ease-signature);
+  }
+  .ds-nav-link:hover {
+    background: rgba(255, 255, 255, 0.1);
   }
 
   .ds-header-cta {
+    display: inline-flex;
     align-items: center;
     gap: 8px;
     font-family: var(--font-body);
     font-weight: 600;
-    color: var(--color-paper);
-    border: 1px solid var(--color-signal-400);
-    border-radius: var(--radius-btn);
-    padding: 8px 16px;
+    font-size: 0.95rem;
+    color: var(--color-navy-950);
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(255, 255, 255, 0.88));
+    border-radius: var(--radius-pill);
+    padding: 10px 18px;
     text-decoration: none;
-    transition: background-color 0.2s var(--ease-signature);
+    box-shadow: var(--shadow-sm), inset 0 1px 0 rgba(255, 255, 255, 0.9);
+    transition:
+      transform 0.2s var(--ease-signature),
+      box-shadow 0.3s var(--ease-signature);
   }
   .ds-header-cta:hover {
-    background-color: var(--color-navy-700);
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-md), var(--glow-signal);
+  }
+
+  /* Mobile nav — frosted dark sheet. */
+  .mobile-nav {
+    background: var(--glass-sheen), color-mix(in srgb, var(--color-navy-950) 88%, transparent);
+    backdrop-filter: blur(24px) saturate(160%);
+    -webkit-backdrop-filter: blur(24px) saturate(160%);
   }
 </style>

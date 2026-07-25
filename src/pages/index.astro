@@ -1,6 +1,7 @@
 ---
 import { getCollection, getEntry } from 'astro:content';
 import { Image } from 'astro:assets';
+import { Icon } from 'astro-icon/components';
 import Base from '../layouts/Base.astro';
 import Hero from '../components/Hero.astro';
 import ServiceCard from '../components/ServiceCard.astro';
@@ -46,14 +47,14 @@ const progettiPreview = (await getCollection('progetti'))
         <p class="measure text-xl leading-relaxed text-ink/90">{chiSiamoBreve.testo}</p>
         <a
           href={chiSiamoBreve.link}
-          class="mt-7 inline-flex items-center gap-2 font-semibold text-navy-900 transition-colors hover:text-navy-700"
+          class="group mt-7 inline-flex items-center gap-2 font-semibold text-navy-900 transition-colors hover:text-navy-700"
         >
           Conosci l'azienda
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6" /></svg>
+          <Icon name="fa6-solid:arrow-right" class="text-xs transition-transform duration-300 group-hover:translate-x-1" style="transition-timing-function: var(--ease-signature);" />
         </a>
       </div>
       <figure class="relative" data-reveal style="--reveal-delay:120ms">
-        <div class="overflow-hidden rounded-[2px] border border-navy-100">
+        <div class="overflow-hidden rounded-[var(--radius-card)] border border-navy-100 shadow-[var(--shadow-md)]">
           <Image
             src={coverageMap}
             alt="Mappa del raggio d'azione di Amon Energy: la sede di Castelluccio dei Sauri (FG) copre l'intero Centro-Sud Italia"
@@ -124,7 +125,7 @@ const progettiPreview = (await getCollection('progetti'))
       {
         progettiPreview.map((p, i) => (
           <a href="/progetti/" class="group block" data-reveal style={`--reveal-delay:${i * 90}ms`}>
-            <div class="relative overflow-hidden rounded-[2px]" style="aspect-ratio: 16 / 11;">
+            <div class="relative overflow-hidden rounded-[var(--radius-card)] border border-navy-100 shadow-[var(--shadow-sm)] transition-shadow duration-300 group-hover:shadow-[var(--shadow-lg)]" style="aspect-ratio: 16 / 11;">
               <Image
                 src={p.data.immagine}
                 alt={p.data.immagineAlt}
@@ -133,6 +134,7 @@ const progettiPreview = (await getCollection('progetti'))
                 widths={[400, 800, 1200]}
                 sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"
               />
+              <span class="pointer-events-none absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-navy-950/50 to-transparent"></span>
               <span class="ds-chip-kv absolute left-3 top-3">{p.data.kv}</span>
             </div>
             <div class="mt-4">

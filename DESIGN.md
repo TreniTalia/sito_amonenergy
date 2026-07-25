@@ -67,10 +67,11 @@ typography:
     fontWeight: 600
     letterSpacing: "0.12em"
 rounded:
-  button: "6px"
-  card: "2px"
-  panel: "4px"
-  pill: "999px"  # status pills & chips ONLY — never buttons (buttons stay 6px)
+  button: "999px"  # Liquid Industrial: CTAs are Apple-style pills
+  card: "26px"
+  panel: "30px"
+  sm: "16px"
+  pill: "999px"
 spacing:
   gap-sm: "16px"
   gap-md: "24px"
@@ -100,6 +101,32 @@ components:
 ---
 
 # Design System: Amon Energy
+
+## 0. Update — "Liquid Industrial" (2026-07, supersedes the flat rules below)
+
+At the brand owner's direction, the site moved from the original flat "Industrial
+Precision" system to **Liquid Industrial**: the same navy + green palette and
+technical voice, but rendered with an Apple-style **liquid-glass** language.
+Where the sections below say *no glassmorphism, no gradients, no box-shadow, near-flat
+corners, Lucide icons, 6px pill-free buttons* — those rules are **superseded**. Current
+system (see `src/styles/global.css`, the source of truth):
+
+- **Glass materials** — `.glass-dark` / `.glass-light` (translucent + `backdrop-filter`
+  blur + specular sheen). Used for the floating navbar island, cards, overlays,
+  the projects captions, the lightbox, and the mobile bar.
+- **Soft layered depth** — `--shadow-sm/md/lg` plus signal/green glows on interactive
+  accents. Tasteful navy/green gradients on buttons and surfaces are allowed.
+- **Rounding** — pill CTAs (`--radius-btn: 999px`), cards `26px`, panels `30px`.
+- **Icons** — **Font Awesome 6** (`fa6-solid` / `fa6-brands`) via `astro-icon`, not Lucide.
+- **Buttons** — one coherent system: `.ds-btn-primary` (navy gradient), `.ds-btn-on-dark`
+  (frosted white), `.ds-btn-ghost` (glass outline on dark), `.ds-btn-secondary` (glass on
+  light), `.ds-btn-signal` (green). All CTAs share identical metrics.
+- **Signature ornament** — the "energy flow": a `<canvas>` conductor with luminous current
+  packets + sparks (`WaveDivider.astro`), static under `prefers-reduced-motion`.
+
+What still holds from below: the navy+green palette and roles, the two-world (field/control)
+art direction, the type scale, accessibility (WCAG 2.2 AA, reduced-motion, 44px targets),
+and the proof-over-adjectives content principles.
 
 ## 1. Overview
 

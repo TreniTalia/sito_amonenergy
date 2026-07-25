@@ -1,68 +1,114 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="1000" viewBox="0 0 1600 1000" role="img">
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="1000" viewBox="0 0 1600 1000" role="img" aria-label="Schema unifilare di una stazione di trasformazione AT/MT">
   <defs>
-    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0" stop-color="#0d3253"/>
-      <stop offset="1" stop-color="#0a2a44"/>
+    <linearGradient id="bg" x1="0" y1="0" x2="0.35" y2="1">
+      <stop offset="0" stop-color="#0e3357"/>
+      <stop offset="0.55" stop-color="#0b2c49"/>
+      <stop offset="1" stop-color="#081f34"/>
     </linearGradient>
+    <radialGradient id="vign" cx="0.5" cy="0.42" r="0.75">
+      <stop offset="0.55" stop-color="#000000" stop-opacity="0"/>
+      <stop offset="1" stop-color="#04121f" stop-opacity="0.55"/>
+    </radialGradient>
+    <linearGradient id="busHV" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#4fb3d9" stop-opacity="0.25"/>
+      <stop offset="0.5" stop-color="#7fd3f2"/>
+      <stop offset="1" stop-color="#4fb3d9" stop-opacity="0.25"/>
+    </linearGradient>
+    <linearGradient id="busMV" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#3e8e5a" stop-opacity="0.25"/>
+      <stop offset="0.5" stop-color="#68e59a"/>
+      <stop offset="1" stop-color="#3e8e5a" stop-opacity="0.25"/>
+    </linearGradient>
+    <filter id="glow" x="-60%" y="-300%" width="220%" height="700%">
+      <feGaussianBlur stdDeviation="7"/>
+    </filter>
+    <filter id="softglow" x="-200%" y="-200%" width="500%" height="500%">
+      <feGaussianBlur stdDeviation="5"/>
+    </filter>
   </defs>
+
   <rect width="1600" height="1000" fill="url(#bg)"/>
-  <!-- faint grid -->
-  <g stroke="#1d5585" stroke-width="1" opacity="0.18">
-    <path d="M0 200H1600M0 400H1600M0 600H1600M0 800H1600"/>
+
+  <!-- faint engineering grid -->
+  <g stroke="#3a6d94" stroke-width="1" opacity="0.12">
+    <path d="M0 250H1600M0 500H1600M0 750H1600"/>
     <path d="M200 0V1000M400 0V1000M600 0V1000M800 0V1000M1000 0V1000M1200 0V1000M1400 0V1000"/>
   </g>
 
-  <g fill="none" stroke="#7ea6c4" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+  <!-- title block -->
+  <text x="96" y="118" font-family="Archivo, Arial, sans-serif" font-size="34" font-weight="700" letter-spacing="3" fill="#eaf3fb">SCHEMA UNIFILARE</text>
+  <rect x="96" y="138" width="52" height="3" rx="1.5" fill="#4fb3d9"/>
+  <text x="164" y="146" font-family="Inter, Arial, sans-serif" font-size="21" fill="#8fb6d4">Stazione di trasformazione AT / MT</text>
+
+  <!-- ===== single line, centred on x=800 ===== -->
+  <g fill="none" stroke="#9cc0dc" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round">
     <!-- incoming AT line -->
-    <path d="M800 90 V150"/>
-    <!-- disconnector (gap + angled blade) -->
-    <path d="M800 150 V180"/>
-    <path d="M800 210 L818 182"/>
-    <circle cx="800" cy="180" r="3.5" fill="#7ea6c4" stroke="none"/>
-    <circle cx="800" cy="210" r="3.5" fill="#7ea6c4" stroke="none"/>
-    <path d="M800 210 V250"/>
-    <!-- circuit breaker (square) -->
-    <rect x="784" y="250" width="32" height="46" rx="2"/>
-    <path d="M800 296 V330"/>
-  </g>
-
-  <!-- 150 kV busbar -->
-  <rect x="470" y="330" width="660" height="6" rx="3" fill="#4fb3d9"/>
-  <text x="1150" y="326" font-family="Archivo, Arial, sans-serif" font-size="26" font-weight="600" fill="#4fb3d9" letter-spacing="1">150 kV</text>
-
-  <g fill="none" stroke="#7ea6c4" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M800 170 V235"/>
+    <!-- disconnector (sezionatore): gap + angled blade -->
+    <path d="M800 265 L822 232"/>
+    <path d="M800 295 V352"/>
+    <!-- circuit breaker (interruttore): square -->
+    <rect x="782" y="352" width="36" height="52" rx="4"/>
+    <path d="M800 404 V452"/>
     <!-- drop to transformer -->
-    <path d="M800 336 V430"/>
-    <!-- transformer: two coupled windings -->
-    <circle cx="800" cy="470" r="42"/>
-    <circle cx="800" cy="530" r="42"/>
-    <path d="M800 572 V640"/>
+    <path d="M800 556 V566"/>
+    <path d="M800 690 V748"/>
+    <!-- transformer windings -->
+    <circle cx="800" cy="512" r="46"/>
+    <circle cx="800" cy="600" r="46"/>
   </g>
 
-  <!-- MT busbar -->
-  <rect x="360" y="640" width="880" height="6" rx="3" fill="#3e8e5a"/>
-  <text x="1258" y="636" font-family="Archivo, Arial, sans-serif" font-size="26" font-weight="600" fill="#3e8e5a" letter-spacing="1">30 kV</text>
+  <!-- terminal nodes -->
+  <g fill="#9cc0dc">
+    <circle cx="800" cy="265" r="5"/>
+    <circle cx="800" cy="295" r="5"/>
+  </g>
 
-  <!-- MT feeders -->
-  <g fill="none" stroke="#7ea6c4" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+  <!-- 150 kV busbar with glow -->
+  <rect x="452" y="449" width="696" height="7" rx="3.5" fill="url(#busHV)" filter="url(#glow)"/>
+  <rect x="452" y="449.5" width="696" height="6" rx="3" fill="#8fd8f5"/>
+  <text x="1168" y="444" font-family="Archivo, Arial, sans-serif" font-size="27" font-weight="700" letter-spacing="1" fill="#7fd3f2">150 kV</text>
+
+  <!-- 30 kV busbar with glow -->
+  <rect x="352" y="745" width="896" height="7" rx="3.5" fill="url(#busMV)" filter="url(#glow)"/>
+  <rect x="352" y="745.5" width="896" height="6" rx="3" fill="#68e59a"/>
+  <text x="1268" y="740" font-family="Archivo, Arial, sans-serif" font-size="27" font-weight="700" letter-spacing="1" fill="#68e59a">30 kV</text>
+
+  <!-- MT feeders (montanti) -->
+  <g fill="none" stroke="#9cc0dc" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round">
     <g>
-      <path d="M480 646 V706"/><rect x="464" y="706" width="32" height="44" rx="2"/><path d="M480 750 V840"/>
-      <path d="M466 840 H494 M470 852 H490 M474 864 H486"/>
+      <path d="M512 752 V812"/><rect x="494" y="812" width="36" height="50" rx="4"/><path d="M512 862 V928"/>
+      <path d="M490 928 H534 M496 940 H528 M502 952 H522"/>
     </g>
     <g>
-      <path d="M660 646 V706"/><rect x="644" y="706" width="32" height="44" rx="2"/><path d="M660 750 V840"/>
-      <path d="M646 840 H674 M650 852 H670 M654 864 H666"/>
+      <path d="M704 752 V812"/><rect x="686" y="812" width="36" height="50" rx="4"/><path d="M704 862 V928"/>
+      <path d="M682 928 H726 M688 940 H720 M694 952 H714"/>
     </g>
     <g>
-      <path d="M840 646 V706"/><rect x="824" y="706" width="32" height="44" rx="2"/><path d="M840 750 V840"/>
-      <path d="M826 840 H854 M830 852 H850 M834 864 H846"/>
+      <path d="M896 752 V812"/><rect x="878" y="812" width="36" height="50" rx="4"/><path d="M896 862 V928"/>
+      <path d="M874 928 H918 M880 940 H912 M886 952 H906"/>
     </g>
     <g>
-      <path d="M1020 646 V706"/><rect x="1004" y="706" width="32" height="44" rx="2"/><path d="M1020 750 V840"/>
-      <path d="M1006 840 H1034 M1010 852 H1030 M1014 864 H1026"/>
+      <path d="M1088 752 V812"/><rect x="1070" y="812" width="36" height="50" rx="4"/><path d="M1088 862 V928"/>
+      <path d="M1066 928 H1110 M1072 940 H1104 M1078 952 H1098"/>
     </g>
   </g>
 
-  <text x="120" y="150" font-family="Archivo, Arial, sans-serif" font-size="30" font-weight="700" fill="#e8eff5" letter-spacing="1">SCHEMA UNIFILARE</text>
-  <text x="120" y="188" font-family="Inter, Arial, sans-serif" font-size="20" fill="#7ea6c4">Stazione di trasformazione AT/MT</text>
+  <!-- glowing current packets on the incoming line -->
+  <g filter="url(#softglow)">
+    <circle cx="800" cy="196" r="6" fill="#eaffff"/>
+    <circle cx="800" cy="430" r="5" fill="#bff0ff"/>
+  </g>
+  <circle cx="800" cy="196" r="3" fill="#ffffff"/>
+
+  <!-- component labels -->
+  <g font-family="Inter, Arial, sans-serif" font-size="19" fill="#7ea6c4">
+    <text x="856" y="262">Sezionatore</text>
+    <text x="856" y="386">Interruttore</text>
+    <text x="872" y="562">Trasformatore</text>
+    <text x="872" y="588" fill="#8fb6d4">150 / 30 kV</text>
+  </g>
+  <text x="512" y="990" font-family="Archivo, Arial, sans-serif" font-size="18" font-weight="600" letter-spacing="1.5" fill="#5f89a8" text-anchor="middle">MONTANTI MT</text>
+
+  <rect width="1600" height="1000" fill="url(#vign)"/>
 </svg>

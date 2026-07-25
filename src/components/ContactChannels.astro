@@ -1,4 +1,5 @@
 ---
+import { Icon } from 'astro-icon/components';
 import { contatti } from '../data/contatti.ts';
 
 interface Props {
@@ -15,14 +16,14 @@ const { h1, sub, orari } = Astro.props;
   <p class="measure mt-5 text-lg text-ink/75" style="line-height: 1.65;">{sub}</p>
 
   <div class="mt-10 flex flex-col gap-4">
-    <a href={contatti.telefonoHref} class="ds-btn-primary justify-center" style="padding: 20px 32px; font-size: 1.125rem;">
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true" class="shrink-0"><path d="M13.832 16.568a1 1 0 0 0 1.213-.303l.355-.465A2 2 0 0 1 17 15h3a2 2 0 0 1 2 2v3a2 2 0 0 1-2 2A18 18 0 0 1 2 4a2 2 0 0 1 2-2h3a2 2 0 0 1 2 2v3a2 2 0 0 1-.428 1.235l-.5.436A1 1 0 0 0 8.048 10c1.1 2.062 3.892 4.854 5.784 6.568"/></svg>
+    <a href={contatti.telefonoHref} class="ds-btn-primary justify-center" style="padding: 19px 32px; font-size: 1.0625rem;">
+      <Icon name="fa6-solid:phone" class="shrink-0 text-base" />
       Chiamaci — {contatti.telefono}
     </a>
     <p class="text-sm text-ink/60" style="margin-top: -0.5rem;">{orari}</p>
 
-    <a href={`mailto:${contatti.email}?subject=Richiesta%20informazioni`} class="ds-btn-primary justify-center mt-2" style="background: transparent; border: 1px solid var(--color-navy-700); color: var(--color-navy-900); padding: 20px 32px; font-size: 1.125rem;">
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true" class="shrink-0"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
+    <a href={`mailto:${contatti.email}?subject=Richiesta%20informazioni`} class="ds-btn-secondary justify-center mt-2" style="padding: 19px 32px; font-size: 1.0625rem;">
+      <Icon name="fa6-solid:envelope" class="shrink-0 text-base" />
       Scrivici — {contatti.email}
     </a>
   </div>

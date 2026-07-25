@@ -2,7 +2,7 @@
 titolo: "Monitoraggio e controllo"
 frase: "Control room 24/7 e sistemi di supervisione conformi a CEI 0-16 V5 e Delibera ARERA 564/2025."
 excerpt: "Control room 24/7, sistemi RCS per cabine MT, CCI conforme CEI 0-16 V5 e Delibera ARERA 564/2025."
-icona: "lucide:monitor"
+icona: "fa6-solid:desktop"
 ordine: 3
 punti:
   - titolo: "Control room 24/7"

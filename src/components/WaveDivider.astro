@@ -1,8 +1,10 @@
 ---
 /**
- * Signal ribbon — the one signature ornament of the system, lifted from the
- * Amon Energy brochure: many thin parallel strands flowing as a single wave.
- * Tileable, so it drifts seamlessly. Static under prefers-reduced-motion.
+ * Energy flow — the signature ornament, rebuilt on <canvas> as a live current:
+ * a luminous conductor with energy "comets" streaming along it and sparks
+ * flicking off, additively blended for a real electrical glow. Draws a single
+ * static frame (no motion) under prefers-reduced-motion, and a CSS fallback
+ * line if JS never runs.
  */
 interface Props {
   tone?: 'signal' | 'navy' | 'green';
@@ -11,91 +13,283 @@ interface Props {
 }
 
 const { tone = 'signal', animated = false, class: className = '' } = Astro.props;
-
-const stroke =
-  tone === 'signal'
-    ? 'var(--color-signal-400)'
-    : tone === 'green'
-      ? 'var(--color-green-400)'
-      : 'var(--color-navy-700)';
-
-// One tile: 1200 wide, 2 full periods so it tiles seamlessly when duplicated.
-const W = 1200;
-const MID = 60;
-const periods = 2;
-const amp = 26;
-const step = 6;
-const points: number[][] = [];
-for (let x = 0; x <= W; x += step) {
-  const y = MID + Math.sin((x / W) * periods * Math.PI * 2) * amp;
-  points.push([x, Math.round(y * 100) / 100]);
-}
-const basePath = 'M' + points.map((p) => `${p[0]},${p[1]}`).join(' L');
-
-// Stack of strands, offset vertically with fading opacity — the "ribbon".
-const strands = Array.from({ length: 11 }, (_, i) => {
-  const t = i - 5; // -5..5
-  return { dy: t * 3.4, opacity: Math.max(0.12, 1 - Math.abs(t) * 0.16) };
-});
 ---
 
 <div
-  class:list={['wave-divider', { 'is-animated': animated }, className]}
+  class:list={['energy-flow', className]}
+  data-tone={tone}
+  data-animated={animated ? 'true' : 'false'}
   aria-hidden="true"
-  style={`--wave-stroke:${stroke}`}
 >
-  <div class="wave-track">
-    {
-      [0, 1].map(() => (
-        <svg viewBox={`0 0 ${W} 120`} preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
-          {strands.map((s) => (
-            <path
-              d={basePath}
-              fill="none"
-              stroke="var(--wave-stroke)"
-              stroke-width="1"
-              vector-effect="non-scaling-stroke"
-              transform={`translate(0 ${s.dy})`}
-              style={`opacity:${s.opacity}`}
-            />
-          ))}
-        </svg>
-      ))
-    }
-  </div>
+  <canvas class="energy-canvas"></canvas>
 </div>
 
 <style>
-  .wave-divider {
-    overflow: hidden;
+  .energy-flow {
+    position: relative;
     width: 100%;
-    height: 72px;
+    height: 92px;
+    overflow: visible;
     line-height: 0;
   }
-  .wave-track {
-    display: flex;
-    width: 200%;
+  /* No-JS / pre-hydration fallback: a faint static conductor line. */
+  .energy-flow::before {
+    content: '';
+    position: absolute;
+    inset: 50% 0 auto 0;
+    height: 1px;
+    background: linear-gradient(
+      90deg,
+      transparent,
+      color-mix(in srgb, var(--color-signal-400) 45%, transparent),
+      color-mix(in srgb, var(--color-green-400) 55%, transparent),
+      color-mix(in srgb, var(--color-signal-400) 45%, transparent),
+      transparent
+    );
+    opacity: 0.5;
+  }
+  .energy-flow.is-ready::before {
+    display: none;
+  }
+  .energy-canvas {
+    display: block;
+    width: 100%;
     height: 100%;
-  }
-  .is-animated .wave-track {
-    animation: wave-drift 26s linear infinite;
-  }
-  .wave-track svg {
-    width: 50%;
-    height: 100%;
-    flex-shrink: 0;
-  }
-  @keyframes wave-drift {
-    from {
-      transform: translateX(0);
-    }
-    to {
-      transform: translateX(-50%);
-    }
-  }
-  @media (prefers-reduced-motion: reduce) {
-    .is-animated .wave-track {
-      animation: none;
-    }
   }
 </style>
+
+<script>
+  type Palette = { a: string; b: string; core: string; glow: string };
+
+  const PALETTES: Record<string, Palette> = {
+    signal: { a: 'rgba(79,179,217,0)', b: 'rgba(79,208,127,0.9)', core: '#eaffff', glow: '#57c8ff' },
+    green: { a: 'rgba(62,142,90,0)', b: 'rgba(79,208,127,0.95)', core: '#e9fff0', glow: '#4fd07f' },
+    navy: { a: 'rgba(126,166,196,0)', b: 'rgba(79,179,217,0.85)', core: '#eaf6ff', glow: '#7ea6c4' },
+  };
+
+  interface Spark {
+    x: number;
+    y: number;
+    vx: number;
+    vy: number;
+    life: number;
+    max: number;
+    r: number;
+  }
+  interface Packet {
+    t: number; // -0.2 .. 1.2 along the conductor
+    speed: number;
+    len: number; // trail length in px
+    size: number;
+  }
+
+  const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  function initEnergyFlow(root: HTMLElement) {
+    const canvas = root.querySelector<HTMLCanvasElement>('.energy-canvas');
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    const animated = root.dataset.animated === 'true' && !prefersReduced;
+    const pal = PALETTES[root.dataset.tone || 'signal'] ?? PALETTES.signal;
+
+    let W = 0;
+    let H = 0;
+    let mid = 0;
+    let amp = 0;
+    const K = (Math.PI * 2) / 330; // wavelength ~330px
+
+    const yAt = (x: number, phase: number) => mid + Math.sin(x * K + phase) * amp;
+
+    const resize = () => {
+      const dpr = Math.min(window.devicePixelRatio || 1, 2);
+      const rect = root.getBoundingClientRect();
+      W = Math.max(1, rect.width);
+      H = Math.max(1, rect.height);
+      canvas.width = Math.round(W * dpr);
+      canvas.height = Math.round(H * dpr);
+      canvas.style.width = W + 'px';
+      canvas.style.height = H + 'px';
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      mid = H / 2;
+      amp = Math.min(H * 0.24, 22);
+      grad = null;
+    };
+
+    // Energy comets travelling along the wire, staggered and at varied speeds.
+    const packets: Packet[] = Array.from({ length: 5 }, (_, i) => ({
+      t: -0.2 + i * 0.26,
+      speed: 0.0016 + Math.random() * 0.0016,
+      len: 70 + Math.random() * 60,
+      size: 2.1 + Math.random() * 1.1,
+    }));
+    const sparks: Spark[] = [];
+
+    let grad: CanvasGradient | null = null;
+    const buildGrad = () => {
+      grad = ctx.createLinearGradient(0, 0, W, 0);
+      grad.addColorStop(0, pal.a);
+      grad.addColorStop(0.5, pal.b);
+      grad.addColorStop(1, pal.a);
+    };
+
+    const trace = (phase: number, dy: number) => {
+      ctx.beginPath();
+      for (let x = 0; x <= W; x += 5) {
+        const y = yAt(x, phase) + dy;
+        x === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+      }
+    };
+
+    // Glow is built from additive translucent layers (no per-shape shadowBlur,
+    // which is the expensive path) so the animation stays smooth.
+    const dot = (x: number, y: number, r: number, color: string, alpha: number) => {
+      ctx.beginPath();
+      ctx.arc(x, y, r, 0, Math.PI * 2);
+      ctx.fillStyle = color;
+      ctx.globalAlpha = alpha;
+      ctx.fill();
+    };
+
+    const drawConductor = (phase: number) => {
+      if (!grad) buildGrad();
+      ctx.strokeStyle = grad as CanvasGradient;
+      ctx.lineCap = 'round';
+      // wide soft halo
+      trace(phase, 0);
+      ctx.globalAlpha = 0.2;
+      ctx.lineWidth = 6;
+      ctx.stroke();
+      // faint echoes
+      ctx.globalAlpha = 0.08;
+      ctx.lineWidth = 1;
+      trace(phase, -6);
+      ctx.stroke();
+      trace(phase, 6);
+      ctx.stroke();
+      // bright core
+      trace(phase, 0);
+      ctx.globalAlpha = 0.9;
+      ctx.lineWidth = 1.5;
+      ctx.stroke();
+      ctx.globalAlpha = 1;
+    };
+
+    const drawComet = (p: Packet, phase: number) => {
+      const headX = p.t * W;
+      const steps = 16;
+      const dx = p.len / steps;
+      for (let i = steps; i >= 0; i--) {
+        const x = headX - i * dx;
+        if (x < -12 || x > W + 12) continue;
+        const y = yAt(x, phase);
+        const f = 1 - i / steps; // 0 tail -> 1 head
+        // soft glow layer
+        dot(x, y, p.size * (1.6 + f * 2.4), pal.glow, f * 0.16);
+        // core
+        dot(x, y, p.size * (0.3 + f * 0.7), i === 0 ? pal.core : pal.glow, f * 0.9);
+      }
+      // extra bright head
+      const hy = yAt(headX, phase);
+      if (headX > -12 && headX < W + 12) {
+        dot(headX, hy, p.size * 3.4, pal.glow, 0.22);
+        dot(headX, hy, p.size * 0.9, pal.core, 1);
+      }
+      ctx.globalAlpha = 1;
+
+      // occasionally throw a spark off the head
+      if (headX > 0 && headX < W && Math.random() < 0.05 && sparks.length < 50) {
+        sparks.push({
+          x: headX,
+          y: hy,
+          vx: 0.6 + Math.random() * 1.2,
+          vy: (Math.random() - 0.5) * 2.2,
+          life: 0,
+          max: 24 + Math.random() * 20,
+          r: 0.9 + Math.random() * 1.1,
+        });
+      }
+    };
+
+    const drawSparks = () => {
+      for (let i = sparks.length - 1; i >= 0; i--) {
+        const s = sparks[i];
+        s.life++;
+        s.x += s.vx;
+        s.y += s.vy;
+        s.vy += 0.04;
+        const f = 1 - s.life / s.max;
+        if (f <= 0) {
+          sparks.splice(i, 1);
+          continue;
+        }
+        dot(s.x, s.y, s.r * f * 2.4, pal.glow, f * 0.25);
+        dot(s.x, s.y, s.r * f, pal.core, f);
+      }
+      ctx.globalAlpha = 1;
+    };
+
+    let raf = 0;
+    let running = false;
+
+    const frame = (now: number) => {
+      const phase = now * 0.0006;
+      ctx.clearRect(0, 0, W, H);
+      ctx.globalCompositeOperation = 'source-over';
+      drawConductor(phase);
+      ctx.globalCompositeOperation = 'lighter';
+      for (const p of packets) {
+        p.t += p.speed;
+        if (p.t > 1.25) p.t = -0.25;
+        drawComet(p, phase);
+      }
+      drawSparks();
+      ctx.globalCompositeOperation = 'source-over';
+      raf = requestAnimationFrame(frame);
+    };
+
+    const staticFrame = () => {
+      ctx.clearRect(0, 0, W, H);
+      ctx.globalCompositeOperation = 'source-over';
+      drawConductor(0.5);
+    };
+
+    const start = () => {
+      if (running) return;
+      running = true;
+      raf = requestAnimationFrame(frame);
+    };
+    const stop = () => {
+      running = false;
+      cancelAnimationFrame(raf);
+    };
+
+    resize();
+    root.classList.add('is-ready');
+    window.addEventListener('resize', () => {
+      resize();
+      if (!animated || !running) staticFrame();
+    });
+
+    if (!animated) {
+      staticFrame();
+      return;
+    }
+
+    // Only animate while on screen.
+    if ('IntersectionObserver' in window) {
+      const io = new IntersectionObserver(
+        (entries) => {
+          for (const en of entries) en.isIntersecting ? start() : stop();
+        },
+        { threshold: 0 },
+      );
+      io.observe(root);
+    } else {
+      start();
+    }
+  }
+
+  document.querySelectorAll<HTMLElement>('.energy-flow').forEach(initEnergyFlow);
+</script>

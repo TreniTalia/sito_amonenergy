@@ -46,7 +46,7 @@ const indexLabel = String(index + 1).padStart(2, '0');
           sizes="100vw"
         />
       </a>
-      <div class="gallery-reveal gallery-reveal--delayed bg-navy-950 lg:bg-navy-950/85 lg:backdrop-blur-sm lg:absolute lg:bottom-0 lg:left-0 lg:max-w-md lg:m-8">
+      <div class="gallery-reveal gallery-reveal--delayed bg-navy-950 lg:bg-navy-950/55 lg:backdrop-blur-xl lg:border lg:border-white/10 lg:shadow-[var(--shadow-lg)] lg:rounded-[var(--radius-panel)] lg:absolute lg:bottom-0 lg:left-0 lg:max-w-md lg:m-8">
         <div class="wrap py-8 lg:py-6 lg:px-6 lg:max-w-none lg:mx-0">
           <GalleryCardContent entry={entry} index={index} onDark={true}>
             <Content />
@@ -60,7 +60,7 @@ const indexLabel = String(index + 1).padStart(2, '0');
         <a
           href={fullImage.src}
           class:list={[
-            'js-lightbox-trigger gallery-reveal block relative overflow-hidden group',
+            'js-lightbox-trigger gallery-reveal block relative overflow-hidden group rounded-[var(--radius-card)] shadow-[var(--shadow-md)]',
             variant === 'a' ? 'lg:col-span-8 lg:order-1' : 'lg:col-span-8 lg:order-2',
           ]}
           style="aspect-ratio: 16 / 10;"

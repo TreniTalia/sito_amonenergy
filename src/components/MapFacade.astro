@@ -6,7 +6,7 @@ import { contatti } from '../data/contatti.ts';
 const embedSrc = `https://www.google.com/maps?q=${encodeURIComponent(contatti.indirizzo)}&output=embed`;
 ---
 
-<div class="map-facade relative" style="aspect-ratio: 4 / 3;">
+<div class="map-facade relative overflow-hidden rounded-[var(--radius-card)] border border-navy-100 shadow-[var(--shadow-md)]" style="aspect-ratio: 4 / 3;">
   <Image src={mapImg} alt={`Mappa: ${contatti.indirizzo}`} class="absolute inset-0 w-full h-full object-cover" widths={[400, 800, 1200]} sizes="(min-width: 1024px) 50vw, 100vw" />
   <button type="button" class="map-open ds-btn-on-dark absolute inset-0 m-auto w-fit h-fit">
     Apri la mappa

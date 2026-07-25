@@ -97,7 +97,8 @@ const jsonLdBlocks = [organization, ...structuredData];
       // just adds the entrance. Staggered per-container via --reveal-delay.
       const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
       const els = Array.from(document.querySelectorAll<HTMLElement>('[data-reveal]'));
-      const revealAll = () => els.forEach((el) => el.classList.add('is-visible'));
+      const reveal = (el: Element) => el.classList.add('is-visible');
+      const revealAll = () => els.forEach(reveal);
 
       if (prefersReduced || !('IntersectionObserver' in window)) {
         revealAll();
@@ -106,24 +107,33 @@ const jsonLdBlocks = [organization, ...structuredData];
           (entries, obs) => {
             entries.forEach((entry) => {
               if (entry.isIntersecting) {
-                entry.target.classList.add('is-visible');
+                reveal(entry.target);
                 obs.unobserve(entry.target);
               }
             });
           },
           { threshold: 0.12, rootMargin: '0px 0px -6% 0px' },
         );
-        els.forEach((el) => io.observe(el));
 
-        // Failsafe: content must never stay hidden. If the observer never fires
-        // for an element (background tab, headless renderer, deep-link past the
-        // fold), reveal everything after a short grace period so no section
-        // ships blank. Below-fold reveals still animate normally on scroll.
-        window.addEventListener(
-          'load',
-          () => window.setTimeout(revealAll, 2500),
-          { once: true },
-        );
+        // Anything already in (or near) the viewport is revealed synchronously,
+        // so above-the-fold content is never gated on an IntersectionObserver
+        // callback that can lag under main-thread load. The rest animate on
+        // scroll as usual.
+        const vh = window.innerHeight || document.documentElement.clientHeight;
+        els.forEach((el) => {
+          const r = el.getBoundingClientRect();
+          if (r.top < vh * 0.96 && r.bottom > 0) {
+            reveal(el);
+          } else {
+            io.observe(el);
+          }
+        });
+
+        // Belt-and-braces: if anything somehow stays hidden, force it shortly
+        // after load so no section ever ships blank.
+        window.addEventListener('load', () => window.setTimeout(revealAll, 800), {
+          once: true,
+        });
       }
     </script>
   </body>

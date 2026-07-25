@@ -34,7 +34,7 @@ const { Content } = await render(entry);
       bodyImage && (
         <figure
           class:list={[
-            'overflow-hidden rounded-[2px] border border-navy-100',
+            'overflow-hidden rounded-[var(--radius-card)] border border-navy-100 shadow-[var(--shadow-md)]',
             bodyImageContain ? 'bg-navy-100/60 p-6' : '',
           ]}
           data-reveal
@@ -56,7 +56,7 @@ const { Content } = await render(entry);
     punti && punti.length > 0 && (
       <div class="mt-16 grid gap-x-8 gap-y-12 sm:grid-cols-2 lg:mt-20 lg:grid-cols-3 lg:gap-x-12">
         {punti.map((p, i) => (
-          <div class="border-t border-navy-100 pt-6" data-reveal style={`--reveal-delay:${(i % 3) * 80}ms`}>
+          <div class="ds-card-service" data-reveal style={`--reveal-delay:${(i % 3) * 80}ms`}>
             <span class="tnum font-display text-sm font-semibold text-green-500">{String(i + 1).padStart(2, '0')}</span>
             <h3 class="mt-3 font-display text-xl font-bold tracking-tight text-ink">{p.titolo}</h3>
             <p class="mt-3 leading-relaxed text-ink/70">{p.testo}</p>

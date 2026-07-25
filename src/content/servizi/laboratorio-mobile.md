@@ -2,7 +2,7 @@
 titolo: "Laboratorio mobile ricerca guasti"
 frase: "Centrix 2.0: individuazione e riparazione guasti su reti MT, 24 ore su 24, 365 giorni l'anno."
 excerpt: "Unità Centrix 2.0 attrezzata per localizzare e riparare guasti su cavi MT. Reperibilità 24h, 365 giorni l'anno."
-icona: "lucide:truck"
+icona: "fa6-solid:truck-fast"
 ordine: 1
 punti:
   - titolo: "Ricerca guasto rapida"

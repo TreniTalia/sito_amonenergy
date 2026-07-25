@@ -48,8 +48,30 @@
   --font-body: "Inter Variable", sans-serif;
   --font-serif: "Source Serif 4 Variable", "Source Serif 4", Georgia, serif;
 
-  --radius-btn: 6px;
-  --radius-card: 2px;
+  /* ---- Rounding (Liquid Industrial: Apple-soft, no longer near-flat) ---- */
+  --radius-btn: 999px; /* Apple-style pill CTAs */
+  --radius-card: 26px;
+  --radius-panel: 30px;
+  --radius-sm: 16px;
+  --radius-pill: 999px;
+
+  /* ---- Soft layered depth (was: flat, no shadow) ---- */
+  --shadow-sm: 0 1px 2px rgba(10, 42, 68, 0.06), 0 4px 12px -4px rgba(10, 42, 68, 0.1);
+  --shadow-md: 0 2px 6px rgba(10, 42, 68, 0.07), 0 16px 40px -12px rgba(10, 42, 68, 0.18);
+  --shadow-lg: 0 10px 30px -10px rgba(10, 42, 68, 0.22), 0 30px 70px -24px rgba(10, 42, 68, 0.3);
+  --shadow-glass: 0 10px 34px -10px rgba(10, 42, 68, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.16);
+  --glow-signal: 0 0 44px -8px rgba(79, 179, 217, 0.55);
+  --glow-green: 0 0 44px -8px rgba(79, 208, 127, 0.55);
+
+  /* ---- Liquid-glass materials ---- */
+  --glass-blur: 24px;
+  --glass-saturate: 180%;
+  --glass-dark-bg: color-mix(in srgb, var(--color-navy-950) 58%, transparent);
+  --glass-dark-border: rgba(255, 255, 255, 0.16);
+  --glass-light-bg: color-mix(in srgb, #ffffff 64%, transparent);
+  --glass-light-border: color-mix(in srgb, var(--color-navy-950) 10%, transparent);
+  --glass-sheen: linear-gradient(180deg, rgba(255, 255, 255, 0.12), rgba(255, 255, 255, 0) 42%);
+  --glass-sheen-light: linear-gradient(180deg, rgba(255, 255, 255, 0.7), rgba(255, 255, 255, 0) 46%);
 
   /* Motion — exponential ease-outs only (no bounce/elastic). */
   --ease-signature: cubic-bezier(0.22, 1, 0.36, 1); /* out-quint-ish */
@@ -115,11 +137,11 @@
   /* ---- Type scale (fluid, scales into large viewports) ---- */
   .text-hero {
     font-family: var(--font-display);
-    font-weight: 800;
-    font-stretch: 125%;
-    font-size: clamp(2.75rem, 1.4rem + 4.4vw, 5.75rem);
-    line-height: 1.02;
-    letter-spacing: -0.03em;
+    font-weight: 760;
+    font-stretch: 112%;
+    font-size: clamp(2.3rem, 1.5rem + 2.7vw, 4.35rem);
+    line-height: 1.07;
+    letter-spacing: -0.035em;
     text-wrap: balance;
   }
   .text-display {
@@ -176,108 +198,158 @@
 }
 
 @layer components {
-  /* ---------- Buttons ---------- */
-  .ds-btn-primary {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 10px;
-    background: var(--color-navy-900);
-    color: var(--color-paper);
-    padding: 15px 32px;
-    border-radius: var(--radius-btn);
-    font-family: var(--font-body);
-    font-weight: 600;
-    text-decoration: none;
-    transition:
-      background 0.2s var(--ease-signature),
-      transform 0.2s var(--ease-signature);
+  /* ---------- Liquid-glass materials ---------- */
+  /* Dark frosted glass — floating UI over photos / dark surfaces (navbar,
+     overlays, project captions). Layered sheen gives the Apple specular edge. */
+  .glass-dark {
+    background: var(--glass-sheen), var(--glass-dark-bg);
+    backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
+    -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
+    border: 1px solid var(--glass-dark-border);
+    box-shadow: var(--shadow-glass);
   }
-  .ds-btn-primary:hover {
-    background: var(--color-navy-700);
-    transform: translateY(-1px);
+  /* Light frosted glass — cards and panels on paper sections. */
+  .glass-light {
+    background: var(--glass-sheen-light), var(--glass-light-bg);
+    backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
+    -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
+    border: 1px solid var(--glass-light-border);
+    box-shadow: var(--shadow-md);
   }
 
-  .ds-btn-on-dark {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 10px;
-    background: var(--color-paper);
-    color: var(--color-navy-950);
-    padding: 15px 32px;
-    border-radius: var(--radius-btn);
-    font-family: var(--font-body);
-    font-weight: 600;
-    text-decoration: none;
-    transition:
-      background 0.2s var(--ease-signature),
-      color 0.2s var(--ease-signature),
-      transform 0.2s var(--ease-signature);
-  }
-  .ds-btn-on-dark:hover {
-    background: var(--color-signal-400);
-    color: var(--color-navy-950);
-    transform: translateY(-1px);
-  }
-
-  .ds-btn-ghost {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 10px;
-    color: var(--color-paper);
-    border: 1px solid color-mix(in srgb, var(--color-paper) 40%, transparent);
-    border-radius: var(--radius-btn);
-    padding: 14px 30px;
-    font-weight: 600;
-    text-decoration: none;
-    transition:
-      border-color 0.2s var(--ease-signature),
-      background 0.2s var(--ease-signature);
-  }
-  .ds-btn-ghost:hover {
-    border-color: var(--color-paper);
-    background: color-mix(in srgb, var(--color-paper) 8%, transparent);
-  }
-
-  /* Control-world button — used on green surfaces. */
+  /* ---------- Buttons — one coherent system, all CTAs identical in metrics ---------- */
+  .ds-btn-primary,
+  .ds-btn-on-dark,
+  .ds-btn-ghost,
+  .ds-btn-secondary,
   .ds-btn-signal {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    gap: 10px;
-    background: var(--color-green-400);
-    color: var(--color-green-950);
-    padding: 15px 32px;
+    gap: 9px;
+    min-height: 48px;
+    padding: 13px 26px;
     border-radius: var(--radius-btn);
-    font-weight: 700;
+    border: 1px solid transparent;
+    font-family: var(--font-body);
+    font-weight: 600;
+    font-size: 0.95rem;
+    line-height: 1;
+    letter-spacing: -0.01em;
     text-decoration: none;
+    cursor: pointer;
     transition:
-      background 0.2s var(--ease-signature),
-      transform 0.2s var(--ease-signature),
+      background 0.25s var(--ease-signature),
+      border-color 0.25s var(--ease-signature),
+      color 0.25s var(--ease-signature),
+      transform 0.25s var(--ease-signature),
       box-shadow 0.3s var(--ease-signature);
   }
-  .ds-btn-signal:hover {
-    transform: translateY(-1px);
-    box-shadow: 0 0 0 1px var(--color-green-400), 0 8px 30px -8px var(--color-green-400);
+
+  /* Primary — navy, on light surfaces. Soft gradient + specular + depth. */
+  .ds-btn-primary {
+    background: linear-gradient(180deg, var(--color-navy-800), var(--color-navy-950));
+    color: var(--color-paper);
+    box-shadow: var(--shadow-md), inset 0 1px 0 rgba(255, 255, 255, 0.14);
+  }
+  .ds-btn-primary:hover {
+    background: linear-gradient(180deg, var(--color-navy-700), var(--color-navy-900));
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-lg), inset 0 1px 0 rgba(255, 255, 255, 0.18);
   }
 
-  /* ---------- Cards ---------- */
+  /* Primary inverse — frosted-white glass, on dark surfaces / photos. */
+  .ds-btn-on-dark {
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.96), rgba(255, 255, 255, 0.86));
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    color: var(--color-navy-950);
+    box-shadow: var(--shadow-md), inset 0 1px 0 rgba(255, 255, 255, 0.9);
+  }
+  .ds-btn-on-dark:hover {
+    background: #ffffff;
+    color: var(--color-navy-950);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-lg), var(--glow-signal);
+  }
+
+  /* Secondary / ghost on dark — translucent glass with luminous border. */
+  .ds-btn-ghost {
+    background: rgba(255, 255, 255, 0.06);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    color: var(--color-paper);
+    border-color: rgba(255, 255, 255, 0.34);
+  }
+  .ds-btn-ghost:hover {
+    background: rgba(255, 255, 255, 0.14);
+    border-color: rgba(255, 255, 255, 0.7);
+    transform: translateY(-2px);
+  }
+
+  /* Secondary on light — frosted glass with navy ink. */
+  .ds-btn-secondary {
+    background: var(--glass-light-bg);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    color: var(--color-navy-900);
+    border-color: color-mix(in srgb, var(--color-navy-900) 22%, transparent);
+    box-shadow: var(--shadow-sm);
+  }
+  .ds-btn-secondary:hover {
+    border-color: var(--color-navy-700);
+    color: var(--color-navy-950);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+  }
+
+  /* Signal — green, control world. Gradient + live glow. */
+  .ds-btn-signal {
+    background: linear-gradient(180deg, var(--color-green-400), var(--color-green-600));
+    color: var(--color-green-950);
+    font-weight: 700;
+    box-shadow: var(--shadow-md), inset 0 1px 0 rgba(255, 255, 255, 0.3);
+  }
+  .ds-btn-signal:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-lg), var(--glow-green);
+  }
+
+  /* ---------- Cards — frosted glass, soft depth, generous rounding ---------- */
   .ds-card-service {
-    background: var(--color-paper);
+    position: relative;
+    background: var(--glass-sheen-light), color-mix(in srgb, #ffffff 78%, transparent);
+    backdrop-filter: blur(14px) saturate(150%);
+    -webkit-backdrop-filter: blur(14px) saturate(150%);
     color: var(--color-ink);
-    border: 1px solid var(--color-navy-100);
+    border: 1px solid var(--glass-light-border);
     border-radius: var(--radius-card);
     padding: 28px;
+    box-shadow: var(--shadow-sm);
     transition:
-      border-color 0.25s var(--ease-signature),
-      transform 0.25s var(--ease-signature),
-      background 0.25s var(--ease-signature);
+      border-color 0.3s var(--ease-signature),
+      transform 0.3s var(--ease-signature),
+      box-shadow 0.3s var(--ease-signature);
   }
   .ds-card-service:hover {
-    border-color: var(--color-navy-700);
-    transform: translateY(-3px);
+    border-color: color-mix(in srgb, var(--color-navy-700) 40%, transparent);
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-lg);
+  }
+
+  /* Glass icon chip — houses the Font Awesome service icon. */
+  .glass-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 54px;
+    height: 54px;
+    border-radius: var(--radius-sm);
+    background: var(--glass-sheen-light),
+      color-mix(in srgb, var(--accent, var(--color-green-500)) 12%, #ffffff);
+    border: 1px solid color-mix(in srgb, var(--accent, var(--color-green-500)) 26%, transparent);
+    color: var(--accent, var(--color-green-500));
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.8);
   }
 
   /* ---------- Eyebrow ---------- */
@@ -320,16 +392,21 @@
 
   /* ---------- Chips / pills ---------- */
   .ds-chip-kv {
-    display: inline-block;
+    display: inline-flex;
+    align-items: center;
     font-family: var(--font-body);
     font-variant-numeric: tabular-nums;
     font-weight: 600;
     font-size: 0.8125rem;
     letter-spacing: 0.02em;
     color: var(--color-paper);
-    background: var(--color-navy-900);
-    padding: 4px 10px;
-    border-radius: var(--radius-card);
+    background: var(--glass-sheen), color-mix(in srgb, var(--color-navy-950) 62%, transparent);
+    backdrop-filter: blur(10px) saturate(150%);
+    -webkit-backdrop-filter: blur(10px) saturate(150%);
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    padding: 5px 12px;
+    border-radius: var(--radius-pill);
+    box-shadow: var(--shadow-sm);
   }
   .ds-pill {
     display: inline-flex;
@@ -364,17 +441,21 @@
     animation: live-ping 2.4s var(--ease-out-expo) infinite;
   }
 
-  /* Control-world glass panel — the ONE deliberate use of translucency,
-     reserved for telemetry panels over the dark green drench. */
+  /* Control-world glass panel — frosted telemetry glass over the green drench. */
   .ds-panel {
-    background: color-mix(in srgb, var(--color-green-900) 70%, transparent);
-    border: 1px solid color-mix(in srgb, var(--color-green-400) 22%, transparent);
-    border-radius: 4px;
+    background: linear-gradient(180deg, rgba(79, 208, 127, 0.08), rgba(79, 208, 127, 0) 45%),
+      color-mix(in srgb, var(--color-green-900) 62%, transparent);
+    backdrop-filter: blur(16px) saturate(150%);
+    -webkit-backdrop-filter: blur(16px) saturate(150%);
+    border: 1px solid color-mix(in srgb, var(--color-green-400) 26%, transparent);
+    border-radius: var(--radius-card);
+    box-shadow: var(--shadow-md), inset 0 1px 0 rgba(255, 255, 255, 0.08);
   }
 }
 
-/* Flat-by-Default: the field world uses no box-shadow. The only glow/shadow in
-   the system is the green signal glow, which belongs to the Control world. */
+/* Liquid Industrial: depth comes from soft layered shadows (--shadow-*) and
+   frosted glass materials (.glass-*), with signal/green glows on interactive
+   accents. Superseded the earlier flat/no-shadow system (2026-07). */
 
 /* ---------- Motion primitives ---------- */
 @keyframes live-ping {
