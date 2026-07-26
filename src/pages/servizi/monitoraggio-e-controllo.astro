@@ -4,8 +4,8 @@ import { Image } from 'astro:assets';
 import Base from '../../layouts/Base.astro';
 import PageHero from '../../components/PageHero.astro';
 import CtaBand from '../../components/CtaBand.astro';
-import turbines from '../../assets/img/photos/traliccio-tramonto.webp';
 import campoImg from '../../assets/img/photos/van-parco-eolico.jpg';
+import rcsDettaglio from '../../assets/img/rcs/rcs-dettaglio-impianto.webp';
 
 const entry = await getEntry('servizi', 'monitoraggio-e-controllo');
 if (!entry) throw new Error('servizi/monitoraggio-e-controllo.md missing');
@@ -94,8 +94,8 @@ const structuredData = [
     h1={entry.data.titolo}
     sub={entry.data.frase}
     tone="green"
-    image={turbines}
-    imageAlt="Traliccio dell'alta tensione al tramonto: gli impianti sorvegliati 24/7 dalla Control Room di Amon Energy"
+    image={campoImg}
+    imageAlt="Il laboratorio mobile di Amon Energy in un parco eolico, durante un intervento partito da una segnalazione della Control Room"
   />
 
   <!-- Intro -->
@@ -106,9 +106,9 @@ const structuredData = [
       </div>
       <div class="ds-panel overflow-hidden" data-reveal style="--reveal-delay:120ms">
         <Image
-          src={campoImg}
-          alt="Il laboratorio mobile di Amon Energy in un parco eolico durante un intervento su segnalazione della Control Room"
-          class="aspect-[16/11] w-full object-cover"
+          src={rcsDettaglio}
+          alt="Dettaglio di un impianto nella piattaforma RCS: schema unifilare, andamento della potenza, stato dei dispositivi e comandi di linea da remoto"
+          class="aspect-[16/11] w-full object-cover object-left-top"
           widths={[500, 800, 1100]}
           sizes="(min-width: 1024px) 44vw, 100vw"
         />

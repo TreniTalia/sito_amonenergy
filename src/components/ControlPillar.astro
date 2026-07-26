@@ -1,6 +1,8 @@
 ---
 import { Image } from 'astro:assets';
-import controlRoom from '../assets/img/photos/traliccio-tramonto.webp';
+// The real RCS platform, with client names redacted. A screenshot belongs in a
+// panel framed as a monitor far more than a landscape photo did.
+import controlRoom from '../assets/img/rcs/rcs-lista-impianti.webp';
 
 interface Props {
   eyebrow: string;
@@ -80,8 +82,8 @@ const tiers = [
         <div class="relative">
           <Image
             src={controlRoom}
-            alt="Traliccio dell'alta tensione al tramonto: le linee elettriche degli impianti sorvegliati dalla Control Room di Amon Energy"
-            class="aspect-[16/11] w-full object-cover"
+            alt="La piattaforma RCS di Amon Energy: lista degli impianti sorvegliati con matricola, stato, potenza istantanea e allarmi attivi"
+            class="aspect-[16/11] w-full object-cover object-left-top"
             widths={[600, 900, 1200]}
             sizes="(min-width: 1024px) 46vw, 100vw"
           />
