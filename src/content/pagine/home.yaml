@@ -2,13 +2,13 @@ pagina: "home"
 
 hero:
   eyebrow: "Professionisti dell'energia"
-  h1: "Costruiamo, verifichiamo e gestiamo l'energia del Centro-Sud Italia."
-  sub: "Sottostazioni AT/MT, verifiche strumentali, ricerca guasti e monitoraggio 24/7 per impianti eolici e fotovoltaici. Dalla nostra sede di Castelluccio dei Sauri (FG), sul posto in giornata."
+  h1: "Tecnologia e gestione operativa degli impianti energetici."
+  sub: "System Integrator, sottostazioni AT/MT, verifiche strumentali, ricerca guasti e monitoraggio 24/7 per impianti eolici e fotovoltaici."
   ctaPrimaria: "Chiamaci: 0881 377590"
   ctaSecondaria: "Scopri i servizi"
 
 chiSiamoBreve:
-  testo: "Oltre 20 anni di esperienza nella costruzione di stazioni AT/MT e nella gestione O&M di impianti rinnovabili nel Sud Italia. Un'unica sede operativa da 5.000 m² a Castelluccio dei Sauri (FG), baricentrica sul Centro-Sud, con magazzino ricambi strategico e Control Room attiva 24/7/365."
+  testo: "Da oltre 20 anni costruiamo stazioni AT/MT e gestiamo impianti nel Centro - Sud Italia. Un’unica base operativa strategica, Control Room sempre attiva e ricambi pronti: così interveniamo in tempi record e teniamo i tuoi impianti sempre in produzione."
   link: "/azienda/"
 
 controllo:

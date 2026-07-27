@@ -1,6 +1,6 @@
 ---
-import { Image } from 'astro:assets';
-import heroImg from '../assets/img/photos/hero-banzi-sky.jpg';
+import { Picture } from 'astro:assets';
+import heroImg from '../assets/img/photos/hero-tralicci-energia.png';
 import WaveDivider from './WaveDivider.astro';
 
 interface Props {
@@ -19,11 +19,21 @@ const facts = ['Centro-Sud Italia', 'Reperibilità 24/7', 'Sottostazioni fino a 
 ---
 
 <section class="hero relative isolate flex min-h-[88svh] flex-col justify-end overflow-hidden text-paper">
-  <Image
+  <!-- AVIF first, and quality above the default 80. This photo is mostly fine
+       cloud texture, which is what a low bitrate destroys first: the default
+       webp/q80 spends 0.14 bytes per pixel and the sky comes out mushy. AVIF at
+       q85 is more faithful than webp at q96 for roughly half the bytes, and the
+       webp fallback also improves. `display: contents` keeps <picture> from
+       adding a phantom flex item to the hero column. -->
+  <Picture
     src={heroImg}
-    alt="Sottostazione elettrica AT/MT realizzata da Amon Energy: campo di isolatori e sezionatori sotto un cielo nuvoloso"
+    alt="Linee elettriche di alta tensione al tramonto con tralicci in controluce e flussi di energia luminosi"
+    formats={['avif', 'webp']}
+    fallbackFormat="webp"
+    quality={85}
     class="hero-img absolute inset-0 h-full w-full object-cover"
-    widths={[768, 1280, 1600, 2000]}
+    pictureAttributes={{ class: 'contents' }}
+    widths={[768, 1280, 1600, 1916]}
     sizes="100vw"
     loading="eager"
     fetchpriority="high"
@@ -71,15 +81,24 @@ const facts = ['Centro-Sud Italia', 'Reperibilità 24/7', 'Sottostazioni fino a 
     background:
       linear-gradient(
         to top,
-        color-mix(in srgb, var(--color-navy-950) 96%, transparent) 0%,
-        color-mix(in srgb, var(--color-navy-950) 88%, transparent) 22%,
-        color-mix(in srgb, var(--color-navy-950) 55%, transparent) 55%,
-        color-mix(in srgb, var(--color-navy-950) 30%, transparent) 100%
+        color-mix(in srgb, var(--color-navy-950) 92%, transparent) 0%,
+        color-mix(in srgb, var(--color-navy-950) 62%, transparent) 20%,
+        color-mix(in srgb, var(--color-navy-950) 24%, transparent) 52%,
+        color-mix(in srgb, var(--color-navy-950) 14%, transparent) 100%
       ),
       linear-gradient(
         to right,
-        color-mix(in srgb, var(--color-navy-950) 70%, transparent) 0%,
-        transparent 60%
+        color-mix(in srgb, var(--color-navy-950) 74%, transparent) 0%,
+        color-mix(in srgb, var(--color-navy-950) 30%, transparent) 45%,
+        transparent 72%
+      ),
+      /* Flat veil that takes the whole photo down a notch. A uniform layer here
+         rather than `filter: brightness()` on the image: a filter would promote
+         the LCP element to its own layer, and this hero has already proved
+         fragile about compositing. */
+      linear-gradient(
+        color-mix(in srgb, var(--color-navy-950) 12%, transparent) 0%,
+        color-mix(in srgb, var(--color-navy-950) 12%, transparent) 100%
       );
   }
 
