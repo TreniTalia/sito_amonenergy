@@ -7,8 +7,11 @@ interface Props {
   eyebrow: string;
   h1: string;
   sub?: string;
-  /** Visual world: navy (field) or green (control). */
-  tone?: 'navy' | 'green';
+  /**
+   * Surface is always the navy of the brand; `control` only swaps the eyebrow
+   * for the live 24/7 dot, the one place the signal green still shows.
+   */
+  tone?: 'navy' | 'control';
   /** Optional full-bleed background photo. */
   image?: ImageMetadata;
   imageAlt?: string;
@@ -16,14 +19,11 @@ interface Props {
 
 const { eyebrow, h1, sub, tone = 'navy', image, imageAlt = '' } = Astro.props;
 
-const bg = tone === 'green' ? 'bg-green-950' : 'bg-navy-950';
-const dashClass = tone === 'green' ? 'ds-eyebrow-dash--signal' : '';
-const labelClass = tone === 'green' ? 'ds-eyebrow-label--signal' : '';
-const scrim = tone === 'green' ? 'bg-green-950/82' : 'bg-navy-950/82';
-const waveTone = tone === 'green' ? 'green' : 'signal';
+const isControl = tone === 'control';
+const labelClass = isControl ? 'ds-eyebrow-label--signal' : '';
 ---
 
-<section class:list={['relative isolate overflow-hidden text-paper', bg]}>
+<section class="relative isolate overflow-hidden bg-navy-950 text-paper">
   {
     image && (
       <>
@@ -35,15 +35,15 @@ const waveTone = tone === 'green' ? 'green' : 'signal';
           sizes="100vw"
           loading="eager"
         />
-        <div class:list={['absolute inset-0', scrim]} />
+        <div class="absolute inset-0 bg-navy-950/82" />
       </>
     )
   }
 
   <div class="wrap-wide relative z-10 pb-16 pt-32 lg:pb-24 lg:pt-40">
     <div class="ds-eyebrow" data-reveal>
-      {tone === 'green' && <span class="ds-live-dot" aria-hidden="true" />}
-      <span class:list={['ds-eyebrow-dash', dashClass]} style={tone === 'green' ? 'display:none' : ''}></span>
+      {isControl && <span class="ds-live-dot" aria-hidden="true" />}
+      {!isControl && <span class="ds-eyebrow-dash"></span>}
       <span class:list={['ds-eyebrow-label', labelClass]}>{eyebrow}</span>
     </div>
     <h1 class="text-display max-w-[20ch]" data-reveal style="--reveal-delay:80ms">{h1}</h1>
@@ -51,6 +51,6 @@ const waveTone = tone === 'green' ? 'green' : 'signal';
   </div>
 
   <div class="relative z-10">
-    <WaveDivider tone={waveTone} animated />
+    <WaveDivider tone="signal" animated />
   </div>
 </section>

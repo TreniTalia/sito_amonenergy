@@ -13,9 +13,9 @@ const { entries } = Astro.props;
 // real photograph. Everything else alternates the two side-by-side layouts, so
 // technical schematics never land in a full-bleed crop.
 let sideCount = 0;
-const variantFor = (entry: CollectionEntry<'progetti'>) => {
-  if (entry.data.full) return 'c' as const;
-  return (sideCount++ % 2 === 0 ? 'a' : 'b') as const;
+const variantFor = (entry: CollectionEntry<'progetti'>): 'a' | 'b' | 'c' => {
+  if (entry.data.full) return 'c';
+  return sideCount++ % 2 === 0 ? 'a' : 'b';
 };
 ---
 

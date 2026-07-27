@@ -9,7 +9,7 @@ import ControlPillar from '../components/ControlPillar.astro';
 import StatBar from '../components/StatBar.astro';
 import ClientMarquee from '../components/ClientMarquee.astro';
 import CtaBand from '../components/CtaBand.astro';
-import coverageMap from '../assets/img/photos/coverage-map.webp';
+import CoverageMap from '../components/CoverageMap.astro';
 import { contatti } from '../data/contatti.ts';
 
 const home = await getEntry('pagine', 'home');
@@ -53,20 +53,9 @@ const progettiPreview = (await getCollection('progetti'))
           <Icon name="fa6-solid:arrow-right" class="text-xs transition-transform duration-300 group-hover:translate-x-1" style="transition-timing-function: var(--ease-signature);" />
         </a>
       </div>
-      <figure class="relative" data-reveal style="--reveal-delay:120ms">
-        <div class="overflow-hidden rounded-[var(--radius-card)] border border-navy-100 shadow-[var(--shadow-md)]">
-          <Image
-            src={coverageMap}
-            alt="Mappa del raggio d'azione di Amon Energy: la sede di Castelluccio dei Sauri (FG) copre l'intero Centro-Sud Italia"
-            class="w-full object-cover"
-            widths={[500, 800, 1100]}
-            sizes="(min-width: 1024px) 42vw, 100vw"
-          />
-        </div>
-        <figcaption class="mt-3 text-sm text-ink/60">
-          Sede unica a Castelluccio dei Sauri (FG), baricentrica sul Centro-Sud Italia.
-        </figcaption>
-      </figure>
+      <div class="relative" data-reveal style="--reveal-delay:120ms">
+        <CoverageMap />
+      </div>
     </div>
   </section>
 

@@ -1,35 +1,147 @@
 {
   "schemaVersion": 2,
-  "generatedAt": "2026-07-19T00:00:00.000Z",
+  "generatedAt": "2026-07-27T00:00:00.000Z",
   "title": "Design System: Amon Energy",
   "extensions": {
     "colorMeta": {
-      "navy-950": { "role": "neutral", "displayName": "Deep Navy", "canonical": "#0A2A44", "tonalRamp": ["#0A2A44", "#103B5F", "#1D5585", "#E8EFF5"] },
-      "navy-900": { "role": "primary", "displayName": "Amon Navy", "canonical": "#103B5F", "tonalRamp": ["#0A2A44", "#103B5F", "#1D5585", "#E8EFF5"] },
-      "navy-700": { "role": "neutral", "displayName": "Navy Hover", "canonical": "#1D5585", "tonalRamp": ["#0A2A44", "#103B5F", "#1D5585", "#E8EFF5"] },
-      "navy-100": { "role": "neutral", "displayName": "Pale Navy", "canonical": "#E8EFF5", "tonalRamp": ["#0A2A44", "#103B5F", "#1D5585", "#E8EFF5"] },
-      "leaf-500": { "role": "tertiary", "displayName": "Signal Leaf", "canonical": "#3E8E5A" },
-      "signal-400": { "role": "secondary", "displayName": "Circuit Blue", "canonical": "#4FB3D9" },
-      "paper": { "role": "neutral", "displayName": "Paper", "canonical": "#FAFBFC" },
-      "ink": { "role": "neutral", "displayName": "Ink", "canonical": "#16222E" }
+      "navy-950": {
+        "role": "neutral",
+        "displayName": "Deep Navy",
+        "canonical": "#0A2A44",
+        "note": "The darkest step and the site's primary drench: hero, footer, dark sub-heroes, control sections, lightbox backdrop.",
+        "tonalRamp": ["#04131F", "#0A2A44", "#103B5F", "#14486F", "#1D5585", "#3B75A0", "#7EA6C4", "#E8EFF5"]
+      },
+      "navy-900": {
+        "role": "primary",
+        "displayName": "Amon Navy",
+        "canonical": "#103B5F",
+        "note": "The brand's primary colour. Primary CTA gradient, interactive elements, resting state of body links.",
+        "tonalRamp": ["#04131F", "#0A2A44", "#103B5F", "#14486F", "#1D5585", "#3B75A0", "#7EA6C4", "#E8EFF5"]
+      },
+      "navy-800": {
+        "role": "primary",
+        "displayName": "Navy Mid",
+        "canonical": "#14486F",
+        "note": "Top stop of the primary-button gradient and of ambient section glows.",
+        "tonalRamp": ["#04131F", "#0A2A44", "#103B5F", "#14486F", "#1D5585", "#3B75A0", "#7EA6C4", "#E8EFF5"]
+      },
+      "navy-700": {
+        "role": "primary",
+        "displayName": "Navy Hover",
+        "canonical": "#1D5585",
+        "note": "Interactive hover/focus on light surfaces: card borders, link underlines, glow washes.",
+        "tonalRamp": ["#04131F", "#0A2A44", "#103B5F", "#14486F", "#1D5585", "#3B75A0", "#7EA6C4", "#E8EFF5"]
+      },
+      "navy-300": {
+        "role": "neutral",
+        "displayName": "Muted Navy",
+        "canonical": "#7EA6C4",
+        "note": "Secondary text and map labels on dark surfaces; the cold tone of the spark-gap divider.",
+        "tonalRamp": ["#04131F", "#0A2A44", "#103B5F", "#14486F", "#1D5585", "#3B75A0", "#7EA6C4", "#E8EFF5"]
+      },
+      "navy-100": {
+        "role": "neutral",
+        "displayName": "Pale Navy",
+        "canonical": "#E8EFF5",
+        "note": "Light alternating section background, resting card borders, and body text on navy drenches.",
+        "tonalRamp": ["#04131F", "#0A2A44", "#103B5F", "#14486F", "#1D5585", "#3B75A0", "#7EA6C4", "#E8EFF5"]
+      },
+      "green-500": {
+        "role": "accent",
+        "displayName": "Signal Leaf",
+        "canonical": "#3E8E5A",
+        "note": "ACCENT ONLY. The logo's leaf. Service-card icons, eyebrow dashes, step numbers, bullets, text selection. Never a background, never a large fill (the Leaf Rarity Rule). The dark steps of this ramp are reference tone only — they were deleted from the palette in DESIGN.md section 0.1 and must not be used as surfaces.",
+        "tonalRamp": ["#061C12", "#0B2C1D", "#123F2A", "#1A5335", "#227244", "#3E8E5A", "#4FD07F", "#BFE6CD"]
+      },
+      "green-400": {
+        "role": "accent",
+        "displayName": "Live Signal",
+        "canonical": "#4FD07F",
+        "note": "ACCENT ONLY. The 24/7 heartbeat: live dots, telemetry pulse, checkmarks, the coverage-map pin and radius rings. Never a fill larger than a marker.",
+        "tonalRamp": ["#061C12", "#0B2C1D", "#123F2A", "#1A5335", "#227244", "#3E8E5A", "#4FD07F", "#BFE6CD"]
+      },
+      "signal-400": {
+        "role": "secondary",
+        "displayName": "Circuit Blue",
+        "canonical": "#4FB3D9",
+        "note": "The technical signal accent: eyebrow labels and dashes, focus-visible outlines, the spark-gap arc, hover glow on dark CTAs, the coverage-map wash.",
+        "tonalRamp": ["#08222E", "#0D3547", "#134A61", "#1B6284", "#2B87AC", "#4FB3D9", "#8FD3EC", "#DCF1F9"]
+      },
+      "tier-basic": {
+        "role": "tertiary",
+        "displayName": "RCS Basic",
+        "canonical": "#43B26A",
+        "note": "RCS tier marker, from the company presentation. Top rule and heading of the Basic tier card only.",
+        "tonalRamp": ["#0B2716", "#123C22", "#19542F", "#22713F", "#2F9354", "#43B26A", "#86D3A2", "#D2F0DE"]
+      },
+      "tier-advance": {
+        "role": "tertiary",
+        "displayName": "RCS Advance",
+        "canonical": "#E0912F",
+        "note": "RCS tier marker. Top rule and heading of the Advance tier card only.",
+        "tonalRamp": ["#2C1A05", "#43280A", "#5E3810", "#7E4B16", "#AD681F", "#E0912F", "#EEBA7B", "#FAE7CE"]
+      },
+      "tier-pro": {
+        "role": "tertiary",
+        "displayName": "RCS Pro",
+        "canonical": "#E05A3D",
+        "note": "RCS tier marker. Top rule and heading of the Pro tier card only.",
+        "tonalRamp": ["#2E0F07", "#46180C", "#622212", "#832E19", "#B24124", "#E05A3D", "#EE9683", "#FADCD4"]
+      },
+      "paper": {
+        "role": "neutral",
+        "displayName": "Paper",
+        "canonical": "#FAFBFC",
+        "note": "Base page background on light sections; text colour on navy drenches.",
+        "tonalRamp": ["#16222E", "#2B3A48", "#465767", "#697A8A", "#94A3B0", "#C4CED6", "#E8EDF1", "#FAFBFC"]
+      },
+      "ink": {
+        "role": "neutral",
+        "displayName": "Ink",
+        "canonical": "#16222E",
+        "note": "Body text on paper. Muted variants are opacity steps of ink, never a separate gray.",
+        "tonalRamp": ["#16222E", "#2B3A48", "#465767", "#697A8A", "#94A3B0", "#C4CED6", "#E8EDF1", "#FAFBFC"]
+      }
     },
     "typographyMeta": {
-      "display": { "displayName": "Display", "purpose": "H1 hero headline only, one per page." },
-      "headline": { "displayName": "Headline", "purpose": "H2 section titles." },
-      "body": { "displayName": "Body", "purpose": "Running copy, capped at 65ch measure." },
-      "label": { "displayName": "Eyebrow / Label", "purpose": "Uppercase section-opener kicker, paired with the short dash." }
+      "hero": { "displayName": "Hero", "purpose": "The homepage H1 only. Archivo with the width axis at 112% and weight 760." },
+      "display": { "displayName": "Display", "purpose": "H1 on inner pages. Archivo width axis opened to 125%." },
+      "headline": { "displayName": "Headline", "purpose": "H2 section titles, Archivo at 125% width, text-wrap: balance." },
+      "control": { "displayName": "Control", "purpose": "Source Serif 4. H2s in the Control Room / RCS narrative. Since section 0.1 this serif — not a colour — is what marks the control voice." },
+      "body": { "displayName": "Body", "purpose": "Running copy, Inter. Capped at 68ch (.measure) or 54ch (.measure-tight)." },
+      "button": { "displayName": "Button", "purpose": "Every CTA. A hair under body so a pill reads as a control, not a sentence." },
+      "label": { "displayName": "Label", "purpose": "The eyebrow line opening most sections, preceded by a 32x2px dash." },
+      "pill-label": { "displayName": "Pill Label", "purpose": "Tags and spec chips inside telemetry panels." }
     },
-    "shadows": [],
+    "shadows": [
+      { "name": "shadow-sm", "value": "0 1px 2px rgba(10,42,68,0.06), 0 4px 12px -4px rgba(10,42,68,0.1)", "purpose": "Resting cards, chips, secondary buttons." },
+      { "name": "shadow-md", "value": "0 2px 6px rgba(10,42,68,0.07), 0 16px 40px -12px rgba(10,42,68,0.18)", "purpose": "Primary CTAs, light glass panels, the coverage-map card." },
+      { "name": "shadow-lg", "value": "0 10px 30px -10px rgba(10,42,68,0.22), 0 30px 70px -24px rgba(10,42,68,0.3)", "purpose": "Hover-lifted cards and buttons. Always paired with a -2px to -4px translateY." },
+      { "name": "shadow-glass", "value": "0 10px 34px -10px rgba(10,42,68,0.3), inset 0 1px 0 rgba(255,255,255,0.16)", "purpose": "Dark glass only. The inset top highlight is the specular edge; without it glass reads as flat translucency." },
+      { "name": "glow-signal", "value": "0 0 44px -8px rgba(79,179,217,0.55)", "purpose": "Hover glow on dark CTAs and the telemetry monitor. Never at rest." },
+      { "name": "glow-green", "value": "0 0 44px -8px rgba(79,208,127,0.55)", "purpose": "Live-state glow on telemetry accents. Marker scale only, per the Leaf Rarity Rule." }
+    ],
     "motion": [
-      { "name": "ease-out-signature", "value": "cubic-bezier(0.22, 1, 0.36, 1)", "purpose": "Gallery photo slow-zoom on hover and scroll-reveal transitions (0.7-1.2s)." },
-      { "name": "wave-drift", "value": "linear, ~24s loop", "purpose": "Barely-perceptible continuous horizontal drift of the signal-wave SVG divider; suggested default pending final tuning. Disabled entirely under prefers-reduced-motion." }
+      { "name": "ease-signature", "value": "cubic-bezier(0.22, 1, 0.36, 1)", "purpose": "The default: an out-quint. All state transitions, reveals, and hover lifts." },
+      { "name": "ease-out-expo", "value": "cubic-bezier(0.16, 1, 0.3, 1)", "purpose": "The live-dot ping and other one-shot pulses that must decay fast." },
+      { "name": "live-ping", "value": "2.4s var(--ease-out-expo) infinite", "purpose": "The 24/7 heartbeat ring expanding out of .ds-live-dot." },
+      { "name": "scan", "value": "4.5s var(--ease-signature) infinite", "purpose": "The scanline sweeping the RCS monitor screenshot. Suppressed under prefers-reduced-motion." }
     ],
     "breakpoints": [
-      { "name": "base", "value": "360px" },
+      { "name": "xs", "value": "400px" },
       { "name": "sm", "value": "640px" },
       { "name": "md", "value": "768px" },
       { "name": "lg", "value": "1024px" },
-      { "name": "xl", "value": "1280px" }
+      { "name": "xl", "value": "1280px" },
+      { "name": "2xl", "value": "1536px" },
+      { "name": "3xl", "value": "1920px" }
+    ],
+    "zIndex": [
+      { "name": "sticky", "value": "30" },
+      { "name": "header", "value": "40" },
+      { "name": "mobilebar", "value": "45" },
+      { "name": "modal", "value": "50" },
+      { "name": "skip", "value": "100" }
     ]
   },
   "components": [
@@ -37,86 +149,106 @@
       "name": "Button Primary",
       "kind": "button",
       "refersTo": "button-primary",
-      "description": "Primary CTA on light backgrounds, e.g. \"Chiamaci ora\" in the hero.",
-      "html": "<a class=\"ds-btn-primary\" href=\"tel:+390881377590\">Chiamaci ora</a>",
-      "css": ".ds-btn-primary { display: inline-flex; align-items: center; justify-content: center; background: #103B5F; color: #FAFBFC; padding: 14px 32px; border-radius: 6px; font-family: 'Inter Variable', sans-serif; font-weight: 500; text-decoration: none; transition: background 0.2s ease-out; } .ds-btn-primary:hover { background: #1D5585; } .ds-btn-primary:focus-visible { outline: 2px solid #4FB3D9; outline-offset: 2px; }"
+      "description": "The CTA on light surfaces. Navy gradient, pill, specular top highlight.",
+      "html": "<a class=\"ds-btn ds-btn-primary\" href=\"#\">Chiamaci — +39 0881 377590</a>",
+      "css": ".ds-btn { display: inline-flex; align-items: center; justify-content: center; gap: 9px; min-height: 48px; padding: 13px 26px; border-radius: 999px; border: 1px solid transparent; font-family: 'Inter Variable', sans-serif; font-weight: 600; font-size: 0.95rem; line-height: 1; letter-spacing: -0.01em; text-decoration: none; cursor: pointer; transition: background .25s cubic-bezier(.22,1,.36,1), border-color .25s cubic-bezier(.22,1,.36,1), color .25s cubic-bezier(.22,1,.36,1), transform .25s cubic-bezier(.22,1,.36,1), box-shadow .3s cubic-bezier(.22,1,.36,1); } .ds-btn-primary { background: linear-gradient(180deg, #14486F, #0A2A44); color: #FAFBFC; box-shadow: 0 2px 6px rgba(10,42,68,.07), 0 16px 40px -12px rgba(10,42,68,.18), inset 0 1px 0 rgba(255,255,255,.14); } .ds-btn-primary:hover { background: linear-gradient(180deg, #1D5585, #103B5F); transform: translateY(-2px); box-shadow: 0 10px 30px -10px rgba(10,42,68,.22), 0 30px 70px -24px rgba(10,42,68,.3), inset 0 1px 0 rgba(255,255,255,.18); } .ds-btn-primary:focus-visible { outline: 2px solid #4FB3D9; outline-offset: 2px; }"
     },
     {
       "name": "Button On Dark",
       "kind": "button",
       "refersTo": "button-on-dark",
-      "description": "CTA placed on a dark navy surface, e.g. the CtaBand or hero secondary action.",
-      "html": "<a class=\"ds-btn-on-dark\" href=\"/servizi/\">Scopri i servizi</a>",
-      "css": ".ds-btn-on-dark { display: inline-flex; align-items: center; justify-content: center; background: #FAFBFC; color: #0A2A44; padding: 14px 32px; border-radius: 6px; font-family: 'Inter Variable', sans-serif; font-weight: 500; text-decoration: none; transition: background 0.2s ease-out, color 0.2s ease-out; } .ds-btn-on-dark:hover { background: #4FB3D9; color: #0A2A44; } .ds-btn-on-dark:focus-visible { outline: 2px solid #4FB3D9; outline-offset: 2px; }"
+      "description": "Frosted-white glass CTA for navy drenches and photography. Also shipped as .ds-btn-signal inside the control sections, which since section 0.1 have no colour of their own.",
+      "html": "<div class=\"ds-onnavy\"><a class=\"ds-btn ds-btn-on-dark\" href=\"#\">Scopri monitoraggio e controllo</a></div>",
+      "css": ".ds-onnavy { background: #0A2A44; padding: 32px; border-radius: 26px; } .ds-btn { display: inline-flex; align-items: center; justify-content: center; gap: 9px; min-height: 48px; padding: 13px 26px; border-radius: 999px; border: 1px solid transparent; font-family: 'Inter Variable', sans-serif; font-weight: 600; font-size: 0.95rem; line-height: 1; letter-spacing: -0.01em; text-decoration: none; cursor: pointer; transition: background .25s cubic-bezier(.22,1,.36,1), transform .25s cubic-bezier(.22,1,.36,1), box-shadow .3s cubic-bezier(.22,1,.36,1); } .ds-btn-on-dark { background: linear-gradient(180deg, rgba(255,255,255,.96), rgba(255,255,255,.86)); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); color: #0A2A44; font-weight: 700; box-shadow: 0 2px 6px rgba(10,42,68,.07), 0 16px 40px -12px rgba(10,42,68,.18), inset 0 1px 0 rgba(255,255,255,.9); } .ds-btn-on-dark:hover { background: #fff; transform: translateY(-2px); box-shadow: 0 10px 30px -10px rgba(10,42,68,.22), 0 30px 70px -24px rgba(10,42,68,.3), 0 0 44px -8px rgba(79,179,217,.55); } .ds-btn-on-dark:focus-visible { outline: 2px solid #4FB3D9; outline-offset: 2px; }"
+    },
+    {
+      "name": "Button Ghost",
+      "kind": "button",
+      "refersTo": "button-ghost",
+      "description": "Secondary CTA on dark: translucent glass with a luminous border.",
+      "html": "<div class=\"ds-onnavy\"><a class=\"ds-btn ds-btn-ghost\" href=\"#\">I nostri servizi</a></div>",
+      "css": ".ds-onnavy { background: #0A2A44; padding: 32px; border-radius: 26px; } .ds-btn { display: inline-flex; align-items: center; justify-content: center; gap: 9px; min-height: 48px; padding: 13px 26px; border-radius: 999px; border: 1px solid transparent; font-family: 'Inter Variable', sans-serif; font-weight: 600; font-size: 0.95rem; line-height: 1; letter-spacing: -0.01em; text-decoration: none; cursor: pointer; transition: background .25s cubic-bezier(.22,1,.36,1), border-color .25s cubic-bezier(.22,1,.36,1), transform .25s cubic-bezier(.22,1,.36,1); } .ds-btn-ghost { background: rgba(255,255,255,.06); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); color: #FAFBFC; border-color: rgba(255,255,255,.34); } .ds-btn-ghost:hover { background: rgba(255,255,255,.14); border-color: rgba(255,255,255,.7); transform: translateY(-2px); } .ds-btn-ghost:focus-visible { outline: 2px solid #4FB3D9; outline-offset: 2px; }"
     },
     {
       "name": "Service Card",
       "kind": "card",
       "refersTo": "card-service",
-      "description": "One of the 5 service cards on the home page and services hub.",
-      "html": "<div class=\"ds-card-service\"><svg class=\"ds-card-service-icon\" width=\"28\" height=\"28\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"#3E8E5A\" stroke-width=\"2\"><path d=\"M13 2 3 14h7l-1 8 10-12h-7z\"/></svg><h3 class=\"ds-card-service-title\">Laboratorio mobile ricerca guasti</h3><p class=\"ds-card-service-text\">Unità Centrix 2.0 attrezzata per localizzare e riparare guasti su cavi MT. Reperibilità 24h, 365 giorni l'anno.</p></div>",
-      "css": ".ds-card-service { background: #FAFBFC; color: #16222E; border: 1px solid #E8EFF5; border-radius: 2px; padding: 24px; transition: border-color 0.2s ease-out, transform 0.2s ease-out; } .ds-card-service:hover { border-color: #1D5585; transform: translateY(-2px); } .ds-card-service-icon { margin-bottom: 12px; } .ds-card-service-title { font-family: 'Archivo Variable', sans-serif; font-weight: 700; font-size: 1.125rem; margin: 0 0 8px; } .ds-card-service-text { font-family: 'Inter Variable', sans-serif; font-size: 0.9375rem; line-height: 1.65; margin: 0; }"
+      "description": "Light frosted-glass card on paper sections, with a glass icon chip carrying the card's one point of accent colour.",
+      "html": "<article class=\"ds-card-service\"><span class=\"ds-glass-icon\" aria-hidden=\"true\"><svg width=\"22\" height=\"22\" viewBox=\"0 0 24 24\" fill=\"currentColor\"><path d=\"M13 2 3 14h7l-1 8 10-12h-7l1-8Z\"/></svg></span><h3 class=\"ds-card-title\">Verifiche strumentali</h3><p class=\"ds-card-text\">Prove su interruttori, trasformatori e protezioni con strumentazione certificata, secondo CEI 0-16.</p></article>",
+      "css": ".ds-card-service { position: relative; display: block; max-width: 340px; background: linear-gradient(180deg, rgba(255,255,255,.7), rgba(255,255,255,0) 46%), color-mix(in srgb, #ffffff 78%, transparent); backdrop-filter: blur(14px) saturate(150%); -webkit-backdrop-filter: blur(14px) saturate(150%); color: #16222E; border: 1px solid color-mix(in srgb, #0A2A44 10%, transparent); border-radius: 26px; padding: 28px; box-shadow: 0 1px 2px rgba(10,42,68,.06), 0 4px 12px -4px rgba(10,42,68,.1); transition: border-color .3s cubic-bezier(.22,1,.36,1), transform .3s cubic-bezier(.22,1,.36,1), box-shadow .3s cubic-bezier(.22,1,.36,1); } .ds-card-service:hover { border-color: color-mix(in srgb, #1D5585 40%, transparent); transform: translateY(-4px); box-shadow: 0 10px 30px -10px rgba(10,42,68,.22), 0 30px 70px -24px rgba(10,42,68,.3); } .ds-glass-icon { display: inline-flex; align-items: center; justify-content: center; width: 54px; height: 54px; border-radius: 16px; background: linear-gradient(180deg, rgba(255,255,255,.7), rgba(255,255,255,0) 46%), color-mix(in srgb, #3E8E5A 12%, #ffffff); border: 1px solid color-mix(in srgb, #3E8E5A 26%, transparent); color: #3E8E5A; box-shadow: inset 0 1px 0 rgba(255,255,255,.8); } .ds-card-title { margin: 20px 0 0; font-family: 'Archivo Variable', sans-serif; font-weight: 700; font-size: 1.25rem; letter-spacing: -0.015em; } .ds-card-text { margin: 10px 0 0; font-family: 'Inter Variable', sans-serif; font-size: .9375rem; line-height: 1.65; color: rgba(22,34,46,.75); }"
+    },
+    {
+      "name": "Telemetry Panel",
+      "kind": "card",
+      "refersTo": "panel",
+      "description": "The control sections' surface: navy glass over the navy drench. Holds the RCS screenshot, the three system cards, and the alarm-flow steps. Carries no green since section 0.1 — the control voice comes from the serif heading and the live dot instead.",
+      "html": "<div class=\"ds-onnavy\"><article class=\"ds-panel\"><span class=\"ds-pill\">RCS</span><h3 class=\"ds-panel-title\">Remote Control System</h3><p class=\"ds-panel-text\">Analisi guasti in tempo reale, richiusura automatica, reset protezioni da remoto.</p><ul class=\"ds-spec-list\"><li class=\"ds-spec\">Richiusura automatica</li><li class=\"ds-spec\">Web App</li><li class=\"ds-spec\">Integrazione SCADA</li></ul></article></div>",
+      "css": ".ds-onnavy { background: #0A2A44; padding: 32px; border-radius: 26px; } .ds-panel { display: flex; flex-direction: column; max-width: 360px; background: linear-gradient(180deg, rgba(255,255,255,.12), rgba(255,255,255,0) 42%), color-mix(in srgb, #103B5F 62%, transparent); backdrop-filter: blur(16px) saturate(150%); -webkit-backdrop-filter: blur(16px) saturate(150%); border: 1px solid rgba(255,255,255,.16); border-radius: 26px; padding: 28px; color: #FAFBFC; box-shadow: 0 2px 6px rgba(10,42,68,.07), 0 16px 40px -12px rgba(10,42,68,.18), inset 0 1px 0 rgba(255,255,255,.08); } .ds-pill { align-self: flex-start; display: inline-flex; align-items: center; gap: 8px; font-family: 'Archivo Variable', sans-serif; font-weight: 600; font-size: .72rem; letter-spacing: .12em; text-transform: uppercase; padding: 6px 12px; border-radius: 999px; border: 1px solid rgba(255,255,255,.28); color: #E8EFF5; } .ds-panel-title { margin: 20px 0 0; font-family: 'Archivo Variable', sans-serif; font-weight: 700; font-size: 1.25rem; letter-spacing: -0.015em; } .ds-panel-text { margin: 12px 0 0; font-family: 'Inter Variable', sans-serif; font-size: .875rem; line-height: 1.65; color: rgba(232,239,245,.85); } .ds-spec-list { display: flex; flex-wrap: wrap; gap: 8px; margin: 24px 0 0; padding: 20px 0 0; border-top: 1px solid rgba(255,255,255,.12); list-style: none; } .ds-spec { border-radius: 999px; border: 1px solid rgba(255,255,255,.18); background: rgba(255,255,255,.08); padding: 4px 12px; font-family: 'Archivo Variable', sans-serif; font-size: .72rem; font-weight: 500; letter-spacing: .02em; color: #E8EFF5; }"
     },
     {
       "name": "Eyebrow",
       "kind": "custom",
-      "refersTo": "label",
-      "description": "Section-opening kicker: short dash + uppercase tracked label, used before every H2.",
-      "html": "<div class=\"ds-eyebrow\"><span class=\"ds-eyebrow-dash\"></span><span class=\"ds-eyebrow-label\">Cerca guasti</span></div>",
-      "css": ".ds-eyebrow { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; } .ds-eyebrow-dash { width: 32px; height: 2px; background: #4FB3D9; display: block; } .ds-eyebrow-label { font-family: 'Archivo Variable', sans-serif; font-weight: 600; font-size: 0.8rem; letter-spacing: 0.1em; text-transform: uppercase; color: #4FB3D9; }"
+      "refersTo": "eyebrow",
+      "description": "The recurring section opener, inherited from the client's print brochure: a 32x2px dash then an uppercase tracked label. The leaf variant marks field sections; in control sections the live dot replaces the dash — since section 0.1 that dot is the only colour cue left.",
+      "html": "<div class=\"ds-eyebrow-row\"><div class=\"ds-eyebrow\"><span class=\"ds-eyebrow-dash ds-eyebrow-dash--leaf\"></span><span class=\"ds-eyebrow-label ds-eyebrow-label--leaf\">Cosa facciamo</span></div><div class=\"ds-onnavy ds-onnavy--tight\"><div class=\"ds-eyebrow\"><span class=\"ds-live-dot\" aria-hidden=\"true\"></span><span class=\"ds-eyebrow-label ds-eyebrow-label--signal\">Control Room · RCS · CCI</span></div></div></div>",
+      "css": ".ds-eyebrow-row { display: flex; flex-direction: column; gap: 20px; } .ds-onnavy--tight { background: #0A2A44; padding: 20px 24px; border-radius: 16px; } .ds-eyebrow { display: flex; align-items: center; gap: 12px; } .ds-eyebrow-dash { width: 32px; height: 2px; display: block; background: #4FB3D9; } .ds-eyebrow-dash--leaf { background: #3E8E5A; } .ds-eyebrow-label { font-family: 'Archivo Variable', sans-serif; font-weight: 600; font-size: .8rem; letter-spacing: .1em; text-transform: uppercase; color: #4FB3D9; } .ds-eyebrow-label--leaf { color: #3E8E5A; } .ds-eyebrow-label--signal { color: #4FD07F; } .ds-live-dot { position: relative; width: 9px; height: 9px; border-radius: 999px; background: #4FD07F; flex-shrink: 0; } .ds-live-dot::after { content: ''; position: absolute; inset: 0; border-radius: 999px; background: #4FD07F; animation: ds-live-ping 2.4s cubic-bezier(.16,1,.3,1) infinite; } @keyframes ds-live-ping { 0% { transform: scale(1); opacity: .7; } 70% { transform: scale(2.6); opacity: 0; } 100% { transform: scale(2.6); opacity: 0; } } @media (prefers-reduced-motion: reduce) { .ds-live-dot::after { animation: none; } }"
     },
     {
       "name": "kV Chip",
       "kind": "chip",
-      "refersTo": "card-service",
-      "description": "Tabular-figure kV rating tag on each Progetti gallery item — the most identity-carrying data point of each project.",
-      "html": "<span class=\"ds-chip-kv\">150/30 kV</span>",
-      "css": ".ds-chip-kv { display: inline-block; font-family: 'Inter Variable', sans-serif; font-variant-numeric: tabular-nums; font-weight: 500; font-size: 0.8125rem; letter-spacing: 0.02em; color: #FAFBFC; background: #103B5F; padding: 4px 10px; border-radius: 2px; }"
+      "refersTo": "chip-kv",
+      "description": "Dark glass chip carrying a project's technical rating over photography. Always visible, never hover-only — touch has no hover state.",
+      "html": "<div class=\"ds-onnavy\"><span class=\"ds-chip-kv\">150/30 kV</span></div>",
+      "css": ".ds-onnavy { background: #0A2A44; padding: 32px; border-radius: 26px; } .ds-chip-kv { display: inline-flex; align-items: center; font-family: 'Inter Variable', sans-serif; font-variant-numeric: tabular-nums; font-weight: 600; font-size: .8125rem; letter-spacing: .02em; color: #FAFBFC; background: linear-gradient(180deg, rgba(255,255,255,.12), rgba(255,255,255,0) 42%), color-mix(in srgb, #0A2A44 62%, transparent); backdrop-filter: blur(10px) saturate(150%); -webkit-backdrop-filter: blur(10px) saturate(150%); border: 1px solid rgba(255,255,255,.18); padding: 5px 12px; border-radius: 999px; box-shadow: 0 1px 2px rgba(10,42,68,.06), 0 4px 12px -4px rgba(10,42,68,.1); }"
     },
     {
       "name": "Header Navigation",
       "kind": "nav",
-      "refersTo": "button-on-dark",
-      "description": "Sticky header: transparent over the dark hero, solidifies to navy-950 on scroll. Persistent tel: CTA at every breakpoint.",
-      "html": "<header class=\"ds-header\"><nav class=\"ds-header-nav\"><a href=\"/azienda/\">Azienda</a><a href=\"/servizi/\">Servizi</a><a href=\"/progetti/\">Progetti</a><a href=\"/contatti/\">Contatti</a></nav><a class=\"ds-header-cta\" href=\"tel:+390881377590\">0881 377590</a></header>",
-      "css": ".ds-header { display: flex; align-items: center; justify-content: space-between; padding: 20px 32px; background: transparent; transition: background 0.2s ease-out; } .ds-header.ds-header--scrolled { background: #0A2A44; } .ds-header-nav { display: flex; gap: 32px; } .ds-header-nav a { font-family: 'Inter Variable', sans-serif; font-weight: 500; color: #FAFBFC; text-decoration: none; } .ds-header-cta { font-family: 'Inter Variable', sans-serif; font-weight: 600; color: #FAFBFC; border: 1px solid #4FB3D9; border-radius: 6px; padding: 8px 16px; text-decoration: none; transition: background 0.2s ease-out; } .ds-header-cta:hover { background: #1D5585; }"
+      "refersTo": "header",
+      "description": "A floating dark-glass island over the hero. The tel: CTA stays visible at every breakpoint — it is the site's primary conversion — and collapses to an icon only below 400px.",
+      "html": "<nav class=\"ds-nav\"><span class=\"ds-nav-brand\">AMON ENERGY</span><ul class=\"ds-nav-list\"><li><a class=\"ds-nav-link\" href=\"#\">Azienda</a></li><li><a class=\"ds-nav-link\" href=\"#\">Servizi</a></li><li><a class=\"ds-nav-link\" href=\"#\">Progetti</a></li><li><a class=\"ds-nav-link\" href=\"#\">Contatti</a></li></ul><a class=\"ds-nav-cta\" href=\"tel:+390881377590\">+39 0881 377590</a></nav>",
+      "css": ".ds-nav { display: flex; align-items: center; gap: 24px; padding: 10px 12px 10px 22px; border-radius: 999px; background: linear-gradient(180deg, rgba(255,255,255,.12), rgba(255,255,255,0) 42%), color-mix(in srgb, #0A2A44 58%, transparent); backdrop-filter: blur(24px) saturate(180%); -webkit-backdrop-filter: blur(24px) saturate(180%); border: 1px solid rgba(255,255,255,.16); box-shadow: 0 10px 34px -10px rgba(10,42,68,.3), inset 0 1px 0 rgba(255,255,255,.16); } .ds-nav-brand { font-family: 'Archivo Variable', sans-serif; font-weight: 600; font-size: .8rem; letter-spacing: .12em; color: rgba(232,239,245,.85); white-space: nowrap; } .ds-nav-list { display: flex; align-items: center; gap: 22px; margin: 0; padding: 0; list-style: none; } .ds-nav-link { font-family: 'Inter Variable', sans-serif; font-weight: 600; font-size: .9rem; color: #FAFBFC; text-decoration: none; transition: color .25s cubic-bezier(.22,1,.36,1); } .ds-nav-link:hover { color: #4FB3D9; } .ds-nav-cta { display: inline-flex; align-items: center; min-height: 40px; padding: 10px 20px; border-radius: 999px; background: linear-gradient(180deg, rgba(255,255,255,.96), rgba(255,255,255,.86)); color: #0A2A44; font-family: 'Inter Variable', sans-serif; font-weight: 700; font-size: .875rem; text-decoration: none; white-space: nowrap; box-shadow: 0 2px 6px rgba(10,42,68,.07), inset 0 1px 0 rgba(255,255,255,.9); transition: transform .25s cubic-bezier(.22,1,.36,1), box-shadow .3s cubic-bezier(.22,1,.36,1); } .ds-nav-cta:hover { transform: translateY(-2px); box-shadow: 0 10px 30px -10px rgba(10,42,68,.22), 0 0 44px -8px rgba(79,179,217,.55); }"
     }
   ],
   "narrative": {
-    "northStar": "Industrial Precision",
-    "overview": "This is the term the client's own 2024 brochure already earned, and it's the standard the site is held to: the site should read like the print collateral of a serious electrical-engineering contractor — deep navy, generous white space, confident large-scale type, one restrained signature graphic — not like a SaaS product landing page. Every decision below defaults to restraint. The system rejects gradients, glassmorphism, decorative card shadows, and the stock-photography-and-superlative vocabulary of the prior WordPress site.\n\nDensity is generous but purposeful: sections carry one idea each (per PRODUCT.md's Design Principles), separated by real vertical space rather than dividers or shadows. The one permitted piece of ornament is the signal-wave motif — a thin electrical-waveform line, lifted directly from the brochure, used as a section divider with a barely-perceptible horizontal drift. Everything else earns its place through structure (borders, type scale, color role) rather than decoration.",
+    "northStar": "Liquid Industrial",
+    "overview": "The standard is still the one the client's own 2024 brochure earned — the site should read like the print collateral of a serious electrical-engineering contractor: deep navy, generous white space, confident large-scale type, one signature graphic, not a SaaS product landing page. What changed in 2026-07 is the material, not the posture: surfaces are frosted glass over navy with soft layered depth, rendered with the precision of instrument housing rather than the softness of a consumer app. Restraint is still the default, and it is now enforced by where effects are allowed rather than by banning them outright — blur only where something genuinely floats (the Earned Blur Rule), shadows only in the navy's own shade (the Navy Shadow Rule), green only at the scale of a marker (the Leaf Rarity Rule).\n\nSince 2026-07 the site also has a single surface colour. The green drench that used to mark the control sections (Control Room, RCS, CCI) read as a second brand rather than a second voice, so navy now carries every surface and the dark green steps were deleted from the palette outright. The control world still exists, but it is spoken rather than coloured: a Source Serif 4 authority face, a live 24/7 dot, telemetry panels, a scanline.\n\nDensity is generous but purposeful: sections carry one idea each, separated by real vertical space. The one permitted piece of ornament is the spark gap — a Jacob's ladder arc struck between two electrodes, closing every hero. Everything else earns its place through structure rather than decoration.",
     "keyCharacteristics": [
       "Deep navy + paper-white base, with leaf-green and signal-blue reserved for small, deliberate accents only",
       "Large, confident, geometric-expanded display type paired with a neutral, highly readable body face",
-      "Flat surfaces throughout — depth comes from borders and translucent dark overlay panels, never box-shadow",
-      "One recurring signature element (the signal wave), not a library of decorative motifs",
+      "Depth from frosted glass and soft layered shadows, tuned to feel engineered rather than decorative",
+      "One recurring signature element (the spark gap), not a library of decorative motifs",
       "Mobile-first, touch-parity by construction: nothing shown only on hover"
     ],
     "rules": [
-      { "name": "The Leaf Rarity Rule", "body": "leaf-500 never fills a background, a button, or a section. It appears only as a small accent — an icon, a chip, a bullet — and its rarity is what keeps it feeling like the logo's signature color rather than a UI color.", "section": "colors" },
-      { "name": "The Navy Ramp Rule", "body": "navy-950 → navy-900 → navy-700 → navy-100 is a single continuous tonal ramp, not four unrelated colors. Any new navy-family need should sit on this same ramp.", "section": "colors" },
+      { "name": "The One Surface Rule", "body": "Navy is the only surface colour of the site, control sections included. The dark green steps were deleted from the palette so a green section cannot come back by accident. Continuity over contrast.", "section": "colors" },
+      { "name": "The Leaf Rarity Rule", "body": "green-500 and green-400 never fill a background, a button, or a section. They appear only as small marks — a live dot, an eyebrow dash, a step number, an icon, a bullet, a map pin — and their rarity is what keeps green feeling like the logo's signature colour rather than a UI colour.", "section": "colors" },
+      { "name": "The Navy Ramp Rule", "body": "navy-950 through navy-100 is a single continuous tonal ramp, not six unrelated colours. Any new navy-family need should sit somewhere on this same ramp rather than introducing an unrelated blue.", "section": "colors" },
+      { "name": "The Navy Shadow Rule", "body": "Every shadow is mixed from rgba(10, 42, 68, ...). A neutral or black shadow anywhere in the system is a bug — on the paper background it reads as smudge rather than depth.", "section": "elevation" },
+      { "name": "The Earned Blur Rule", "body": "backdrop-filter is for elements that genuinely float over something: the navbar island over the hero, captions over photography, the lightbox, telemetry panels over a drench. Glass on a static section against a flat background is decoration, and PRODUCT.md rules out decorative glassmorphism by name.", "section": "elevation" },
       { "name": "The No-Fluff Rule", "body": "Copy is short, factual, and technically specific (norms, equipment, kV ratings) rather than motivational. If a sentence could appear on any B2B site regardless of industry, cut it.", "section": "typography" },
-      { "name": "The Deliberate Eyebrow Rule", "body": "The eyebrow-dash-title pattern is inherited directly from the client's print brochure — it is brand continuity, not a default scaffold. Apply it as a single consistent system, and vary section rhythm through spacing, StatBar, marquee, and full-bleed gallery breaks so the eyebrow doesn't become the only structural device on the page.", "section": "typography" },
-      { "name": "The Flat-by-Default Rule", "body": "No box-shadow anywhere in the system, including the mobile nav panel, sticky header, and lightbox. Where a SaaS pattern would reach for a shadow, use a border, a background-color shift, or a navy-950 translucent panel instead.", "section": "elevation" }
+      { "name": "The Deliberate Eyebrow Rule", "body": "The eyebrow-dash-title pattern is inherited directly from the client's print brochure — it is brand continuity, not a default scaffold. Because a tracked-uppercase kicker above every section is also the most common AI-generated-site tell, treat it as a single system applied consistently rather than as filler reached for per-section; vary section rhythm through spacing, StatBar, marquee, and full-bleed gallery breaks.", "section": "typography" }
     ],
     "dos": [
-      "Do keep leaf-500 to micro-accents only — an icon, a chip, a bullet.",
-      "Do build all depth from 1px borders and navy-950 translucent panels, never box-shadow.",
+      "Do keep green-500 / green-400 to micro-accents only — a live dot, an eyebrow dash, a step number, an icon, a bullet (the Leaf Rarity Rule).",
+      "Do drench every surface in navy, control sections included (the One Surface Rule).",
+      "Do mix every shadow from rgba(10, 42, 68, ...) so depth reads as the navy's own shade (the Navy Shadow Rule).",
       "Do write explicit, task-specific button labels (\"Chiamaci ora\", \"Scrivici via email\"), never \"Invia\" / \"Submit\".",
-      "Do cap body copy at 65ch measure at every breakpoint.",
-      "Do keep the two radius scales distinct: 6px for buttons, 2px for cards/containers.",
+      "Do cap body copy at 65-68ch measure at every breakpoint.",
+      "Do give every CTA the same metrics — 999px pill, 48px min-height, 13px 26px — and change only the material.",
       "Do keep the tel: CTA visible in the header at every breakpoint, and in the mobile sticky bar below md.",
-      "Do show gallery captions, metadata, and chip tags by default — never hover-only.",
-      "Do disable the signal-wave drift, StatBar counters, and all scroll-reveal animation under prefers-reduced-motion."
+      "Do show gallery captions, metadata, and chip tags by default — never hover-only, since touch has no hover state.",
+      "Do disable the spark-gap arc, StatBar counters, and all scroll-reveal animation under prefers-reduced-motion."
     ],
     "donts": [
-      "Don't use leaf-500 as a section or button background — it is a logo accent, not a UI color.",
-      "Don't add box-shadow to cards, the mobile nav panel, the sticky header, or the lightbox.",
-      "Don't use gradients, background-clip: text, or glassmorphism anywhere.",
-      "Don't use stock photography of \"smiling guys in hardhats\" — source real photography of the actual substations, vans, and control room.",
-      "Don't build the projects gallery as Pinterest-style masonry, a uniform square-thumbnail grid, an autoplay carousel, a 50%-black-overlay-with-centered-title, or a flip/tilt hover card.",
-      "Don't use pill-shaped buttons; radius is 6px, full stop.",
-      "Don't let the eyebrow-dash pattern become the only section-opening device on a page."
+      "Don't use green as a section background, a button fill, or body text — it is a logo accent, not a UI colour.",
+      "Don't reintroduce a green-950/green-900 surface step; they were deleted from the palette on purpose.",
+      "Don't reach for backdrop-filter on elements that aren't actually floating over something (the Earned Blur Rule) — PRODUCT.md rules out decorative glassmorphism by name.",
+      "Don't use background-clip: text, gradient text, or a saturated multi-stop gradient — this is an engineering brochure, not a SaaS landing page.",
+      "Don't use stock photography of \"smiling guys in hardhats\" — source real brochure/site photography of the actual substations, vans, and control room.",
+      "Don't build the projects gallery as Pinterest-style masonry, a uniform square-thumbnail grid, an autoplay carousel, a 50%-black-overlay-with-centered-title, or a flip/tilt hover card — all five are explicitly ruled out for this project.",
+      "Don't use a hero-metric template (big number, small label, gradient accent) — the StatBar is the one sanctioned numbers block, and its placeholder values stay marked as such until the client confirms them.",
+      "Don't let the eyebrow-dash pattern become the only section-opening device on a page — vary rhythm with StatBar, marquee, and full-bleed breaks (the Deliberate Eyebrow Rule)."
     ]
   }
 }

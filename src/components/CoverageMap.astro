@@ -1,0 +1,353 @@
+---
+/**
+ * Mappa vettoriale del raggio d'azione: Centro-Sud Italia con la sede di
+ * Castelluccio dei Sauri (FG). Stessa grafica della mappa in /contatti,
+ * ma disegnata dalle coordinate reali — nessuna immagine, nessun iframe.
+ */
+type LL = [number, number];
+
+const LAT_MID = 40.3;
+const K = Math.cos((LAT_MID * Math.PI) / 180);
+const KM_PER_DEG = 111.32;
+
+// Proiezione equirettangolare centrata sulla latitudine media: isotropa,
+// quindi i cerchi di raggio in km restano cerchi.
+const project = ([lon, lat]: LL): [number, number] => [lon * K, -lat];
+
+// Coste semplificate (lon, lat), senso orario.
+// Il bordo superiore (lat 44.1) è un taglio, non una costa: viene sfumato.
+const LAT_CUT = 44.1;
+
+const peninsola: LL[] = [
+  // Tirreno, da nord verso sud
+  [10.05, LAT_CUT], [10.28, 43.83], [10.52, 43.50], [10.79, 42.93], [11.10, 42.42],
+  [11.45, 42.35], [11.82, 42.09], [12.05, 41.75], [12.30, 41.68], [12.63, 41.44],
+  [12.95, 41.28], [13.28, 41.23], [13.58, 41.21], [13.88, 41.05], [14.27, 40.83],
+  [14.42, 40.72], [14.68, 40.62], [14.93, 40.25], [15.28, 40.03], [15.63, 39.99],
+  [16.02, 39.72], [16.03, 39.36], [16.08, 39.13], [16.20, 38.93], [16.05, 38.72],
+  [15.83, 38.62], [15.92, 38.45], [15.85, 38.36], [15.72, 38.25], [15.64, 38.13],
+  // Punta dello Stivale e risalita ionica
+  [15.68, 37.95], [15.85, 37.92], [16.00, 37.93], [16.20, 38.10], [16.58, 38.51],
+  [16.85, 38.85], [17.13, 39.08], [17.13, 39.37], [16.98, 39.51], [16.50, 39.75],
+  [16.70, 40.08], [16.82, 40.38], [17.23, 40.47], [17.55, 40.30], [17.98, 40.05],
+  [18.36, 39.79], [18.49, 40.14], [18.30, 40.40], [17.94, 40.64], [17.47, 40.83],
+  [17.30, 40.95], [16.87, 41.13], [16.42, 41.28], [16.13, 41.38], [15.92, 41.63],
+  // Gargano
+  [16.05, 41.71], [16.18, 41.88], [16.01, 41.95], [15.75, 41.90], [15.40, 41.90],
+  // Adriatico, risalita
+  [14.99, 42.00], [14.71, 42.12], [14.40, 42.35], [14.22, 42.47], [13.96, 42.75],
+  [13.88, 42.94], [13.68, 43.18], [13.51, 43.62], [13.22, 43.72], [12.90, 43.92],
+  [12.57, LAT_CUT],
+];
+
+const sicilia: LL[] = [
+  [12.43, 37.80], [12.71, 38.10], [13.36, 38.20], [13.70, 38.02], [14.03, 38.05],
+  [14.40, 38.02], [14.70, 38.16], [15.05, 38.25], [15.24, 38.27], [15.63, 38.26],
+  [15.29, 37.85], [15.09, 37.50], [15.19, 37.28], [15.29, 37.07], [15.22, 36.85],
+  [15.14, 36.69], [15.00, 36.70], [14.85, 36.72], [14.44, 36.89], [14.25, 37.07],
+  [13.94, 37.10], [13.57, 37.27], [13.08, 37.50], [12.78, 37.57], [12.59, 37.65],
+];
+
+const sardegna: LL[] = [
+  [8.20, 40.97], [8.17, 40.56], [8.50, 40.30], [8.37, 40.03],
+  [8.50, 39.90], [8.45, 39.75], [8.38, 39.50], [8.38, 39.20], [8.45, 39.05],
+  [8.63, 38.87], [9.12, 39.20], [9.62, 39.11], [9.70, 39.94], [9.83, 40.52],
+  [9.55, 40.92], [9.14, 41.24], [8.70, 40.92],
+];
+
+const forme = [peninsola, sicilia, sardegna];
+
+// --- viewBox ------------------------------------------------------------
+// La geometria viene inscritta in una tela 4:3 (stesso rapporto della card),
+// così nulla viene tagliato e non serve `slice`.
+const RATIO = 4 / 3;
+const PAD = 0.45; // gradi
+const pts = forme.flat().map(project);
+const gx0 = Math.min(...pts.map((p) => p[0])) - PAD * K;
+const gx1 = Math.max(...pts.map((p) => p[0])) + PAD * K;
+const gy0 = Math.min(...pts.map((p) => p[1])) - PAD;
+const gy1 = Math.max(...pts.map((p) => p[1])) + PAD;
+
+// Estende l'asse più corto fino a raggiungere il rapporto voluto.
+const gw = gx1 - gx0;
+const gh = gy1 - gy0;
+const vw = Math.max(gw, gh * RATIO);
+const vh = vw / RATIO;
+const minX = gx0 - (vw - gw) / 2;
+const minY = gy0 - (vh - gh) / 2;
+
+const W = 1000;
+const SCALE = W / vw;
+const H = Math.round(vh * SCALE);
+
+const xy = (p: LL): [number, number] => {
+  const [px, py] = project(p);
+  return [(px - minX) * SCALE, (py - minY) * SCALE];
+};
+const km = (v: number) => (v / KM_PER_DEG) * SCALE;
+const n = (v: number) => Math.round(v * 10) / 10;
+
+/** Catmull-Rom → Bézier: coste morbide senza sbavare i promontori. */
+const TENSION = 0.28;
+function smoothClosed(coords: LL[]): string {
+  const p = coords.map(xy);
+  const len = p.length;
+  const at = (i: number) => p[((i % len) + len) % len];
+  let d = `M${n(p[0][0])} ${n(p[0][1])}`;
+  for (let i = 0; i < len; i++) {
+    const p0 = at(i - 1);
+    const p1 = at(i);
+    const p2 = at(i + 1);
+    const p3 = at(i + 2);
+    const c1 = [p1[0] + (p2[0] - p0[0]) * TENSION, p1[1] + (p2[1] - p0[1]) * TENSION];
+    const c2 = [p2[0] - (p3[0] - p1[0]) * TENSION, p2[1] - (p3[1] - p1[1]) * TENSION];
+    d += `C${n(c1[0])} ${n(c1[1])},${n(c2[0])} ${n(c2[1])},${n(p2[0])} ${n(p2[1])}`;
+  }
+  return `${d}Z`;
+}
+
+// --- punti notevoli -----------------------------------------------------
+const sede: LL = [15.505, 41.297];
+const [sx, sy] = xy(sede);
+
+const citta: { nome: string; ll: LL; dx?: number; dy?: number; anchor?: 'start' | 'end' }[] = [
+  { nome: 'Roma', ll: [12.5, 41.9], dx: -10, dy: -8, anchor: 'end' },
+  { nome: 'Napoli', ll: [14.27, 40.85], dx: -10, dy: 14, anchor: 'end' },
+  { nome: 'Bari', ll: [16.87, 41.12], dx: 11, dy: 5 },
+  { nome: 'Pescara', ll: [14.22, 42.47], dx: -10, dy: -8, anchor: 'end' },
+  { nome: 'Taranto', ll: [17.23, 40.47], dx: 11, dy: 5 },
+  { nome: 'Cosenza', ll: [16.25, 39.3], dx: 11, dy: 4 },
+];
+
+const anelli = [150, 300, 450].map((r) => ({ km: r, labelY: sy - km(r) + 22 }));
+
+// Sfumatura sul taglio settentrionale: il bordo dritto non deve leggersi come costa.
+const yCut = xy([0, LAT_CUT])[1];
+const yFade = yCut + km(190);
+
+// Graticola
+const lonLines: number[] = [];
+for (let l = 8; l <= 19; l += 2) lonLines.push(l);
+const latLines: number[] = [];
+for (let l = 36; l <= 44; l += 2) latLines.push(l);
+
+const uid = 'cvg';
+---
+
+<figure class="coverage-map">
+  <div class="coverage-map__frame rounded-[var(--radius-card)] border border-navy-100 shadow-[var(--shadow-md)]">
+    <svg
+      viewBox={`0 0 ${W} ${H}`}
+      role="img"
+      aria-label="Mappa del raggio d'azione di Amon Energy: la sede di Castelluccio dei Sauri (FG) copre l'intero Centro-Sud Italia"
+      preserveAspectRatio="xMidYMid meet"
+    >
+      <defs>
+        <linearGradient id={`${uid}-sea`} x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0" stop-color="#103b5f"></stop>
+          <stop offset="1" stop-color="#0a2a44"></stop>
+        </linearGradient>
+        <linearGradient id={`${uid}-land`} x1="0.1" y1="0" x2="0.9" y2="1">
+          <stop offset="0" stop-color="#1c5680"></stop>
+          <stop offset="1" stop-color="#123f61"></stop>
+        </linearGradient>
+        <radialGradient id={`${uid}-glow`} cx="0.5" cy="0.5" r="0.5">
+          <stop offset="0" stop-color="#4fb3d9" stop-opacity="0.26"></stop>
+          <stop offset="0.5" stop-color="#4fb3d9" stop-opacity="0.09"></stop>
+          <stop offset="1" stop-color="#4fb3d9" stop-opacity="0"></stop>
+        </radialGradient>
+        <filter id={`${uid}-pin-shadow`} x="-60%" y="-60%" width="220%" height="220%">
+          <feDropShadow dx="0" dy="4" stdDeviation="5" flood-color="#04182a" flood-opacity="0.55"></feDropShadow>
+        </filter>
+        <linearGradient id={`${uid}-fade`} gradientUnits="userSpaceOnUse" x1="0" y1={n(yCut)} x2="0" y2={n(yFade)}>
+          <stop offset="0" stop-color="#000"></stop>
+          <stop offset="1" stop-color="#fff"></stop>
+        </linearGradient>
+        <mask id={`${uid}-cut`}>
+          <rect width={W} height={H} fill={`url(#${uid}-fade)`}></rect>
+        </mask>
+      </defs>
+
+      <rect width={W} height={H} fill={`url(#${uid}-sea)`}></rect>
+
+      <!-- graticola -->
+      <g stroke="#1d5585" stroke-width="1" opacity="0.3">
+        {lonLines.map((l) => <line x1={n(xy([l, 0])[0])} y1="0" x2={n(xy([l, 0])[0])} y2={H} />)}
+        {latLines.map((l) => <line x1="0" y1={n(xy([0, l])[1])} x2={W} y2={n(xy([0, l])[1])} />)}
+      </g>
+
+      <!-- terraferma -->
+      <g
+        fill={`url(#${uid}-land)`}
+        stroke="#3f80b8"
+        stroke-width="1.5"
+        stroke-linejoin="round"
+        opacity="0.95"
+        mask={`url(#${uid}-cut)`}
+      >
+        {forme.map((f) => <path d={smoothClosed(f)} />)}
+      </g>
+
+      <!-- alone di copertura -->
+      <circle cx={n(sx)} cy={n(sy)} r={n(km(470))} fill={`url(#${uid}-glow)`}></circle>
+
+      <!-- anelli di raggio -->
+      <g fill="none" stroke="#4fd07f" stroke-opacity="0.45" stroke-width="1.5" stroke-dasharray="7 9">
+        {anelli.map((a) => <circle class="ring" cx={n(sx)} cy={n(sy)} r={n(km(a.km))} />)}
+      </g>
+      <g font-family="Inter, Arial, sans-serif" font-size="15" fill="#4fd07f" fill-opacity="0.75" text-anchor="middle">
+        {
+          anelli
+            .filter((a) => a.labelY > 24)
+            .map((a) => <text x={n(sx)} y={n(a.labelY)}>{a.km} km</text>)
+        }
+      </g>
+
+      <!-- città -->
+      <g font-family="Inter, Arial, sans-serif" font-size="17" fill="#9dc0d9">
+        {
+          citta.map((c) => {
+            const [cx, cy] = xy(c.ll);
+            return (
+              <>
+                <circle cx={n(cx)} cy={n(cy)} r="3.5" fill="#9dc0d9" fill-opacity="0.8" />
+                <text
+                  x={n(cx + (c.dx ?? 0))}
+                  y={n(cy + (c.dy ?? 0))}
+                  text-anchor={c.anchor ?? 'start'}
+                >
+                  {c.nome}
+                </text>
+              </>
+            );
+          })
+        }
+      </g>
+
+      <!-- sede -->
+      <g transform={`translate(${n(sx)} ${n(sy)})`}>
+        <circle class="pulse" r={n(km(60))} fill="#4fd07f" fill-opacity="0.2"></circle>
+        <g filter={`url(#${uid}-pin-shadow)`} transform="scale(0.85)">
+          <path
+            d="M0 -34 C 20 -34 34 -20 34 0 C 34 22 0 44 0 44 C 0 44 -34 22 -34 0 C -34 -20 -20 -34 0 -34 Z"
+            fill="#4fd07f"></path>
+          <circle cy="-2" r="11" fill="#0a2a44"></circle>
+        </g>
+      </g>
+
+    </svg>
+
+    <div class="coverage-map__legend">
+      <span class="coverage-map__dot" aria-hidden="true"></span>
+      <span>
+        <strong>Castelluccio dei Sauri</strong>
+        <span class="coverage-map__legend-sub">Sede unica · Foggia, Puglia</span>
+      </span>
+    </div>
+  </div>
+</figure>
+
+<style>
+  .coverage-map__frame {
+    position: relative;
+    overflow: hidden;
+    aspect-ratio: 4 / 3;
+    background: #0a2a44;
+  }
+
+  .coverage-map__legend {
+    position: absolute;
+    left: 1rem;
+    bottom: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.625rem;
+    padding: 0.625rem 0.9rem;
+    border-radius: 999px;
+    border: 1px solid rgb(255 255 255 / 0.14);
+    background: rgb(10 42 68 / 0.62);
+    backdrop-filter: blur(10px);
+    color: #e8eff5;
+    font-size: 0.8125rem;
+    line-height: 1.25;
+  }
+
+  .coverage-map__legend strong {
+    display: block;
+    font-weight: 700;
+    letter-spacing: 0.01em;
+  }
+
+  .coverage-map__legend-sub {
+    display: block;
+    color: #9dc0d9;
+    font-size: 0.75rem;
+  }
+
+  .coverage-map__dot {
+    width: 0.5rem;
+    height: 0.5rem;
+    flex: none;
+    border-radius: 999px;
+    background: #4fd07f;
+    box-shadow: 0 0 0 4px rgb(79 208 127 / 0.22);
+  }
+
+  .coverage-map__frame svg {
+    display: block;
+    width: 100%;
+    height: 100%;
+  }
+
+  .ring {
+    transform-box: fill-box;
+    transform-origin: center;
+    animation: ring-breathe 6s var(--ease-signature, ease-in-out) infinite;
+  }
+  .ring:nth-child(2) {
+    animation-delay: 0.6s;
+  }
+  .ring:nth-child(3) {
+    animation-delay: 1.2s;
+  }
+
+  .pulse {
+    transform-box: fill-box;
+    transform-origin: center;
+    animation: pin-pulse 3.2s ease-out infinite;
+  }
+
+  @keyframes ring-breathe {
+    0%,
+    100% {
+      opacity: 0.55;
+      transform: scale(1);
+    }
+    50% {
+      opacity: 1;
+      transform: scale(1.015);
+    }
+  }
+
+  @keyframes pin-pulse {
+    0% {
+      opacity: 0.55;
+      transform: scale(0.5);
+    }
+    70% {
+      opacity: 0;
+      transform: scale(1.6);
+    }
+    100% {
+      opacity: 0;
+      transform: scale(1.6);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .ring,
+    .pulse {
+      animation: none;
+    }
+  }
+</style>

@@ -24,15 +24,13 @@
   --color-navy-300: #7ea6c4;
   --color-navy-100: #e8eff5;
 
-  /* ---- Control world (green): Control Room, RCS, CCI, 24/7 monitoring ---- */
-  --color-green-950: #061c12;
-  --color-green-900: #0b2c1d;
-  --color-green-800: #123f2a;
-  --color-green-700: #1a5335;
-  --color-green-600: #227244;
+  /* ---- Green: accent only ----
+     Navy is the one surface colour of the site, control sections included.
+     Green is reserved for small marks — dots, dashes, step numbers, icons.
+     There are deliberately no dark green surface steps: a green drench is what
+     used to split the site into two worlds. */
   --color-green-500: #3e8e5a; /* the logo leaf — shared bridge accent */
   --color-green-400: #4fd07f; /* live "signal" green — telemetry, pulse, glow */
-  --color-green-200: #bfe6cd;
 
   /* RCS tier accents (from the presentation) */
   --color-tier-basic: #43b26a;
@@ -233,7 +231,7 @@
     border: 1px solid transparent;
     font-family: var(--font-body);
     font-weight: 600;
-    font-size: 0.95rem;
+    font-size: 0.95rem; /* typography.button in DESIGN.md */
     line-height: 1;
     letter-spacing: -0.01em;
     text-decoration: none;
@@ -303,16 +301,20 @@
     box-shadow: var(--shadow-md);
   }
 
-  /* Signal — green, control world. Gradient + live glow. */
+  /* Signal — control world. Frosted white on the navy drench, like the other
+     on-dark CTAs: the control sections no longer own a colour of their own. */
   .ds-btn-signal {
-    background: linear-gradient(180deg, var(--color-green-400), var(--color-green-600));
-    color: var(--color-green-950);
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.96), rgba(255, 255, 255, 0.86));
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    color: var(--color-navy-950);
     font-weight: 700;
-    box-shadow: var(--shadow-md), inset 0 1px 0 rgba(255, 255, 255, 0.3);
+    box-shadow: var(--shadow-md), inset 0 1px 0 rgba(255, 255, 255, 0.9);
   }
   .ds-btn-signal:hover {
+    background: #ffffff;
     transform: translateY(-2px);
-    box-shadow: var(--shadow-lg), var(--glow-green);
+    box-shadow: var(--shadow-lg), var(--glow-signal);
   }
 
   /* ---------- Cards — frosted glass, soft depth, generous rounding ---------- */
@@ -419,8 +421,8 @@
     text-transform: uppercase;
     padding: 6px 12px;
     border-radius: 999px;
-    border: 1px solid color-mix(in srgb, var(--color-green-400) 45%, transparent);
-    color: var(--color-green-200);
+    border: 1px solid rgba(255, 255, 255, 0.28);
+    color: var(--color-navy-100);
   }
 
   /* Live indicator dot — the 24/7 heartbeat of the Control world. */
@@ -441,13 +443,13 @@
     animation: live-ping 2.4s var(--ease-out-expo) infinite;
   }
 
-  /* Control-world glass panel — frosted telemetry glass over the green drench. */
+  /* Control-world glass panel — frosted telemetry glass over the navy drench. */
   .ds-panel {
-    background: linear-gradient(180deg, rgba(79, 208, 127, 0.08), rgba(79, 208, 127, 0) 45%),
-      color-mix(in srgb, var(--color-green-900) 62%, transparent);
+    background: var(--glass-sheen),
+      color-mix(in srgb, var(--color-navy-900) 62%, transparent);
     backdrop-filter: blur(16px) saturate(150%);
     -webkit-backdrop-filter: blur(16px) saturate(150%);
-    border: 1px solid color-mix(in srgb, var(--color-green-400) 26%, transparent);
+    border: 1px solid rgba(255, 255, 255, 0.16);
     border-radius: var(--radius-card);
     box-shadow: var(--shadow-md), inset 0 1px 0 rgba(255, 255, 255, 0.08);
   }

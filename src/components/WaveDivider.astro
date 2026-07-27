@@ -11,7 +11,7 @@
  * Under `prefers-reduced-motion` the arc is drawn once, frozen mid-climb.
  */
 interface Props {
-  tone?: 'signal' | 'navy' | 'green';
+  tone?: 'signal' | 'navy';
   animated?: boolean;
   class?: string;
 }
@@ -116,10 +116,6 @@ const { tone = 'signal', animated = false, class: className = '' } = Astro.props
     --tone-glow: var(--color-signal-400);
     --tone-rod: color-mix(in srgb, var(--color-navy-700) 55%, transparent);
   }
-  .energy-flow[data-tone='green'] {
-    --tone-glow: var(--color-green-400);
-    --tone-rod: color-mix(in srgb, var(--color-green-700) 60%, transparent);
-  }
   .energy-flow[data-tone='navy'] {
     --tone-glow: var(--color-navy-300);
     --tone-rod: color-mix(in srgb, var(--color-navy-700) 45%, transparent);
@@ -129,7 +125,7 @@ const { tone = 'signal', animated = false, class: className = '' } = Astro.props
 <script>
   import type { Renderer as OGLRenderer, Program as OGLProgram, Mesh as OGLMesh } from 'ogl';
 
-  type Tone = 'signal' | 'navy' | 'green';
+  type Tone = 'signal' | 'navy';
   type RGB = [number, number, number];
 
   interface Palette {
@@ -141,22 +137,14 @@ const { tone = 'signal', animated = false, class: className = '' } = Astro.props
   }
 
   const PALETTES: Record<Tone, Palette> = {
-    // Field world: a cold blue arc. Leaf-green stays out of it — it is a logo
-    // accent, and a green bloom this size would break the Leaf Rarity Rule.
+    // A cold blue arc. Leaf-green stays out of it — it is a logo accent, and a
+    // green bloom this size would break the Leaf Rarity Rule.
     signal: {
       core: [0.92, 0.98, 1.0],
       glow: [0.31, 0.7, 0.85], // signal-400
       halo: [0.17, 0.45, 0.62],
       rod: [0.31, 0.43, 0.55],
       intensity: 1.0,
-    },
-    // Control world: this is where green is the subject, not an accent.
-    green: {
-      core: [0.93, 1.0, 0.96],
-      glow: [0.31, 0.82, 0.5], // green-400
-      halo: [0.1, 0.36, 0.22],
-      rod: [0.27, 0.46, 0.35],
-      intensity: 0.95,
     },
     navy: {
       core: [0.92, 0.97, 1.0],
