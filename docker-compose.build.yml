@@ -1,0 +1,18 @@
+# Override per costruire le immagini in locale invece di scaricarle da GHCR.
+#
+#   docker compose -f docker-compose.yml -f docker-compose.build.yml up --build
+#
+# Esiste come file separato perché docker-compose.yml deve restare deployabile
+# in Portainer senza il repository a disposizione: una chiave `build:` con un
+# context inesistente farebbe fallire lo stack.
+
+services:
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+
+  cms-auth:
+    build:
+      context: services/cms-auth
+      dockerfile: Dockerfile

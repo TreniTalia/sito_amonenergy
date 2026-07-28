@@ -1,9 +1,9 @@
 # Sito Amon Energy S.r.l.
 
 Sito vetrina statico B2B per Amon Energy — Astro 5 + Tailwind 4, contenuti editabili
-da pannello, deploy automatico su SiteGround. Vedi `SPEC_sito_amonenergy.md` per la
-spec costruttiva completa, `PRODUCT.md`/`DESIGN.md` per il contesto strategico e
-visivo, `docs/CMS-SETUP.md` per il setup del pannello `/admin`.
+da pannello, deploy come stack Docker su Portainer. Vedi `SPEC_sito_amonenergy.md`
+per la spec costruttiva completa, `PRODUCT.md`/`DESIGN.md` per il contesto
+strategico e visivo, `docs/CMS-SETUP.md` per il setup del pannello `/admin`.
 
 ## Comandi
 
@@ -26,54 +26,93 @@ src/
 ├── data/             # contatti.ts, clienti.ts — dati non editabili da CMS
 └── styles/global.css # Design tokens (Tailwind 4 @theme)
 public/
-├── admin/            # Pannello Sveltia CMS
-├── .htaccess         # Redirect 301 + cache, versionato qui (Astro lo copia in dist/)
-└── docs/              # PDF/documenti pubblici (rendicontazione contributi, ecc.)
-.github/workflows/deploy.yml   # CI/CD: build + deploy SFTP su push a main
+├── admin/            # Pannello Sveltia CMS (statico, servito su /admin)
+└── docs/             # PDF/documenti pubblici (rendicontazione contributi, ecc.)
+
+Dockerfile                     # Immagine del sito: build Astro -> nginx
+docker/nginx.conf              # Redirect 301, 404 custom, cache, proxy /oauth/
+docker/snippets/               # Header di sicurezza inclusi da nginx.conf
+services/cms-auth/             # Backend OAuth del pannello (Node, zero dipendenze)
+docker-compose.yml             # Stack Portainer (immagini da GHCR)
+docker-compose.build.yml       # Override per costruire in locale
+.env.example                   # Variabili dello stack, HTTP_PORT incluso
+.github/workflows/deploy.yml   # CI/CD: build immagini -> GHCR -> webhook Portainer
 docs/CMS-SETUP.md              # Setup OAuth del pannello /admin (passaggi manuali)
 ```
 
-## Deploy
+## Deploy (stack Docker su Portainer)
 
-### Automatico (CI/CD — motore del pannello /admin)
+Lo stack ha due servizi:
 
-Ogni push su `main` (manuale o generato dal pannello `/admin`) attiva
-`.github/workflows/deploy.yml`: `npm ci && npm run build` seguito da un deploy SFTP
-su `public_html/`. Prima del primo deploy automatico, configura questi **secrets**
-nel repository GitHub (Settings → Secrets and variables → Actions):
+| Servizio | Immagine | Ruolo |
+| :--- | :--- | :--- |
+| `web` | `ghcr.io/trenitalia/sito_amonenergy-web` | nginx con la build statica + il pannello. **L'unico con una porta pubblicata**: `HTTP_PORT` → 80. |
+| `cms-auth` | `ghcr.io/trenitalia/sito_amonenergy-cms-auth` | Backend OAuth del pannello. Nessuna porta pubblicata: `web` gli fa da reverse proxy su `/oauth/`. |
 
-| Secret | Valore |
-| :--- | :--- |
-| `SFTP_HOST` | Host SFTP (Site Tools → Devs → FTP Accounts su SiteGround) |
-| `SFTP_USER` | Utente SFTP |
-| `SFTP_PASS` | Password SFTP |
-| `SFTP_PORT` | Porta (spesso 22, ma SiteGround può usarne una diversa — verificare in Site Tools) |
+Davanti allo stack c'è il reverse proxy dell'host, che termina il TLS su
+`amonenergy.it` e inoltra su `HTTP_PORT` (in produzione: **8082**).
 
-Il workflow usa `wlixcc/SFTP-Deploy-Action` per il vero protocollo SFTP (non FTP/FTPS
-— vedi il commento nel workflow stesso per i dettagli). **Verifica i nomi esatti
-degli input dell'azione contro il suo README prima del primo run reale**, non sono
-stati testati contro un deploy live.
+### Primo deploy in Portainer
 
-Dopo l'upload, il workflow non esegue una purge automatica della cache SiteGround
-(dipende dal piano attivo se l'API SG Optimizer è disponibile). Fallback manuale:
-**Site Tools → Speed → Caching → Purge** (un click). Senza purge, le modifiche fatte
-dal pannello `/admin` non si vedono subito e sembra che il pannello sia rotto.
+1. **Stacks → Add stack**, sorgente *Repository*: `https://github.com/TreniTalia/sito_amonenergy`,
+   compose path `docker-compose.yml`.
+2. Compila le **Environment variables** (vedi `.env.example` per la descrizione
+   di ciascuna):
 
-### Manuale (fase 1 / fallback)
+   | Variabile | Valore in produzione |
+   | :--- | :--- |
+   | `HTTP_PORT` | `8082` |
+   | `ALLOWED_ORIGIN` | `https://amonenergy.it` |
+   | `GITHUB_OAUTH_CLIENT_ID` | dalla GitHub OAuth App — vedi `docs/CMS-SETUP.md` |
+   | `GITHUB_OAUTH_CLIENT_SECRET` | idem |
+   | `IMAGE_TAG` | `latest` |
 
-```bash
-npm run build          # genera dist/
+3. Se il package GHCR è **privato**, registra prima la credenziale in
+   Portainer (*Registries → Add registry → Custom*, host `ghcr.io`, username il
+   tuo utente GitHub, password un PAT con scope `read:packages`). Con il package
+   pubblico non serve nulla.
+4. Attiva il **webhook** dello stack (nella pagina dello stack) e incolla l'URL
+   generato fra i secrets del repository come `PORTAINER_WEBHOOK_URL`.
+
+### Pubblicazione automatica (motore del pannello /admin)
+
+```
+push su main  (a mano, o generato da un salvataggio nel pannello /admin)
+   └─> GitHub Actions: build delle due immagini -> push su GHCR (:latest e :<sha>)
+       └─> POST al webhook Portainer
+           └─> Portainer ri-pulla :latest e ricrea lo stack
 ```
 
-1. Accedi a SiteGround → Site Tools → **File Manager** (o SFTP).
-2. Backup: rinomina l'attuale `public_html` in `public_html_wp_backup`, ricrea
-   `public_html` vuota.
-3. Carica **il contenuto** di `dist/` (non la cartella stessa) in `public_html/`.
-4. `.htaccess` è già incluso in `dist/` (versionato in `public/.htaccess`) — nessuna
-   azione manuale necessaria oltre al caricamento.
-5. In Site Tools: attiva **SSL Let's Encrypt** + HTTPS Enforce, attiva la cache
-   statica, disattiva eventuali servizi WordPress residui (WP Toolkit).
-6. Verifica home, tutte le pagine, i redirect 301 e i link `tel:`/`mailto:`.
+Un solo secret nel repository: `PORTAINER_WEBHOOK_URL`. Per GHCR basta il
+`GITHUB_TOKEN` che Actions fornisce da sé. Se il secret manca, il workflow
+costruisce e pubblica comunque le immagini e chiude con un warning: lo stack va
+poi aggiornato a mano da Portainer.
+
+Tempo dal salvataggio alla pagina live: circa 2-3 minuti. Nessuna purge di cache
+da fare — l'HTML è servito `no-store`.
+
+> **Se il tuo è un edge stack**, i webhook non sono disponibili: in quel caso usa
+> il polling *GitOps updates* di Portainer sul repository al posto della
+> chiamata webhook, e rimuovi il job `deploy` dal workflow.
+
+### Build e verifica in locale
+
+```bash
+cp .env.example .env     # e metti HTTP_PORT=8082
+docker compose -f docker-compose.yml -f docker-compose.build.yml up --build
+```
+
+Il sito risponde su `http://localhost:8082`. `docker-compose.yml` da solo non
+costruisce nulla: usa le immagini di GHCR, perché è il file che Portainer
+deploya e una chiave `build:` senza il repository a disposizione lo farebbe
+fallire.
+
+### Redirect, cache e 404
+
+Erano in `public/.htaccess` (Apache), ora sono in **`docker/nginx.conf`**:
+i 9 redirect 301 dai vecchi URL WordPress, `error_page 404`, e le regole di
+cache (`/_astro/` immutable a 1 anno, HTML `no-store`). Il `.htaccess` è stato
+eliminato: con nginx non farebbe nulla e resterebbe una falsa fonte di verità.
 
 ## Pannello /admin (editing contenuti)
 
@@ -95,9 +134,10 @@ delle pagine da `/admin`, senza toccare codice o git:
 5. Il logo bianco Amon Energy in alto a sinistra nel pannello riporta alla lista
    delle collection.
 
-**Nota**: `/admin` non è ancora utilizzabile finché non completi il setup OAuth
-descritto in `docs/CMS-SETUP.md` — è un passaggio esterno a questo repo che
-richiede i tuoi account GitHub/Cloudflare.
+**Nota**: `/admin` non è utilizzabile finché non completi il setup OAuth descritto
+in `docs/CMS-SETUP.md` — sono tre passaggi che richiedono il tuo account GitHub
+(creare la OAuth App, passarne le credenziali allo stack, aggiungere l'editor come
+collaboratore).
 
 ## Cose da fare prima del go-live
 
@@ -122,8 +162,11 @@ e `<!-- DATO-FINTO -->` nel codice/contenuti):
   (aggiornando anche il link nel footer da `.txt` a `.pdf`).
 - **Dominio di produzione**: `astro.config.mjs` usa `https://amonenergy.it` — confermare
   che sia corretto (apex, non `www`) prima del deploy.
-- **Repository GitHub**: creare la repo, aggiornare `backend.repo` in
-  `public/admin/config.yml`, collegare il remote.
-- **Setup CMS**: vedi `docs/CMS-SETUP.md` per l'autenticazione del pannello `/admin`.
+- **Setup CMS**: vedi `docs/CMS-SETUP.md` per l'autenticazione del pannello `/admin`
+  (GitHub OAuth App + variabili dello stack). Finché non è fatto, `/admin` non
+  consente il login.
+- **Webhook Portainer**: creare il webhook dello stack e salvarlo come secret
+  `PORTAINER_WEBHOOK_URL` nel repository, altrimenti la pubblicazione dal
+  pannello si ferma su GHCR e va completata a mano.
 - **QA pre-deploy**: `npx astro check`, test manuale di tutti i link `tel:`/`mailto:`,
   Lighthouse mobile (obiettivo ≥95), verifica visiva a 360/390/768/1024/1440px.

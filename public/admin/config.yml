@@ -1,19 +1,18 @@
 # Configurazione Sveltia CMS per il sito Amon Energy.
 #
-# ATTENZIONE — placeholder da aggiornare prima del go-live:
-#   1. `backend.repo` sotto: sostituire "amonenergy/sito-amonenergy" con il vero
-#      owner/repo GitHub una volta creata la repository.
-#   2. `backend.base_url` / `backend.auth_endpoint`: da impostare solo se si usa
-#      l'autenticazione via Worker Cloudflare (sveltia-cms-auth) — vedi docs/CMS-SETUP.md.
-#      Se assenti, Sveltia usa il flusso OAuth GitHub di default (richiede comunque
-#      un provider OAuth configurato — vedi docs/CMS-SETUP.md).
-#   3. Questo file non è stato ancora validato contro un'istanza Sveltia CMS live:
-#      rivedere i widget e gli hint dopo il primo test reale del pannello.
+# ATTENZIONE — questo file non è stato ancora validato contro un'istanza Sveltia
+# CMS live: rivedere widget e hint dopo il primo test reale del pannello.
 
 backend:
   name: github
-  repo: amonenergy/sito-amonenergy # PLACEHOLDER — aggiornare con l'owner/repo reale
+  repo: TreniTalia/sito_amonenergy
   branch: main
+  # Il backend OAuth è il servizio `cms-auth` dello stack, dietro lo stesso
+  # hostname del sito: nginx inoltra /oauth/ al container, che non pubblica
+  # porte. Nessun Worker Cloudflare, nessun servizio esterno.
+  # base_url è l'origine, auth_endpoint il path — Sveltia li concatena.
+  base_url: https://amonenergy.it
+  auth_endpoint: oauth/auth
 
 # Commit diretto su main: per due editor interni il flusso bozze/review è
 # complessità inutile (SPEC §2.3).

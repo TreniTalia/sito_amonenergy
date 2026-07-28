@@ -1,0 +1,29 @@
+# Il build context viene inviato al daemon Docker: tenerlo minimo accorcia il
+# build e, soprattutto, evita che node_modules dell'host (compilato per Windows)
+# finisca nell'immagine e sporchi npm ci.
+node_modules
+dist
+.astro
+
+.git
+.github
+.gitattributes
+.gitignore
+
+# Strumenti e documentazione: non servono alla build statica.
+# I path sono ancorati alla radice del context: /docs esclude la documentazione
+# del repo ma NON public/docs (il PDF pubblico), e /*.md non tocca i contenuti
+# Markdown in src/content/.
+.claude
+.impeccable
+.idea
+.vscode
+/docs
+info_utili
+scripts
+/*.md
+
+# Non finiscono mai in un'immagine.
+.env
+.env.*
+!.env.example

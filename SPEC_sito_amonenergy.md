@@ -672,6 +672,15 @@ con Rich Results Test; controllo 301 dopo il deploy.
 
 ## 9. Build e deploy su SiteGround
 
+> **⚠️ SEZIONE SUPERATA — non seguire.** Il progetto non viene più deployato su
+> SiteGround: è containerizzato e gira come stack Docker su Portainer, dietro il
+> reverse proxy dell'host. Di conseguenza non esistono più né il deploy SFTP, né
+> `public/.htaccess`, né la purge cache di Site Tools; i redirect 301 e le regole
+> di cache vivono in `docker/nginx.conf`, e l'autenticazione del pannello usa il
+> servizio `cms-auth` dello stack al posto del Cloudflare Worker previsto in
+> §2.3. Il riferimento aggiornato è il **README.md**, sezione *Deploy*, più
+> `docs/CMS-SETUP.md`. Questa sezione resta come documento storico della fase 1.
+
 ### 9.1 Procedura manuale (fase 1)
 
 ```bash

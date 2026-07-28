@@ -1,52 +1,92 @@
-name: Deploy
+name: Build & deploy
+
+# Catena di pubblicazione: un push su main — fatto a mano o generato da un
+# salvataggio nel pannello /admin — costruisce le due immagini, le pubblica su
+# GHCR e sveglia Portainer perché ricrei lo stack.
+#
+# Sostituisce il vecchio deploy SFTP verso SiteGround, rimosso insieme ai
+# secrets SFTP_HOST / SFTP_USER / SFTP_PASS / SFTP_PORT (che possono essere
+# cancellati dalle impostazioni del repository) e allo step di purge cache, ora
+# inutile: l'HTML è servito no-store da nginx.
 
 on:
   push:
     branches: [main]
+  workflow_dispatch:
+
+# Un salvataggio dal pannello può seguirne un altro a breve distanza: la corsa
+# più vecchia viene annullata così l'ultimo contenuto è quello che vince.
+concurrency:
+  group: deploy-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
-  build-and-deploy:
+  build:
+    name: Build ${{ matrix.name }}
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    strategy:
+      fail-fast: true
+      matrix:
+        include:
+          - name: web
+            context: .
+            dockerfile: Dockerfile
+          - name: cms-auth
+            context: services/cms-auth
+            dockerfile: services/cms-auth/Dockerfile
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Setup Node
-        uses: actions/setup-node@v4
+      - name: Calcola il nome immagine
+        # GHCR rifiuta le maiuscole nel path, mentre GITHUB_REPOSITORY le
+        # conserva (TreniTalia/sito_amonenergy): l'espansione ${VAR,,} di bash
+        # lo normalizza.
+        run: echo "IMAGE=ghcr.io/${GITHUB_REPOSITORY,,}-${{ matrix.name }}" >> "$GITHUB_ENV"
+
+      - name: Setup Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login su GHCR
+        uses: docker/login-action@v3
         with:
-          node-version: 22
-          cache: npm
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Install dependencies
-        run: npm ci
-
-      - name: Build
-        run: npm run build
-
-      # NOTA IMPORTANTE sulla scelta dell'azione: la spec indica SFTP (protocollo SSH,
-      # tipicamente porta 22 o una porta custom su SiteGround). SamKirkland/FTP-Deploy-Action
-      # (citata nella spec) supporta solo FTP e FTPS, NON il vero SFTP — è un errore comune
-      # confondere i due protocolli. Questo workflow usa wlixcc/SFTP-Deploy-Action, che
-      # implementa SFTP reale. Verificare i nomi esatti degli input contro il README
-      # dell'azione (https://github.com/wlixcc/SFTP-Deploy-Action) prima del primo deploy:
-      # potrebbero essere cambiati rispetto a quanto scritto qui. In alternativa, se
-      # SiteGround espone solo FTP/FTPS per il piano attivo, si può tornare a
-      # SamKirkland/FTP-Deploy-Action con protocol: ftps.
-      - name: Deploy via SFTP a SiteGround
-        uses: wlixcc/SFTP-Deploy-Action@v1.2.4
+      - name: Build e push
+        uses: docker/build-push-action@v6
         with:
-          server: ${{ secrets.SFTP_HOST }}
-          username: ${{ secrets.SFTP_USER }}
-          password: ${{ secrets.SFTP_PASS }}
-          port: ${{ secrets.SFTP_PORT }}
-          local_path: './dist/*'
-          remote_path: '/public_html/'
-          sftpArgs: '-o ConnectTimeout=5'
+          context: ${{ matrix.context }}
+          file: ${{ matrix.dockerfile }}
+          push: true
+          # `latest` è il tag che lo stack segue; quello per SHA serve a
+          # inchiodare una versione o tornare indietro senza ricostruire.
+          tags: |
+            ${{ env.IMAGE }}:latest
+            ${{ env.IMAGE }}:${{ github.sha }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
 
-      - name: Purge cache statica SiteGround
+  deploy:
+    name: Redeploy stack Portainer
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Chiama il webhook dello stack
+        env:
+          WEBHOOK: ${{ secrets.PORTAINER_WEBHOOK_URL }}
         run: |
-          echo "Nessuna purge automatica configurata."
-          echo "Se il piano SiteGround espone l'API SG Optimizer / SG CLI, sostituire"
-          echo "questo step con la chiamata di purge (richiede un token nei secrets)."
-          echo "In assenza: Site Tools -> Speed -> Caching -> Purge, un click manuale."
-          echo "Vedi README.md, sezione Deploy, per i dettagli."
+          if [ -z "$WEBHOOK" ]; then
+            echo "::warning title=Redeploy saltato::PORTAINER_WEBHOOK_URL non è configurato fra i secrets. Le immagini sono su GHCR, ma lo stack va aggiornato a mano da Portainer."
+            exit 0
+          fi
+          # --fail perché un webhook revocato o un URL sbagliato rispondono con
+          # uno status di errore e un corpo vuoto: senza questo il curl
+          # "riuscirebbe" e il workflow mentirebbe.
+          curl --fail --silent --show-error --location \
+               --request POST --max-time 60 "$WEBHOOK"
+          echo "Redeploy richiesto a Portainer."

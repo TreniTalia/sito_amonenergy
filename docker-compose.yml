@@ -1,0 +1,53 @@
+# Stack Portainer per il sito Amon Energy.
+#
+# Le immagini arrivano da GHCR, costruite e pubblicate da
+# .github/workflows/deploy.yml a ogni push su main. Questo file non le
+# costruisce: per farlo in locale usa l'override docker-compose.build.yml
+#   docker compose -f docker-compose.yml -f docker-compose.build.yml up --build
+#
+# Variabili: vedi .env.example. In Portainer vanno inserite nella sezione
+# "Environment variables" dello stack, non in un file sull'host.
+
+name: amonenergy
+
+services:
+  # Sito statico + pannello /admin. L'unico servizio con una porta pubblicata.
+  web:
+    image: ghcr.io/trenitalia/sito_amonenergy-web:${IMAGE_TAG:-latest}
+    restart: unless-stopped
+    ports:
+      # HTTP_PORT è la porta sull'host: il reverse proxy davanti inoltra qui.
+      # Il default 8080 esiste solo per non far esplodere un `up` senza .env.
+      - "${HTTP_PORT:-8080}:80"
+    depends_on:
+      # Solo ordine di avvio, deliberatamente senza condition: service_healthy.
+      # Con il gate sulla salute, credenziali OAuth sbagliate terrebbero giù
+      # anche il sito pubblico; così invece un cms-auth rotto degrada soltanto
+      # il login del pannello.
+      - cms-auth
+    networks:
+      - interna
+    logging: &logging
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  # Backend OAuth del pannello. Nessuna porta pubblicata: raggiungibile solo da
+  # `web`, che gli fa da reverse proxy su /oauth/.
+  cms-auth:
+    image: ghcr.io/trenitalia/sito_amonenergy-cms-auth:${IMAGE_TAG:-latest}
+    restart: unless-stopped
+    environment:
+      # Origine pubblica del sito. Vincola il destinatario del postMessage con
+      # il token e compone la redirect_uri passata a GitHub.
+      ALLOWED_ORIGIN: ${ALLOWED_ORIGIN:?ALLOWED_ORIGIN è obbligatorio}
+      GITHUB_OAUTH_CLIENT_ID: ${GITHUB_OAUTH_CLIENT_ID:?serve il Client ID della OAuth App}
+      GITHUB_OAUTH_CLIENT_SECRET: ${GITHUB_OAUTH_CLIENT_SECRET:?serve il Client Secret della OAuth App}
+    networks:
+      - interna
+    logging: *logging
+
+networks:
+  interna:
+    driver: bridge
