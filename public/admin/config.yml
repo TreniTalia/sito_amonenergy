@@ -10,7 +10,18 @@ backend:
   # Il backend OAuth è il servizio `cms-auth` dello stack, dietro lo stesso
   # hostname del sito: nginx inoltra /oauth/ al container, che non pubblica
   # porte. Nessun Worker Cloudflare, nessun servizio esterno.
-  # base_url è l'origine, auth_endpoint il path — Sveltia li concatena.
+  #
+  # ATTENZIONE — `base_url` qui sotto viene RISCRITTO A RUNTIME da nginx
+  # sull'host della richiesta (vedi `location = /admin/config.yml` in
+  # docker/nginx.conf). Il valore scritto qui è quello di produzione e serve
+  # solo come default se quella riscrittura venisse rimossa; su
+  # test.amonenergy.it il pannello riceve `https://test.amonenergy.it`.
+  #
+  # Non è una complicazione gratuita. Le due alternative sono peggiori:
+  # cablare l'host sarebbe un interruttore da girare a ogni cambio di dominio
+  # (e sbagliarlo manda il login sul sito sbagliato), mentre OMETTERE base_url
+  # è la trappola: Sveltia non ricade sull'origine corrente ma su
+  # https://api.netlify.com — verificato, il login finirebbe su Netlify.
   base_url: https://amonenergy.it
   auth_endpoint: oauth/auth
 

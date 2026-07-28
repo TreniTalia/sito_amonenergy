@@ -59,6 +59,20 @@ meglio un fallimento subito che un login rotto in modo incomprensibile.
 consegnato via `postMessage`. Quel token ha permesso di scrittura sul
 repository, quindi il valore va tenuto vincolato al dominio reale del sito.
 
+### Dove il pannello prende l'indirizzo del login
+
+Non serve configurarlo: `base_url` in `public/admin/config.yml` viene **riscritto
+da nginx** sull'host della richiesta (`location = /admin/config.yml` in
+`docker/nginx.conf`). Su `test.amonenergy.it` il pannello riceve
+`https://test.amonenergy.it`, su `amonenergy.it` riceve `https://amonenergy.it`,
+con la stessa immagine e nessuna variabile da cambiare.
+
+Se un giorno quella riscrittura venisse rimossa, sappi cosa c'è in mezzo:
+Sveltia costruisce l'URL del login come `<base_url>/<auth_endpoint>`, e
+`base_url` è **obbligatorio**. Omesso, non ricade sull'origine corrente ma su
+`https://api.netlify.com` — l'eredità di Netlify CMS, verificata sul pannello
+reale. Il login se ne andrebbe sui server di Netlify senza un errore evidente.
+
 ## 3. Aggiungi l'editor come collaboratore
 
 Repository → Settings → Collaborators. L'editor usa il proprio account GitHub
@@ -87,6 +101,8 @@ Non serve nessuna purge di cache: nginx serve l'HTML `no-store` (vedi
 | GitHub mostra `redirect_uri_mismatch` | La callback URL della OAuth App non combacia con `$ALLOWED_ORIGIN/oauth/callback`. |
 | `/oauth/auth` risponde 502 | Il container `cms-auth` è giù. Il sito pubblico resta online per costruzione: nginx risolve l'upstream a runtime. Controlla i log del servizio. |
 | La popup si apre, GitHub autorizza, ma il pannello non entra | `ALLOWED_ORIGIN` non coincide con l'origine da cui stai aprendo `/admin` — il `postMessage` con il token viene scartato dal browser. |
+| Il login va su `api.netlify.com` | Manca `base_url` in `config.yml`: non ha un default sull'origine corrente, ricade su Netlify. |
+| Il login va su un dominio diverso da quello che stai usando | La riscrittura di `base_url` non sta agendo. Verifica: `curl -s https://test.amonenergy.it/admin/config.yml \| grep base_url` deve restituire l'host da cui stai navigando. |
 
 ## Cosa NON è ancora stato validato
 

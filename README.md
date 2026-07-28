@@ -68,6 +68,18 @@ quindi anche sul test la sitemap elenca URL di produzione. È irrilevante finch�
 il test è `noindex`, e vuol dire che l'immagine è la stessa in entrambi gli
 ambienti — nessuna build separata per il test.
 
+### L'indirizzo di login del pannello segue l'host
+
+Stessa logica, altro meccanismo: nginx riscrive `base_url` in
+`/admin/config.yml` sull'host della richiesta (`location = /admin/config.yml`).
+Il pannello manda quindi il login sempre sull'host da cui è stato aperto, sia
+`test.amonenergy.it` sia `amonenergy.it`, senza variabili da cambiare.
+
+Serve perché Sveltia esige `base_url` e, se lo si omette, non ricade
+sull'origine corrente ma su `https://api.netlify.com` — spedendo il login sui
+server di Netlify. Verificato sul pannello reale, non dedotto dalla doc, che sul
+punto tace.
+
 ### Primo deploy in Portainer
 
 1. **Stacks → Add stack**, sorgente *Repository*: `https://github.com/TreniTalia/sito_amonenergy`,
