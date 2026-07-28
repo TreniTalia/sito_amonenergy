@@ -49,8 +49,24 @@ Lo stack ha due servizi:
 | `web` | `ghcr.io/trenitalia/sito_amonenergy-web` | nginx con la build statica + il pannello. **L'unico con una porta pubblicata**: `HTTP_PORT` → 80. |
 | `cms-auth` | `ghcr.io/trenitalia/sito_amonenergy-cms-auth` | Backend OAuth del pannello. Nessuna porta pubblicata: `web` gli fa da reverse proxy su `/oauth/`. |
 
-Davanti allo stack c'è il reverse proxy dell'host, che termina il TLS su
-`amonenergy.it` e inoltra su `HTTP_PORT` (in produzione: **8082**).
+Davanti allo stack c'è il reverse proxy nginx dell'host, che termina il TLS e
+inoltra su `HTTP_PORT` (**8082**). Host attuale: **`test.amonenergy.it`**;
+a regime `amonenergy.it`. (Portainer sta su `container.amonenergy.it`, che non
+c'entra con il sito: è solo la sua interfaccia.)
+
+### Indicizzazione: solo il dominio di produzione
+
+`docker/nginx.conf` decide in base a `$host`: su `amonenergy.it` e
+`www.amonenergy.it` le pagine sono indicizzabili, su **qualunque altro host**
+(`test.amonenergy.it`, l'IP nudo, un futuro staging) l'HTML esce con
+`X-Robots-Tag: noindex, nofollow`. Serve a non ritrovarsi il sito duplicato in
+SERP mentre il test è online. È una whitelist del dominio vero, non una
+blacklist del test: al go-live non c'è alcun interruttore da girare.
+
+Un effetto collaterale voluto: `astro.config.mjs` ha `site: 'https://amonenergy.it'`,
+quindi anche sul test la sitemap elenca URL di produzione. È irrilevante finché
+il test è `noindex`, e vuol dire che l'immagine è la stessa in entrambi gli
+ambienti — nessuna build separata per il test.
 
 ### Primo deploy in Portainer
 
@@ -59,13 +75,17 @@ Davanti allo stack c'è il reverse proxy dell'host, che termina il TLS su
 2. Compila le **Environment variables** (vedi `.env.example` per la descrizione
    di ciascuna):
 
-   | Variabile | Valore in produzione |
-   | :--- | :--- |
-   | `HTTP_PORT` | `8082` |
-   | `ALLOWED_ORIGIN` | `https://amonenergy.it` |
-   | `GITHUB_OAUTH_CLIENT_ID` | dalla GitHub OAuth App — vedi `docs/CMS-SETUP.md` |
-   | `GITHUB_OAUTH_CLIENT_SECRET` | idem |
-   | `IMAGE_TAG` | `latest` |
+   | Variabile | Valore attuale (test) | A regime |
+   | :--- | :--- | :--- |
+   | `HTTP_PORT` | `8082` | `8082` |
+   | `ALLOWED_ORIGIN` | `https://test.amonenergy.it` | `https://amonenergy.it` |
+   | `GITHUB_OAUTH_CLIENT_ID` | dalla GitHub OAuth App — vedi `docs/CMS-SETUP.md` | OAuth App del dominio di produzione |
+   | `GITHUB_OAUTH_CLIENT_SECRET` | idem | idem |
+   | `IMAGE_TAG` | `latest` | `latest` |
+
+   `ALLOWED_ORIGIN` deve essere l'host da cui il sito è **effettivamente**
+   raggiunto: da lì `cms-auth` deriva la `redirect_uri` che GitHub confronta con
+   la callback della OAuth App, e una OAuth App vale per un solo host.
 
 3. Se il package GHCR è **privato**, registra prima la credenziale in
    Portainer (*Registries → Add registry → Custom*, host `ghcr.io`, username il

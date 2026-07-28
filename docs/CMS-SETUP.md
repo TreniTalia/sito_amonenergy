@@ -15,14 +15,21 @@ a chiedere accesso al repository per conto di un editor.
 
 GitHub → Settings → Developer settings → **OAuth Apps** → *New OAuth App*.
 
-| Campo | Valore |
+| Campo | Valore (ambiente di test) |
 | :--- | :--- |
-| Application name | `Amon Energy CMS` (libero) |
-| Homepage URL | `https://amonenergy.it` |
-| Authorization callback URL | `https://amonenergy.it/oauth/callback` |
+| Application name | `Amon Energy CMS (test)` (libero) |
+| Homepage URL | `https://test.amonenergy.it` |
+| Authorization callback URL | `https://test.amonenergy.it/oauth/callback` |
 
 Poi *Generate a new client secret*. **Il secret è visibile una volta sola**:
 copialo subito.
+
+> **Una OAuth App vale per un solo host.** GitHub accetta un'unica callback URL,
+> quindi al passaggio in produzione su `amonenergy.it` serve un secondo giro: o
+> aggiorni la callback di questa App (e il test smette di funzionare), o crei una
+> seconda App per il dominio di produzione e tieni le due credenziali negli
+> ambienti rispettivi. La seconda strada è preferibile: puoi continuare a
+> collaudare sul test dopo il go-live.
 
 La callback URL deve combaciare **esattamente** con quella che `cms-auth`
 costruisce da `ALLOWED_ORIGIN` (`$ALLOWED_ORIGIN/oauth/callback`). Se le due
@@ -42,7 +49,7 @@ In Portainer → Stacks → `amonenergy` → *Environment variables*:
 | :--- | :--- |
 | `GITHUB_OAUTH_CLIENT_ID` | Client ID della OAuth App |
 | `GITHUB_OAUTH_CLIENT_SECRET` | il secret generato al punto 1 |
-| `ALLOWED_ORIGIN` | `https://amonenergy.it` |
+| `ALLOWED_ORIGIN` | l'host da cui il sito è raggiunto: `https://test.amonenergy.it` in test, `https://amonenergy.it` in produzione |
 
 Portainer conserva lui questi valori: non serve un file `.env` sull'host. Senza
 tutte e tre, `cms-auth` **non parte** e lo scrive nei log — è deliberato,
@@ -59,7 +66,7 @@ solo per autenticarsi su `/admin`: non naviga il codice.
 
 ## Verifica end-to-end
 
-1. Vai su `https://amonenergy.it/admin`.
+1. Vai su `https://test.amonenergy.it/admin` (in produzione: `https://amonenergy.it/admin`).
 2. Accedi con l'account GitHub collaboratore: si apre una popup verso GitHub,
    che al ritorno si chiude da sola e ti lascia dentro al pannello.
 3. Modifica un testo (es. il sottotitolo della home) e salva. Sveltia crea un
