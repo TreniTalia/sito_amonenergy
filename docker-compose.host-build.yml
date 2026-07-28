@@ -1,0 +1,55 @@
+# Variante dello stack che COSTRUISCE le immagini sull'host invece di tirarle
+# da GHCR. Salta il registry per intero: nessun package da rendere pubblico,
+# nessun PAT, nessuna credenziale in Portainer.
+#
+# Uso in Portainer: Add stack -> Repository, e come "Compose path" indica
+#   docker-compose.host-build.yml
+# invece di docker-compose.yml. Portainer clona il repo e fa il build in loco.
+#
+# È self-contained (non un override): Portainer accetta un solo compose path,
+# quindi non può combinare due file come si fa in locale con -f ... -f ...
+#
+# Compromesso rispetto a docker-compose.yml: ogni pubblicazione dal pannello
+# /admin fa girare `npm ci` + `npm run build` sull'host (2-3 minuti e un po' di
+# CPU) invece di scaricare un'immagine già pronta. Per un sito di 12 pagine è
+# del tutto accettabile; l'host deve però avere accesso a internet per npm.
+#
+# Le variabili d'ambiente sono identiche all'altro file, tranne IMAGE_TAG che
+# qui non serve. Vedi .env.example.
+
+name: amonenergy
+
+services:
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    ports:
+      - "${HTTP_PORT:-8080}:80"
+    depends_on:
+      - cms-auth
+    networks:
+      - interna
+    logging: &logging
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  cms-auth:
+    build:
+      context: services/cms-auth
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    environment:
+      ALLOWED_ORIGIN: ${ALLOWED_ORIGIN:?ALLOWED_ORIGIN è obbligatorio}
+      GITHUB_OAUTH_CLIENT_ID: ${GITHUB_OAUTH_CLIENT_ID:?serve il Client ID della OAuth App}
+      GITHUB_OAUTH_CLIENT_SECRET: ${GITHUB_OAUTH_CLIENT_SECRET:?serve il Client Secret della OAuth App}
+    networks:
+      - interna
+    logging: *logging
+
+networks:
+  interna:
+    driver: bridge
