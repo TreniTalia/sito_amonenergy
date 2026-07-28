@@ -2,7 +2,6 @@
 import '../styles/global.css';
 import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
-import MobileStickyBar from '../components/MobileStickyBar.astro';
 import { contatti } from '../data/contatti.ts';
 
 interface Props {
@@ -85,11 +84,10 @@ const jsonLdBlocks = [organization, ...structuredData];
   <body>
     <a href="#main" class="skip-link">Vai al contenuto</a>
     <Header transparent={headerTransparent} />
-    <main id="main" class:list={['pb-14 md:pb-0', { 'pt-28 lg:pt-32': !headerTransparent }]}>
+    <main id="main" class:list={[{ 'pt-28 lg:pt-32': !headerTransparent }]}>
       <slot />
     </main>
     <Footer />
-    <MobileStickyBar />
 
     <script>
       // Scroll reveal — progressive enhancement. Content is visible by default

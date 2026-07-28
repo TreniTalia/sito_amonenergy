@@ -40,11 +40,12 @@ typography:
     lineHeight: 1.12
     letterSpacing: "-0.015em"
   control:
-    fontFamily: "Source Serif 4 Variable, Georgia, serif"
+    fontFamily: "Archivo Variable, sans-serif"
+    fontStretch: "100%"
     fontSize: "clamp(2rem, 1.3rem + 2.4vw, 3.4rem)"
-    fontWeight: 600
+    fontWeight: 620
     lineHeight: 1.08
-    letterSpacing: "-0.015em"
+    letterSpacing: "-0.02em"
   body:
     fontFamily: "Inter Variable, sans-serif"
     fontSize: "1rem"
@@ -146,11 +147,32 @@ continuity over contrast.
 - **Green survives as an accent only** — `green-500` (logo leaf) and `green-400` (live
   signal): live dots, eyebrow dashes, step numbers, small icons, checkmarks, the map pin.
   Never a background, never a large fill, never body text.
-- The **control voice still exists**, carried by what is not colour: the Source Serif 4
-  display face, the live 24/7 dot, the telemetry panels, the scanline. `PageHero`'s
+- The **control voice still exists**, carried by what is not colour: the normal-width
+  Archivo display face (§0.2), the live 24/7 dot, the telemetry panels, the scanline. `PageHero`'s
   `tone="control"` now only swaps the eyebrow dash for the live dot.
 - Large glows follow the same rule: ambient washes use `navy-700/800` or `signal-400`,
   not green. `WaveDivider` has `signal` and `navy` tones only.
+
+### §0.2 — Two families, no third (2026-07-28) — **supersedes every serif rule below**
+
+The site runs on **exactly two typefaces**: **Archivo Variable** (display) and **Inter
+Variable** (body/UI). **Source Serif 4 is deleted** — the font is uninstalled, the
+`--font-serif` token and the `.text-serif` utility no longer exist, so a third family
+cannot come back by accident.
+
+The control voice is not lost, it just moved axis. Archivo's *width* axis carries it:
+
+| Voice | Family | Width | Weight |
+|---|---|---|---|
+| Field display (`.text-display`, `.text-headline`) | Archivo | 125% (Expanded) | 700 |
+| Hero (`.text-hero`) | Archivo | 112% | 760 |
+| Control display (`.text-control`) | Archivo | **100% (normal)** | 620 |
+| Body, UI, CTA | Inter | — | 400–600 |
+
+Read anywhere below "Source Serif", "serif display", or "the serif marks the control
+voice" and substitute *normal-width Archivo*. Inline SVG labels must name the loaded
+families (`Inter Variable`, `Archivo Variable`) — bare `Inter`/`Archivo` do not match
+the Fontsource family names and silently fall back to Arial.
 
 ## 1. Overview
 
@@ -170,15 +192,15 @@ Density is generous but purposeful: sections carry one idea each (per PRODUCT.md
 ## 1b. The two-world system — **superseded by §0.1**
 
 > The colour half of this section no longer applies: the control world is drenched in
-> navy like everything else. What survives is the *voice* split (serif display, live dot,
-> telemetry panels) and the leaf accent.
+> navy like everything else. What survives is the *voice* split (normal-width Archivo
+> display per §0.2, live dot, telemetry panels) and the leaf accent.
 
 The identity runs on **two visual worlds**, each lifted from the company's own collateral, applied by section as art direction (consistency of *voice*, not of *treatment*):
 
 - **Field world (navy)** — construction, substations, ricerca guasti, O&M in the field. Deep navy base, **Archivo Expanded** display type, real substation photography, flat surfaces with 1px borders. This is the brochure DNA and the site's default.
-- **Control world (green)** — the Control Room, the RCS platform, the CCI, 24/7 monitoring. Deep forest-green drench (`green-950`), a **Source Serif 4** "authority" display voice, a bright **`green-400` signal** accent for live/telemetry cues (pulse dots, scanline, glow), and translucent `ds-panel` telemetry panels. This is the company-presentation DNA and marks the digital/monitoring surfaces (the home Control pillar, `/servizi/monitoraggio-e-controllo`).
+- **Control world (green)** — the Control Room, the RCS platform, the CCI, 24/7 monitoring. Deep forest-green drench (`green-950`), a **normal-width Archivo** "authority" display voice (§0.2, was Source Serif 4), a bright **`green-400` signal** accent for live/telemetry cues (pulse dots, scanline, glow), and translucent `ds-panel` telemetry panels. This is the company-presentation DNA and marks the digital/monitoring surfaces (the home Control pillar, `/servizi/monitoraggio-e-controllo`).
 
-The **A-leaf monogram** and the **leaf-green** accent are the bridge shared by both worlds. Serif is the semantic marker of the control/authority voice; the RCS tiers use `tier-basic` (green) / `tier-advance` (amber) / `tier-pro` (red) exactly as the presentation does.
+The **A-leaf monogram** and the **leaf-green** accent are the bridge shared by both worlds. Normal-width Archivo against the Expanded field display is the semantic marker of the control/authority voice (§0.2); the RCS tiers use `tier-basic` (green) / `tier-advance` (amber) / `tier-pro` (red) exactly as the presentation does.
 
 ## 2. Colors
 
@@ -215,7 +237,7 @@ A two-register palette: a deep navy family that does almost all of the work, plu
 ### Hierarchy
 - **Hero / Display** (`typography.hero` / `typography.display`): H1s only — one per page. `.text-hero` adds the Archivo width axis at 112%; `.text-display` opens it to 125%.
 - **Headline** (`typography.headline`): H2 section titles, Archivo at 125% width.
-- **Control** (`typography.control`): the Source Serif 4 authority voice — H2s in the Control Room / RCS narrative only. Since §0.1 this serif, not a colour, is what marks the control world.
+- **Control** (`typography.control`): the authority voice — H2s in the Control Room / RCS narrative only. Since §0.2 it is Archivo at normal width (100%) against the Expanded 125% of the field displays; before that it was Source Serif 4. It is this width contrast, not a colour, that marks the control world.
 - **Body** (400/500, 1rem, line-height 1.65): running copy. Capped at 65ch measure at every breakpoint — never wider.
 - **Label** (600, 0.8rem, letter-spacing 0.1em, uppercase, color `signal-400` or `green-500`): the eyebrow line that opens most sections, preceded by a short 32×2px dash in navy or signal.
 
@@ -260,7 +282,7 @@ One coherent system: five variants, identical metrics. 999px pill (`{rounded.but
 - **Icon:** Font Awesome 6 in a 54px `.glass-icon` chip, tinted with the card's accent (`green-500` default, `signal-400` for the control service) — the icon is the card's one point of accent color.
 
 ### Telemetry Panel (`.ds-panel`)
-The control sections' surface. Navy glass — a white sheen gradient over 62% `navy-900`, 16px blur, 160% saturate, 16% white hairline, `--shadow-md` plus an 8% inset top highlight. Holds the RCS screenshot, the three system cards, and the alarm-flow steps. Since §0.1 it carries no green; the control voice comes from the serif heading, the live dot, and the scanline instead.
+The control sections' surface. Navy glass — a white sheen gradient over 62% `navy-900`, 16px blur, 160% saturate, 16% white hairline, `--shadow-md` plus an 8% inset top highlight. Holds the RCS screenshot, the three system cards, and the alarm-flow steps. Since §0.1 it carries no green; the control voice comes from the normal-width Archivo heading (§0.2), the live dot, and the scanline instead.
 
 ### Eyebrow (recurring section opener)
 - **Style:** a short 32×2px dash (navy or signal) directly before an uppercase, letter-spaced (0.1em) label in `signal-400` or `green-500`, immediately followed by the H2 and body copy. See the Deliberate Eyebrow Rule above for how this stays brand-specific rather than generic.

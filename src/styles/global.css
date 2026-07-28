@@ -4,9 +4,9 @@
    one variable file — needed for the Expanded heading treatment. */
 @import "@fontsource-variable/archivo/wdth.css";
 @import "@fontsource-variable/inter";
-/* Source Serif 4 — the "authority" face of the green Control world (echoes the
-   serif wordmark of the company presentation). Field world stays Archivo. */
-@import "@fontsource-variable/source-serif-4";
+/* Due famiglie, nessuna terza: Archivo per i display, Inter per il testo. Il
+   "mondo Control" non ha più una faccia propria (era Source Serif 4) — si
+   distingue con l'asse di larghezza di Archivo, vedi .text-control. */
 
 @theme {
   /* Extra breakpoint below Tailwind's default `sm` (640px), used only to
@@ -44,7 +44,6 @@
 
   --font-display: "Archivo Variable", sans-serif;
   --font-body: "Inter Variable", sans-serif;
-  --font-serif: "Source Serif 4 Variable", "Source Serif 4", Georgia, serif;
 
   /* ---- Rounding (Liquid Industrial: Apple-soft, no longer near-flat) ---- */
   --radius-btn: 999px; /* Apple-style pill CTAs */
@@ -160,18 +159,18 @@
     letter-spacing: -0.015em;
     text-wrap: balance;
   }
-  /* Control-world display — serif, for the RCS / Control Room narrative. */
+  /* Control-world display — RCS / sala controllo. Stessa famiglia dei display
+     di campo: a distinguerlo è l'asse di larghezza di Archivo, qui a larghezza
+     normale (100%) contro il 125% Expanded di .text-display/.text-headline, con
+     un peso più basso. Voce diversa, una sola famiglia. */
   .text-control {
-    font-family: var(--font-serif);
-    font-weight: 600;
+    font-family: var(--font-display);
+    font-weight: 620;
+    font-stretch: 100%;
     font-size: clamp(2rem, 1.3rem + 2.4vw, 3.4rem);
     line-height: 1.08;
-    letter-spacing: -0.015em;
+    letter-spacing: -0.02em;
     text-wrap: balance;
-  }
-  .text-serif {
-    font-family: var(--font-serif);
-    letter-spacing: -0.01em;
   }
 
   .tnum {
@@ -441,6 +440,18 @@
     border-radius: 999px;
     background: var(--color-green-400);
     animation: live-ping 2.4s var(--ease-out-expo) infinite;
+    /* Sfasa il ping quando più punti stanno sulla stessa riga: in sincrono
+       leggono come un'animazione decorativa, sfalsati come telemetria. */
+    animation-delay: var(--live-delay, 0ms);
+  }
+  /* Variante ridotta: stessa vita, ma sotto la scala dell'occhiello, così i
+     punti di una lista non competono con la label che apre la sezione. */
+  .ds-live-dot--sm {
+    width: 6px;
+    height: 6px;
+  }
+  .ds-live-dot--sm::after {
+    animation-name: live-ping-sm;
   }
 
   /* Control-world glass panel — frosted telemetry glass over the navy drench. */
@@ -468,6 +479,22 @@
   70%,
   100% {
     transform: scale(2.6);
+    opacity: 0;
+  }
+}
+
+/* Il punto piccolo si espande di più (3.4x contro 2.6x): a 6px il fattore
+   dell'occhiello darebbe un alone di appena 15px, che a distanza di lettura
+   non si vede pulsare. Così l'alone resta grosso quanto quello grande, ma il
+   punto pieno al centro no. */
+@keyframes live-ping-sm {
+  0% {
+    transform: scale(1);
+    opacity: 0.7;
+  }
+  70%,
+  100% {
+    transform: scale(3.4);
     opacity: 0;
   }
 }

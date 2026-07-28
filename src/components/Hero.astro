@@ -15,10 +15,14 @@ interface Props {
 
 const { eyebrow, h1, sub, ctaPrimaria, ctaPrimariaHref, ctaSecondaria, ctaSecondariaHref } = Astro.props;
 
-const facts = ['Centro-Sud Italia', 'Reperibilità 24/7', 'Sottostazioni fino a 150 kV'];
+const facts = ['Sistemi di monitoraggio', 'Automazioni', 'Reperibilità 24/7'];
 ---
 
-<section class="hero relative isolate flex min-h-[88svh] flex-col justify-end overflow-hidden text-paper">
+<!-- Full-viewport by design: l'arco deve chiudere esattamente sulla piega, così
+     lo stacco con la fascia bianca non entra mai nel primo schermo. `svh` e non
+     `dvh`: con dvh l'altezza cambia mentre la barra del browser mobile si
+     ritrae e l'arco slitterebbe durante lo scroll. -->
+<section class="hero relative isolate flex min-h-svh flex-col justify-end overflow-hidden text-paper">
   <!-- AVIF first, and quality above the default 80. This photo is mostly fine
        cloud texture, which is what a low bitrate destroys first: the default
        webp/q80 spends 0.14 bytes per pixel and the sky comes out mushy. AVIF at
@@ -40,34 +44,45 @@ const facts = ['Centro-Sud Italia', 'Reperibilità 24/7', 'Sottostazioni fino a 
   />
   <div class="hero-scrim absolute inset-0"></div>
 
-  <div class="relative z-10 wrap-wide pb-14 pt-32 lg:pb-20 lg:pt-40">
-    <div class="max-w-xl md:max-w-2xl lg:max-w-3xl xl:max-w-4xl 2xl:max-w-5xl">
-      <div class="ds-eyebrow" data-reveal style="--reveal-delay:80ms">
-        <span class="ds-live-dot" aria-hidden="true"></span>
-        <span class="ds-eyebrow-label" style="color: var(--color-green-400)">{eyebrow}</span>
+  <!-- Su mobile il blocco è centrato nello spazio fra header e arco: con l'hero
+       a tutta altezza, ancorarlo in basso lo faceva leggere come una didascalia
+       appoggiata sul fondo. Da `sm` in su resta ancorato in basso, dove la
+       colonna di testo lunga vuole stare. Il padding qui è il minimo di
+       sicurezza (sotto l'header fisso), non la spaziatura di layout: quando lo
+       spazio libero finisce smette di centrare e torna a comportarsi da margine. -->
+  <div class="relative z-10 flex flex-1 flex-col justify-center sm:flex-none sm:justify-end">
+    <div class="wrap-wide pb-10 pt-16 sm:pb-14 sm:pt-32 lg:pb-20 lg:pt-40">
+      <div class="max-w-xl md:max-w-2xl lg:max-w-3xl xl:max-w-4xl 2xl:max-w-5xl">
+        <div class="ds-eyebrow" data-reveal style="--reveal-delay:80ms">
+          <span class="ds-live-dot" aria-hidden="true"></span>
+          <span class="ds-eyebrow-label" style="color: var(--color-green-400)">{eyebrow}</span>
+        </div>
+
+        <h1 class="text-hero" data-reveal style="--reveal-delay:160ms">{h1}</h1>
+
+        <p class="measure mt-6 text-lg text-paper/85 lg:text-xl" data-reveal style="--reveal-delay:260ms">
+          {sub}
+        </p>
+
+        <div class="mt-9 flex flex-col gap-3.5 sm:flex-row sm:gap-5" data-reveal style="--reveal-delay:360ms">
+          <a href={ctaPrimariaHref} class="ds-btn-on-dark justify-center">{ctaPrimaria}</a>
+          <a href={ctaSecondariaHref} class="ds-btn-ghost justify-center">{ctaSecondaria}</a>
+        </div>
+
+        <!-- I punti non separano più le voci, le marcano: uno vivo per fatto,
+             sfasato di 800ms dal precedente. È la scala ridotta del punto
+             dell'occhiello — deve dire "acceso", non rifare l'occhiello. -->
+        <ul class="mt-11 hidden flex-wrap items-center gap-x-7 gap-y-3 sm:flex" data-reveal style="--reveal-delay:460ms">
+          {
+            facts.map((f, i) => (
+              <li class="flex items-center gap-2.5 text-[0.9375rem] font-semibold tracking-wide text-paper/90">
+                <span class="ds-live-dot ds-live-dot--sm" aria-hidden="true" style={`--live-delay:${i * 800}ms`} />
+                {f}
+              </li>
+            ))
+          }
+        </ul>
       </div>
-
-      <h1 class="text-hero" data-reveal style="--reveal-delay:160ms">{h1}</h1>
-
-      <p class="measure mt-6 text-lg text-paper/85 lg:text-xl" data-reveal style="--reveal-delay:260ms">
-        {sub}
-      </p>
-
-      <div class="mt-9 flex flex-col gap-3.5 sm:flex-row sm:gap-5" data-reveal style="--reveal-delay:360ms">
-        <a href={ctaPrimariaHref} class="ds-btn-on-dark justify-center">{ctaPrimaria}</a>
-        <a href={ctaSecondariaHref} class="ds-btn-ghost justify-center">{ctaSecondaria}</a>
-      </div>
-
-      <ul class="mt-12 hidden flex-wrap items-center gap-x-6 gap-y-2 sm:flex" data-reveal style="--reveal-delay:460ms">
-        {
-          facts.map((f, i) => (
-            <>
-              {i > 0 && <li aria-hidden="true" class="h-1 w-1 rounded-full bg-green-400/70" />}
-              <li class="text-sm font-medium tracking-wide text-paper/75">{f}</li>
-            </>
-          ))
-        }
-      </ul>
     </div>
   </div>
 

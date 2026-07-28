@@ -41,6 +41,14 @@ const { tone = 'signal', animated = false, class: className = '' } = Astro.props
     line-height: 0;
   }
 
+  /* Sotto ai 640px la banda si accorcia: nell'hero a tutta altezza ogni pixel
+     qui è tolto al contenuto, e la scarica resta leggibile anche più bassa. */
+  @media (max-width: 639px) {
+    .energy-flow {
+      height: 84px;
+    }
+  }
+
   /* No-JS / pre-hydration fallback for the animated band: the conductor at
      rest, broken by the gap in the middle. */
   .energy-flow:not(.energy-flow--cold)::before {
