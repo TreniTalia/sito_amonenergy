@@ -194,15 +194,32 @@ const { tone = 'signal', animated = false, class: className = '' } = Astro.props
 
     const float PI = 3.14159265;
 
-    float hash11(float n) {
-      return fract(sin(n * 127.1) * 43758.5453123);
+    // Hash *without* sin(). The textbook fract(sin(n * 127.1) * 43758.5) was
+    // fed arguments of 1e5..1e7 here — uTime is unbounded, the call sites scale
+    // it by up to 41x, and fbm multiplies by 5.6x per octave. Desktop GPUs range
+    // -reduce that fine; PowerVR/Adreno/Apple do not, and return NaN. The NaN
+    // reached the fragment output, where min(col, 1.0) is undefined for NaN and
+    // those same GPUs answer 1.0 — an opaque white slab across the arc, for
+    // exactly as long as the strike lasted. This form only ever multiplies
+    // numbers under ~35, so no finite input can produce NaN or an overflow.
+    float hash11(float p) {
+      p = fract(p * 0.1031);
+      p *= p + 33.33;
+      p *= p + p;
+      return fract(p);
     }
+
+    // Periodic lattice: whatever uTime has grown to, the indices reaching the
+    // hash stay inside [0, NOISE_P), so the hash keeps full float precision for
+    // the life of the page. Both lattice points are wrapped — wrapping only the
+    // first would tear the noise open at every seam.
+    const float NOISE_P = 512.0;
 
     // Deliberately *linear* interpolation: smoothstep would give rounded ripples,
     // and an arc is made of straight runs meeting at sharp kinks.
     float vnoise(float x) {
       float i = floor(x);
-      return mix(hash11(i), hash11(i + 1.0), fract(x));
+      return mix(hash11(mod(i, NOISE_P)), hash11(mod(i + 1.0, NOISE_P)), fract(x));
     }
 
     // 3 octaves, remapped to roughly -0.5 .. 0.5
@@ -325,6 +342,13 @@ const { tone = 'signal', animated = false, class: className = '' } = Astro.props
       // Never let light hard-cut at the band edges — the lower one is the
       // boundary with the next, light section.
       col *= uIntensity * smoothstep(0.0, 7.0, p.y) * (1.0 - smoothstep(H - 11.0, H, p.y));
+
+      // Belt and braces against the white slab: every comparison against NaN is
+      // false by definition, so a poisoned channel multiplies by 0 and the pixel
+      // drops out instead of falling through to min()/clamp(), whose NaN result
+      // is undefined and reads as 1.0 on the GPUs that caused this.
+      col *= vec3(lessThanEqual(abs(col), vec3(1e6)));
+
       float a = clamp(max(max(col.r, col.g), col.b), 0.0, 1.0);
       gl_FragColor = vec4(min(col, vec3(1.0)), a);
     }
@@ -488,7 +512,11 @@ const { tone = 'signal', animated = false, class: className = '' } = Astro.props
     const frame = (now: number) => {
       const dt = Math.min(0.05, (now - last) / 1000);
       last = now;
-      u.uTime.value += dt;
+      // Wrapped, not monotonic: past ~2^24 a float32 can no longer separate
+      // adjacent noise cells and the filament freezes into steps. An hour is far
+      // beyond any session, and the wrap costs one frame of reseeded shimmer
+      // inside an already chaotic arc.
+      u.uTime.value = (u.uTime.value + dt) % 3600;
       step(dt);
       renderer.render({ scene: mesh });
       raf = requestAnimationFrame(frame);
