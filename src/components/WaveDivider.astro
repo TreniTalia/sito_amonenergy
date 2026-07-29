@@ -422,6 +422,13 @@ const { tone = 'signal', animated = false, class: className = '' } = Astro.props
       return; // no WebGL — the CSS resting gap stays
     }
 
+    // Diagnostica temporanea (src/components/ArcDebug.astro), inerte senza
+    // `?arcdbg=1`: scariche una dietro l'altra per rendere frequente il difetto
+    // e, al livello 2, banda azzerata a blu opaco per capire se il bianco sia
+    // scritto dal fragment shader o sia un buco di paint sotto al canvas.
+    const dbg = Number((window as unknown as { __ARCDBG?: number }).__ARCDBG ?? 0);
+    if (dbg >= 2) renderer.gl.clearColor(0, 0, 1, 1);
+
     const u = program.uniforms;
     let H = 1;
 
@@ -458,15 +465,19 @@ const { tone = 'signal', animated = false, class: className = '' } = Astro.props
         if (wait <= 0) {
           live = true;
           t = 0;
-          dur = 1.6 + Math.random() * 1.3;
+          dur = dbg ? 0.9 : 1.6 + Math.random() * 1.3;
           u.uSeed.value = Math.random() * 100;
           rollBranch();
+          if (dbg) {
+            const w = window as unknown as { __ARCDBG_STRIKES?: number };
+            w.__ARCDBG_STRIKES = (w.__ARCDBG_STRIKES ?? 0) + 1;
+          }
         }
       } else {
         t += dt;
         if (t >= dur) {
           live = false;
-          wait = 0.3 + Math.random() * 0.85;
+          wait = dbg ? 0.05 : 0.3 + Math.random() * 0.85;
         }
       }
 
@@ -519,6 +530,10 @@ const { tone = 'signal', animated = false, class: className = '' } = Astro.props
       u.uTime.value = (u.uTime.value + dt) % 3600;
       step(dt);
       renderer.render({ scene: mesh });
+      if (dbg) {
+        const w = window as unknown as { __ARCDBG_FRAMES?: number };
+        w.__ARCDBG_FRAMES = (w.__ARCDBG_FRAMES ?? 0) + 1;
+      }
       raf = requestAnimationFrame(frame);
     };
 

@@ -1,0 +1,86 @@
+---
+/**
+ * Diagnostica temporanea per il blocco bianco della banda dell'arco su mobile.
+ * Inerte finche' l'URL non porta `?arcdbg=1` (o `=2`), quindi non ha effetto in
+ * produzione. Da rimuovere insieme a questo componente quando il difetto e'
+ * chiuso.
+ *
+ * Il difetto non e' riproducibile su desktop: lo stesso fragment shader, montato
+ * a misura reale e ispezionato con readPixels su 1220 stati di scarica, produce
+ * bianco saturo solo fra gli elettrodi (x 105-286 di 391) e su una striscia alta
+ * 14px, mai a destra dell'elettrodo e mai a piena altezza. Il rettangolo visto
+ * su iPhone e' fuori da quell'insieme, quindi le ipotesi sono due e opposte:
+ * pixel scritti dal canvas su una GPU che sbaglia una operazione, oppure un buco
+ * di paint nel layer dell'hero che scopre lo sfondo pagina.
+ *
+ * Livello 1 — colora solo gli strati che normalmente restano coperti, senza
+ * toccare ne' la foto ne' lo scrim, e infittisce le scariche. Il colore del
+ * quadrato identifica lo strato:
+ *   magenta = sfondo pagina, manca tutto il layer hero
+ *   verde   = hero dipinto, manca la foto
+ *   bianco  = nessuno dei due, i pixel arrivano da altrove (vedi livello 2)
+ *
+ * Livello 2 — in piu' azzera il canvas a blu opaco: se la banda e' blu con un
+ * rettangolo bianco dentro, il bianco lo ha scritto il fragment shader.
+ */
+---
+
+<script is:inline>
+  (() => {
+    const level = Number(new URLSearchParams(location.search).get('arcdbg') || 0);
+    if (!level) return;
+    window.__ARCDBG = level;
+
+    const css = document.createElement('style');
+    css.textContent = `
+      html, body { background: #ff00ff !important; }
+      .hero { background: #00ff00 !important; }
+      #arcdbg { position: fixed; z-index: 2147483647; left: 4px; top: 4px;
+        max-width: calc(100vw - 8px); padding: 4px 6px; border-radius: 4px;
+        background: #000c; color: #7fffd4; font: 10px/1.35 ui-monospace, monospace;
+        white-space: pre-wrap; pointer-events: none; }
+    `;
+    document.head.appendChild(css);
+
+    // Precisione reale del fragment shader su questo dispositivo: se `highp`
+    // viene degradato, i quadrati e gli exp() dello shader escono dal range.
+    const probe = () => {
+      const c = document.createElement('canvas');
+      const gl = c.getContext('webgl');
+      if (!gl) return { webgl: false };
+      const fmt = (p) => (p ? `${p.rangeMin}/${p.rangeMax}/${p.precision}` : 'n/d');
+      const d = gl.getExtension('WEBGL_debug_renderer_info');
+      return {
+        webgl: true,
+        gpu: d ? gl.getParameter(d.UNMASKED_RENDERER_WEBGL) : 'n/d',
+        fragHigh: fmt(gl.getShaderPrecisionFormat(gl.FRAGMENT_SHADER, gl.HIGH_FLOAT)),
+        fragMed: fmt(gl.getShaderPrecisionFormat(gl.FRAGMENT_SHADER, gl.MEDIUM_FLOAT)),
+        vertHigh: fmt(gl.getShaderPrecisionFormat(gl.VERTEX_SHADER, gl.HIGH_FLOAT)),
+      };
+    };
+
+    const box = document.createElement('pre');
+    box.id = 'arcdbg';
+    const paint = () => {
+      const p = window.__ARCDBG_PROBE || (window.__ARCDBG_PROBE = probe());
+      const root = document.querySelector('.energy-flow:not(.energy-flow--cold)');
+      const cv = root && root.querySelector('canvas');
+      const rr = root && root.getBoundingClientRect();
+      const cr = cv && cv.getBoundingClientRect();
+      box.textContent = [
+        `arcdbg=${level} dpr=${devicePixelRatio} vw=${innerWidth}x${innerHeight}`,
+        `gpu=${p.gpu}`,
+        `frag highp ${p.fragHigh}  medp ${p.fragMed}`,
+        `band ${rr ? `${rr.width.toFixed(2)}x${rr.height.toFixed(2)} @${rr.top.toFixed(1)}` : 'assente'}`,
+        `canvas css ${cr ? `${cr.width.toFixed(2)}x${cr.height.toFixed(2)}` : '-'} buf ${cv ? `${cv.width}x${cv.height}` : '-'}`,
+        `strikes=${window.__ARCDBG_STRIKES ?? 0} frames=${window.__ARCDBG_FRAMES ?? 0}`,
+      ].join('\n');
+    };
+    const attach = () => {
+      document.body.appendChild(box);
+      paint();
+      setInterval(paint, 500);
+    };
+    document.readyState === 'loading' ? addEventListener('DOMContentLoaded', attach) : attach();
+  })();
+</script>
