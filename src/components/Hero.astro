@@ -44,14 +44,14 @@ const facts = ['Sistemi di monitoraggio', 'Automazioni', 'Reperibilità 24/7'];
   />
   <div class="hero-scrim absolute inset-0"></div>
 
-  <!-- Su mobile il blocco è centrato nello spazio fra header e arco: con l'hero
-       a tutta altezza, ancorarlo in basso lo faceva leggere come una didascalia
+  <!-- Su mobile il blocco è centrato nell'altezza libera dell'hero: con l'hero a
+       tutta altezza, ancorarlo in basso lo faceva leggere come una didascalia
        appoggiata sul fondo. Da `sm` in su resta ancorato in basso, dove la
-       colonna di testo lunga vuole stare. Il padding qui è il minimo di
-       sicurezza (sotto l'header fisso), non la spaziatura di layout: quando lo
-       spazio libero finisce smette di centrare e torna a comportarsi da margine. -->
+       colonna di testo lunga vuole stare. I padding di .hero-col sono franchi di
+       sicurezza, non spaziatura di layout: entrano in gioco solo quando lo
+       spazio libero finisce e il blocco smette di stare centrato. -->
   <div class="relative z-10 flex flex-1 flex-col justify-center sm:flex-none sm:justify-end">
-    <div class="wrap-wide pb-10 pt-16 sm:pb-14 sm:pt-32 lg:pb-20 lg:pt-40">
+    <div class="hero-col wrap-wide">
       <div class="max-w-xl md:max-w-2xl lg:max-w-3xl xl:max-w-4xl 2xl:max-w-5xl">
         <div class="ds-eyebrow" data-reveal style="--reveal-delay:80ms">
           <span class="ds-live-dot" aria-hidden="true"></span>
@@ -92,6 +92,36 @@ const facts = ['Sistemi di monitoraggio', 'Automazioni', 'Reperibilità 24/7'];
 </section>
 
 <style>
+  /* Il padding superiore dell'hero è due cose insieme, e prima ne teneva conto
+     una sola: la spaziatura voluta a quel breakpoint, e il franco contro
+     l'isola *fissa* dell'header, che non sta nel flusso e quindi non spinge
+     nulla. Sotto `sm` il valore voluto era `pt-16`, 64px, contro un'isola da
+     78px: appena la colonna di testo si allungava, l'occhiello finiva dietro al
+     vetro. `max()` prende sempre il maggiore dei due, così nessuna larghezza può
+     più passare sotto l'header — in landscape corto l'isola arriva a ~104px, a
+     ridosso dei 128px di `sm`, e lì il vecchio numero fisso stava per cedere.
+     Sotto `sm` il blocco è centrato fra header e fondo, quindi il valore voluto
+     è zero: comanda il franco. Il franco inferiore vale 3.5rem invece dei 2.5
+     di prima perché su telefono la fascia dell'arco è nascosta, e quei pixel
+     erano il piede ottico del blocco. */
+  .hero-col {
+    --hero-pt: 0rem;
+    --hero-pb: 3.5rem;
+    padding-top: max(var(--hero-pt), calc(var(--header-h, 4.875rem) + 1.25rem));
+    padding-bottom: var(--hero-pb);
+  }
+  @media (min-width: 640px) {
+    .hero-col {
+      --hero-pt: 8rem;
+    }
+  }
+  @media (min-width: 1024px) {
+    .hero-col {
+      --hero-pt: 10rem;
+      --hero-pb: 5rem;
+    }
+  }
+
   .hero-scrim {
     background:
       linear-gradient(

@@ -121,6 +121,22 @@ const serviziLinks = [
   onScroll();
   window.addEventListener('scroll', onScroll, { passive: true });
 
+  // L'isola è `fixed`: il contenuto sotto non la vede nel flusso e deve sapere
+  // quanto spazio occupa per non finirci dietro. Pubblichiamo l'altezza reale
+  // invece di ricopiarne il calcolo nei layout, che è come l'occhiello dell'hero
+  // era finito sotto il vetro: `pt-16` (64px) contro un'isola da ~78px.
+  // ResizeObserver e non `resize`: l'altezza cambia anche a viewport ferma,
+  // quando il CTA telefonico passa da numero a "Chiama" o il logo si accorcia.
+  const wrap = document.querySelector<HTMLElement>('.ds-header-wrap');
+  if (wrap) {
+    const publishHeight = () => {
+      document.documentElement.style.setProperty('--header-h', `${wrap.getBoundingClientRect().height.toFixed(2)}px`);
+    };
+    publishHeight();
+    if ('ResizeObserver' in window) new ResizeObserver(publishHeight).observe(wrap);
+    else window.addEventListener('resize', publishHeight);
+  }
+
   const openNav = () => {
     panel?.classList.remove('translate-x-full');
     toggle?.setAttribute('aria-expanded', 'true');

@@ -41,11 +41,20 @@ const { tone = 'signal', animated = false, class: className = '' } = Astro.props
     line-height: 0;
   }
 
-  /* Sotto ai 640px la banda si accorcia: nell'hero a tutta altezza ogni pixel
-     qui è tolto al contenuto, e la scarica resta leggibile anche più bassa. */
+  /* Sotto i 640px la banda animata non si mostra affatto.
+     Su iPhone la scarica dipinge un rettangolo bianco opaco dall'elettrodo
+     destro al bordo dello schermo, per tutta l'altezza della fascia (vedi
+     info_utili/issue.jpeg). Non è riproducibile su GPU desktop: lo stesso
+     fragment shader, montato a misura reale e ispezionato con readPixels su
+     1220 stati di scarica, satura solo fra gli elettrodi e su una striscia alta
+     14px. Due tentativi di correzione mirata non l'hanno chiuso, e una striscia
+     decorativa di 84px su un telefono non giustifica il rischio.
+     `display: none` e non `visibility: hidden`: l'elemento esce dall'albero di
+     compositing — così nulla può più dipingere lì — e i suoi pixel tornano al
+     contenuto dell'hero, dove servono per staccare il testo dalla navbar. */
   @media (max-width: 639px) {
-    .energy-flow {
-      height: 84px;
+    .energy-flow:not(.energy-flow--cold) {
+      display: none;
     }
   }
 
@@ -588,15 +597,25 @@ const { tone = 'signal', animated = false, class: className = '' } = Astro.props
     }
   }
 
-  // Only mount WebGL once the band is actually near the viewport, so `ogl`
-  // is fetched off the critical path.
   // The band always sits inside the first viewport, so there is nothing to gain
   // from a viewport-triggered mount — just keep `ogl` off the critical path.
+  //
+  // Sotto i 640px la fascia è `display: none` (vedi lo <style>): non montiamo
+  // niente, così su telefono non si scarica nemmeno `ogl` e non gira alcun rAF.
+  // Non è un controllo una-volta-sola: una rotazione in landscape supera la
+  // soglia e l'arco deve comparire, quindi il mount resta in ascolto. Il flag
+  // sul nodo impedisce il doppio init a ogni passaggio della soglia.
+  const wide = window.matchMedia('(min-width: 640px)');
   const mountAll = () => {
+    if (!wide.matches) return;
     document.querySelectorAll<HTMLElement>('.energy-flow:not(.energy-flow--cold)').forEach((root) => {
+      if (root.dataset.mounted) return;
+      root.dataset.mounted = '1';
       void initEnergyFlow(root);
     });
   };
+
+  wide.addEventListener('change', mountAll);
 
   if ('requestIdleCallback' in window) {
     window.requestIdleCallback(mountAll, { timeout: 800 });

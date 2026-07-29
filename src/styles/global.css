@@ -83,6 +83,19 @@
 }
 
 @layer base {
+  /* Altezza occupata dall'isola fissa dell'header, gutter superiore incluso.
+     Questo è solo il valore di ripiego per il primo paint e per il caso senza
+     JS; Header.astro lo sovrascrive con la misura reale via ResizeObserver.
+     Tenerlo pari o superiore al vero: chi lo usa lo usa come franco minimo. */
+  :root {
+    --header-h: 4.875rem; /* 12px di gutter + 66px d'isola sul mobile */
+  }
+  @media (min-width: 768px) {
+    :root {
+      --header-h: 5.25rem; /* il gutter passa a 16px (md:pt-4) */
+    }
+  }
+
   body {
     background: var(--color-paper);
     color: var(--color-ink);
