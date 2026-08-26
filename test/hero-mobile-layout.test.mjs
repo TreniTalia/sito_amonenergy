@@ -1,20 +1,19 @@
 /**
- * Regressione di layout dell'hero su viewport reali. Copre due difetti distinti
- * osservati su iPhone.
+ * Regressione di layout e di rete dell'hero su viewport reali.
  *
- * 1. BANDA DELL'ARCO. Durante la scarica compariva un rettangolo bianco opaco
- *    dall'elettrodo destro al bordo dello schermo, per tutta l'altezza della
- *    fascia (info_utili/issue.jpeg). Non riproducibile su GPU desktop: lo stesso
- *    fragment shader, montato a misura reale e ispezionato con readPixels su
- *    1220 stati di scarica, satura solo fra gli elettrodi e su 14px d'altezza.
- *    Due correzioni mirate allo shader non l'hanno chiuso (vedi
- *    wave-divider-noise.test.mjs), quindi sotto i 640px la fascia animata non
- *    viene mostrata e WebGL non viene nemmeno montato.
- *
- * 2. OCCHIELLO SOTTO LA NAVBAR. L'header è `fixed`: non sta nel flusso e non
+ * 1. OCCHIELLO SOTTO LA NAVBAR. L'header è `fixed`: non sta nel flusso e non
  *    spinge nulla. Il padding superiore dell'hero valeva `pt-16` (64px) contro
  *    un'isola alta 78px, così su schermi bassi — dove la colonna di testo cresce
  *    e smette di stare centrata — l'occhiello scivolava dietro al vetro.
+ *
+ * 2. VIDEO DI FONDO. Il fondale dell'hero è un video (pattern di circuito
+ *    gradato sui colori del marchio). Sotto i 768px, e con
+ *    `prefers-reduced-motion`, non deve girare *né scaricare*: il gating vive
+ *    nell'attributo `media` delle <source>, che è l'unica cosa capace di
+ *    impedire il download. Il `display: none` in CSS è solo la cintura di
+ *    sicurezza per i browser che ignorano `media`, quindi il test controlla
+ *    entrambi — e soprattutto conta i byte, perché è quello che pagherebbe
+ *    l'utente in 4G.
  *
  * Il test parte dal `dist` già costruito e si salta se non c'è, perche' `npm
  * test` deve restare eseguibile senza una build.
@@ -51,6 +50,7 @@ const MIME = {
   '.webp': 'image/webp',
   '.avif': 'image/avif',
   '.jpg': 'image/jpeg',
+  '.mp4': 'video/mp4',
   '.woff2': 'font/woff2',
   '.xml': 'application/xml',
   '.json': 'application/json',
@@ -72,6 +72,10 @@ describe('layout dell’hero su viewport reali', { skip }, () => {
       try {
         const body = readFileSync(f);
         s.setHeader('content-type', MIME[path.extname(f)] ?? 'application/octet-stream');
+        // Il media element chiede byte-range: senza `accept-ranges` alcuni
+        // browser rifiutano di partire, e il test misurerebbe il server, non la
+        // pagina.
+        s.setHeader('accept-ranges', 'bytes');
         s.end(body);
       } catch {
         s.statusCode = 404;
@@ -89,29 +93,42 @@ describe('layout dell’hero su viewport reali', { skip }, () => {
   });
 
   /** Apre la home a una viewport data e restituisce le misure che ci interessano. */
-  const load = async (width, height) => {
-    const ctx = await browser.newContext({ viewport: { width, height }, deviceScaleFactor: 3 });
+  const load = async (width, height, { reducedMotion = 'no-preference' } = {}) => {
+    const ctx = await browser.newContext({ viewport: { width, height }, deviceScaleFactor: 3, reducedMotion });
     const page = await ctx.newPage();
-    let oglRequests = 0;
+    let videoBytes = 0;
+    let videoRequests = 0;
     page.on('request', (q) => {
-      if (/\/(Renderer|Program|Mesh|Triangle)\.[^/]*\.js$/.test(q.url())) oglRequests++;
+      if (/\.(mp4|webm)(\?|$)/.test(q.url())) videoRequests++;
+    });
+    page.on('response', async (r) => {
+      if (!/\.(mp4|webm)(\?|$)/.test(r.url())) return;
+      try {
+        videoBytes += (await r.body()).length;
+      } catch {
+        /* risposta annullata: i byte non sono arrivati */
+      }
     });
     await page.goto(origin, { waitUntil: 'load' });
-    // Il mount dell'arco passa da requestIdleCallback con timeout 800ms.
-    await page.waitForTimeout(1400);
+    // L'avvio del video passa da requestIdleCallback con timeout 1200ms.
+    await page.waitForTimeout(2000);
     const m = await page.evaluate(() => {
-      const band = document.querySelector('.energy-flow:not(.energy-flow--cold)');
       const wrap = document.querySelector('.ds-header-wrap');
       const eyebrow = document.querySelector('.hero .ds-eyebrow');
+      const video = document.querySelector('.hero .hero-video');
+      const poster = document.querySelector('.hero .hero-media');
       return {
         headerBottom: wrap.getBoundingClientRect().bottom,
         eyebrowTop: eyebrow.getBoundingClientRect().top,
-        bandDisplay: band ? getComputedStyle(band).display : 'assente',
-        bandMounted: band ? Boolean(band.dataset.mounted) : false,
+        videoDisplay: video ? getComputedStyle(video).display : 'assente',
+        // networkState 3 = NETWORK_NO_SOURCE: nessuna <source> ha combaciato.
+        videoNetworkState: video ? video.networkState : null,
+        videoCurrentSrc: video ? video.currentSrc : null,
+        posterPresent: Boolean(poster),
       };
     });
     await ctx.close();
-    return { ...m, oglRequests, clearance: m.eyebrowTop - m.headerBottom };
+    return { ...m, videoBytes, videoRequests, clearance: m.eyebrowTop - m.headerBottom };
   };
 
   // Il caso peggiore e' lo schermo *basso*, non stretto: e' l'altezza che fa
@@ -123,46 +140,45 @@ describe('layout dell’hero su viewport reali', { skip }, () => {
     [375, 667],
     [390, 844],
     [430, 932],
-    [639, 700],
+    [767, 700],
   ];
 
   for (const [w, h] of PHONES) {
-    test(`${w}x${h}: l’occhiello non tocca l’header e la fascia animata non c’è`, async () => {
+    test(`${w}x${h}: l’occhiello non tocca l’header e il video non scarica`, async () => {
       const m = await load(w, h);
       assert.ok(
         m.clearance > 0,
         `l’occhiello invade l’header di ${(-m.clearance).toFixed(1)}px: il padding dell’hero non copre l’isola fissa (${m.headerBottom.toFixed(1)}px)`,
       );
-      assert.equal(m.bandDisplay, 'none', 'la fascia animata è visibile sotto i 640px');
-      assert.equal(m.bandMounted, false, 'WebGL è stato montato sotto i 640px');
-      assert.equal(m.oglRequests, 0, `ogl scaricato su telefono (${m.oglRequests} richieste)`);
+      assert.equal(m.videoDisplay, 'none', 'il video di fondo è visibile sotto i 768px');
+      assert.equal(m.videoCurrentSrc, '', 'una <source> ha combaciato sotto i 768px');
+      assert.equal(m.videoNetworkState, 3, 'il video non è in NETWORK_NO_SOURCE sotto i 768px');
+      assert.equal(m.videoBytes, 0, `video scaricato su telefono (${m.videoBytes} byte in ${m.videoRequests} richieste)`);
+      assert.ok(m.posterPresent, 'manca il fermo-immagine, che è l’unico fondale sotto i 768px');
     });
   }
 
-  // Sopra la soglia l'arco deve esserci: il fix non deve spegnerlo dove funziona.
+  // Sopra la soglia il video deve esserci: il gating non deve spegnerlo dove
+  // serve.
   for (const [w, h] of [
-    [640, 800],
-    [844, 390], // landscape corto: qui l'isola cresce a ~104px, vicino ai 128 di `sm`
+    [768, 800],
+    [844, 390], // landscape corto: qui l'isola cresce a ~104px
     [1280, 900],
   ]) {
-    test(`${w}x${h}: l’arco resta montato e l’occhiello resta libero`, async () => {
+    test(`${w}x${h}: il video di fondo parte e l’occhiello resta libero`, async () => {
       const m = await load(w, h);
-      assert.equal(m.bandDisplay, 'block', 'la fascia animata è nascosta sopra i 640px');
-      assert.ok(m.bandMounted, 'WebGL non è stato montato sopra i 640px');
+      assert.equal(m.videoDisplay, 'block', 'il video di fondo è nascosto sopra i 768px');
+      assert.match(m.videoCurrentSrc, /pattern-home(\.av1)?\.mp4$/, 'nessuna <source> ha combaciato sopra i 768px');
+      assert.ok(m.videoBytes > 0, 'il video non è stato scaricato sopra i 768px');
       assert.ok(m.clearance > 0, `l’occhiello invade l’header di ${(-m.clearance).toFixed(1)}px`);
     });
   }
 
-  test('la rotazione oltre la soglia monta l’arco, che sotto soglia non era partito', async () => {
-    const ctx = await browser.newContext({ viewport: { width: 390, height: 844 }, deviceScaleFactor: 3 });
-    const page = await ctx.newPage();
-    await page.goto(origin, { waitUntil: 'load' });
-    await page.waitForTimeout(1400);
-    const mounted = () => page.evaluate(() => Boolean(document.querySelector('.energy-flow:not(.energy-flow--cold)')?.dataset.mounted));
-    assert.equal(await mounted(), false, 'montato in portrait sotto soglia');
-    await page.setViewportSize({ width: 844, height: 390 });
-    await page.waitForTimeout(1600);
-    assert.equal(await mounted(), true, 'la rotazione oltre 640px non ha montato l’arco');
-    await ctx.close();
+  test('con prefers-reduced-motion il video non parte nemmeno su desktop', async () => {
+    const m = await load(1280, 900, { reducedMotion: 'reduce' });
+    assert.equal(m.videoDisplay, 'none', 'il video gira con prefers-reduced-motion');
+    assert.equal(m.videoCurrentSrc, '', 'una <source> ha combaciato con prefers-reduced-motion');
+    assert.equal(m.videoBytes, 0, `video scaricato con prefers-reduced-motion (${m.videoBytes} byte)`);
+    assert.ok(m.posterPresent, 'manca il fermo-immagine con prefers-reduced-motion');
   });
 });

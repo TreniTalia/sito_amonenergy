@@ -127,8 +127,8 @@ system (see `src/styles/global.css`, the source of truth):
 - **Buttons** — one coherent system: `.ds-btn-primary` (navy gradient), `.ds-btn-on-dark`
   (frosted white), `.ds-btn-ghost` (glass outline on dark), `.ds-btn-secondary` (glass on
   light), `.ds-btn-signal` (frosted white, control sections). All CTAs share identical metrics.
-- **Signature ornament** — the "energy flow" spark gap (`WaveDivider.astro`), a WebGL
-  Jacob's ladder; see §5 below for the full spec.
+- **Signature ornament** — the "energy flow" spark gap (`WaveDivider.astro`), drawn at rest
+  in CSS; plus the graded circuit-plane video behind the home hero. See §5 for both specs.
 
 What still holds from below: the type scale, accessibility (WCAG 2.2 AA, reduced-motion,
 44px targets), and the proof-over-adjectives content principles.
@@ -180,7 +180,7 @@ the Fontsource family names and silently fall back to Arial.
 
 The standard is still the one the client's own 2024 brochure earned — the site should read like the print collateral of a serious electrical-engineering contractor: deep navy, generous white space, confident large-scale type, one signature graphic, not a SaaS product landing page. What changed in 2026-07 (§0) is the material, not the posture: surfaces are frosted glass over navy with soft layered depth, rendered with the precision of instrument housing rather than the softness of a consumer app. Restraint is still the default, and it is now enforced by *where* effects are allowed rather than by banning them outright — blur only where something genuinely floats (the Earned Blur Rule), shadows only in the navy's own shade (the Navy Shadow Rule), green only at the scale of a marker (the Leaf Rarity Rule). The system still rejects gradient text, decorative glassmorphism, and the stock-photography-and-superlative vocabulary of the prior WordPress site.
 
-Density is generous but purposeful: sections carry one idea each (per PRODUCT.md's Design Principles), separated by real vertical space rather than dividers or shadows. The one permitted piece of ornament is the spark gap (§5) — a Jacob's ladder arc struck between two electrodes, used as the band that closes every hero. Everything else earns its place through structure (borders, type scale, color role) rather than decoration.
+Density is generous but purposeful: sections carry one idea each (per PRODUCT.md's Design Principles), separated by real vertical space rather than dividers or shadows. Ornament is permitted in exactly two places (§5): the spark gap that closes every hero, and the graded circuit plane behind the home hero. Everything else earns its place through structure (borders, type scale, color role) rather than decoration.
 
 **Key Characteristics:**
 - Deep navy + paper-white base, with leaf-green and signal-blue reserved for small, deliberate accents only
@@ -294,15 +294,23 @@ The control sections' surface. Navy glass — a white sheen gradient over 62% `n
 - **Mobile:** hamburger opens a full-height `navy-950` panel with large nav items and contact info at the base; a 56px sticky bottom bar with two 50/50 "Chiama" / "Email" buttons stays pinned below `md`, respecting `env(safe-area-inset-bottom)`.
 
 ### Spark Gap (signature component — `WaveDivider.astro`)
-The one decorative element in the system, and the only place in the site where motion is the subject rather than a transition. A full-width band closing the hero of every page: a 1px conductor hairline runs in from both edges and terminates at two electrodes that diverge slightly as they rise — a spark gap. Between them an arc strikes at the narrow foot, climbs while it stretches and destabilises, then breaks and restrikes, on an irregular cadence (~1.6–2.9 s live, ~0.3–1.2 s dark). It is a Jacob's ladder, not a waveform: no sine, no travelling particles, no sparks thrown off.
+A full-width band closing the hero of every page: a 1px conductor hairline runs in from both edges and terminates at two electrodes that diverge slightly as they rise — a spark gap, drawn at rest.
 
-- **Render:** WebGL via `ogl` (`Renderer` / `Program` / `Mesh` / `Triangle` imported by path, ~40 kB raw across four chunks), one fullscreen-triangle fragment shader. Glow is a distance field around the filament — a hot core plus two Gaussian falloffs — so the light is continuous, never stacked translucent layers. Premultiplied alpha makes it add to the dark hero instead of veiling it.
-- **Filament shape:** fBm with *linear* interpolation, so the channel is straight runs meeting at sharp kinks. Displacement is pinned to zero at the electrodes; amplitude and bow grow with the climb and run away just before the break. Two counter-scrolling noise samples keep it shimmering in place rather than sliding sideways.
-- **Restraint rules:** the arc is thin and cold. Neither tone carries green — a green bloom at this size would break the Leaf Rarity Rule. Only `signal` and `navy` exist (the `green` tone was removed with §0.1). Light fades out near both band edges so nothing hard-cuts at the boundary with the next section.
-- **`animated={false}`** (dividers on light sections) never loads WebGL: it renders the same spark gap cold, in CSS, as a hairline and two pins. Same for the pre-hydration and no-WebGL fallback.
-- **`prefers-reduced-motion`:** one frame, drawn once, frozen mid-climb.
+- **Render:** pure CSS — a hairline and two skewed pins, no canvas, no JS. Only `signal` and `navy` tones exist (`green` was removed with §0.1); neither carries green, since a bloom at this size would break the Leaf Rarity Rule.
+- **The arc no longer animates (2026-08).** It used to be a WebGL Jacob's ladder (`ogl`, one fragment shader): the arc struck at the gap, climbed while it stretched, then broke and restruck. On mobile GPUs the discharge painted an opaque white slab across the band (`info_utili/issue.jpeg`); two targeted shader fixes did not close it, it was first disabled below 640px, and at the brand owner's direction it was then removed on every viewport. `ogl` is no longer a dependency. **Do not reintroduce a WebGL arc** — the static gap is the intended state.
 
-No other decorative motif is permitted alongside it.
+The hero backdrop (below) is now the only place in the system where motion is the subject rather than a transition.
+
+### Hero backdrop (home — `Hero.astro`)
+A slow circuit-board plane in perspective, graded onto the brand ramp: the live trace is pulled onto the hue and saturation of `signal-400` and the ground stays a navy-black, so the band never introduces a blue from outside the ramp. It replaced a sunset-pylon photograph in 2026-08.
+
+- **Grade:** baked into the encode, not applied at runtime — `hue=h=-8:s=0.68,eq=gamma=1.10` in ffmpeg, measured against the source's own trace colour (`#036CB5`, 205°/97%) so the result lands on `signal-400`'s 197°/64%. No CSS `filter` on the element: a filter would promote the LCP layer, and this hero has already proved fragile about compositing.
+- **Delivery:** AV1 first (~1.4 MB), H.264 behind it (~1.7 MB), both 1600×900 at 24 fps, `+faststart`, no audio track. The loop is seamless in the source, so there is no crossfade.
+- **The poster is the backdrop, not a fallback.** A `<Picture>` of frame 0 paints first and is the LCP element; the video layers over it once it starts.
+- **Gating lives in `media` on the `<source>`, not in CSS.** Below 768px, and under `prefers-reduced-motion`, no source matches and **nothing is downloaded** — the poster is the whole backdrop. The `display: none` rule is only a belt for browsers that ignore `media`. `test/hero-mobile-layout.test.mjs` asserts the byte count, not just the visibility.
+- **Start is deferred**: `preload="none"` plus a `requestIdleCallback` that calls `load()`/`play()`, so the video never competes with the poster in the network queue. Every failure path (no matching source, autoplay refused, no decoder) lands on the poster, which is already on screen.
+
+No other decorative motif is permitted alongside these two.
 
 ## 6. Do's and Don'ts
 

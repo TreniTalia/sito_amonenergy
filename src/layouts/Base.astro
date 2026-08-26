@@ -2,7 +2,6 @@
 import '../styles/global.css';
 import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
-import ArcDebug from '../components/ArcDebug.astro';
 import { contatti } from '../data/contatti.ts';
 
 interface Props {
@@ -83,8 +82,6 @@ const jsonLdBlocks = [organization, ...structuredData];
     }
   </head>
   <body>
-    <!-- Inerte senza `?arcdbg=1`. Rimuovere con il componente a difetto chiuso. -->
-    <ArcDebug />
     <a href="#main" class="skip-link">Vai al contenuto</a>
     <Header transparent={headerTransparent} />
     <main id="main" class:list={[{ 'pt-28 lg:pt-32': !headerTransparent }]}>

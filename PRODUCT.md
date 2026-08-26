@@ -41,4 +41,4 @@ Proof over adjectives — real client names and real project kV/location data be
 
 ## Accessibility & Inclusion
 
-WCAG 2.2 AA. `prefers-reduced-motion` is respected everywhere, disabling the signature wave-line drift and animated stat counters. Touch targets are at least 44×44px, critical for the tel/mail buttons. No information is conveyed by hover alone — gallery captions and metadata stay visible by default rather than hover-only, since touch has no hover state.
+WCAG 2.2 AA. `prefers-reduced-motion` is respected everywhere, disabling the animated stat counters and the home hero's background video — which is then not even downloaded, only its poster frame. Touch targets are at least 44×44px, critical for the tel/mail buttons. No information is conveyed by hover alone — gallery captions and metadata stay visible by default rather than hover-only, since touch has no hover state.

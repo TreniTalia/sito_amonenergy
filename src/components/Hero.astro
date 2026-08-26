@@ -1,6 +1,6 @@
 ---
 import { Picture } from 'astro:assets';
-import heroImg from '../assets/img/photos/hero-tralicci-energia.png';
+import heroPoster from '../assets/img/photos/hero-pattern-circuito.png';
 import WaveDivider from './WaveDivider.astro';
 
 interface Props {
@@ -23,25 +23,55 @@ const facts = ['Sistemi di monitoraggio', 'Automazioni', 'Reperibilità 24/7'];
      `dvh`: con dvh l'altezza cambia mentre la barra del browser mobile si
      ritrae e l'arco slitterebbe durante lo scroll. -->
 <section class="hero relative isolate flex min-h-svh flex-col justify-end overflow-hidden text-paper">
-  <!-- AVIF first, and quality above the default 80. This photo is mostly fine
-       cloud texture, which is what a low bitrate destroys first: the default
-       webp/q80 spends 0.14 bytes per pixel and the sky comes out mushy. AVIF at
-       q85 is more faithful than webp at q96 for roughly half the bytes, and the
-       webp fallback also improves. `display: contents` keeps <picture> from
-       adding a phantom flex item to the hero column. -->
+  <!-- Il fondale è il pattern di circuito, gradato sui colori del marchio: la
+       traccia viva è portata sulla tinta di `signal-400` e il nero resta un
+       nero-navy, così la fascia non introduce un blu estraneo alla rampa.
+       Il primo strato è il fermo-immagine del video, non un ripiego: è lui che
+       dipinge (ed è l'elemento LCP), il video gli si sovrappone quando parte.
+       `display: contents` impedisce a <picture> di aggiungere un elemento flex
+       fantasma alla colonna dell'hero. -->
   <Picture
-    src={heroImg}
-    alt="Linee elettriche di alta tensione al tramonto con tralicci in controluce e flussi di energia luminosi"
+    src={heroPoster}
+    alt=""
     formats={['avif', 'webp']}
     fallbackFormat="webp"
-    quality={85}
-    class="hero-img absolute inset-0 h-full w-full object-cover"
+    quality={82}
+    class="hero-media absolute inset-0 h-full w-full object-cover"
     pictureAttributes={{ class: 'contents' }}
-    widths={[768, 1280, 1600, 1916]}
+    widths={[768, 1280, 1600]}
     sizes="100vw"
     loading="eager"
     fetchpriority="high"
   />
+
+  <!-- Il `media` sulle <source> è il vero interruttore: sotto i 768px, e con
+       `prefers-reduced-motion`, nessuna sorgente combacia e il video non scarica
+       niente — resta il fermo-immagine. Il `display: none` in CSS è la cintura
+       di sicurezza per i browser che ignorano `media` e pescano la prima
+       sorgente comunque. AV1 in testa (1,4 MB), H.264 dietro (1,7 MB) per chi
+       non lo decodifica. -->
+  <video
+    class="hero-video absolute inset-0 h-full w-full object-cover"
+    autoplay
+    muted
+    loop
+    playsinline
+    preload="none"
+    aria-hidden="true"
+    tabindex="-1"
+  >
+    <source
+      media="(min-width: 768px) and (prefers-reduced-motion: no-preference)"
+      src="/video/pattern-home.av1.mp4"
+      type='video/mp4; codecs="av01.0.05M.08"'
+    />
+    <source
+      media="(min-width: 768px) and (prefers-reduced-motion: no-preference)"
+      src="/video/pattern-home.mp4"
+      type='video/mp4; codecs="avc1.640028"'
+    />
+  </video>
+
   <div class="hero-scrim absolute inset-0"></div>
 
   <!-- Su mobile il blocco è centrato nell'altezza libera dell'hero: con l'hero a
@@ -87,7 +117,7 @@ const facts = ['Sistemi di monitoraggio', 'Automazioni', 'Reperibilità 24/7'];
   </div>
 
   <div class="relative z-10">
-    <WaveDivider tone="signal" animated />
+    <WaveDivider tone="signal" />
   </div>
 </section>
 
@@ -147,19 +177,65 @@ const facts = ['Sistemi di monitoraggio', 'Automazioni', 'Reperibilità 24/7'];
       );
   }
 
-  .hero-img {
-    transform: scale(1.06);
-    animation: hero-zoom 18s var(--ease-out-expo) forwards;
-  }
-  @keyframes hero-zoom {
-    to {
-      transform: scale(1);
-    }
-  }
-  @media (prefers-reduced-motion: reduce) {
-    .hero-img {
-      animation: none;
-      transform: none;
+  /* Lo zoom lento che c'era sulla foto è caduto con la foto: il movimento ora
+     lo dà il video, e sommare le due cose renderebbe il fondale inquieto. */
+
+  /* Cintura di sicurezza: dove il video non deve girare, non deve nemmeno stare
+     nell'albero di compositing — così non può coprire il fermo-immagine se un
+     browser ignora il `media` delle <source>. */
+  @media (max-width: 767px), (prefers-reduced-motion: reduce) {
+    .hero-video {
+      display: none;
     }
   }
 </style>
+
+<script>
+  /* `preload="none"` è deliberato: il fermo-immagine è l'elemento LCP e il video
+     non deve competere con lui in rete. Ma con `preload="none"` Chrome non fa
+     partire l'autoplay da sé, quindi la partenza la diamo noi appena il thread
+     è libero — stesso schema usato altrove nel sito per il montaggio differito.
+     Ogni via d'uscita porta allo stesso posto: nessuna sorgente combacia,
+     autoplay negato, decoder assente — resta il fermo-immagine, che è già a
+     schermo. */
+  const video = document.querySelector<HTMLVideoElement>('.hero-video');
+
+  if (video) {
+    const play = () => void video.play().catch(() => {});
+
+    const mount = () => {
+      // La regola CSS gemella spegne il video sotto i 768px e con
+      // `prefers-reduced-motion`: se è spento lì, non deve nemmeno scaricare.
+      if (getComputedStyle(video).display === 'none') return;
+      if (!video.currentSrc) return; // nessuna <source> ha combaciato
+      video.load();
+      play();
+
+      document.addEventListener('visibilitychange', () => {
+        if (document.hidden) video.pause();
+        else play();
+      });
+
+      // L'hero sta in cima, quindi l'osservatore serve solo a *fermare* il
+      // decoder quando la fascia è scrollata via, mai a impedirne l'avvio.
+      if ('IntersectionObserver' in window) {
+        const io = new IntersectionObserver(
+          (entries) => {
+            for (const en of entries) {
+              if (en.isIntersecting && !document.hidden) play();
+              else video.pause();
+            }
+          },
+          { threshold: 0 },
+        );
+        io.observe(video);
+      }
+    };
+
+    if ('requestIdleCallback' in window) {
+      window.requestIdleCallback(mount, { timeout: 1200 });
+    } else {
+      setTimeout(mount, 300);
+    }
+  }
+</script>
