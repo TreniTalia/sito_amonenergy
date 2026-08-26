@@ -9,14 +9,6 @@ interface Props {
 }
 
 const { transparent = true } = Astro.props;
-
-const serviziLinks = [
-  { href: '/servizi/laboratorio-mobile/', label: 'Laboratorio mobile ricerca guasti', icon: 'fa6-solid:truck-fast' },
-  { href: '/servizi/verifiche-strumentali/', label: 'Verifiche strumentali', icon: 'fa6-solid:clipboard-check' },
-  { href: '/servizi/monitoraggio-e-controllo/', label: 'Monitoraggio e controllo', icon: 'fa6-solid:desktop' },
-  { href: '/servizi/costruzioni/', label: 'Costruzioni', icon: 'fa6-solid:helmet-safety' },
-  { href: '/servizi/gestione-e-manutenzione/', label: 'Gestione e manutenzione', icon: 'fa6-solid:gears' },
-];
 ---
 
 <header class="ds-header fixed inset-x-0 top-0 z-40" data-transparent={transparent ? 'true' : 'false'}>
@@ -27,28 +19,8 @@ const serviziLinks = [
       </a>
 
       <nav class="hidden md:flex items-center gap-1" aria-label="Navigazione principale">
-        <a href="/azienda/" class="ds-nav-link">Azienda</a>
-
-        <div class="group relative">
-          <button type="button" class="ds-nav-link inline-flex items-center gap-1.5" aria-haspopup="true">
-            Servizi
-            <Icon name="fa6-solid:chevron-down" class="text-[0.6rem] opacity-70 transition-transform duration-200 group-hover:rotate-180" />
-          </button>
-          <div class="invisible opacity-0 translate-y-1 group-hover:visible group-hover:opacity-100 group-hover:translate-y-0 group-focus-within:visible group-focus-within:opacity-100 group-focus-within:translate-y-0 absolute left-1/2 top-full -translate-x-1/2 pt-4 transition-all duration-200 min-w-[19rem]" style="transition-timing-function: var(--ease-signature);">
-            <ul class="glass-dark rounded-[var(--radius-card)] p-2">
-              {serviziLinks.map((s) => (
-                <li>
-                  <a href={s.href} class="flex items-center gap-3 rounded-[var(--radius-sm)] px-3 py-2.5 text-sm text-paper/90 transition-colors hover:bg-white/10">
-                    <Icon name={s.icon} class="text-[0.95rem] text-green-400" />
-                    {s.label}
-                  </a>
-                </li>
-              ))}
-            </ul>
-          </div>
-        </div>
-
-        <a href="/progetti/" class="ds-nav-link">Progetti</a>
+        <a href="/servizi/" class="ds-nav-link">Servizi</a>
+        <a href="/lavori/" class="ds-nav-link">Lavori</a>
         <a href="/contatti/" class="ds-nav-link">Contatti</a>
       </nav>
 
@@ -76,24 +48,8 @@ const serviziLinks = [
       </button>
     </div>
     <nav class="flex flex-col gap-1" aria-label="Navigazione mobile">
-      <a href="/azienda/" class="text-paper text-2xl py-3 border-b border-white/10">Azienda</a>
-      <details class="border-b border-white/10">
-        <summary class="text-paper text-2xl py-3 cursor-pointer list-none flex items-center justify-between">
-          Servizi
-          <Icon name="fa6-solid:chevron-down" class="text-sm opacity-70" />
-        </summary>
-        <ul class="pb-3">
-          {serviziLinks.map((s) => (
-            <li>
-              <a href={s.href} class="flex items-center gap-3 text-paper/80 text-base py-2.5">
-                <Icon name={s.icon} class="text-sm text-green-400" />
-                {s.label}
-              </a>
-            </li>
-          ))}
-        </ul>
-      </details>
-      <a href="/progetti/" class="text-paper text-2xl py-3 border-b border-white/10">Progetti</a>
+      <a href="/servizi/" class="text-paper text-2xl py-3 border-b border-white/10">Servizi</a>
+      <a href="/lavori/" class="text-paper text-2xl py-3 border-b border-white/10">Lavori</a>
       <a href="/contatti/" class="text-paper text-2xl py-3 border-b border-white/10">Contatti</a>
     </nav>
   </div>

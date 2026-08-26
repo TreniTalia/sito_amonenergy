@@ -12,7 +12,7 @@ hero:
 # Stessa cautela: da far rivedere/validare dal cliente prima del go-live.
 chiSiamoBreve:
   testo: "L'esperienza di Amon Energy comincia nel 2000, come PL System e poi come Energy System: oltre 100 stazioni AT/MT realizzate e contratti O&M su più di 30 impianti nel Sud Italia, fino all'acquisizione da parte del Gruppo BayWa r.e. nel 2019. Nel 2020 Mario Palumbo e Ludovico Lombardi fondano Amon Energy S.r.l., riunendo oltre vent'anni di competenza sugli impianti elettrici AT/MT in un'unica realtà oggi al servizio delle energie rinnovabili nel Centro-Sud Italia. Un'unica sede da 5.000 m² a Castelluccio dei Sauri (FG), baricentrica, con magazzino ricambi e Control Room attiva 24/7/365."
-  link: "/azienda/"
+  link: "/servizi/"
 
 controllo:
   eyebrow: "Remote Control System · CCI"

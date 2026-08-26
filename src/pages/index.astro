@@ -52,7 +52,7 @@ const progettiPreview = (await getCollection('progetti'))
           href={chiSiamoBreve.link}
           class="group mt-7 inline-flex items-center gap-2 font-semibold text-navy-900 transition-colors hover:text-navy-700"
         >
-          Conosci l'azienda
+          Scopri i servizi
           <Icon name="fa6-solid:arrow-right" class="text-xs transition-transform duration-300 group-hover:translate-x-1" style="transition-timing-function: var(--ease-signature);" />
         </a>
 
@@ -131,14 +131,14 @@ const progettiPreview = (await getCollection('progetti'))
         </div>
         <h2 class="text-headline">Stazioni elettriche che abbiamo costruito.</h2>
       </div>
-      <a href="/progetti/" class="hidden shrink-0 font-semibold text-navy-900 hover:text-navy-700 sm:inline-flex">
+      <a href="/lavori/" class="hidden shrink-0 font-semibold text-navy-900 hover:text-navy-700 sm:inline-flex">
         Tutti i progetti →
       </a>
     </div>
     <div class="grid gap-5 sm:grid-cols-2 lg:grid-cols-3 lg:gap-6">
       {
         progettiPreview.map((p, i) => (
-          <a href="/progetti/" class="group block" data-reveal style={`--reveal-delay:${i * 90}ms`}>
+          <a href="/lavori/" class="group block" data-reveal style={`--reveal-delay:${i * 90}ms`}>
             <div class="relative overflow-hidden rounded-[var(--radius-card)] border border-navy-100 shadow-[var(--shadow-sm)] transition-shadow duration-300 group-hover:shadow-[var(--shadow-lg)]" style="aspect-ratio: 16 / 11;">
               <Image
                 src={p.data.immagine}
@@ -159,7 +159,7 @@ const progettiPreview = (await getCollection('progetti'))
         ))
       }
     </div>
-    <a href="/progetti/" class="mt-8 inline-flex font-semibold text-navy-900 sm:hidden">Tutti i progetti →</a>
+    <a href="/lavori/" class="mt-8 inline-flex font-semibold text-navy-900 sm:hidden">Tutti i progetti →</a>
   </section>
 
   <ClientMarquee titolo={marqueeTitolo} />

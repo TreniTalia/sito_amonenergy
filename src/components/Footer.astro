@@ -3,12 +3,10 @@ import { Icon } from 'astro-icon/components';
 import { contatti } from '../data/contatti.ts';
 import Logo from './Logo.astro';
 
-const serviziLinks = [
-  { href: '/servizi/laboratorio-mobile/', label: 'Laboratorio mobile ricerca guasti' },
-  { href: '/servizi/verifiche-strumentali/', label: 'Verifiche strumentali' },
-  { href: '/servizi/monitoraggio-e-controllo/', label: 'Monitoraggio e controllo' },
-  { href: '/servizi/costruzioni/', label: 'Costruzioni' },
-  { href: '/servizi/gestione-e-manutenzione/', label: 'Gestione e manutenzione' },
+const quickLinks = [
+  { href: '/servizi/', label: 'Servizi' },
+  { href: '/lavori/', label: 'Lavori' },
+  { href: '/contatti/', label: 'Contatti' },
 ];
 
 const year = new Date().getFullYear();
@@ -33,9 +31,9 @@ const year = new Date().getFullYear();
     </div>
 
     <div>
-      <p class="ds-eyebrow-label" style="color: var(--color-paper); opacity: 0.6;">Servizi</p>
+      <p class="ds-eyebrow-label" style="color: var(--color-paper); opacity: 0.6;">Naviga</p>
       <ul class="mt-4 flex flex-col gap-3">
-        {serviziLinks.map((s) => (
+        {quickLinks.map((s) => (
           <li><a href={s.href} class="text-paper/80 hover:text-signal-400 transition-colors">{s.label}</a></li>
         ))}
       </ul>
