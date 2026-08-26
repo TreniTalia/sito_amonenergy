@@ -23,12 +23,13 @@ const parsed = items.map((item) => {
 });
 ---
 
-<section class="relative isolate overflow-hidden bg-navy-950 text-paper">
-  <div class="wrap-wide py-16 lg:py-24">
+<section class="stat-bar relative isolate overflow-hidden bg-navy-950 text-paper">
+  <div class="stat-bar-glow" aria-hidden="true"></div>
+  <div class="wrap-wide relative z-10 py-16 lg:py-24">
     {
       nota && (
         <p class="mb-10 flex items-center gap-3 text-xs font-semibold uppercase tracking-[0.14em] text-paper/55">
-          <span class="ds-eyebrow-dash ds-eyebrow-dash--leaf" />
+          <span class="ds-eyebrow-dash" />
           {nota}
         </p>
       )
@@ -37,7 +38,7 @@ const parsed = items.map((item) => {
       {
         parsed.map((item, i) => (
           <div data-reveal style={`--reveal-delay:${i * 90}ms`}>
-            <span class="mb-4 block h-[2px] w-9 bg-green-400" aria-hidden="true" />
+            <span class="stat-dash mb-4 block h-[3px] w-10 rounded-full bg-signal-400" aria-hidden="true" />
             <p
               class="stat-value tnum text-display leading-none"
               style="font-size: clamp(2.6rem, 1.4rem + 3vw, 4.25rem); font-stretch: 125%; font-weight: 800;"
@@ -57,6 +58,22 @@ const parsed = items.map((item) => {
     </div>
   </div>
 </section>
+
+<style>
+  /* Stessa profondità della fascia Control Room (radial glow in navy), a
+     intensità più bassa: la fascia numeri non deve competere con quella. */
+  .stat-bar-glow {
+    position: absolute;
+    inset: 0;
+    background:
+      radial-gradient(55% 70% at 85% 0%, color-mix(in srgb, var(--color-navy-700) 40%, transparent), transparent 70%),
+      radial-gradient(45% 60% at 5% 100%, color-mix(in srgb, var(--color-navy-800) 45%, transparent), transparent 70%);
+    z-index: 0;
+  }
+  .stat-dash {
+    box-shadow: var(--glow-signal);
+  }
+</style>
 
 <script>
   const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;

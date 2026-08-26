@@ -10,13 +10,23 @@ interface Props {
   index?: number;
   /** Accent color role for the icon. */
   accent?: 'leaf' | 'signal';
+  /**
+   * Stronger card treatment (solid paper background, top accent bar, bigger
+   * icon chip) for sections where the default glass-on-white card reads as
+   * too faint. Additive-only: the base `.ds-card-service` look is untouched,
+   * so pages that don't opt in (`/servizi/`) are unaffected.
+   */
+  elevated?: boolean;
 }
 
-const { titolo, excerpt, icona, href, index, accent = 'leaf' } = Astro.props;
+const { titolo, excerpt, icona, href, index, accent = 'leaf', elevated = false } = Astro.props;
 const accentColor = accent === 'signal' ? 'var(--color-signal-400)' : 'var(--color-green-500)';
 ---
 
-<a href={href} class="ds-card-service group relative flex flex-col no-underline">
+<a
+  href={href}
+  class:list={['ds-card-service group relative flex flex-col no-underline', elevated && 'ds-card-service--elevated']}
+>
   <div class="flex items-start justify-between">
     <span class="glass-icon" style={`--accent: ${accentColor};`}>
       <Icon name={icona} class="text-[1.4rem]" />

@@ -36,9 +36,12 @@ const progettiPreview = (await getCollection('progetti'))
     ctaSecondariaHref="/servizi/"
   />
 
-  <!-- Chi siamo + copertura -->
+  <!-- Chi siamo + copertura. La fascia "Perché Amon" (percheAmon) non è più
+       una sezione a sé: i tre punti diventano una riga compatta qui, sotto la
+       storia — la colonna di testo è più larga della mappa apposta, perché è
+       lei il blocco che deve dominare. -->
   <section class="wrap-wide py-20 lg:py-28">
-    <div class="grid items-center gap-12 lg:grid-cols-[1.1fr_0.9fr] lg:gap-20">
+    <div class="grid items-start gap-12 lg:grid-cols-[1.4fr_0.6fr] lg:gap-16">
       <div data-reveal>
         <div class="ds-eyebrow">
           <span class="ds-eyebrow-dash"></span>
@@ -52,21 +55,46 @@ const progettiPreview = (await getCollection('progetti'))
           Conosci l'azienda
           <Icon name="fa6-solid:arrow-right" class="text-xs transition-transform duration-300 group-hover:translate-x-1" style="transition-timing-function: var(--ease-signature);" />
         </a>
+
+        <div class="mt-12 grid gap-x-8 gap-y-8 border-t border-navy-100 pt-10 sm:grid-cols-3">
+          {
+            percheAmon.map((p, i) => (
+              <div data-reveal style={`--reveal-delay:${i * 90}ms`}>
+                <span class="tnum font-display text-sm font-semibold text-green-500">0{i + 1}</span>
+                <h3 class="mt-2.5 font-display text-lg font-bold tracking-tight text-ink">{p.titolo}</h3>
+                <p class="mt-2 text-sm leading-relaxed text-ink/70">{p.testo}</p>
+              </div>
+            ))
+          }
+        </div>
       </div>
-      <div class="relative" data-reveal style="--reveal-delay:120ms">
+      <div class="relative lg:sticky lg:top-32" data-reveal style="--reveal-delay:120ms">
         <CoverageMap />
       </div>
     </div>
   </section>
 
+  <!-- Mondo del controllo: RCS + CCI -->
+  {
+    controllo && (
+      <ControlPillar eyebrow={controllo.eyebrow} titolo={controllo.titolo} testo={controllo.testo} />
+    )
+  }
+
   <!-- Servizi -->
-  <section class="wrap-wide pb-20 lg:pb-28">
+  <section class="wrap-wide py-20 lg:py-28">
     <div class="ds-eyebrow" data-reveal>
       <span class="ds-eyebrow-dash ds-eyebrow-dash--leaf"></span>
       <span class="ds-eyebrow-label ds-eyebrow-label--leaf">Cosa facciamo</span>
     </div>
     <div class="mb-12 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between" data-reveal>
-      <h2 class="text-headline max-w-[16ch]">Costruiamo, verifichiamo, cerchiamo guasti e gestiamo.</h2>
+      <div>
+        <h2 class="text-headline max-w-[18ch]">Un impianto ha tante fasi. Le conosciamo tutte.</h2>
+        <p class="measure mt-3 text-ink/70">
+          Costruzione, verifiche strumentali, ricerca guasti, monitoraggio e automazione — la stessa
+          squadra segue l'impianto in ogni fase.
+        </p>
+      </div>
       <a href="/servizi/" class="hidden shrink-0 font-semibold text-navy-900 hover:text-navy-700 sm:inline-flex">
         Tutti i servizi →
       </a>
@@ -81,20 +109,17 @@ const progettiPreview = (await getCollection('progetti'))
               icona={s.data.icona}
               href={`/servizi/${s.id}/`}
               index={i + 1}
-              accent={s.id === 'monitoraggio-e-controllo' ? 'signal' : 'leaf'}
+              accent="signal"
+              elevated
             />
           </div>
         ))
       }
     </div>
+    <a href="/servizi/" class="mt-8 inline-flex font-semibold text-navy-900 sm:hidden">Tutti i servizi →</a>
   </section>
 
-  <!-- Mondo del controllo: RCS + CCI -->
-  {
-    controllo && (
-      <ControlPillar eyebrow={controllo.eyebrow} titolo={controllo.titolo} testo={controllo.testo} />
-    )
-  }
+  <StatBar items={statbar} nota="Numeri dell'operatività Amon Energy" />
 
   <!-- Realizzazioni -->
   <section class="wrap-wide py-20 lg:py-28">
@@ -135,27 +160,6 @@ const progettiPreview = (await getCollection('progetti'))
       }
     </div>
     <a href="/progetti/" class="mt-8 inline-flex font-semibold text-navy-900 sm:hidden">Tutti i progetti →</a>
-  </section>
-
-  <StatBar items={statbar} nota="Numeri dell'operatività Amon Energy" />
-
-  <!-- Perché Amon -->
-  <section class="wrap-wide py-20 lg:py-28">
-    <div class="ds-eyebrow" data-reveal>
-      <span class="ds-eyebrow-dash"></span>
-      <span class="ds-eyebrow-label">Perché Amon Energy</span>
-    </div>
-    <div class="mt-10 grid gap-x-8 gap-y-12 sm:grid-cols-3">
-      {
-        percheAmon.map((p, i) => (
-          <div data-reveal style={`--reveal-delay:${i * 90}ms`}>
-            <span class="tnum font-display text-sm font-semibold text-green-500">0{i + 1}</span>
-            <h3 class="mt-3 font-display text-2xl font-bold tracking-tight text-ink">{p.titolo}</h3>
-            <p class="mt-3 leading-relaxed text-ink/70">{p.testo}</p>
-          </div>
-        ))
-      }
-    </div>
   </section>
 
   <ClientMarquee titolo={marqueeTitolo} />

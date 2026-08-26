@@ -1,18 +1,21 @@
 pagina: "home"
 
 hero:
-  eyebrow: "Professionisti dell'energia"
-  h1: "Tecnologia e gestione operativa degli impianti energetici."
-  sub: "System Integrator, sottostazioni AT/MT, verifiche strumentali, ricerca guasti e monitoraggio 24/7 per impianti eolici e fotovoltaici."
+  eyebrow: "System Integrator per l'energia"
+  h1: "Conosciamo l'impianto. Costruiamo il software che lo controlla."
+  sub: "Ingegneria elettrica, automazione e controllo remoto in un'unica squadra: progettiamo sottostazioni AT/MT e ci costruiamo sopra i sistemi software, il monitoraggio e l'analisi dati che le tengono sempre in produzione."
   ctaPrimaria: "Chiamaci: 0881 377590"
   ctaSecondaria: "Scopri i servizi"
 
+# NOTA: storia redatta a partire dai fatti già in azienda.yaml (fondazione 2020,
+# soci, PL System / Energy System, acquisizione BayWa r.e. 2019, sede 5.000mq).
+# Stessa cautela: da far rivedere/validare dal cliente prima del go-live.
 chiSiamoBreve:
-  testo: "Da oltre 20 anni costruiamo stazioni AT/MT e gestiamo impianti nel Centro - Sud Italia. Un’unica base operativa strategica, Control Room sempre attiva e ricambi pronti: così interveniamo in tempi record e teniamo i tuoi impianti sempre in produzione."
+  testo: "L'esperienza di Amon Energy comincia nel 2000, come PL System e poi come Energy System: oltre 100 stazioni AT/MT realizzate e contratti O&M su più di 30 impianti nel Sud Italia, fino all'acquisizione da parte del Gruppo BayWa r.e. nel 2019. Nel 2020 Mario Palumbo e Ludovico Lombardi fondano Amon Energy S.r.l., riunendo oltre vent'anni di competenza sugli impianti elettrici AT/MT in un'unica realtà oggi al servizio delle energie rinnovabili nel Centro-Sud Italia. Un'unica sede da 5.000 m² a Castelluccio dei Sauri (FG), baricentrica, con magazzino ricambi e Control Room attiva 24/7/365."
   link: "/azienda/"
 
 controllo:
-  eyebrow: "Control Room · RCS · CCI"
+  eyebrow: "Remote Control System · CCI"
   titolo: "Il cuore digitale dei tuoi impianti, sempre acceso."
   testo: "Dalla nostra Control Room in Puglia sorvegliamo gli impianti in tempo reale, 24 ore su 24. Il sistema proprietario RCS analizza i guasti e richiude in automatico; il Controllore Centrale d'Impianto (CCI) tiene tutto conforme alle norme. Quando serve un intervento, il team parte dalla sede con il laboratorio mobile."
 
@@ -30,12 +33,14 @@ statbar:
     label: "monitoraggio continuo, 365 giorni"
     finto: false
 
+# Ora rese in forma compatta dentro la fascia "Chi siamo" (non più una sezione
+# a sé): testo accorciato per non ripetere i fatti già citati in chiSiamoBreve.
 percheAmon:
   - titolo: "Rapidità"
-    testo: "Sede operativa a Castelluccio dei Sauri (FG), baricentrica: raggiungiamo la maggior parte degli impianti del Centro-Sud in poche ore, con reperibilità 24h."
+    testo: "Sede baricentrica in Puglia: raggiungiamo la maggior parte degli impianti del Centro-Sud in poche ore, con reperibilità 24h."
   - titolo: "Affidabilità"
-    testo: "Personale qualificato CEI EN 50110-1 e CEI 11-27, con oltre 100 stazioni AT/MT realizzate e piena responsabilità sulla sicurezza e l'operatività elettrica."
+    testo: "Personale qualificato CEI EN 50110-1 e CEI 11-27, piena responsabilità su sicurezza e operatività elettrica."
   - titolo: "Tecnologia"
-    testo: "Control Room 24/7, sistema RCS proprietario e laboratori mobili Centrix 2.0 con strumentazione ISA, Megger HV 80kV, OTDR e termografia — tutta certificata e calibrata."
+    testo: "RCS proprietario e laboratori mobili Centrix 2.0 con strumentazione ISA, Megger HV, OTDR e termografia, certificata e calibrata."
 
 marqueeTitolo: "Si affidano a noi"

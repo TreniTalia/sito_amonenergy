@@ -366,6 +366,33 @@
     box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.8);
   }
 
+  /* Elevated service card — opt-in via ServiceCard's `elevated` prop (home
+     only, for now). The frosted glass card reads as too faint directly on a
+     flat white section (nothing behind it to blur); a solid paper background,
+     a firmer border/shadow and a signal-blue top bar give it a real edge. */
+  .ds-card-service--elevated {
+    overflow: hidden;
+    background: var(--color-paper);
+    border-color: var(--color-navy-100);
+    box-shadow: var(--shadow-md);
+  }
+  .ds-card-service--elevated::before {
+    content: '';
+    position: absolute;
+    inset: 0 0 auto 0;
+    height: 3px;
+    background: linear-gradient(90deg, var(--color-signal-400), transparent);
+  }
+  .ds-card-service--elevated:hover {
+    box-shadow: var(--shadow-lg);
+  }
+  .ds-card-service--elevated .glass-icon {
+    width: 60px;
+    height: 60px;
+    background: color-mix(in srgb, var(--accent, var(--color-signal-400)) 16%, #ffffff);
+    border-color: color-mix(in srgb, var(--accent, var(--color-signal-400)) 38%, transparent);
+  }
+
   /* ---------- Eyebrow ---------- */
   .ds-eyebrow {
     display: flex;

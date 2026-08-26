@@ -41,7 +41,7 @@ const sistemi = [
 const tiers = [
   { nome: 'Basic', desc: 'Monitoraggio di base e richiusura automatica.', color: 'var(--color-tier-basic)' },
   { nome: 'Advance', desc: 'In più: acquisizione dati da campo e reset protezioni da remoto.', color: 'var(--color-tier-advance)' },
-  { nome: 'Pro', desc: 'In più: analisi avanzate, integrazione SCADA e interfaccia grafica personalizzata.', color: 'var(--color-tier-pro)' },
+  { nome: 'Pro', desc: 'In più: analisi performance, integrazione SCADA e interfaccia grafica personalizzata.', color: 'var(--color-tier-pro)' },
 ];
 ---
 
@@ -72,9 +72,9 @@ const tiers = [
       <!-- Live monitor panel -->
       <figure class="monitor ds-panel overflow-hidden" data-reveal style="--reveal-delay:120ms">
         <div class="flex items-center gap-2 border-b border-white/18 px-4 py-3">
-          <span class="h-2.5 w-2.5 rounded-full bg-tier-pro/80"></span>
-          <span class="h-2.5 w-2.5 rounded-full bg-tier-advance/80"></span>
-          <span class="h-2.5 w-2.5 rounded-full bg-tier-basic/80"></span>
+          <span class="h-2.5 w-2.5 shrink-0 rounded-full bg-tier-pro/80"></span>
+          <span class="h-2.5 w-2.5 shrink-0 rounded-full bg-tier-advance/80"></span>
+          <span class="h-2.5 w-2.5 shrink-0 rounded-full bg-tier-basic/80"></span>
           <span class="ml-3 truncate font-display text-xs font-semibold uppercase tracking-[0.12em] text-navy-100/75">
             Amon · Control Room — Castelluccio dei Sauri (FG)
           </span>
