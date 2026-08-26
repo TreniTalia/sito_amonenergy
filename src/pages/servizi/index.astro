@@ -1,15 +1,31 @@
 ---
 import { getCollection, getEntry } from 'astro:content';
+import { Image } from 'astro:assets';
+import { Icon } from 'astro-icon/components';
 import Base from '../../layouts/Base.astro';
 import PageHero from '../../components/PageHero.astro';
 import ServiceCard from '../../components/ServiceCard.astro';
 import CtaBand from '../../components/CtaBand.astro';
+import teamwareLogo from '../../assets/img/brand/partners/teamware-logo.png';
+import modbusSvg from '../../assets/img/tech/modbus.svg?raw';
+import mqttSvg from '../../assets/img/tech/mqtt.svg?raw';
+import zigbeeSvg from '../../assets/img/tech/zigbee.svg?raw';
 
 const hub = await getEntry('pagine', 'servizi');
 if (!hub || hub.data.pagina !== 'servizi') throw new Error('pagine/servizi.yaml missing or malformed');
-const { eyebrow, h1, sub } = hub.data;
+const { eyebrow, h1, sub, controllo, ingegneriaElettrica, costruzioneGestione, tecnologie } = hub.data;
 
-const servizi = (await getCollection('servizi')).sort((a, b) => a.data.ordine - b.data.ordine);
+const costruzioni = await getEntry('servizi', 'costruzioni');
+const gestione = await getEntry('servizi', 'gestione-e-manutenzione');
+if (!costruzioni || !gestione) throw new Error('content/servizi: costruzioni o gestione-e-manutenzione mancante');
+
+// I tre marchi monocromi disponibili (vedi Task 7). Le altre voci di
+// `tecnologie.voci` non hanno `logo` e restano chip di solo testo.
+const techLogos: Record<string, string> = {
+  modbus: modbusSvg,
+  mqtt: mqttSvg,
+  zigbee: zigbeeSvg,
+};
 
 const breadcrumb = {
   '@context': 'https://schema.org',
@@ -23,23 +39,80 @@ const breadcrumb = {
 
 <Base
   title="Servizi"
-  description="Laboratorio mobile ricerca guasti, verifiche strumentali, monitoraggio e controllo, costruzioni, gestione e manutenzione per impianti AT/MT e rinnovabili."
+  description="RCS, CCI, ricerca guasti AT/MT, diagnostica su cavi e trasformatori, costruzione e gestione di impianti elettrici AT/MT."
   structuredData={[breadcrumb]}
 >
   <PageHero eyebrow={eyebrow} h1={h1} sub={sub} />
 
-  <section class="wrap-wide py-20 lg:py-28">
-    <div class="grid gap-5 sm:grid-cols-2 lg:grid-cols-3 lg:gap-6">
+  <!-- Controllo e monitoraggio: RCS + CCI -->
+  <section id="controllo-e-monitoraggio" class="relative isolate overflow-hidden bg-navy-950 text-paper">
+    <div class="control-glow" aria-hidden="true"></div>
+    <div class="wrap-wide relative z-10 py-20 lg:py-28">
+      <div class="ds-eyebrow" data-reveal>
+        <span class="ds-live-dot" aria-hidden="true"></span>
+        <span class="ds-eyebrow-label ds-eyebrow-label--signal">{controllo.eyebrow}</span>
+      </div>
+      <h2 class="text-control max-w-[20ch]" data-reveal style="--reveal-delay:80ms">{controllo.titolo}</h2>
+      <p class="measure mt-6 text-lg text-navy-100" data-reveal style="--reveal-delay:160ms">{controllo.testo}</p>
+
+      <div class="mt-14 grid gap-5 md:grid-cols-2 lg:gap-6">
+        <article class="ds-panel flex flex-col p-7 lg:p-8" data-reveal>
+          <span class="ds-pill self-start">RCS</span>
+          <h3 class="mt-5 font-display text-xl font-bold tracking-tight">{controllo.rcs.titolo}</h3>
+          <p class="mt-3 text-sm leading-relaxed text-navy-100/85">{controllo.rcs.testo}</p>
+          <ul class="mt-6 flex flex-wrap gap-2 border-t border-white/12 pt-5">
+            {controllo.rcs.specs.map((spec) => (
+              <li class="rounded-full border border-white/18 bg-white/8 px-3 py-1 font-display text-[0.72rem] font-medium tracking-wide text-navy-100">
+                {spec}
+              </li>
+            ))}
+          </ul>
+        </article>
+
+        <article class="ds-panel flex flex-col p-7 lg:p-8" data-reveal style="--reveal-delay:100ms">
+          <span class="ds-pill self-start">CCI</span>
+          <h3 class="mt-5 font-display text-xl font-bold tracking-tight">{controllo.cci.titolo}</h3>
+          <p class="mt-3 text-sm leading-relaxed text-navy-100/85">{controllo.cci.testo}</p>
+          <ul class="mt-6 flex flex-wrap gap-2 border-t border-white/12 pt-5">
+            {controllo.cci.specs.map((spec) => (
+              <li class="rounded-full border border-white/18 bg-white/8 px-3 py-1 font-display text-[0.72rem] font-medium tracking-wide text-navy-100">
+                {spec}
+              </li>
+            ))}
+          </ul>
+          <div class="mt-6 flex items-center gap-3 border-t border-white/12 pt-5">
+            <span class="text-xs font-medium uppercase tracking-wide text-navy-100/60">In partnership con</span>
+            <a href={controllo.cci.partnerUrl} target="_blank" rel="noopener noreferrer" aria-label={controllo.cci.partnerNome}>
+              <Image src={teamwareLogo} alt={controllo.cci.partnerNome} width={90} style="height: auto; width: 90px;" />
+            </a>
+          </div>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- Ingegneria elettrica -->
+  <section id="ingegneria-elettrica" class="wrap-wide py-20 lg:py-28">
+    <div class="ds-eyebrow" data-reveal>
+      <span class="ds-eyebrow-dash ds-eyebrow-dash--leaf"></span>
+      <span class="ds-eyebrow-label ds-eyebrow-label--leaf">{ingegneriaElettrica.eyebrow}</span>
+    </div>
+    <h2 class="text-headline max-w-[22ch]" data-reveal style="--reveal-delay:80ms">{ingegneriaElettrica.titolo}</h2>
+    <p class="measure mt-3 text-ink/70" data-reveal style="--reveal-delay:120ms">{ingegneriaElettrica.sub}</p>
+
+    <div class="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-3 lg:gap-6">
       {
-        servizi.map((s, i) => (
-          <div data-reveal style={`--reveal-delay:${(i % 3) * 90}ms`}>
+        ingegneriaElettrica.voci.map((v, i) => (
+          <div data-reveal style={`--reveal-delay:${i * 90}ms`}>
             <ServiceCard
-              titolo={s.data.titolo}
-              excerpt={s.data.excerpt}
-              icona={s.data.icona}
-              href={`/servizi/${s.id}/`}
+              titolo={v.titolo}
+              excerpt={v.testo}
+              icona={v.icona}
+              href="/contatti/"
               index={i + 1}
-              accent={s.id === 'monitoraggio-e-controllo' ? 'signal' : 'leaf'}
+              accent="signal"
+              elevated
+              ctaLabel="Richiedi informazioni"
             />
           </div>
         ))
@@ -47,5 +120,88 @@ const breadcrumb = {
     </div>
   </section>
 
+  <!-- Costruzione e gestione impianti -->
+  <section id="costruzione-e-gestione" class="bg-navy-100">
+    <div class="wrap-wide py-20 lg:py-28">
+      <div class="ds-eyebrow" data-reveal>
+        <span class="ds-eyebrow-dash"></span>
+        <span class="ds-eyebrow-label">{costruzioneGestione.eyebrow}</span>
+      </div>
+      <h2 class="text-headline max-w-[22ch]" data-reveal style="--reveal-delay:80ms">{costruzioneGestione.titolo}</h2>
+
+      <div class="mt-10 grid gap-4 sm:grid-cols-2 lg:gap-6">
+        <div data-reveal style="--reveal-delay:90ms">
+          <ServiceCard
+            titolo={costruzioni.data.titolo}
+            excerpt={costruzioni.data.excerpt}
+            icona={costruzioni.data.icona}
+            href="/lavori/"
+            index={1}
+            accent="signal"
+            elevated
+            ctaLabel="Guarda le opere realizzate"
+          />
+        </div>
+        <div data-reveal style="--reveal-delay:180ms">
+          <ServiceCard
+            titolo={gestione.data.titolo}
+            excerpt={gestione.data.excerpt}
+            icona={gestione.data.icona}
+            href="/lavori/"
+            index={2}
+            accent="signal"
+            elevated
+            ctaLabel="Guarda le opere realizzate"
+          />
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Tecnologie -->
+  <section id="tecnologie" class="wrap-wide py-20 lg:py-28">
+    <div class="ds-eyebrow" data-reveal>
+      <span class="ds-eyebrow-dash"></span>
+      <span class="ds-eyebrow-label">{tecnologie.eyebrow}</span>
+    </div>
+    <h2 class="text-headline max-w-[24ch]" data-reveal style="--reveal-delay:80ms">{tecnologie.titolo}</h2>
+    <p class="measure mt-3 text-ink/70" data-reveal style="--reveal-delay:120ms">{tecnologie.sub}</p>
+
+    <ul class="mt-10 flex flex-wrap gap-3">
+      {
+        tecnologie.voci.map((v, i) => (
+          <li
+            class="tech-chip flex items-center gap-2.5 rounded-full border border-navy-100 bg-navy-100/40 px-4 py-2.5 font-display text-sm font-medium text-navy-900"
+            data-reveal
+            style={`--reveal-delay:${i * 60}ms`}
+          >
+            {v.logo && techLogos[v.logo] && <Fragment set:html={techLogos[v.logo]} />}
+            {v.nome}
+          </li>
+        ))
+      }
+    </ul>
+  </section>
+
   <CtaBand />
 </Base>
+
+<style>
+  .control-glow {
+    position: absolute;
+    inset: 0;
+    background:
+      radial-gradient(60% 55% at 78% 8%, color-mix(in srgb, var(--color-navy-700) 55%, transparent), transparent 70%),
+      radial-gradient(50% 60% at 0% 100%, color-mix(in srgb, var(--color-navy-800) 60%, transparent), transparent 70%);
+    z-index: 0;
+  }
+
+  /* I tre chip con un marchio (Modbus/MQTT/Zigbee, vedi Task 7) portano
+     l'SVG inline: eredita colore dal chip invece di un fill fisso. */
+  .tech-chip :global(svg) {
+    width: 18px;
+    height: 18px;
+    color: var(--color-navy-700);
+    flex-shrink: 0;
+  }
+</style>
