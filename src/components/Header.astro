@@ -126,19 +126,17 @@ const { transparent = true } = Astro.props;
   }
 
   /* The floating glass island. Starts airy over the hero, frosts up on scroll.
-     Rifrazione vera del contenuto retrostante — un filtro SVG (feDisplacement-
-     Map) dentro `backdrop-filter` — è stata provata e scartata: funziona su
-     `filter` (contenuto proprio dell'elemento, verificato con un test a
-     righe che si piegano davvero) ma nessun browser oggi la applica quando è
-     referenziata da `backdrop-filter` per deformare ciò che sta sotto
-     (confermato a schermo con un confronto diretto scale 0 contro 40: zero
-     differenza). Non è un limite di questa implementazione, è un limite
-     della piattaforma — quindi qui si simula il vetro con luce, non con
-     deformazione: un bagliore radiale in alto a sinistra (la luce che
-     colpisce la superficie), il rim-light superiore netto (il bordo dove il
-     vetro cattura più luce), un'ombra interna in basso (lo spessore del
-     vetro, non solo un bordo piatto) e uno sheen diagonale fisso — nessuna
-     animazione, per restare un dettaglio e non un effetto da caricamento. */
+     Rifrazione vera del contenuto retrostante, come sui pulsanti "vetro"
+     (`#liquid-glass-nav` in Base.astro, stessa mappa, scala più larga perché
+     la navbar è molto più grande di un bottone). Il primo tentativo su
+     questo stesso elemento sembrava provare che nessun browser applica un
+     filtro SVG dentro `backdrop-filter` — falso: la causa vera era generare
+     la mappa a runtime con `canvas.toDataURL()` e assegnarla dopo il primo
+     paint, cosa che Chrome non rivaluta mai. Una mappa vera, statica, dà la
+     deformazione reale (verificato). Il trattamento a luce resta comunque —
+     bagliore in alto a sinistra, rim-light, ombra interna per lo spessore,
+     sheen diagonale fisso — perché la rifrazione da sola non basta a leggere
+     come vetro: è la luce a dirlo, la deformazione è il dettaglio in più. */
   .ds-navbar {
     position: relative;
     isolation: isolate;
@@ -148,6 +146,7 @@ const { transparent = true } = Astro.props;
       color-mix(in srgb, var(--color-navy-950) 32%, transparent);
     backdrop-filter: blur(26px) saturate(200%);
     -webkit-backdrop-filter: blur(26px) saturate(200%);
+    backdrop-filter: url(#liquid-glass-nav) blur(18px) saturate(200%);
     border: 1px solid rgba(255, 255, 255, 0.18);
     box-shadow:
       0 10px 34px -14px rgba(4, 16, 28, 0.55),
