@@ -20,22 +20,12 @@ const progetti = defineCollection({
 
 const servizi = defineCollection({
   loader: glob({ pattern: '**/*.md', base: './src/content/servizi' }),
-  schema: ({ image }) =>
+  schema: () =>
     z.object({
       titolo: z.string(),
-      frase: z.string(),
       excerpt: z.string(),
       icona: z.string(),
       ordine: z.number(),
-      immagine: image().optional(),
-      punti: z
-        .array(
-          z.object({
-            titolo: z.string(),
-            testo: z.string(),
-          }),
-        )
-        .optional(),
     }),
 });
 

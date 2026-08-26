@@ -61,26 +61,16 @@ collections:
 
   - name: "servizi"
     label: "Servizi"
-    description: "Le 5 schede servizio — corrispondono 1:1 alle pagine di /servizi/."
+    description: "Le 5 card servizio mostrate in home — non corrispondono più a pagine di dettaglio proprie: l'approfondimento vive tutto su /servizi/."
     files:
       - name: "laboratorio-mobile"
         label: "Laboratorio mobile ricerca guasti"
         file: "src/content/servizi/laboratorio-mobile.md"
         fields: &servizio_fields
           - { label: "Titolo", name: "titolo", widget: "string" }
-          - { label: "Frase (sotto il titolo nella pagina servizio)", name: "frase", widget: "string" }
-          - { label: "Testo breve (per le card home/hub)", name: "excerpt", widget: "text" }
-          - { label: "Icona (nome Lucide, es. \"lucide:truck\")", name: "icona", widget: "string" }
+          - { label: "Testo breve (per la card in home)", name: "excerpt", widget: "text" }
+          - { label: "Icona (nome Font Awesome, es. \"fa6-solid:truck-fast\")", name: "icona", widget: "string" }
           - { label: "Ordine", name: "ordine", widget: "number", value_type: "int" }
-          - { label: "Immagine (opzionale)", name: "immagine", widget: "image", required: false }
-          - label: "Punti elenco (titolo + 2 righe)"
-            name: "punti"
-            widget: "list"
-            required: false
-            fields:
-              - { label: "Titolo punto", name: "titolo", widget: "string" }
-              - { label: "Testo punto", name: "testo", widget: "text" }
-          - { label: "Testo introduttivo/di chiusura", name: "body", widget: "markdown" }
       - name: "verifiche-strumentali"
         label: "Verifiche strumentali"
         file: "src/content/servizi/verifiche-strumentali.md"
