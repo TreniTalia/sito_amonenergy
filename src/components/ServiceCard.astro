@@ -17,9 +17,13 @@ interface Props {
    * so pages that don't opt in (`/servizi/`) are unaffected.
    */
   elevated?: boolean;
+  /** Text of the closing link — 'Approfondisci' fits a detail page, but a
+   * card with no page to link to (e.g. a call-to-contact) needs its own
+   * wording. */
+  ctaLabel?: string;
 }
 
-const { titolo, excerpt, icona, href, index, accent = 'leaf', elevated = false } = Astro.props;
+const { titolo, excerpt, icona, href, index, accent = 'leaf', elevated = false, ctaLabel = 'Approfondisci' } = Astro.props;
 const accentColor = accent === 'signal' ? 'var(--color-signal-400)' : 'var(--color-green-500)';
 ---
 
@@ -44,7 +48,7 @@ const accentColor = accent === 'signal' ? 'var(--color-signal-400)' : 'var(--col
     <p class="mt-2.5 text-sm leading-relaxed text-ink/70">{excerpt}</p>
   </div>
   <span class="mt-6 inline-flex items-center gap-2 text-sm font-semibold text-navy-900">
-    Approfondisci
+    {ctaLabel}
     <Icon
       name="fa6-solid:arrow-right"
       class="text-xs transition-transform duration-300 group-hover:translate-x-1"
