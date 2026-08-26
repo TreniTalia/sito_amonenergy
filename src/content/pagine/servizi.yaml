@@ -1,7 +1,55 @@
 pagina: "servizi"
 
-# NOTA: hero della pagina hub non fornito verbatim nello spec (§4.3 descrive solo
-# le 5 sottopagine). Testo redatto in tono coerente col resto del sito, da rivedere.
-eyebrow: "I nostri servizi"
-h1: "Un partner tecnico per ogni fase dell'impianto."
-sub: "Dalla costruzione alla gestione quotidiana: cinque aree di specializzazione per impianti AT/MT ed energie rinnovabili."
+eyebrow: "Portfolio dei servizi"
+h1: "Un system integrator per ogni fase dell'impianto."
+sub: "Dal controllo remoto alla diagnostica strumentale, fino alla costruzione e alla gestione quotidiana: le competenze che mettiamo al lavoro sui tuoi impianti elettrici."
+
+controllo:
+  eyebrow: "Controllo e monitoraggio"
+  titolo: "RCS e CCI, in casa e in campo."
+  testo: "Due sistemi distinti che lavoriamo entrambi in prima persona: il nostro RCS proprietario per la supervisione da remoto, e il CCI che installiamo, configuriamo e gestiamo per conto dei nostri clienti."
+  rcs:
+    titolo: "Remote Control System"
+    testo: "Il nostro sistema proprietario di supervisione: analisi guasti in tempo reale, richiusura automatica, reset protezioni da remoto e storicizzazione dati, con integrazione SCADA."
+    specs: ["Richiusura automatica", "Web App", "Integrazione SCADA"]
+  cci:
+    titolo: "Controllore Centrale d'Impianto"
+    testo: "Installiamo, configuriamo e gestiamo il CCI in partnership con Teamware, abilitando le funzioni PF1 (osservabilità dello stato dell'impianto) e PF2 (limitazione della potenza attiva su comando del distributore), conformi a CEI 0-16 V5 e alla Delibera ARERA 564/2025/R/eel."
+    specs: ["CEI 0-16 V5", "PF1 · PF2", "ARERA 564/2025"]
+    partnerNome: "Teamware"
+    partnerUrl: "https://www.teamware.it/"
+
+ingegneriaElettrica:
+  eyebrow: "Ingegneria elettrica"
+  titolo: "Diagnostica strumentale su cavi e trasformatori."
+  sub: "Tra i servizi più richiesti dai nostri clienti: strumentazione all'avanguardia e tecnici qualificati per ogni prova in campo."
+  voci:
+    - titolo: "Ricerca guasti su cavi AT e MT"
+      testo: "Localizzazione rapida dei guasti su cavi di alta e media tensione con il laboratorio mobile Centrix 2.0, reperibilità 24 ore su 24, 365 giorni l'anno."
+      icona: "fa6-solid:truck-fast"
+    - titolo: "Tangente delta e scariche parziali"
+      testo: "Diagnostica avanzata dello stato di isolamento di cavi e macchine elettriche, con misure di tangente delta e scariche parziali."
+      icona: "fa6-solid:bolt-lightning"
+    - titolo: "Verifiche e collaudi trasformatori"
+      testo: "Prove di iniezione primaria, SFRA e verifiche funzionali su trasformatori AT/MT e MT/BT, di potenza e di misura."
+      icona: "fa6-solid:magnifying-glass-chart"
+
+costruzioneGestione:
+  eyebrow: "Costruzione e gestione"
+  titolo: "Dalla posa in opera alla gestione quotidiana."
+
+tecnologie:
+  eyebrow: "Tecnologie"
+  titolo: "Il software che parla la lingua dell'impianto."
+  sub: "Protocolli e standard industriali che integriamo nei nostri sistemi, oltre a competenze native di sviluppo software e intelligenza artificiale."
+  voci:
+    - nome: "Modbus TCP/RTU"
+      logo: "modbus"
+    - nome: "OPC UA"
+    - nome: "MQTT"
+      logo: "mqtt"
+    - nome: "Sparkplug B"
+    - nome: "IEC 61850 · 101"
+    - nome: "Zigbee"
+      logo: "zigbee"
+    - nome: "AI & sviluppo software"

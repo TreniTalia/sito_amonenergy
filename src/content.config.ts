@@ -72,11 +72,55 @@ const contattiSchema = z.object({
   orari: z.string(),
 });
 
-const serviziHubSchema = z.object({
+const serviziSchema = z.object({
   pagina: z.literal('servizi'),
   eyebrow: z.string(),
   h1: z.string(),
   sub: z.string(),
+  controllo: z.object({
+    eyebrow: z.string(),
+    titolo: z.string(),
+    testo: z.string(),
+    rcs: z.object({
+      titolo: z.string(),
+      testo: z.string(),
+      specs: z.array(z.string()),
+    }),
+    cci: z.object({
+      titolo: z.string(),
+      testo: z.string(),
+      specs: z.array(z.string()),
+      partnerNome: z.string(),
+      partnerUrl: z.string(),
+    }),
+  }),
+  ingegneriaElettrica: z.object({
+    eyebrow: z.string(),
+    titolo: z.string(),
+    sub: z.string(),
+    voci: z.array(
+      z.object({
+        titolo: z.string(),
+        testo: z.string(),
+        icona: z.string(),
+      }),
+    ),
+  }),
+  costruzioneGestione: z.object({
+    eyebrow: z.string(),
+    titolo: z.string(),
+  }),
+  tecnologie: z.object({
+    eyebrow: z.string(),
+    titolo: z.string(),
+    sub: z.string(),
+    voci: z.array(
+      z.object({
+        nome: z.string(),
+        logo: z.string().optional(),
+      }),
+    ),
+  }),
 });
 
 const pagine = defineCollection({
@@ -84,7 +128,7 @@ const pagine = defineCollection({
   schema: z.discriminatedUnion('pagina', [
     homeSchema,
     contattiSchema,
-    serviziHubSchema,
+    serviziSchema,
   ]),
 });
 

@@ -138,10 +138,66 @@ collections:
           - { label: "Orari", name: "orari", widget: "string" }
 
       - name: "servizi-hub"
-        label: "Servizi (pagina hub)"
+        label: "Servizi"
         file: "src/content/pagine/servizi.yaml"
         fields:
           - { label: "Tipo pagina", name: "pagina", widget: "hidden", default: "servizi" }
           - { label: "Eyebrow (etichetta sopra il titolo)", name: "eyebrow", widget: "string" }
           - { label: "Titolo grande (H1)", name: "h1", widget: "text" }
           - { label: "Sottotitolo", name: "sub", widget: "text" }
+          - label: "Controllo e monitoraggio"
+            name: "controllo"
+            widget: "object"
+            fields:
+              - { label: "Eyebrow", name: "eyebrow", widget: "string" }
+              - { label: "Titolo", name: "titolo", widget: "text" }
+              - { label: "Testo introduttivo", name: "testo", widget: "text" }
+              - label: "RCS"
+                name: "rcs"
+                widget: "object"
+                fields:
+                  - { label: "Titolo", name: "titolo", widget: "string" }
+                  - { label: "Testo", name: "testo", widget: "text" }
+                  - { label: "Specifiche (chip)", name: "specs", widget: "list", field: { label: "Voce", name: "item", widget: "string" } }
+              - label: "CCI"
+                name: "cci"
+                widget: "object"
+                fields:
+                  - { label: "Titolo", name: "titolo", widget: "string" }
+                  - { label: "Testo", name: "testo", widget: "text" }
+                  - { label: "Specifiche (chip)", name: "specs", widget: "list", field: { label: "Voce", name: "item", widget: "string" } }
+                  - { label: "Nome partner", name: "partnerNome", widget: "string" }
+                  - { label: "Sito partner", name: "partnerUrl", widget: "string" }
+          - label: "Ingegneria elettrica"
+            name: "ingegneriaElettrica"
+            widget: "object"
+            fields:
+              - { label: "Eyebrow", name: "eyebrow", widget: "string" }
+              - { label: "Titolo", name: "titolo", widget: "text" }
+              - { label: "Sottotitolo", name: "sub", widget: "text" }
+              - label: "Voci (3 card)"
+                name: "voci"
+                widget: "list"
+                fields:
+                  - { label: "Titolo", name: "titolo", widget: "string" }
+                  - { label: "Testo", name: "testo", widget: "text" }
+                  - { label: "Icona (nome Font Awesome)", name: "icona", widget: "string" }
+          - label: "Costruzione e gestione"
+            name: "costruzioneGestione"
+            widget: "object"
+            fields:
+              - { label: "Eyebrow", name: "eyebrow", widget: "string" }
+              - { label: "Titolo", name: "titolo", widget: "text" }
+          - label: "Tecnologie"
+            name: "tecnologie"
+            widget: "object"
+            fields:
+              - { label: "Eyebrow", name: "eyebrow", widget: "string" }
+              - { label: "Titolo", name: "titolo", widget: "text" }
+              - { label: "Sottotitolo", name: "sub", widget: "text" }
+              - label: "Voci (chip)"
+                name: "voci"
+                widget: "list"
+                fields:
+                  - { label: "Nome", name: "nome", widget: "string" }
+                  - { label: "Logo (modbus / mqtt / zigbee — lasciare vuoto per un chip di solo testo)", name: "logo", widget: "string", required: false }
