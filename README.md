@@ -183,8 +183,9 @@ e `<!-- DATO-FINTO -->` nel codice/contenuti):
   (`src/assets/img/**`) — sostituire con le foto reali elencate nella spec §7.
 - **StatBar** (`src/content/pagine/home.yaml`): 3 dei 4 numeri sono segnaposto
   (`finto: true`) — sostituire con i dati reali del cliente.
-- **Missione aziendale** (`src/content/pagine/azienda.yaml`): testo redatto dai
-  soli fatti presenti nello spec, non è testo brochure verbatim — da far validare.
+- **Missione aziendale** (`src/content/pagine/home.yaml`, campo `chiSiamoBreve`):
+  testo redatto dai soli fatti presenti nello spec, non è testo brochure
+  verbatim — da far validare.
 - **Privacy Policy** (`src/pages/privacy-policy.astro`): bozza minima, non
   revisionata da un legale — non pubblicare senza validazione.
 - **Dati mancanti nella galleria progetti**: kV e/o committente di alcuni progetti

@@ -5,6 +5,12 @@
 > deployabile su SiteGround come semplice cartella di file statici.
 > Nessun form di contatto: CTA dirette (telefono / email).
 
+> **Nota (2026-08-26):** la sitemap descritta in questo documento (§4.2 Azienda,
+> §4.4 Progetti) è superata. Sitemap attuale: Home, Servizi (pagina unica),
+> Lavori, Contatti — vedi
+> `docs/superpowers/specs/2026-08-26-sitemap-servizi-restructure-design.md`
+> per il dettaglio della ristrutturazione.
+
 ---
 
 ## 1. Contesto e posizionamento
