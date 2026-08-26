@@ -121,7 +121,7 @@ collections:
             widget: "object"
             fields:
               - { label: "Testo", name: "testo", widget: "text" }
-              - { label: "Link (di solito /azienda/)", name: "link", widget: "string" }
+              - { label: "Link", name: "link", widget: "string" }
           - label: "Numeri (StatBar)"
             name: "statbar"
             widget: "list"
@@ -137,21 +137,6 @@ collections:
               - { label: "Titolo", name: "titolo", widget: "string" }
               - { label: "Testo", name: "testo", widget: "text" }
           - { label: "Titolo sezione clienti", name: "marqueeTitolo", widget: "string" }
-
-      - name: "azienda"
-        label: "Azienda"
-        file: "src/content/pagine/azienda.yaml"
-        fields:
-          - { label: "Tipo pagina", name: "pagina", widget: "hidden", default: "azienda" }
-          - { label: "Eyebrow (etichetta sopra il titolo)", name: "eyebrow", widget: "string" }
-          - { label: "Titolo grande (H1)", name: "h1", widget: "text" }
-          - { label: "Storia", name: "storia", widget: "text" }
-          - { label: "Missione", name: "missione", widget: "text", hint: "Testo redatto dai soli fatti noti — da far validare dal cliente." }
-          - { label: "Tempestività d'intervento (testo raggio d'azione)", name: "raggioAzione", widget: "text" }
-          - label: "Strumentazione (elenco tag)"
-            name: "strumentazione"
-            widget: "list"
-            field: { label: "Strumento", name: "item", widget: "string" }
 
       - name: "contatti"
         label: "Contatti"
