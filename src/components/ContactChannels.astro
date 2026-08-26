@@ -1,6 +1,7 @@
 ---
 import { Icon } from 'astro-icon/components';
 import { contatti } from '../data/contatti.ts';
+import PackIcon from './PackIcon.astro';
 
 interface Props {
   h1: string;
@@ -17,7 +18,7 @@ const { h1, sub, orari } = Astro.props;
 
   <div class="mt-10 flex flex-col gap-4">
     <a href={contatti.telefonoHref} class="ds-btn-primary justify-center" style="padding: 19px 32px; font-size: 1.0625rem;">
-      <Icon name="fa6-solid:phone" class="shrink-0 text-base" />
+      <PackIcon name="phone" class="shrink-0 text-base" />
       Chiamaci — {contatti.telefono}
     </a>
     <p class="text-sm text-ink/60" style="margin-top: -0.5rem;">{orari}</p>

@@ -26,13 +26,13 @@ ingegneriaElettrica:
   voci:
     - titolo: "Ricerca guasti su cavi AT e MT"
       testo: "Localizzazione rapida dei guasti su cavi di alta e media tensione con il laboratorio mobile Centrix 2.0, reperibilità 24 ore su 24, 365 giorni l'anno."
-      icona: "fa6-solid:truck-fast"
+      icona: "glass-png:delivery-time"
     - titolo: "Tangente delta e scariche parziali"
       testo: "Diagnostica avanzata dello stato di isolamento di cavi e macchine elettriche, con misure di tangente delta e scariche parziali."
-      icona: "fa6-solid:bolt-lightning"
+      icona: "glass-png:conflict"
     - titolo: "Verifiche e collaudi trasformatori"
       testo: "Prove di iniezione primaria, SFRA e verifiche funzionali su trasformatori AT/MT e MT/BT, di potenza e di misura."
-      icona: "fa6-solid:magnifying-glass-chart"
+      icona: "glass-png:total-sales"
 
 costruzioneGestione:
   eyebrow: "Costruzione e gestione"

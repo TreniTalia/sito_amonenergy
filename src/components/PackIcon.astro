@@ -1,0 +1,24 @@
+---
+// Icona raster (PNG) dal pack "glass" — icons8, glifo bianco/grigio translucido
+// su badge. Serve dove serve un match del pack che esiste solo in PNG:
+// astro-icon (<Icon>) inlinea SVG, non rasterizzati, quindi questi passano
+// per <img> invece che per il componente Icon.
+interface Props {
+  name: string;
+  class?: string;
+}
+
+const { name, class: className } = Astro.props;
+---
+
+<img src={`/icons/glass/${name}.png`} alt="" aria-hidden="true" class:list={['pack-icon', className]} />
+
+<style>
+  .pack-icon {
+    width: 1em;
+    height: 1em;
+    display: inline-block;
+    object-fit: contain;
+    vertical-align: -0.125em;
+  }
+</style>

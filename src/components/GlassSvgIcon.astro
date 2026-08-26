@@ -1,0 +1,35 @@
+---
+// Icone SVG del pack "glass" (icons8) — inlineate a crudo (`?raw`), non tramite
+// astro-icon: il suo sprite condiviso `<symbol>+<use>` minifica gli id dei
+// gradienti a lettere singole ("a", "b") per icona, e con più icone di questo
+// pack in pagina gli id collidono — un gradiente vince sull'altro e il glifo
+// risulta invisibile (visto su "settings": DOM presente, fill che non pitta
+// nulla). L'import raw mantiene gli id lunghi e unici originali del file.
+import menuRaw from '../icons/glass/menu.svg?raw';
+import closeRaw from '../icons/glass/close.svg?raw';
+import settingsRaw from '../icons/glass/settings.svg?raw';
+
+const svgByName: Record<string, string> = { menu: menuRaw, close: closeRaw, settings: settingsRaw };
+
+interface Props {
+  name: string;
+  class?: string;
+}
+
+const { name, class: className } = Astro.props;
+---
+
+<span class:list={['glass-svg-icon', className]} set:html={svgByName[name]} />
+
+<style>
+  .glass-svg-icon {
+    display: inline-flex;
+    width: 1em;
+    height: 1em;
+  }
+  .glass-svg-icon :global(svg) {
+    width: 100%;
+    height: 100%;
+    display: block;
+  }
+</style>

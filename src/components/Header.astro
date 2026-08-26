@@ -2,6 +2,7 @@
 import { Icon } from 'astro-icon/components';
 import { contatti } from '../data/contatti.ts';
 import Logo from './Logo.astro';
+import GlassSvgIcon from './GlassSvgIcon.astro';
 
 interface Props {
   /** True when this page opens on a dark hero, so the header can start transparent. */
@@ -13,9 +14,9 @@ const { transparent = true } = Astro.props;
 
 <header class="ds-header fixed inset-x-0 top-0 z-40" data-transparent={transparent ? 'true' : 'false'}>
   <div class="ds-header-wrap wrap-wide pt-3 md:pt-4">
-    <div class="ds-navbar flex items-center justify-between gap-4 rounded-[var(--radius-panel)] py-2.5 pl-5 pr-2.5 md:pl-7 md:pr-3">
+    <div class="ds-navbar flex items-center justify-between gap-4 rounded-[var(--radius-panel)] py-4 pl-5 pr-2.5 md:pl-7 md:pr-3">
       <a href="/" class="flex shrink-0 items-center text-paper" aria-label="Amon Energy, torna alla home">
-        <Logo variant="full" size={26} class="max-[420px]:[--logo-h:22px]" />
+        <Logo variant="full" size={34} class="max-[420px]:[--logo-h:28px]" />
       </a>
 
       <nav class="hidden md:flex items-center gap-1" aria-label="Navigazione principale">
@@ -33,7 +34,7 @@ const { transparent = true } = Astro.props;
         </a>
 
         <button type="button" id="nav-toggle" class="md:hidden grid h-11 w-11 place-items-center rounded-[var(--radius-sm)] text-paper transition-colors hover:bg-white/10" aria-expanded="false" aria-controls="mobile-nav" aria-label="Apri il menu">
-          <Icon name="fa6-solid:bars" class="text-lg" />
+          <GlassSvgIcon name="menu" class="text-lg" />
         </button>
       </div>
     </div>
@@ -43,9 +44,9 @@ const { transparent = true } = Astro.props;
 <div id="mobile-nav" class="mobile-nav fixed inset-0 z-50 flex flex-col justify-between p-6 translate-x-full transition-transform duration-300 md:hidden" style="transition-timing-function: var(--ease-signature);">
   <div>
     <div class="flex items-center justify-between mb-10">
-      <span class="text-paper"><Logo size={28} /></span>
+      <span class="text-paper"><Logo size={32} /></span>
       <button type="button" id="nav-close" class="grid h-11 w-11 place-items-center rounded-[var(--radius-sm)] text-paper transition-colors hover:bg-white/10" aria-label="Chiudi il menu">
-        <Icon name="fa6-solid:xmark" class="text-xl" />
+        <GlassSvgIcon name="close" class="text-xl" />
       </button>
     </div>
     <nav class="flex flex-col gap-1" aria-label="Navigazione mobile">

@@ -12,12 +12,13 @@ interface Props {
 const { headline = 'Un guasto non aspetta. Nemmeno noi.' } = Astro.props;
 ---
 
-<section class="relative isolate overflow-hidden text-paper">
+<section class="relative isolate overflow-hidden text-paper cta-band">
   <Image
     src={ctaImg}
     alt="Giunto di un cavo di media tensione bruciato e scoperto in uno scavo, con i conduttori in rame esposti"
-    class="absolute inset-0 h-full w-full object-cover"
-    widths={[768, 1100, 1376]}
+    class="cta-bg-img absolute left-0 w-full object-cover"
+    data-parallax
+    widths={[768, 1100, 1376, 1900]}
     sizes="100vw"
     loading="lazy"
   />
@@ -51,3 +52,59 @@ const { headline = 'Un guasto non aspetta. Nemmeno noi.' } = Astro.props;
     </div>
   </div>
 </section>
+
+<style>
+  /* La foto statica prima non lasciava vedere la rifrazione vera dei pulsanti
+     (backdrop-filter su uno sfondo fermo non "respira" mai) — stessa
+     parallasse di ControlPillar: più margine verticale del necessario, così
+     il traslare in scroll non scopre mai un bordo vuoto. */
+  .cta-bg-img {
+    top: -18%;
+    height: 136%;
+    max-width: none;
+    transform: translate3d(0, 0, 0);
+    will-change: transform;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .cta-bg-img {
+      transform: translate3d(0, 0, 0) !important;
+    }
+  }
+</style>
+
+<script>
+  const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const section = document.querySelector<HTMLElement>('.cta-band');
+  const layer = section?.querySelector<HTMLElement>('[data-parallax]');
+
+  if (section && layer && !prefersReduced) {
+    let inView = false;
+    let ticking = false;
+    const depth = 0.3;
+
+    const apply = () => {
+      ticking = false;
+      const rect = section.getBoundingClientRect();
+      const vh = window.innerHeight || document.documentElement.clientHeight;
+      const progress = (vh - rect.top) / (vh + rect.height);
+      const offset = (progress - 0.5) * rect.height * depth;
+      layer.style.transform = `translate3d(0, ${offset.toFixed(1)}px, 0)`;
+    };
+
+    const onScroll = () => {
+      if (!inView || ticking) return;
+      ticking = true;
+      requestAnimationFrame(apply);
+    };
+
+    const io = new IntersectionObserver(
+      (entries) => {
+        inView = entries[0]?.isIntersecting ?? false;
+        if (inView) onScroll();
+      },
+      { rootMargin: '20% 0px' },
+    );
+    io.observe(section);
+    window.addEventListener('scroll', onScroll, { passive: true });
+  }
+</script>

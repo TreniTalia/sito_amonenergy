@@ -28,27 +28,27 @@ const parsed = items.map((item) => {
   <div class="wrap-wide relative z-10 py-16 lg:py-24">
     {
       nota && (
-        <p class="mb-10 flex items-center gap-3 text-xs font-semibold uppercase tracking-[0.14em] text-paper/55">
-          <span class="ds-eyebrow-dash" />
+        <p class="stat-nota mb-10 flex items-center gap-3 text-xs font-semibold uppercase tracking-[0.14em] text-paper/55">
+          <span class="ds-eyebrow-dash shrink-0" />
           {nota}
         </p>
       )
     }
-    <div class="grid grid-cols-2 gap-x-8 gap-y-12 md:grid-cols-4 lg:gap-x-12">
+    <div class="grid grid-cols-2 gap-4 md:grid-cols-4 lg:gap-5">
       {
         parsed.map((item, i) => (
-          <div data-reveal style={`--reveal-delay:${i * 90}ms`}>
+          <div class="ds-panel stat-card flex flex-col p-6" data-reveal style={`--reveal-delay:${i * 90}ms`}>
             <span class="stat-dash mb-4 block h-[3px] w-10 rounded-full bg-signal-400" aria-hidden="true" />
             <p
-              class="stat-value tnum text-display leading-none"
-              style="font-size: clamp(2.6rem, 1.4rem + 3vw, 4.25rem); font-stretch: 125%; font-weight: 800;"
+              class="stat-value tnum text-display leading-none text-paper"
+              style="font-size: clamp(2.8rem, 1.4rem + 3.4vw, 4.75rem); font-stretch: 125%; font-weight: 800;"
               data-numero={item.numero}
               data-suffisso={item.suffisso}
             >
               {item.numero ? '0' : ''}
               {item.suffisso}
             </p>
-            <p class="mt-3 max-w-[22ch] text-sm leading-snug text-paper/70">
+            <p class="stat-label mt-3 text-sm font-medium leading-snug text-paper/85">
               {item.label}
               {item.finto && <Fragment set:html="<!-- DATO-FINTO -->" />}
             </p>
@@ -72,6 +72,14 @@ const parsed = items.map((item) => {
   }
   .stat-dash {
     box-shadow: var(--glow-signal);
+  }
+  /* Andate a capo curate: `balance` distribuisce le righe invece di lasciare
+     un'ultima parola orfana in fondo (es. "monitoraggio continuo, 365" +
+     "giorni" da solo) — supportato ovunque tranne Safari <17.4, dove
+     semplicemente non fa nulla e il wrap resta quello naturale. */
+  .stat-label,
+  .stat-nota {
+    text-wrap: balance;
   }
 </style>
 

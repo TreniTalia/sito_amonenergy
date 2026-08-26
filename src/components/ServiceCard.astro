@@ -1,5 +1,7 @@
 ---
 import { Icon } from 'astro-icon/components';
+import PackIcon from './PackIcon.astro';
+import GlassSvgIcon from './GlassSvgIcon.astro';
 
 interface Props {
   titolo: string;
@@ -33,21 +35,29 @@ const accentColor = accent === 'signal' ? 'var(--color-signal-400)' : 'var(--col
 >
   <div class="flex items-start justify-between">
     <span class="glass-icon" style={`--accent: ${accentColor};`}>
-      <Icon name={icona} class="text-[1.4rem]" />
+      {
+        icona.startsWith('glass-png:') ? (
+          <PackIcon name={icona.replace('glass-png:', '')} class="text-[1.4rem]" />
+        ) : icona.startsWith('glass-svg:') ? (
+          <GlassSvgIcon name={icona.replace('glass-svg:', '')} class="text-[1.4rem]" />
+        ) : (
+          <Icon name={icona} class="text-[1.4rem]" />
+        )
+      }
     </span>
     {
       index !== undefined && (
-        <span class="tnum font-display text-sm font-semibold text-navy-300">
+        <span class:list={['tnum font-display text-sm font-semibold', elevated ? 'text-paper/45' : 'text-navy-300']}>
           {String(index).padStart(2, '0')}
         </span>
       )
     }
   </div>
   <div class="mt-6">
-    <h3 class="font-display text-lg font-bold tracking-tight text-ink">{titolo}</h3>
-    <p class="mt-2.5 text-sm leading-relaxed text-ink/70">{excerpt}</p>
+    <h3 class:list={['font-display text-lg font-bold tracking-tight', elevated ? 'text-paper' : 'text-ink']}>{titolo}</h3>
+    <p class:list={['mt-2.5 text-sm leading-relaxed', elevated ? 'text-paper/80' : 'text-ink/70']}>{excerpt}</p>
   </div>
-  <span class="mt-6 inline-flex items-center gap-2 text-sm font-semibold text-navy-900">
+  <span class:list={['mt-6 inline-flex items-center gap-2 text-sm font-semibold', elevated ? 'text-paper' : 'text-navy-900']}>
     {ctaLabel}
     <Icon
       name="fa6-solid:arrow-right"

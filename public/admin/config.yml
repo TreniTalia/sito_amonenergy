@@ -69,7 +69,7 @@ collections:
         fields: &servizio_fields
           - { label: "Titolo", name: "titolo", widget: "string" }
           - { label: "Testo breve (per la card in home)", name: "excerpt", widget: "text" }
-          - { label: "Icona (nome Font Awesome, es. \"fa6-solid:truck-fast\")", name: "icona", widget: "string" }
+          - { label: "Icona (es. \"fa6-solid:truck-fast\" Font Awesome, \"glass-svg:settings\" SVG del pack, \"glass-png:safety-hat\" PNG del pack)", name: "icona", widget: "string" }
           - { label: "Ordine", name: "ordine", widget: "number", value_type: "int" }
       - name: "verifiche-strumentali"
         label: "Verifiche strumentali"
@@ -181,7 +181,7 @@ collections:
                 fields:
                   - { label: "Titolo", name: "titolo", widget: "string" }
                   - { label: "Testo", name: "testo", widget: "text" }
-                  - { label: "Icona (nome Font Awesome)", name: "icona", widget: "string" }
+                  - { label: "Icona (es. \"fa6-solid:truck-fast\" Font Awesome, \"glass-svg:settings\" SVG del pack, \"glass-png:safety-hat\" PNG del pack)", name: "icona", widget: "string" }
           - label: "Costruzione e gestione"
             name: "costruzioneGestione"
             widget: "object"

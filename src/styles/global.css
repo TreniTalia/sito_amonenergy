@@ -355,7 +355,10 @@
     box-shadow: var(--shadow-lg);
   }
 
-  /* Glass icon chip — houses the Font Awesome service icon. */
+  /* Glass icon chip — houses the service icon. Sfondo scuro/accent (non
+     più quasi-bianco): le glifo del pack "glass" sono bianco translucido,
+     illeggibili su un chip chiaro — leggono solo su una superficie scura,
+     come i pulsanti/navbar liquid-glass del resto del sito. */
   .glass-icon {
     display: inline-flex;
     align-items: center;
@@ -363,38 +366,72 @@
     width: 54px;
     height: 54px;
     border-radius: var(--radius-sm);
-    background: var(--glass-sheen-light),
-      color-mix(in srgb, var(--accent, var(--color-green-500)) 12%, #ffffff);
-    border: 1px solid color-mix(in srgb, var(--accent, var(--color-green-500)) 26%, transparent);
-    color: var(--accent, var(--color-green-500));
-    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.8);
+    background: var(--glass-sheen),
+      color-mix(in srgb, var(--accent, var(--color-green-500)) 78%, var(--color-navy-950) 22%);
+    border: 1px solid color-mix(in srgb, var(--accent, var(--color-green-500)) 55%, transparent);
+    color: var(--color-paper);
+    box-shadow: var(--shadow-sm), inset 0 1px 0 rgba(255, 255, 255, 0.3);
   }
 
-  /* Elevated service card — opt-in via ServiceCard's `elevated` prop (home
-     only, for now). The frosted glass card reads as too faint directly on a
-     flat white section (nothing behind it to blur); a solid paper background,
-     a firmer border/shadow and a signal-blue top bar give it a real edge. */
+  /* Elevated service card — opt-in via ServiceCard's `elevated` prop (home,
+     sezione "Cosa facciamo"). Il vetro chiaro di base legge troppo debole su
+     una sezione bianca piatta (niente dietro da sfocare) — invece di un
+     cartoncino bianco con trafiletto blu sopra (bocciato: piatto, poco
+     "glass"), lo stesso vetro navy/blu delle altre fasce (`.ds-panel`):
+     radial highlight in alto a sx, rifrazione SVG vera, sheen diagonale,
+     ombre a strati. Testo bianco a contrasto sulle superfici scure. */
   .ds-card-service--elevated {
+    isolation: isolate;
     overflow: hidden;
-    background: var(--color-paper);
-    border-color: var(--color-navy-100);
-    box-shadow: var(--shadow-md);
+    /* Sfondo pieno, non trasparente: qui dietro c'è una sezione bianca piatta,
+       niente da rifrangere — un tint trasparente lascerebbe il bianco
+       sbiadire il vetro in un grigiore. Il carattere "glass" arriva da luce
+       e ombra (highlight, sheen, rim), non dalla trasparenza. */
+    background:
+      radial-gradient(120% 180% at 14% -25%, rgba(255, 255, 255, 0.22), transparent 55%),
+      var(--glass-sheen),
+      linear-gradient(165deg, var(--color-navy-800), var(--color-navy-950));
+    backdrop-filter: blur(20px) saturate(190%);
+    -webkit-backdrop-filter: blur(20px) saturate(190%);
+    backdrop-filter: url(#liquid-glass-panel) blur(16px) saturate(190%);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    box-shadow:
+      var(--shadow-md),
+      inset 0 1.5px 0 rgba(255, 255, 255, 0.34),
+      inset 0 -18px 26px -20px rgba(4, 16, 28, 0.55),
+      inset 0 0 0 1px rgba(255, 255, 255, 0.06);
   }
   .ds-card-service--elevated::before {
     content: '';
     position: absolute;
-    inset: 0 0 auto 0;
-    height: 3px;
-    background: linear-gradient(90deg, var(--color-signal-400), transparent);
+    inset: 0;
+    z-index: 1;
+    border-radius: inherit;
+    pointer-events: none;
+    background: linear-gradient(
+      125deg,
+      transparent 30%,
+      rgba(255, 255, 255, 0.1) 44%,
+      rgba(255, 255, 255, 0.16) 50%,
+      rgba(255, 255, 255, 0.1) 56%,
+      transparent 70%
+    );
+    mix-blend-mode: screen;
+  }
+  .ds-card-service--elevated > * {
+    position: relative;
+    z-index: 2;
   }
   .ds-card-service--elevated:hover {
-    box-shadow: var(--shadow-lg);
+    border-color: rgba(255, 255, 255, 0.34);
+    box-shadow: var(--shadow-lg), var(--glow-signal);
   }
   .ds-card-service--elevated .glass-icon {
     width: 60px;
     height: 60px;
-    background: color-mix(in srgb, var(--accent, var(--color-signal-400)) 16%, #ffffff);
-    border-color: color-mix(in srgb, var(--accent, var(--color-signal-400)) 38%, transparent);
+    background: var(--glass-sheen),
+      color-mix(in srgb, var(--accent, var(--color-signal-400)) 82%, var(--color-navy-950) 18%);
+    border-color: color-mix(in srgb, var(--accent, var(--color-signal-400)) 60%, transparent);
   }
 
   /* ---------- Eyebrow ---------- */
@@ -499,14 +536,54 @@
   }
 
   /* Control-world glass panel — frosted telemetry glass over the navy drench. */
+  /* Pannello vetro — monitor RCS e i 3 box sistemi in ControlPillar. Rifrazione
+     vera (stessa tecnica di navbar/CTA: `url(#liquid-glass-panel)` in coda,
+     mappa statica da primo paint — vedi il commento in Base.astro) più uno
+     sheen diagonale proprio, non condiviso col contenuto: `isolation:isolate`
+     e `z-index` sui figli tengono testo/badge sopra la luce che schiarisce. */
   .ds-panel {
-    background: var(--glass-sheen),
-      color-mix(in srgb, var(--color-navy-900) 62%, transparent);
-    backdrop-filter: blur(16px) saturate(150%);
-    -webkit-backdrop-filter: blur(16px) saturate(150%);
-    border: 1px solid rgba(255, 255, 255, 0.16);
+    position: relative;
+    isolation: isolate;
+    /* Tint quasi pieno, non 58%: dov'è dietro un tratto piatto/scuro del
+       pattern (es. i box Basic/Advance/Pro, più in basso nella fascia) il
+       58% lasciava il pannello quasi indistinguibile dallo sfondo — stesso
+       problema già visto sui box "Cosa facciamo" (vedi commento lì). */
+    background:
+      radial-gradient(120% 180% at 14% -25%, rgba(255, 255, 255, 0.24), transparent 55%),
+      var(--glass-sheen),
+      color-mix(in srgb, var(--color-navy-800) 82%, transparent);
+    backdrop-filter: blur(20px) saturate(190%);
+    -webkit-backdrop-filter: blur(20px) saturate(190%);
+    backdrop-filter: url(#liquid-glass-panel) blur(16px) saturate(190%);
+    border: 1px solid rgba(255, 255, 255, 0.28);
     border-radius: var(--radius-card);
-    box-shadow: var(--shadow-md), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+    box-shadow:
+      var(--shadow-md),
+      inset 0 1.5px 0 rgba(255, 255, 255, 0.38),
+      inset 0 -18px 26px -20px rgba(4, 16, 28, 0.55),
+      inset 0 0 0 1px rgba(255, 255, 255, 0.08);
+    transition: box-shadow 0.3s var(--ease-signature), transform 0.3s var(--ease-signature);
+  }
+  .ds-panel::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    border-radius: inherit;
+    pointer-events: none;
+    background: linear-gradient(
+      125deg,
+      transparent 30%,
+      rgba(255, 255, 255, 0.1) 44%,
+      rgba(255, 255, 255, 0.16) 50%,
+      rgba(255, 255, 255, 0.1) 56%,
+      transparent 70%
+    );
+    mix-blend-mode: screen;
+  }
+  .ds-panel > * {
+    position: relative;
+    z-index: 2;
   }
 }
 
