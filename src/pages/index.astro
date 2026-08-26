@@ -17,6 +17,13 @@ if (!home || home.data.pagina !== 'home') throw new Error('pagine/home.yaml miss
 const { hero, chiSiamoBreve, controllo, statbar, percheAmon, marqueeTitolo } = home.data;
 
 const servizi = (await getCollection('servizi')).sort((a, b) => a.data.ordine - b.data.ordine);
+const serviziAnchor: Record<string, string> = {
+  'laboratorio-mobile': '/servizi/#ingegneria-elettrica',
+  'verifiche-strumentali': '/servizi/#ingegneria-elettrica',
+  'monitoraggio-e-controllo': '/servizi/#controllo-e-monitoraggio',
+  costruzioni: '/servizi/#costruzione-e-gestione',
+  'gestione-e-manutenzione': '/servizi/#costruzione-e-gestione',
+};
 const progettiPreview = (await getCollection('progetti'))
   .sort((a, b) => a.data.ordine - b.data.ordine)
   .slice(0, 3);
@@ -107,7 +114,7 @@ const progettiPreview = (await getCollection('progetti'))
               titolo={s.data.titolo}
               excerpt={s.data.excerpt}
               icona={s.data.icona}
-              href={`/servizi/${s.id}/`}
+              href={serviziAnchor[s.id] ?? '/servizi/'}
               index={i + 1}
               accent="signal"
               elevated
