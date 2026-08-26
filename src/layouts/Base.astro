@@ -82,6 +82,26 @@ const jsonLdBlocks = [organization, ...structuredData];
     }
   </head>
   <body>
+    <!-- Filtro di rifrazione condiviso da tutti i pulsanti "vetro" del sito
+         (.ds-btn-on-dark / .ds-btn-ghost / .ds-btn-secondary / .ds-btn-signal,
+         vedi global.css). `feImage` legge una mappa vera, statica, servita da
+         `public/img/glass/lens-map.png` — non generata a runtime via canvas:
+         un data URI generato via `canvas.toDataURL()` e assegnato dopo il
+         primo paint dell'elemento con `backdrop-filter` risulta INVISIBILE
+         in Chrome (verificato: stesso filtro, stessa mappa concettuale, zero
+         effetto). Un URL statico presente fin dal primo render funziona
+         (verificato con un test isolato prima di adottarlo qui). La mappa
+         codifica uno spostamento a lente — bordi che spingono verso
+         l'esterno, centro quasi piatto — più un filo di rumore ovunque:
+         una mappa con grandi zone piatte uniformi è il sospetto principale
+         dietro al fallimento del tentativo precedente. -->
+    <svg width="0" height="0" style="position: absolute;" aria-hidden="true" focusable="false">
+      <filter id="liquid-glass-btn" x="-25%" y="-25%" width="150%" height="150%" color-interpolation-filters="sRGB">
+        <feImage href="/img/glass/lens-map.png" x="0" y="0" width="100%" height="100%" preserveAspectRatio="none" result="map" />
+        <feDisplacementMap in="SourceGraphic" in2="map" scale="16" xChannelSelector="R" yChannelSelector="G" />
+      </filter>
+    </svg>
+
     <a href="#main" class="skip-link">Vai al contenuto</a>
     <Header transparent={headerTransparent} />
     <main id="main" class:list={[{ 'pt-28 lg:pt-32': !headerTransparent }]}>
