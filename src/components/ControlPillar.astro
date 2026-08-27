@@ -39,12 +39,6 @@ const sistemi = [
     specs: ['CEI 0-16 V5', 'ARERA 564/2025', 'Teledistacco A72'],
   },
 ];
-
-const tiers = [
-  { nome: 'Basic', desc: 'Monitoraggio di base e richiusura automatica.', accent: 'var(--color-signal-400)' },
-  { nome: 'Advance', desc: 'In più: acquisizione dati da campo e reset protezioni da remoto.', accent: 'var(--color-green-500)' },
-  { nome: 'Pro', desc: 'In più: analisi performance, integrazione SCADA e interfaccia grafica personalizzata.', accent: 'var(--color-green-400)' },
-];
 ---
 
 <section class="control relative isolate overflow-hidden bg-navy-950 text-paper">
@@ -133,29 +127,6 @@ const tiers = [
           </article>
         ))
       }
-    </div>
-
-    <!-- RCS tiers -->
-    <div class="mt-16 lg:mt-20" data-reveal>
-      <div class="ds-eyebrow">
-        <span class="ds-eyebrow-dash"></span>
-        <span class="ds-eyebrow-label">Piattaforma RCS — tre versioni</span>
-      </div>
-      <div class="grid gap-4 sm:grid-cols-3">
-        {
-          tiers.map((t) => (
-            <div class="ds-panel flex flex-col p-6">
-              <span
-                class="ds-pill self-start"
-                style={`color:${t.accent}; border-color: color-mix(in srgb, ${t.accent} 50%, transparent); background: color-mix(in srgb, ${t.accent} 16%, transparent);`}
-              >
-                {t.nome}
-              </span>
-              <p class="mt-4 text-sm leading-relaxed text-navy-100/95">{t.desc}</p>
-            </div>
-          ))
-        }
-      </div>
     </div>
   </div>
 </section>

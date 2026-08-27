@@ -1,0 +1,123 @@
+---
+---
+
+<div id="cookie-consent" class="cookie-consent" role="region" aria-label="Preferenze cookie">
+  <div class="cookie-consent-panel">
+    <p class="cookie-consent-text">
+      Nessun cookie di profilazione o marketing. Solo tecnici indispensabili; eventuali cookie
+      statistici partiranno solo con il tuo consenso.
+      {' '}<a href="/privacy-policy/">Privacy Policy</a>
+    </p>
+    <div class="cookie-consent-actions">
+      <button type="button" id="cookie-reject" class="ds-btn-ghost">Rifiuta</button>
+      <button type="button" id="cookie-accept" class="ds-btn-on-dark">Accetta tutti</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  import { getConsent, setConsent } from '../lib/consent';
+
+  const panel = document.getElementById('cookie-consent');
+  const accept = document.getElementById('cookie-accept');
+  const reject = document.getElementById('cookie-reject');
+
+  const show = () => panel?.classList.add('is-visible');
+  const hide = () => panel?.classList.remove('is-visible');
+
+  if (!getConsent()) show();
+
+  accept?.addEventListener('click', () => {
+    setConsent('accepted');
+    hide();
+  });
+  reject?.addEventListener('click', () => {
+    setConsent('rejected');
+    hide();
+  });
+
+  // Riaperto dal link "Preferenze cookie" nel footer, a prescindere dalla
+  // scelta già salvata: il consenso deve restare modificabile in ogni momento.
+  document.addEventListener('amon-open-consent', show);
+</script>
+
+<style>
+  /* Stesso trattamento a vetro scuro di `.mobile-nav` (sheen + blur navy),
+     ma come pannello flottante in basso, non un foglio a schermo intero.
+     `pointer-events: none` sul contenitore mentre è nascosto: da chiuso non
+     deve intercettare click sul contenuto sottostante (è `position: fixed`
+     su tutta la larghezza). */
+  .cookie-consent {
+    position: fixed;
+    inset-inline: 0;
+    bottom: 0;
+    z-index: 50;
+    display: flex;
+    justify-content: center;
+    padding: 0 16px;
+    transform: translateY(120%);
+    opacity: 0;
+    pointer-events: none;
+    transition:
+      transform 0.5s var(--ease-signature),
+      opacity 0.4s var(--ease-signature);
+  }
+  .cookie-consent.is-visible {
+    transform: translateY(0);
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  .cookie-consent-panel {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px 24px;
+    width: 100%;
+    max-width: 900px;
+    margin-bottom: 16px;
+    padding: 20px 24px;
+    border-radius: var(--radius-panel);
+    color: var(--color-paper);
+    background: var(--glass-sheen), color-mix(in srgb, var(--color-navy-950) 88%, transparent);
+    backdrop-filter: blur(24px) saturate(160%);
+    -webkit-backdrop-filter: blur(24px) saturate(160%);
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    box-shadow:
+      0 20px 50px -20px rgba(4, 16, 28, 0.6),
+      inset 0 1px 0 rgba(255, 255, 255, 0.2);
+  }
+
+  .cookie-consent-text {
+    flex: 1 1 380px;
+    font-size: 0.875rem;
+    line-height: 1.55;
+    color: var(--color-paper);
+    opacity: 0.92;
+  }
+  .cookie-consent-text a {
+    color: inherit;
+    text-decoration: underline;
+    text-underline-offset: 2px;
+  }
+
+  .cookie-consent-actions {
+    display: flex;
+    flex-shrink: 0;
+    gap: 10px;
+  }
+
+  @media (max-width: 480px) {
+    .cookie-consent-panel {
+      padding: 18px;
+    }
+    .cookie-consent-actions {
+      width: 100%;
+    }
+    .cookie-consent-actions .ds-btn-ghost,
+    .cookie-consent-actions .ds-btn-on-dark {
+      flex: 1;
+    }
+  }
+</style>

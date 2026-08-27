@@ -53,25 +53,22 @@ const year = new Date().getFullYear();
   </div>
 
   <div class="border-t border-navy-700">
-    <div class="wrap-wide py-8 text-xs text-paper/70">
-      <p>
-        Amon Energy S.r.l. ha beneficiato di aiuti di Stato ai sensi della L. 124/2017 e del D.L. 34/2019.
-        L'elenco è consultabile nel Registro Nazionale degli Aiuti di Stato su
-        {' '}<a href={`https://www.rna.gov.it/RegistroNazionaleTrasparenza/faces/pages/TrasparenzaAiuto.jspx?codiceFiscale=${contatti.piva}`} class="underline hover:text-signal-400" target="_blank" rel="noopener noreferrer">rna.gov.it</a>
-        {' '}(C.F. {contatti.piva}), oppure nel documento di
-        {' '}<a href="/docs/rendicontazione-contributi-pubblici.txt" class="underline hover:text-signal-400">rendicontazione contributi pubblici</a>{' '}
-        (segnaposto — sostituire con il PDF originale prima del go-live).
-      </p>
-    </div>
-  </div>
-
-  <div class="border-t border-navy-700">
     <div class="wrap-wide pt-6 pb-6 flex flex-col sm:flex-row items-center justify-between gap-3 text-sm text-paper/75">
       <p>© {year} {contatti.ragioneSociale}</p>
       <div class="flex items-center gap-6">
         <a href="/privacy-policy/" class="hover:text-signal-400 transition-colors">Privacy Policy</a>
+        <button type="button" id="footer-cookie-preferences" class="border-0 bg-transparent p-0 cursor-pointer hover:text-signal-400 transition-colors">Preferenze cookie</button>
         <span>P.IVA {contatti.piva}</span>
       </div>
     </div>
   </div>
 </footer>
+
+<script>
+  // Riapre il banner cookie per cambiare scelta — il consenso deve essere
+  // revocabile con la stessa facilità con cui è dato. CookieConsent.astro
+  // ascolta questo evento a prescindere dalla scelta già salvata.
+  document.getElementById('footer-cookie-preferences')?.addEventListener('click', () => {
+    document.dispatchEvent(new CustomEvent('amon-open-consent'));
+  });
+</script>

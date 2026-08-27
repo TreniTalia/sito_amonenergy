@@ -22,24 +22,60 @@ const breadcrumb = {
     <div class="max-w-3xl">
       <h1 class="text-headline">Privacy Policy</h1>
 
-      <p class="mt-6 text-sm text-navy-700 bg-navy-100 inline-block px-4 py-2" style="border-radius: 2px;">
-        Segnaposto — testo da far validare da un legale prima del go-live. Non è il testo del sito
-        precedente, che faceva riferimento a un modulo di contatto qui non presente.
-      </p>
-
       <div class="mt-10 measure" style="line-height: 1.75;">
         <p>
           {contatti.ragioneSociale}, con sede in {contatti.indirizzo}, P.IVA {contatti.piva} ("Titolare"),
           tratta i dati personali degli utenti di questo sito nel rispetto del
-          Regolamento (UE) 2016/679 (GDPR) e della normativa italiana applicabile.
+          Regolamento (UE) 2016/679 (GDPR), della normativa italiana applicabile e, per i cookie,
+          della direttiva ePrivacy e delle linee guida del Garante per la protezione dei dati personali.
         </p>
 
         <h2 class="text-headline mt-10" style="font-size: 1.375rem;">Dati trattati</h2>
         <p class="mt-3">
-          Questo sito non contiene moduli di contatto, non utilizza cookie di profilazione né
-          strumenti di analisi che raccolgono dati personali. I soli dati personali trattati dal
-          Titolare sono quelli che l'utente comunica spontaneamente contattando l'azienda per
-          telefono ({contatti.telefono}) o via email ({contatti.email}, {contatti.pec}).
+          Questo sito non contiene moduli di contatto. I soli dati personali trattati dal Titolare
+          sono quelli che l'utente comunica spontaneamente contattando l'azienda per telefono
+          ({contatti.telefono}) o via email ({contatti.email}, {contatti.pec}).
+        </p>
+
+        <h2 class="text-headline mt-10" style="font-size: 1.375rem;">Cookie e tecnologie simili</h2>
+        <p class="mt-3">
+          Il banner mostrato alla prima visita chiede il consenso prima di attivare qualunque
+          cookie non strettamente necessario; puoi cambiare scelta in qualsiasi momento dal link
+          "Preferenze cookie" nel piè di pagina.
+        </p>
+        <div class="mt-5 overflow-x-auto">
+          <table class="w-full border-collapse text-sm">
+            <thead>
+              <tr class="border-b border-navy-200 text-left">
+                <th class="py-2 pr-4 font-semibold text-ink">Categoria</th>
+                <th class="py-2 pr-4 font-semibold text-ink">Finalità</th>
+                <th class="py-2 font-semibold text-ink">Consenso</th>
+              </tr>
+            </thead>
+            <tbody class="text-ink/80">
+              <tr class="border-b border-navy-100">
+                <td class="py-3 pr-4 font-medium text-ink">Necessari</td>
+                <td class="py-3 pr-4">
+                  Nessuno attualmente in uso: il sito funziona senza impostare cookie tecnici propri.
+                </td>
+                <td class="py-3">Non richiesto</td>
+              </tr>
+              <tr>
+                <td class="py-3 pr-4 font-medium text-ink">Statistiche</td>
+                <td class="py-3 pr-4">
+                  Google Analytics — non ancora attivo su questo sito. Se e quando verrà introdotto,
+                  si avvierà solo dopo aver scelto "Accetta tutti" nel banner.
+                </td>
+                <td class="py-3">Richiesto, revocabile</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <p class="mt-5">
+          La pagina Contatti include una mappa interattiva (OpenFreeMap, tramite la libreria
+          maplibre-gl): per mostrarla vengono richieste le sole immagini della mappa al server
+          {' '}<code class="text-[0.85em]">tiles.openfreemap.org</code>, che riceve l'indirizzo IP
+          necessario a servirle ma non imposta cookie né traccianti.
         </p>
 
         <h2 class="text-headline mt-10" style="font-size: 1.375rem;">Finalità e base giuridica</h2>

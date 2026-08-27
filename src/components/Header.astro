@@ -10,6 +10,16 @@ interface Props {
 }
 
 const { transparent = true } = Astro.props;
+
+const navLinks = [
+  { href: '/', label: 'Home' },
+  { href: '/servizi/', label: 'Servizi' },
+  { href: '/lavori/', label: 'Lavori' },
+  { href: '/contatti/', label: 'Contatti' },
+];
+
+const currentPath = Astro.url.pathname;
+const isActive = (href: string) => (href === '/' ? currentPath === '/' : currentPath.startsWith(href));
 ---
 
 <header class="ds-header fixed inset-x-0 top-0 z-40" data-transparent={transparent ? 'true' : 'false'}>
@@ -19,11 +29,15 @@ const { transparent = true } = Astro.props;
         <Logo variant="full" size={34} class="max-[420px]:[--logo-h:28px]" />
       </a>
 
-      <nav class="hidden md:flex items-center gap-1" aria-label="Navigazione principale">
-        <a href="/" class="ds-nav-link">Home</a>
-        <a href="/servizi/" class="ds-nav-link">Servizi</a>
-        <a href="/lavori/" class="ds-nav-link">Lavori</a>
-        <a href="/contatti/" class="ds-nav-link">Contatti</a>
+      <nav class="ds-nav hidden md:flex items-center gap-1" aria-label="Navigazione principale">
+        <span class="ds-nav-pill" aria-hidden="true"></span>
+        {
+          navLinks.map((link) => (
+            <a href={link.href} class="ds-nav-link" aria-current={isActive(link.href) ? 'page' : undefined}>
+              {link.label}
+            </a>
+          ))
+        }
       </nav>
 
       <div class="flex items-center gap-2">
@@ -50,10 +64,17 @@ const { transparent = true } = Astro.props;
       </button>
     </div>
     <nav class="flex flex-col gap-1" aria-label="Navigazione mobile">
-      <a href="/" class="text-paper text-2xl py-3 border-b border-white/10">Home</a>
-      <a href="/servizi/" class="text-paper text-2xl py-3 border-b border-white/10">Servizi</a>
-      <a href="/lavori/" class="text-paper text-2xl py-3 border-b border-white/10">Lavori</a>
-      <a href="/contatti/" class="text-paper text-2xl py-3 border-b border-white/10">Contatti</a>
+      {
+        navLinks.map((link) => (
+          <a
+            href={link.href}
+            class="text-paper text-2xl py-3 border-b border-white/10"
+            aria-current={isActive(link.href) ? 'page' : undefined}
+          >
+            {link.label}
+          </a>
+        ))
+      }
     </nav>
   </div>
 
@@ -108,6 +129,37 @@ const { transparent = true } = Astro.props;
   };
   toggle?.addEventListener('click', openNav);
   close?.addEventListener('click', closeNav);
+
+  // Pill dell'indicatore di pagina attiva: misura il link corrente e vi
+  // sposta sopra la pill invece di usare posizioni fisse (le etichette non
+  // sono larghe uguali, a differenza dello switcher da cui è preso lo
+  // stile). Primo posizionamento senza transizione, altrimenti scivola da
+  // 0 al link attivo a ogni caricamento — l'animazione deve esserci solo
+  // quando si passa da un link all'altro all'interno della stessa pagina,
+  // il resto lo fa il view-transition-name attraverso la navigazione.
+  const nav = document.querySelector<HTMLElement>('.ds-nav');
+  const pill = document.querySelector<HTMLElement>('.ds-nav-pill');
+  const positionPill = (animate: boolean) => {
+    if (!nav || !pill) return;
+    const active = nav.querySelector<HTMLElement>('.ds-nav-link[aria-current="page"]');
+    if (!active) {
+      pill.style.opacity = '0';
+      return;
+    }
+    if (!animate) pill.style.transitionDuration = '0s';
+    const navRect = nav.getBoundingClientRect();
+    const linkRect = active.getBoundingClientRect();
+    pill.style.width = `${linkRect.width}px`;
+    pill.style.translate = `${(linkRect.left - navRect.left).toFixed(2)}px`;
+    pill.style.opacity = '1';
+    if (!animate) {
+      pill.getBoundingClientRect();
+      pill.style.transitionDuration = '';
+    }
+  };
+  positionPill(false);
+  window.addEventListener('resize', () => positionPill(false));
+  document.fonts?.ready?.then(() => positionPill(false));
 </script>
 
 <style>
@@ -197,7 +249,13 @@ const { transparent = true } = Astro.props;
       inset 0 0 0 1px rgba(255, 255, 255, 0.05);
   }
 
+  .ds-nav {
+    position: relative;
+  }
+
   .ds-nav-link {
+    position: relative;
+    z-index: 1;
     display: inline-flex;
     align-items: center;
     padding: 8px 14px;
@@ -211,6 +269,47 @@ const { transparent = true } = Astro.props;
   }
   .ds-nav-link:hover {
     background: rgba(255, 255, 255, 0.1);
+  }
+  .ds-nav-link[aria-current='page'] {
+    font-weight: 600;
+  }
+
+  /* Pill di vetro dietro il link della pagina corrente — stesso trattamento
+     a luce della navbar (sheen, inset highlights) ma in scala ridotta, più
+     la rifrazione vera via `#liquid-glass-navpill` (Base.astro). Larghezza
+     e posizione arrivano da JS (misura il link attivo: le etichette non
+     sono larghe uguali), qui solo lo stile e le transizioni. Il fallback
+     `backdrop-filter` senza `url()` viene prima apposta: nei browser che
+     non capiscono il filtro SVG nel backdrop-filter l'intera dichiarazione
+     con `url()` è invalida e viene ignorata, lasciando il blur semplice.
+     `view-transition-name` la fa scivolare verso il link attivo della
+     pagina nuova durante la navigazione invece di sparire e riapparire. */
+  .ds-nav-pill {
+    position: absolute;
+    z-index: 0;
+    top: 4px;
+    left: 0;
+    height: calc(100% - 8px);
+    width: 0;
+    border-radius: var(--radius-pill);
+    pointer-events: none;
+    opacity: 0;
+    background:
+      radial-gradient(120% 200% at 15% -20%, rgba(255, 255, 255, 0.22), transparent 55%),
+      var(--glass-sheen),
+      color-mix(in srgb, var(--color-paper) 16%, transparent);
+    backdrop-filter: blur(10px) saturate(160%);
+    -webkit-backdrop-filter: blur(10px) saturate(160%);
+    backdrop-filter: url(#liquid-glass-navpill) blur(8px) saturate(160%);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.35),
+      inset 0 -6px 10px -8px rgba(4, 16, 28, 0.5),
+      0 2px 8px -4px rgba(4, 16, 28, 0.4);
+    transition:
+      translate 0.5s var(--ease-signature),
+      width 0.5s var(--ease-signature),
+      opacity 0.3s var(--ease-signature);
+    view-transition-name: nav-pill;
   }
 
   .ds-header-cta {

@@ -669,3 +669,23 @@
     scroll-behavior: auto !important;
   }
 }
+
+/* Cross-document View Transitions — il cambio pagina resta una navigazione
+   vera (nessun router lato client, zero rischio per gli script degli altri
+   componenti: slider, lightbox, mappa), ma nei browser che supportano l'API
+   (Chromium 126+) il browser anima vecchia/nuova pagina al posto dello
+   sfarfallio bianco. Non supportata altrove: navigazione normale, nessuna
+   regressione. `.ds-nav-pill` porta il proprio `view-transition-name`
+   (vedi Header.astro) così scivola verso il link attivo della pagina nuova
+   invece di sparire e riapparire. */
+@view-transition {
+  navigation: auto;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-group(*),
+  ::view-transition-old(*),
+  ::view-transition-new(*) {
+    animation: none !important;
+  }
+}
