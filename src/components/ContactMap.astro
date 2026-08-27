@@ -1,0 +1,243 @@
+---
+// Mappa vettoriale reale, sempre visibile (niente più click-per-aprire) —
+// OpenFreeMap (stile "positron", schema OpenMapTiles) via MapLibre GL:
+// gratis, nessuna chiave, nessuna API Google (quella resta solo nel link
+// "Ottieni indicazioni" verso Google Maps vero, più sotto). A differenza di
+// un raster preconfezionato, ogni layer del vettoriale è ricolorato a runtime
+// sulla rampa navy del sito — è questo il "personalizzabile" richiesto,
+// non solo un filtro CSS sopra tile altrui.
+import 'maplibre-gl/dist/maplibre-gl.css';
+import { contatti } from '../data/contatti.ts';
+
+// Via Roma 105, 71025 Castelluccio dei Sauri (FG)
+const LAT = 41.30579278776618;
+const LON = 15.485469330788758;
+---
+
+<div class="contact-map-frame relative overflow-hidden rounded-[var(--radius-card)] border border-navy-100 shadow-[var(--shadow-md)]" style="aspect-ratio: 4 / 3;">
+  <div id="contact-map" class="absolute inset-0" data-lat={LAT} data-lon={LON}></div>
+</div>
+
+<p class="mt-4">
+  <a href={contatti.mapsUrl} target="_blank" rel="noopener noreferrer" class="font-semibold text-navy-900 hover:text-navy-700 transition-colors">
+    Ottieni indicazioni →
+  </a>
+</p>
+
+<script>
+  // maplibre-gl's ESM build ships only named exports (Map, Marker,
+  // NavigationControl, ...), no default — a plain `import maplibregl from`
+  // throws "does not provide an export named 'default'" at runtime.
+  import * as maplibregl from 'maplibre-gl';
+  // maplibre-gl's worker entry itself statically imports a sibling chunk
+  // ("./maplibre-gl-shared.mjs") for code shared with the main thread.
+  // Vite's `?url` import copies only the single requested file as an
+  // opaque asset — it doesn't follow that internal import — so the copied
+  // worker script still references a `maplibre-gl-shared.mjs` next to it
+  // that Rollup never emits, 404s at runtime, and silently kills the
+  // worker (no catchable error — the map just never finishes loading).
+  // Fix: both files are copied verbatim into public/vendor/maplibre-gl/
+  // (kept in sync with the installed maplibre-gl version — see that
+  // folder), so the worker's relative import resolves for real.
+  maplibregl.setWorkerUrl('/vendor/maplibre-gl/maplibre-gl-worker.mjs');
+
+  const NAVY_950 = '#0a2a44';
+  const NAVY_800 = '#14486f';
+  const NAVY_700 = '#1d5585';
+  const NAVY_100 = '#e8eff5';
+
+  // Ricolora ogni layer del vettoriale OpenMapTiles verso la rampa navy del
+  // sito, per tipo/source-layer invece che per id esatto (lo schema
+  // OpenMapTiles è stabile: water/building/landcover/landuse/park/
+  // transportation/waterway/boundary/*_label, verificato sullo style.json
+  // scaricato da OpenFreeMap prima di scrivere questa funzione).
+  function recolor(map: maplibregl.Map) {
+    for (const layer of map.getStyle().layers) {
+      const sl = (layer as { 'source-layer'?: string })['source-layer'];
+      try {
+        if (layer.type === 'background') {
+          map.setPaintProperty(layer.id, 'background-color', NAVY_950);
+        } else if (layer.type === 'fill') {
+          const color = sl === 'water' ? NAVY_950 : sl === 'building' ? NAVY_700 : NAVY_800;
+          map.setPaintProperty(layer.id, 'fill-color', color);
+          map.setPaintProperty(layer.id, 'fill-outline-color', 'rgba(255,255,255,0.05)');
+        } else if (layer.type === 'line') {
+          const color =
+            sl === 'waterway'
+              ? NAVY_800
+              : sl === 'boundary'
+                ? 'rgba(255,255,255,0.16)'
+                : 'rgba(232,239,245,0.3)'; // transportation/aeroway: strade, sottili
+          map.setPaintProperty(layer.id, 'line-color', color);
+        } else if (layer.type === 'symbol') {
+          if (map.getLayoutProperty(layer.id, 'text-field') !== undefined) {
+            map.setPaintProperty(layer.id, 'text-color', NAVY_100);
+            map.setPaintProperty(layer.id, 'text-halo-color', NAVY_950);
+            map.setPaintProperty(layer.id, 'text-halo-width', 1.2);
+          }
+        }
+      } catch {
+        // some layers (e.g. hillshade) have no color-bearing paint props; skip
+      }
+    }
+  }
+
+  const el = document.getElementById('contact-map');
+  if (el) {
+    const lat = parseFloat(el.dataset.lat ?? '0');
+    const lon = parseFloat(el.dataset.lon ?? '0');
+    const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    const map = new maplibregl.Map({
+      container: el,
+      style: 'https://tiles.openfreemap.org/styles/positron',
+      center: [lon, lat],
+      zoom: 13.5,
+      attributionControl: { compact: true },
+      scrollZoom: false,
+      dragRotate: false,
+      pitchWithRotate: false,
+    });
+
+    // `load` (not `style.load`): fires once, guaranteed after the style is
+    // actually ready to have its paint properties read/written. `style.load`
+    // risks a race the first time — nothing here needs the initial tiles
+    // to have arrived too, but `load` is the standard safe event to hook.
+    map.on('load', () => recolor(map));
+    map.addControl(new maplibregl.NavigationControl({ showCompass: false }), 'bottom-right');
+
+    const pin = document.createElement('div');
+    pin.className = 'contact-map-marker';
+    pin.innerHTML = `
+      <span class="contact-map-tooltip">Amon Energy Srl</span>
+      <span class="pin-wrap">
+        <span class="pin-pulse" aria-hidden="true"></span>
+        <span class="pin-dot"></span>
+      </span>
+    `;
+    if (prefersReduced) pin.classList.add('is-reduced-motion');
+    new maplibregl.Marker({ element: pin, anchor: 'bottom' }).setLngLat([lon, lat]).addTo(map);
+
+    // MapLibre reads the container's box at construction time — the
+    // `aspect-ratio` on `.contact-map-frame` hadn't necessarily resolved
+    // yet at that exact moment, so the canvas could init at a 0/fallback
+    // height (verified: container read 0px tall right after construction).
+    // A ResizeObserver both fixes that first paint and keeps the map sized
+    // correctly on any later layout change (window resize, etc.).
+    if ('ResizeObserver' in window) {
+      new ResizeObserver(() => map.resize()).observe(el);
+    }
+  }
+</script>
+
+<style>
+  .contact-map-frame {
+    background: #0a2a44;
+  }
+
+  /* maplibre-gl.css ships `.maplibregl-map { position: relative }` on the
+     container itself — same specificity as Tailwind's `.absolute`, and
+     whichever stylesheet lands later in the bundle wins the tie. Verified:
+     it was winning, so `inset-0` had nothing to size against and the map
+     rendered into a 0-height box. `#contact-map.maplibregl-map` outranks
+     MapLibre's bare class rule regardless of load order. */
+  #contact-map.maplibregl-map {
+    position: absolute;
+    inset: 0;
+  }
+
+  #contact-map :global(.maplibregl-ctrl-attrib) {
+    background: rgba(10, 42, 68, 0.65);
+    color: rgba(255, 255, 255, 0.55);
+    font-size: 0.6rem;
+    border-radius: var(--radius-sm) 0 0 0;
+  }
+  #contact-map :global(.maplibregl-ctrl-attrib a) {
+    color: rgba(255, 255, 255, 0.75);
+  }
+  #contact-map :global(.maplibregl-ctrl-attrib-button) {
+    display: none;
+  }
+
+  #contact-map :global(.maplibregl-ctrl-group) {
+    background: transparent;
+    border: none;
+    box-shadow: none;
+  }
+  #contact-map :global(.maplibregl-ctrl-group button) {
+    width: 36px;
+    height: 36px;
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: var(--radius-pill);
+    margin-bottom: 0.4rem;
+    transition: background-color 0.2s var(--ease-signature);
+  }
+  #contact-map :global(.maplibregl-ctrl-group button:hover) {
+    background: rgba(255, 255, 255, 0.2);
+  }
+  #contact-map :global(.maplibregl-ctrl-icon) {
+    filter: invert(1) brightness(1.6);
+  }
+
+  /* Marker: pin verde-segnale pulsante + chip vetro col nome del comune,
+     nessun sottotitolo "sede unica" — l'indirizzo completo è già scritto
+     sotto la mappa. */
+  #contact-map :global(.contact-map-marker) {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.4rem;
+  }
+  #contact-map :global(.contact-map-tooltip) {
+    background: color-mix(in srgb, var(--color-navy-950) 84%, transparent);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    color: var(--color-paper);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: var(--radius-pill);
+    padding: 0.3rem 0.75rem;
+    font-family: var(--font-display);
+    font-size: 0.75rem;
+    font-weight: 600;
+    white-space: nowrap;
+    box-shadow: var(--shadow-sm);
+  }
+  #contact-map :global(.pin-wrap) {
+    position: relative;
+    width: 16px;
+    height: 16px;
+  }
+  #contact-map :global(.pin-dot) {
+    position: absolute;
+    inset: 0;
+    border-radius: 999px;
+    background: var(--color-green-400);
+    border: 3px solid var(--color-navy-950);
+    box-shadow: 0 2px 10px rgba(4, 16, 28, 0.5);
+  }
+  #contact-map :global(.pin-pulse) {
+    position: absolute;
+    inset: 0;
+    border-radius: 999px;
+    background: var(--color-green-400);
+    opacity: 0.55;
+    animation: contact-pin-pulse 2.4s ease-out infinite;
+  }
+  #contact-map :global(.is-reduced-motion .pin-pulse) {
+    animation: none;
+    opacity: 0;
+  }
+  @keyframes contact-pin-pulse {
+    0% {
+      transform: scale(1);
+      opacity: 0.55;
+    }
+    100% {
+      transform: scale(3.2);
+      opacity: 0;
+    }
+  }
+</style>

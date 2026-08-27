@@ -1,12 +1,12 @@
-<dialog id="gallery-lightbox" class="gallery-lightbox" aria-label="Galleria progetti">
+<dialog id="gallery-lightbox" class="gallery-lightbox" aria-label="Galleria fotografica della stazione">
   <button type="button" class="lb-close" aria-label="Chiudi">
     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12"/></svg>
   </button>
 
-  <button type="button" class="lb-nav lb-prev" aria-label="Immagine precedente">
+  <button type="button" class="lb-nav lb-prev" aria-label="Foto precedente">
     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg>
   </button>
-  <button type="button" class="lb-nav lb-next" aria-label="Immagine successiva">
+  <button type="button" class="lb-nav lb-next" aria-label="Foto successiva">
     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg>
   </button>
 
@@ -26,6 +26,11 @@
 </dialog>
 
 <script>
+  interface Photo {
+    src: string;
+    alt: string;
+  }
+
   const dialog = document.getElementById('gallery-lightbox') as HTMLDialogElement | null;
   if (dialog) {
     const img = dialog.querySelector<HTMLImageElement>('.lb-img')!;
@@ -38,42 +43,54 @@
     const prevBtn = dialog.querySelector<HTMLButtonElement>('.lb-prev')!;
     const nextBtn = dialog.querySelector<HTMLButtonElement>('.lb-next')!;
 
-    const triggers = Array.from(document.querySelectorAll<HTMLAnchorElement>('.js-lightbox-trigger'));
+    const triggers = Array.from(document.querySelectorAll<HTMLButtonElement>('.js-gallery-trigger'));
+
+    // Ogni stazione ha la propria galleria — a differenza della vecchia
+    // versione (un indice unico che scorreva tutte le card della pagina in
+    // sequenza), qui prev/next restano dentro alle foto di UNA stazione.
+    let photos: Photo[] = [];
     let current = 0;
 
     const preload = (i: number) => {
-      const t = triggers[i];
-      if (!t) return;
+      const p = photos[i];
+      if (!p) return;
       const preloadImg = new Image();
-      preloadImg.src = t.dataset.fullSrc ?? '';
+      preloadImg.src = p.src;
     };
 
-    const show = (i: number) => {
-      const t = triggers[i];
-      if (!t) return;
+    const showPhoto = (i: number) => {
+      const p = photos[i];
+      if (!p) return;
       current = i;
-      img.src = t.dataset.fullSrc ?? '';
-      img.alt = t.dataset.alt ?? '';
-      indexEl.textContent = t.dataset.indexLabel ?? '';
-      kvEl.textContent = t.dataset.kv ?? '';
-      titoloEl.textContent = t.dataset.titolo ?? '';
-      metaEl.textContent = `${t.dataset.committente ?? ''} · ${t.dataset.provincia ?? ''} · ${t.dataset.tipologia ?? ''}`;
-      const total = t.dataset.total ?? String(triggers.length);
-      counterEl.textContent = `${t.dataset.indexLabel} / ${String(Number(total)).padStart(2, '0')}`;
+      img.src = p.src;
+      img.alt = p.alt;
+      const multi = photos.length > 1;
+      prevBtn.hidden = !multi;
+      nextBtn.hidden = !multi;
+      counterEl.textContent = multi ? `${i + 1} / ${photos.length}` : '';
       preload(i + 1);
       preload(i - 1);
     };
 
-    const open = (i: number) => {
-      show(i);
+    const open = (trigger: HTMLButtonElement) => {
+      try {
+        photos = JSON.parse(trigger.dataset.photos ?? '[]');
+      } catch {
+        photos = [];
+      }
+      if (!photos.length) return;
+
+      indexEl.textContent = trigger.dataset.indexLabel ?? '';
+      kvEl.textContent = trigger.dataset.potenza ?? '';
+      kvEl.hidden = !trigger.dataset.potenza;
+      titoloEl.textContent = trigger.dataset.titolo ?? '';
+      metaEl.textContent = trigger.dataset.meta ?? '';
+      showPhoto(0);
       dialog.showModal();
     };
 
-    triggers.forEach((trigger, i) => {
-      trigger.addEventListener('click', (e) => {
-        e.preventDefault();
-        open(i);
-      });
+    triggers.forEach((trigger) => {
+      trigger.addEventListener('click', () => open(trigger));
     });
 
     closeBtn.addEventListener('click', () => dialog.close());
@@ -82,8 +99,8 @@
     });
 
     const go = (delta: number) => {
-      const next = (current + delta + triggers.length) % triggers.length;
-      show(next);
+      const nextIndex = (current + delta + photos.length) % photos.length;
+      showPhoto(nextIndex);
     };
     prevBtn.addEventListener('click', () => go(-1));
     nextBtn.addEventListener('click', () => go(1));

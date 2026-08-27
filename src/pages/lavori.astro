@@ -2,9 +2,10 @@
 import { getCollection } from 'astro:content';
 import Base from '../layouts/Base.astro';
 import PageHero from '../components/PageHero.astro';
-import GalleryGrid from '../components/GalleryGrid.astro';
+import ProjectSlider from '../components/ProjectSlider.astro';
 import Lightbox from '../components/Lightbox.astro';
 import CtaBand from '../components/CtaBand.astro';
+import heroLavori from '../assets/img/photos/lavori-hero-substation.jpg';
 
 const progetti = (await getCollection('progetti')).sort((a, b) => a.data.ordine - b.data.ordine);
 
@@ -27,15 +28,25 @@ const breadcrumb = {
     eyebrow="Archivio d'opera"
     h1="Quello che abbiamo costruito."
     sub="Sottostazioni elettriche AT/MT per parchi eolici e fotovoltaici, presentate con i dati di ogni realizzazione."
+    image={heroLavori}
+    imageAlt="Vista aerea di una sottostazione elettrica AT/MT completata, con trasformatori e apparecchiature di manovra"
   />
 
-  <GalleryGrid entries={progetti} />
-
-  <section class="wrap pb-20 lg:pb-28 text-center">
-    <p class="text-headline" style="max-width: 24ch; margin-inline: auto;">
-      Vuoi vedere cosa possiamo costruire per te?
-    </p>
-  </section>
+  <div class="py-16 lg:py-24">
+    <div class="wrap-wide">
+      <div class="ds-eyebrow" data-reveal>
+        <span class="ds-eyebrow-dash"></span>
+        <span class="ds-eyebrow-label">Stazioni realizzate</span>
+      </div>
+      <h2 class="text-headline max-w-[22ch]" data-reveal style="--reveal-delay:80ms">Da qui, l'energia rinnovabile del Centro-Sud entra in rete.</h2>
+      <p class="measure mt-3 text-ink/70" data-reveal style="--reveal-delay:120ms">
+        Ogni sottostazione è il punto d'incontro tra un parco eolico o fotovoltaico e la rete AT/MT — progettata, costruita e messa in esercizio da noi.
+      </p>
+    </div>
+    <div class="mt-10">
+      <ProjectSlider entries={progetti} />
+    </div>
+  </div>
 
   <CtaBand />
 

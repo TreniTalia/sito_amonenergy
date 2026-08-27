@@ -1,0 +1,318 @@
+---
+// Sostituisce GalleryGrid/GalleryItem/GalleryCardContent (retirati): non
+// potendo condividere gli schemi unifilari per riservatezza dei clienti,
+// tutte le stazioni — con o senza foto reale — vivono nello stesso slider
+// invece di un misto di layout a coppie/full-bleed/schema tecnico.
+import { getImage, Image } from 'astro:assets';
+import { render, type CollectionEntry } from 'astro:content';
+import { Icon } from 'astro-icon/components';
+import ProjectCardOverlay from './ProjectCardOverlay.astro';
+
+interface Props {
+  entries: CollectionEntry<'progetti'>[];
+}
+
+const { entries } = Astro.props;
+
+const slides = await Promise.all(
+  entries.map(async (entry, i) => {
+    const { titolo, kv, potenza, committente, provincia, tipologia, immagine, immagineAlt } = entry.data;
+    const { Content } = await render(entry);
+    const indexLabel = String(i + 1).padStart(2, '0');
+    const meta = [committente, provincia, tipologia].filter((v) => v && !/da confermare/i.test(v)).join(' · ');
+
+    // `fullPhotos` stays an array (not just the single `immagine`) so the
+    // modal in Lightbox.astro is already built to page through more than
+    // one photo per station — it just has one entry until the client
+    // uploads more of the same station via the admin panel.
+    //
+    // `immagine` (raw ImageMetadata) goes straight to the `<Image>`
+    // component in the template — it does its own optimization. Feeding it
+    // a `getImage()` result instead (a different, already-processed shape)
+    // is what threw "unsupported format undefined" here.
+    const fullPhotos = immagine ? [{ src: (await getImage({ src: immagine, width: 1920 })).src, alt: immagineAlt }] : [];
+
+    return { entry, indexLabel, titolo, kv, potenza, meta, Content, immagine, fullPhotos, hasPhoto: !!immagine };
+  }),
+);
+---
+
+<div class="ps-wrap" data-reveal>
+  <div class="ps-track" id="ps-track">
+    {
+      slides.map((s) => {
+        const Content = s.Content;
+        return (
+        <div class="ps-slide">
+          {s.hasPhoto ? (
+            <button
+              type="button"
+              class="ps-card js-gallery-trigger"
+              data-photos={JSON.stringify(s.fullPhotos)}
+              data-index-label={s.indexLabel}
+              data-titolo={s.titolo}
+              data-potenza={s.potenza ?? ''}
+              data-meta={s.meta}
+              aria-label={`Apri la galleria fotografica: ${s.titolo}`}
+            >
+              <Image
+                src={s.immagine}
+                alt={s.entry.data.immagineAlt}
+                class="ps-photo"
+                data-parallax
+                widths={[480, 720, 900]}
+                sizes="(min-width: 1024px) 42vw, 82vw"
+              />
+              <span class="ps-scrim" aria-hidden="true" />
+              <ProjectCardOverlay indexLabel={s.indexLabel} titolo={s.titolo} potenza={s.potenza} meta={s.meta}>
+                <Content />
+              </ProjectCardOverlay>
+              <span class="ps-expand" aria-hidden="true">
+                <Icon name="fa6-solid:expand" />
+              </span>
+            </button>
+          ) : (
+            <div class="ps-card ps-card--placeholder" aria-label={`${s.titolo}: fotografia in arrivo`}>
+              <div class="ps-placeholder-art" aria-hidden="true">
+                <Icon name="fa6-regular:image" />
+                <span>Foto in arrivo</span>
+              </div>
+              <ProjectCardOverlay indexLabel={s.indexLabel} titolo={s.titolo} potenza={s.potenza} meta={s.meta}>
+                <Content />
+              </ProjectCardOverlay>
+            </div>
+          )}
+        </div>
+        );
+      })
+    }
+  </div>
+
+  <div class="ps-controls">
+    <button type="button" class="ps-nav ps-prev" aria-label="Stazione precedente" id="ps-prev">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="m15 18-6-6 6-6" /></svg>
+    </button>
+    <button type="button" class="ps-nav ps-next" aria-label="Stazione successiva" id="ps-next">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="m9 18 6-6-6-6" /></svg>
+    </button>
+  </div>
+</div>
+
+<script>
+  const track = document.getElementById('ps-track');
+  const prev = document.getElementById('ps-prev');
+  const next = document.getElementById('ps-next');
+  if (track && prev && next) {
+    const step = () => Math.min(track.clientWidth * 0.86, 560);
+    prev.addEventListener('click', () => track.scrollBy({ left: -step(), behavior: 'smooth' }));
+    next.addEventListener('click', () => track.scrollBy({ left: step(), behavior: 'smooth' }));
+  }
+
+  // Same transform-based parallax as CtaBand/ControlPillar (never
+  // `background-attachment: fixed`), one instance per card instead of one
+  // per section — each `.ps-photo` tracks its own `getBoundingClientRect()`
+  // against the page's vertical scroll, independent of the track's
+  // horizontal scroll position.
+  const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const photos = Array.from(document.querySelectorAll<HTMLElement>('.ps-photo[data-parallax]'));
+
+  if (photos.length && !prefersReduced) {
+    let ticking = false;
+    const inView = new Set<HTMLElement>();
+    const depth = 0.16;
+
+    const apply = () => {
+      ticking = false;
+      const vh = window.innerHeight || document.documentElement.clientHeight;
+      inView.forEach((layer) => {
+        const rect = layer.parentElement!.getBoundingClientRect();
+        const progress = (vh - rect.top) / (vh + rect.height);
+        const offset = (progress - 0.5) * rect.height * depth;
+        layer.style.transform = `translate3d(0, ${offset.toFixed(1)}px, 0)`;
+      });
+    };
+
+    const onScroll = () => {
+      if (!inView.size || ticking) return;
+      ticking = true;
+      requestAnimationFrame(apply);
+    };
+
+    const io = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) inView.add(entry.target as HTMLElement);
+          else inView.delete(entry.target as HTMLElement);
+        });
+        onScroll();
+      },
+      { rootMargin: '20% 0px' },
+    );
+    photos.forEach((p) => io.observe(p));
+    window.addEventListener('scroll', onScroll, { passive: true });
+  }
+</script>
+
+<style>
+  .ps-wrap {
+    position: relative;
+  }
+
+  .ps-track {
+    display: flex;
+    gap: 1.5rem;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    /* Same gutter formula as `.wrap`/`.wrap-wide` (global.css) — the track
+       itself is intentionally full-bleed (not wrapped in `.wrap`), so the
+       first/last card line up with the rest of the page while the strip
+       scrolls past the right edge instead of being clipped by a max-width. */
+    scroll-padding-left: clamp(1.25rem, 5vw, 3rem);
+    padding-inline: clamp(1.25rem, 5vw, 3rem);
+    padding-bottom: 0.5rem;
+    scrollbar-width: none;
+  }
+  .ps-track::-webkit-scrollbar {
+    display: none;
+  }
+
+  .ps-slide {
+    flex: 0 0 auto;
+    width: min(560px, 82vw);
+    scroll-snap-align: start;
+  }
+
+  .ps-card {
+    position: relative;
+    isolation: isolate;
+    display: block;
+    width: 100%;
+    aspect-ratio: 4 / 3;
+    border-radius: var(--radius-card);
+    overflow: hidden;
+    background: var(--color-navy-950);
+    box-shadow: var(--shadow-md);
+    text-align: left;
+    border: none;
+    padding: 0;
+    cursor: pointer;
+    transition:
+      transform 0.3s var(--ease-signature),
+      box-shadow 0.3s var(--ease-signature);
+  }
+  .ps-card:hover,
+  .ps-card:focus-visible {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-lg);
+  }
+  .ps-card--placeholder {
+    cursor: default;
+  }
+  .ps-card--placeholder:hover {
+    transform: none;
+    box-shadow: var(--shadow-md);
+  }
+
+  /* Extra height + negative top, same margin CtaBand's `.cta-bg-img` gives
+     itself: room for the parallax translate (script below) to travel
+     through scroll without ever uncovering an empty edge. No hover-zoom
+     here — combining a CSS `:hover` transform with the JS-driven parallax
+     transform on the same property fights over the inline `style`, so this
+     card's only motion is the parallax itself (same trade CtaBand makes). */
+  .ps-photo {
+    position: absolute;
+    left: 0;
+    top: -15%;
+    width: 100%;
+    height: 130%;
+    max-width: none;
+    object-fit: cover;
+    transform: translate3d(0, 0, 0);
+    will-change: transform;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .ps-photo {
+      transform: translate3d(0, 0, 0) !important;
+    }
+  }
+
+  .ps-scrim {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    background: linear-gradient(
+      180deg,
+      transparent 0%,
+      transparent 40%,
+      color-mix(in srgb, var(--color-navy-950) 88%, transparent) 100%
+    );
+  }
+
+  .ps-expand {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    z-index: 3;
+    display: grid;
+    place-items: center;
+    width: 40px;
+    height: 40px;
+    border-radius: var(--radius-pill);
+    color: var(--color-paper);
+    font-size: 0.85rem;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+  }
+
+  .ps-placeholder-art {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.75rem;
+    color: color-mix(in srgb, var(--color-paper) 45%, transparent);
+    background:
+      radial-gradient(120% 140% at 50% 0%, color-mix(in srgb, var(--color-navy-700) 55%, transparent), transparent 65%),
+      linear-gradient(165deg, var(--color-navy-900), var(--color-navy-950));
+    font-family: var(--font-display);
+    font-size: 0.85rem;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+  .ps-placeholder-art :global(svg) {
+    font-size: 2.25rem;
+  }
+
+  .ps-controls {
+    display: flex;
+    gap: 0.75rem;
+    justify-content: flex-end;
+    padding-inline: clamp(1.25rem, 5vw, 3rem);
+    margin-top: 1.5rem;
+  }
+  .ps-nav {
+    display: grid;
+    place-items: center;
+    width: 48px;
+    height: 48px;
+    border-radius: var(--radius-pill);
+    color: var(--color-navy-900);
+    background: var(--color-paper);
+    border: 1px solid var(--color-navy-100);
+    box-shadow: var(--shadow-sm);
+    transition:
+      background-color 0.2s var(--ease-signature),
+      box-shadow 0.2s var(--ease-signature),
+      transform 0.2s var(--ease-signature);
+  }
+  .ps-nav:hover {
+    background: var(--color-navy-100);
+    box-shadow: var(--shadow-md);
+    transform: translateY(-2px);
+  }
+</style>

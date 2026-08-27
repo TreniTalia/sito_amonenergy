@@ -5,10 +5,29 @@ import Base from '../../layouts/Base.astro';
 import PageHero from '../../components/PageHero.astro';
 import ServiceCard from '../../components/ServiceCard.astro';
 import CtaBand from '../../components/CtaBand.astro';
+import IconCloud from '../../components/IconCloud.astro';
 import teamwareLogo from '../../assets/img/brand/partners/teamware-logo.png';
+import heroServizi from '../../assets/img/photos/servizi-hero-substation.jpg';
+import controlloPattern from '../../assets/img/photos/servizi-controllo-pattern.jpg';
 import modbusSvg from '../../assets/img/tech/modbus.svg?raw';
+import opcuaSvg from '../../assets/img/tech/opcua.svg?raw';
 import mqttSvg from '../../assets/img/tech/mqtt.svg?raw';
+import sparkplugbSvg from '../../assets/img/tech/sparkplugb.svg?raw';
+import iecSvg from '../../assets/img/tech/iec.svg?raw';
 import zigbeeSvg from '../../assets/img/tech/zigbee.svg?raw';
+import phoenixcontactSvg from '../../assets/img/tech/phoenixcontact.svg?raw';
+import inductiveautomationSvg from '../../assets/img/tech/inductiveautomation.svg?raw';
+import teltonikaSvg from '../../assets/img/tech/teltonika.svg?raw';
+import pythonSvg from '../../assets/img/tech/python.svg?raw';
+import cplusplusSvg from '../../assets/img/tech/cplusplus.svg?raw';
+import gitSvg from '../../assets/img/tech/git.svg?raw';
+import githubSvg from '../../assets/img/tech/github.svg?raw';
+import javascriptSvg from '../../assets/img/tech/javascript.svg?raw';
+import html5Svg from '../../assets/img/tech/html5.svg?raw';
+import mysqlSvg from '../../assets/img/tech/mysql.svg?raw';
+import dockerSvg from '../../assets/img/tech/docker.svg?raw';
+import googlecloudSvg from '../../assets/img/tech/googlecloud.svg?raw';
+import awsservicesSvg from '../../assets/img/tech/awsservices.svg?raw';
 
 const hub = await getEntry('pagine', 'servizi');
 if (!hub || hub.data.pagina !== 'servizi') throw new Error('pagine/servizi.yaml missing or malformed');
@@ -18,13 +37,45 @@ const costruzioni = await getEntry('servizi', 'costruzioni');
 const gestione = await getEntry('servizi', 'gestione-e-manutenzione');
 if (!costruzioni || !gestione) throw new Error('content/servizi: costruzioni o gestione-e-manutenzione mancante');
 
-// I tre marchi monocromi disponibili (vedi Task 7). Le altre voci di
-// `tecnologie.voci` non hanno `logo` e restano chip di solo testo.
+// Sorgente unica per la icon cloud: ogni voce di `tecnologie.voci` in
+// servizi.yaml ha un `logo` che punta a uno di questi slug.
 const techLogos: Record<string, string> = {
   modbus: modbusSvg,
+  opcua: opcuaSvg,
   mqtt: mqttSvg,
+  sparkplugb: sparkplugbSvg,
+  iec: iecSvg,
   zigbee: zigbeeSvg,
+  phoenixcontact: phoenixcontactSvg,
+  inductiveautomation: inductiveautomationSvg,
+  teltonika: teltonikaSvg,
+  python: pythonSvg,
+  cplusplus: cplusplusSvg,
+  git: gitSvg,
+  github: githubSvg,
+  javascript: javascriptSvg,
+  html5: html5Svg,
+  mysql: mysqlSvg,
+  docker: dockerSvg,
+  googlecloud: googlecloudSvg,
+  awsservices: awsservicesSvg,
 };
+
+// Marchi troppo fini per leggersi alla dimensione base della cloud (dettagli
+// sottili che si perdono sotto una certa scala) — un moltiplicatore in più
+// oltre alla profondità 3D, non al posto di essa.
+const techSizeBoost: Record<string, number> = {
+  mysql: 1.35,
+  teltonika: 1.3,
+};
+
+const tecnologieIcons = tecnologie.voci
+  .filter((v) => v.logo && techLogos[v.logo])
+  .map((v) => ({
+    name: v.nome,
+    svg: techLogos[v.logo as string],
+    sizeBoost: techSizeBoost[v.logo as string],
+  }));
 
 const breadcrumb = {
   '@context': 'https://schema.org',
@@ -41,10 +92,57 @@ const breadcrumb = {
   description="RCS, CCI, ricerca guasti AT/MT, diagnostica su cavi e trasformatori, costruzione e gestione di impianti elettrici AT/MT."
   structuredData={[breadcrumb]}
 >
-  <PageHero eyebrow={eyebrow} h1={h1} sub={sub} />
+  <PageHero
+    eyebrow={eyebrow}
+    h1={h1}
+    sub={sub}
+    image={heroServizi}
+    imageAlt="Due tecnici in dispositivi di protezione individuale ispezionano una cabina di trasformazione AT/MT all'alba"
+  />
+
+  <!-- Ingegneria elettrica -->
+  <section id="ingegneria-elettrica" class="wrap-wide py-20 lg:py-28">
+    <div class="ds-eyebrow" data-reveal>
+      <span class="ds-eyebrow-dash"></span>
+      <span class="ds-eyebrow-label">{ingegneriaElettrica.eyebrow}</span>
+    </div>
+    <h2 class="text-headline max-w-[22ch]" data-reveal style="--reveal-delay:80ms">{ingegneriaElettrica.titolo}</h2>
+    <p class="measure mt-3 text-ink/70" data-reveal style="--reveal-delay:120ms">{ingegneriaElettrica.sub}</p>
+
+    <div class="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-3 lg:gap-6">
+      {
+        ingegneriaElettrica.voci.map((v, i) => (
+          <div data-reveal style={`--reveal-delay:${i * 90}ms`}>
+            <ServiceCard
+              titolo={v.titolo}
+              excerpt={v.testo}
+              icona={v.icona}
+              href="/contatti/"
+              index={i + 1}
+              accent="signal"
+              elevated
+              ctaLabel="Richiedi informazioni"
+            />
+          </div>
+        ))
+      }
+    </div>
+  </section>
 
   <!-- Controllo e monitoraggio: RCS + CCI -->
-  <section id="controllo-e-monitoraggio" class="relative isolate overflow-hidden bg-navy-950 text-paper">
+  <section id="controllo-e-monitoraggio" class="control relative isolate overflow-hidden bg-navy-950 text-paper">
+    <div class="control-pattern" aria-hidden="true">
+      <Image
+        src={controlloPattern}
+        alt=""
+        class="control-pattern-img"
+        data-parallax
+        widths={[900, 1325, 1800, 2400]}
+        sizes="100vw"
+        quality={92}
+      />
+      <div class="control-pattern-tint" aria-hidden="true"></div>
+    </div>
     <div class="control-glow" aria-hidden="true"></div>
     <div class="wrap-wide relative z-10 py-20 lg:py-28">
       <div class="ds-eyebrow" data-reveal>
@@ -90,35 +188,6 @@ const breadcrumb = {
     </div>
   </section>
 
-  <!-- Ingegneria elettrica -->
-  <section id="ingegneria-elettrica" class="wrap-wide py-20 lg:py-28">
-    <div class="ds-eyebrow" data-reveal>
-      <span class="ds-eyebrow-dash ds-eyebrow-dash--leaf"></span>
-      <span class="ds-eyebrow-label ds-eyebrow-label--leaf">{ingegneriaElettrica.eyebrow}</span>
-    </div>
-    <h2 class="text-headline max-w-[22ch]" data-reveal style="--reveal-delay:80ms">{ingegneriaElettrica.titolo}</h2>
-    <p class="measure mt-3 text-ink/70" data-reveal style="--reveal-delay:120ms">{ingegneriaElettrica.sub}</p>
-
-    <div class="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-3 lg:gap-6">
-      {
-        ingegneriaElettrica.voci.map((v, i) => (
-          <div data-reveal style={`--reveal-delay:${i * 90}ms`}>
-            <ServiceCard
-              titolo={v.titolo}
-              excerpt={v.testo}
-              icona={v.icona}
-              href="/contatti/"
-              index={i + 1}
-              accent="signal"
-              elevated
-              ctaLabel="Richiedi informazioni"
-            />
-          </div>
-        ))
-      }
-    </div>
-  </section>
-
   <!-- Costruzione e gestione impianti -->
   <section id="costruzione-e-gestione" class="bg-navy-100">
     <div class="wrap-wide py-20 lg:py-28">
@@ -159,49 +228,104 @@ const breadcrumb = {
 
   <!-- Tecnologie -->
   <section id="tecnologie" class="wrap-wide py-20 lg:py-28">
-    <div class="ds-eyebrow" data-reveal>
-      <span class="ds-eyebrow-dash"></span>
-      <span class="ds-eyebrow-label">{tecnologie.eyebrow}</span>
-    </div>
-    <h2 class="text-headline max-w-[24ch]" data-reveal style="--reveal-delay:80ms">{tecnologie.titolo}</h2>
-    <p class="measure mt-3 text-ink/70" data-reveal style="--reveal-delay:120ms">{tecnologie.sub}</p>
+    <div class="grid items-center gap-12 lg:grid-cols-[1.05fr_0.95fr] lg:gap-16">
+      <div>
+        <div class="ds-eyebrow" data-reveal>
+          <span class="ds-eyebrow-dash"></span>
+          <span class="ds-eyebrow-label">{tecnologie.eyebrow}</span>
+        </div>
+        <h2 class="text-headline max-w-[24ch]" data-reveal style="--reveal-delay:80ms">{tecnologie.titolo}</h2>
+        <p class="measure mt-3 text-ink/70" data-reveal style="--reveal-delay:120ms">{tecnologie.sub}</p>
 
-    <ul class="mt-10 flex flex-wrap gap-3">
-      {
-        tecnologie.voci.map((v, i) => (
-          <li
-            class="tech-chip flex items-center gap-2.5 rounded-full border border-navy-100 bg-navy-100/40 px-4 py-2.5 font-display text-sm font-medium text-navy-900"
-            data-reveal
-            style={`--reveal-delay:${i * 60}ms`}
-          >
-            {v.logo && techLogos[v.logo] && <Fragment set:html={techLogos[v.logo]} />}
-            {v.nome}
-          </li>
-        ))
-      }
-    </ul>
+        <noscript>
+          <ul class="mt-8 flex flex-wrap gap-3">
+            {
+              tecnologie.voci.map((v) => (
+                <li class="rounded-full border border-navy-100 bg-navy-100/40 px-4 py-2.5 font-display text-sm font-medium text-navy-900">
+                  {v.nome}
+                </li>
+              ))
+            }
+          </ul>
+        </noscript>
+      </div>
+
+      <IconCloud icons={tecnologieIcons} color="#1D5585" />
+    </div>
   </section>
 
   <CtaBand />
 </Base>
 
 <style>
+  /* Quadro elettrico / switchgear reale (Pexels) come pattern astratto —
+     stesso trattamento di `.control-pattern` in ControlPillar.astro
+     (pattern-rcs): texture atmosferica, non un'illustrazione in mostra.
+     Desaturata e scurita, poi un layer navy in `mix-blend-mode: color` le
+     impone la tinta del sistema (tono/saturazione dal layer navy, luminosità
+     dal quadro sottostante — il trucco duotone).
+
+     Niente maschera pesante sopra il testo: due tentativi con un velo
+     artificiale (radiale, poi lineare a percentuale/pixel) o rendevano il
+     pattern invisibile o lo lasciavano trasparire dietro le lettere. La foto
+     scelta è già scura sul lato sinistro per composizione naturale — verificato
+     che lì il contrasto testo-su-pattern è forte quanto testo-su-navy-piatto,
+     senza alcun velo. Resta solo una sfumatura leggerissima ai due bordi, per
+     il raccordo con l'header sopra e la sezione chiara sotto. */
+  .control-pattern {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    overflow: hidden;
+  }
+  .control-pattern-img {
+    /* Extra height + negative top, same margin CtaBand's `.cta-bg-img` gives
+       itself: room for the parallax translate to travel through scroll
+       without ever uncovering an empty edge top or bottom. */
+    position: absolute;
+    left: 0;
+    top: -18%;
+    width: 100%;
+    height: 136%;
+    max-width: none;
+    object-fit: cover;
+    object-position: center 30%;
+    filter: grayscale(1) brightness(0.92) contrast(1.15);
+    opacity: 0.9;
+    transform: translate3d(0, 0, 0);
+    will-change: transform;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .control-pattern-img {
+      transform: translate3d(0, 0, 0) !important;
+    }
+  }
+  .control-pattern-tint {
+    position: absolute;
+    inset: 0;
+    background: var(--color-navy-700);
+    mix-blend-mode: color;
+  }
+  .control-pattern::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      180deg,
+      var(--color-navy-950) 0%,
+      transparent 10%,
+      transparent 92%,
+      var(--color-navy-950) 100%
+    );
+  }
+
   .control-glow {
     position: absolute;
     inset: 0;
     background:
       radial-gradient(60% 55% at 78% 8%, color-mix(in srgb, var(--color-navy-700) 55%, transparent), transparent 70%),
       radial-gradient(50% 60% at 0% 100%, color-mix(in srgb, var(--color-navy-800) 60%, transparent), transparent 70%);
-    z-index: 0;
-  }
-
-  /* I tre chip con un marchio (Modbus/MQTT/Zigbee, vedi Task 7) portano
-     l'SVG inline: eredita colore dal chip invece di un fill fisso. */
-  .tech-chip :global(svg) {
-    width: 18px;
-    height: 18px;
-    color: var(--color-navy-700);
-    flex-shrink: 0;
+    z-index: 1;
   }
 
   #controllo-e-monitoraggio,
@@ -211,3 +335,42 @@ const breadcrumb = {
     scroll-margin-top: var(--header-h, 4.875rem);
   }
 </style>
+
+<script>
+  // Stesso parallasse (via transform, mai `background-attachment: fixed`)
+  // e stessa struttura di CtaBand.astro, sulla fascia Controllo e monitoraggio.
+  const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const section = document.querySelector<HTMLElement>('.control');
+  const layer = section?.querySelector<HTMLElement>('[data-parallax]');
+
+  if (section && layer && !prefersReduced) {
+    let inView = false;
+    let ticking = false;
+    const depth = 0.3;
+
+    const apply = () => {
+      ticking = false;
+      const rect = section.getBoundingClientRect();
+      const vh = window.innerHeight || document.documentElement.clientHeight;
+      const progress = (vh - rect.top) / (vh + rect.height);
+      const offset = (progress - 0.5) * rect.height * depth;
+      layer.style.transform = `translate3d(0, ${offset.toFixed(1)}px, 0)`;
+    };
+
+    const onScroll = () => {
+      if (!inView || ticking) return;
+      ticking = true;
+      requestAnimationFrame(apply);
+    };
+
+    const io = new IntersectionObserver(
+      (entries) => {
+        inView = entries[0]?.isIntersecting ?? false;
+        if (inView) onScroll();
+      },
+      { rootMargin: '20% 0px' },
+    );
+    io.observe(section);
+    window.addEventListener('scroll', onScroll, { passive: true });
+  }
+</script>

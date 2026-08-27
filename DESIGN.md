@@ -127,8 +127,9 @@ system (see `src/styles/global.css`, the source of truth):
 - **Buttons** — one coherent system: `.ds-btn-primary` (navy gradient), `.ds-btn-on-dark`
   (frosted white), `.ds-btn-ghost` (glass outline on dark), `.ds-btn-secondary` (glass on
   light), `.ds-btn-signal` (frosted white, control sections). All CTAs share identical metrics.
-- **Signature ornament** — the "energy flow" spark gap (`WaveDivider.astro`), drawn at rest
-  in CSS; plus the graded circuit-plane video behind the home hero. See §5 for both specs.
+- **Signature ornament** — the graded circuit-plane video behind the home hero. See §5.
+  (The spark-gap band that used to close every hero, `WaveDivider.astro`, was removed
+  2026-08: it was a leftover rest-state for the dielectric-arc animation that no longer exists.)
 
 What still holds from below: the type scale, accessibility (WCAG 2.2 AA, reduced-motion,
 44px targets), and the proof-over-adjectives content principles.
@@ -151,7 +152,7 @@ continuity over contrast.
   Archivo display face (§0.2), the live 24/7 dot, the telemetry panels, the scanline. `PageHero`'s
   `tone="control"` now only swaps the eyebrow dash for the live dot.
 - Large glows follow the same rule: ambient washes use `navy-700/800` or `signal-400`,
-  not green. `WaveDivider` has `signal` and `navy` tones only.
+  not green.
 
 ### §0.2 — Two families, no third (2026-07-28) — **supersedes every serif rule below**
 
@@ -293,13 +294,16 @@ The control sections' surface. Navy glass — a white sheen gradient over 62% `n
 - **Persistent CTA:** a `tel:` button stays visible in the header at every breakpoint (icon-only under 400px).
 - **Mobile:** hamburger opens a full-height `navy-950` panel with large nav items and contact info at the base; a 56px sticky bottom bar with two 50/50 "Chiama" / "Email" buttons stays pinned below `md`, respecting `env(safe-area-inset-bottom)`.
 
-### Spark Gap (signature component — `WaveDivider.astro`)
-A full-width band closing the hero of every page: a 1px conductor hairline runs in from both edges and terminates at two electrodes that diverge slightly as they rise — a spark gap, drawn at rest.
+### Spark Gap — removed (2026-08)
+`WaveDivider.astro` — the band closing every hero, a static electrode gap left over as the
+rest-state of a WebGL dielectric-arc animation (`ogl`, removed earlier after it painted an
+opaque white slab on mobile GPUs, see `info_utili/issue.jpeg`) — has itself been deleted, along
+with its three call sites (`Hero.astro`, `PageHero.astro`, `GalleryGrid.astro`): once no arc
+remained to strike, the leftover static band no longer served the site. `ogl` is no longer a
+dependency. **Do not reintroduce it or a WebGL arc.**
 
-- **Render:** pure CSS — a hairline and two skewed pins, no canvas, no JS. Only `signal` and `navy` tones exist (`green` was removed with §0.1); neither carries green, since a bloom at this size would break the Leaf Rarity Rule.
-- **The arc no longer animates (2026-08).** It used to be a WebGL Jacob's ladder (`ogl`, one fragment shader): the arc struck at the gap, climbed while it stretched, then broke and restruck. On mobile GPUs the discharge painted an opaque white slab across the band (`info_utili/issue.jpeg`); two targeted shader fixes did not close it, it was first disabled below 640px, and at the brand owner's direction it was then removed on every viewport. `ogl` is no longer a dependency. **Do not reintroduce a WebGL arc** — the static gap is the intended state.
-
-The hero backdrop (below) is now the only place in the system where motion is the subject rather than a transition.
+The hero backdrop (below) is the only place in the system where motion is the subject rather
+than a transition.
 
 ### Hero backdrop (home — `Hero.astro`)
 A slow circuit-board plane in perspective, graded onto the brand ramp: the live trace is pulled onto the hue and saturation of `signal-400` and the ground stays a navy-black, so the band never introduces a blue from outside the ramp. It replaced a sunset-pylon photograph in 2026-08.

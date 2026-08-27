@@ -1,7 +1,6 @@
 ---
 import { Image } from 'astro:assets';
 import type { ImageMetadata } from 'astro';
-import WaveDivider from './WaveDivider.astro';
 
 interface Props {
   eyebrow: string;
@@ -30,12 +29,12 @@ const labelClass = isControl ? 'ds-eyebrow-label--signal' : '';
         <Image
           src={image}
           alt={imageAlt}
-          class="absolute inset-0 h-full w-full object-cover"
+          class="pagehero-photo absolute inset-0 h-full w-full object-cover"
           widths={[768, 1280, 1600]}
           sizes="100vw"
           loading="eager"
         />
-        <div class="absolute inset-0 bg-navy-950/82" />
+        <div class="pagehero-scrim absolute inset-0" />
       </>
     )
   }
@@ -47,10 +46,31 @@ const labelClass = isControl ? 'ds-eyebrow-label--signal' : '';
       <span class:list={['ds-eyebrow-label', labelClass]}>{eyebrow}</span>
     </div>
     <h1 class="text-display max-w-[20ch]" data-reveal style="--reveal-delay:80ms">{h1}</h1>
-    {sub && <p class="measure mt-5 text-lg text-paper/80" data-reveal style="--reveal-delay:160ms">{sub}</p>}
-  </div>
-
-  <div class="relative z-10">
-    <WaveDivider tone="signal" />
+    {sub && <p class="measure mt-5 text-lg text-paper/80 whitespace-pre-line" data-reveal style="--reveal-delay:160ms">{sub}</p>}
   </div>
 </section>
+
+<style>
+  /* The photo itself is darkened and taken down a register — a real filter,
+     not just a translucent layer on top — so it reads as moody brochure
+     photography graded onto the navy system rather than a raw stock shot.
+     No video layers over this element (unlike the home hero), so promoting
+     it to its own compositing layer here is not the risk it is there. */
+  .pagehero-photo {
+    filter: brightness(0.55) saturate(0.85);
+  }
+
+  /* Heavier, directional legibility scrim: darkest at the foot, where the
+     text cluster actually sits (PageHero's large top padding pushes the
+     eyebrow/h1/sub block toward the bottom of the section), fading out
+     toward the top where it's photo-only. */
+  .pagehero-scrim {
+    background: linear-gradient(
+      to top,
+      color-mix(in srgb, var(--color-navy-950) 88%, transparent) 0%,
+      color-mix(in srgb, var(--color-navy-950) 68%, transparent) 30%,
+      color-mix(in srgb, var(--color-navy-950) 38%, transparent) 60%,
+      color-mix(in srgb, var(--color-navy-950) 18%, transparent) 100%
+    );
+  }
+</style>

@@ -1,9 +1,11 @@
 ---
 import { getEntry } from 'astro:content';
 import Base from '../layouts/Base.astro';
+import PageHero from '../components/PageHero.astro';
 import ContactChannels from '../components/ContactChannels.astro';
-import MapFacade from '../components/MapFacade.astro';
+import ContactMap from '../components/ContactMap.astro';
 import { contatti } from '../data/contatti.ts';
+import heroContatti from '../assets/img/photos/contatti-hero-pylon-notte.jpg';
 
 const pagina = await getEntry('pagine', 'contatti');
 if (!pagina || pagina.data.pagina !== 'contatti') throw new Error('pagine/contatti.yaml missing or malformed');
@@ -23,12 +25,19 @@ const breadcrumb = {
   title="Contatti"
   description={`Chiama ${contatti.telefono} o scrivi a ${contatti.email}: nessun modulo da compilare, rispondiamo direttamente.`}
   structuredData={[breadcrumb]}
-  headerTransparent={false}
 >
+  <PageHero
+    eyebrow="Contatti"
+    h1={h1}
+    sub={sub}
+    image={heroContatti}
+    imageAlt="Traliccio dell'alta tensione di notte, sotto un cielo stellato"
+  />
+
   <section class="wrap py-20 lg:py-28 grid gap-16 lg:grid-cols-2 lg:gap-20 items-start">
-    <ContactChannels h1={h1} sub={sub} orari={orari} />
+    <ContactChannels orari={orari} />
     <div>
-      <MapFacade />
+      <ContactMap />
       <p class="mt-6 text-ink/75 font-semibold">{contatti.indirizzo}</p>
     </div>
   </section>

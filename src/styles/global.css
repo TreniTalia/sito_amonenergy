@@ -96,12 +96,26 @@
     }
   }
 
+  /* Safety net for full-bleed breakouts (GalleryItem's `100vw` band, any
+     other `left:50%;margin-left:-50vw` trick): `100vw` counts the
+     scrollbar's own width, so on a page that has a vertical scrollbar the
+     full-bleed element ends up a few px wider than the actually visible
+     viewport — a real horizontal scrollbar, not just a rounding artifact.
+     Needed on `html`, not just `body`: the root scrolling box is `html` in
+     standards mode, so `overflow-x:hidden` on `body` alone still left a few
+     px of real horizontal scroll (verified — `window.scrollX` could reach a
+     nonzero max even with body clipped). */
+  html {
+    overflow-x: hidden;
+  }
+
   body {
     background: var(--color-paper);
     color: var(--color-ink);
     font-family: var(--font-body);
     -webkit-font-smoothing: antialiased;
     text-rendering: optimizeLegibility;
+    overflow-x: hidden;
   }
 
   :focus-visible {

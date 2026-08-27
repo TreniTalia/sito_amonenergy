@@ -4,28 +4,33 @@ import { contatti } from '../data/contatti.ts';
 import PackIcon from './PackIcon.astro';
 
 interface Props {
-  h1: string;
-  sub: string;
   orari: string;
 }
 
-const { h1, sub, orari } = Astro.props;
+const { orari } = Astro.props;
 ---
 
 <div>
-  <h1 class="text-display" style="font-size: clamp(2rem, 4vw, 3rem); max-width: 16ch;">{h1}</h1>
-  <p class="measure mt-5 text-lg text-ink/75" style="line-height: 1.65;">{sub}</p>
-
-  <div class="mt-10 flex flex-col gap-4">
-    <a href={contatti.telefonoHref} class="ds-btn-primary justify-center" style="padding: 19px 32px; font-size: 1.0625rem;">
-      <PackIcon name="phone" class="shrink-0 text-base" />
-      Chiamaci — {contatti.telefono}
+  <div class="flex flex-col gap-4">
+    <a href={contatti.telefonoHref} class="contact-card contact-card--primary">
+      <span class="contact-card-icon">
+        <PackIcon name="phone" />
+      </span>
+      <span class="contact-card-body">
+        <span class="contact-card-label">Chiamaci</span>
+        <span class="contact-card-value">{contatti.telefono}</span>
+        <span class="contact-card-meta">{orari}</span>
+      </span>
     </a>
-    <p class="text-sm text-ink/60" style="margin-top: -0.5rem;">{orari}</p>
 
-    <a href={`mailto:${contatti.email}?subject=Richiesta%20informazioni`} class="ds-btn-secondary justify-center mt-2" style="padding: 19px 32px; font-size: 1.0625rem;">
-      <Icon name="fa6-solid:envelope" class="shrink-0 text-base" />
-      Scrivici — {contatti.email}
+    <a href={`mailto:${contatti.email}?subject=Richiesta%20informazioni`} class="contact-card">
+      <span class="contact-card-icon">
+        <Icon name="fa6-solid:envelope" />
+      </span>
+      <span class="contact-card-body">
+        <span class="contact-card-label">Scrivici</span>
+        <span class="contact-card-value">{contatti.email}</span>
+      </span>
     </a>
   </div>
 
@@ -38,3 +43,124 @@ const { h1, sub, orari } = Astro.props;
     P.IVA {contatti.piva} · Codice FE {contatti.codiceFE}
   </p>
 </div>
+
+<style>
+  /* Stessa ricetta vetro reale del resto del sito (v. .ds-panel in
+     global.css): backdrop-filter con la rifrazione SVG in coda, sheen
+     diagonale proprio via ::before in screen-blend, isolation:isolate +
+     z-index sui figli così testo/icona restano sopra la luce. */
+  .contact-card {
+    position: relative;
+    isolation: isolate;
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    padding: 20px 24px;
+    border-radius: var(--radius-card);
+    text-decoration: none;
+    border: 1px solid var(--glass-light-border);
+    background: var(--glass-sheen-light), color-mix(in srgb, #ffffff 78%, transparent);
+    backdrop-filter: blur(14px) saturate(150%);
+    -webkit-backdrop-filter: blur(14px) saturate(150%);
+    backdrop-filter: url(#liquid-glass-panel) blur(12px) saturate(150%);
+    color: var(--color-ink);
+    box-shadow: var(--shadow-sm);
+    transition:
+      border-color 0.3s var(--ease-signature),
+      transform 0.3s var(--ease-signature),
+      box-shadow 0.3s var(--ease-signature);
+  }
+  .contact-card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    border-radius: inherit;
+    pointer-events: none;
+    background: linear-gradient(
+      125deg,
+      transparent 30%,
+      rgba(255, 255, 255, 0.14) 44%,
+      rgba(255, 255, 255, 0.22) 50%,
+      rgba(255, 255, 255, 0.14) 56%,
+      transparent 70%
+    );
+    mix-blend-mode: screen;
+  }
+  .contact-card > * {
+    position: relative;
+    z-index: 2;
+  }
+  .contact-card:hover {
+    border-color: color-mix(in srgb, var(--color-navy-700) 40%, transparent);
+    transform: translateY(-3px);
+    box-shadow: var(--shadow-lg);
+  }
+
+  .contact-card-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 52px;
+    height: 52px;
+    flex-shrink: 0;
+    border-radius: var(--radius-pill);
+    background: color-mix(in srgb, var(--color-navy-100) 65%, transparent);
+    backdrop-filter: blur(8px) saturate(160%);
+    -webkit-backdrop-filter: blur(8px) saturate(160%);
+    backdrop-filter: url(#liquid-glass-btn) blur(7px) saturate(160%);
+    border: 1px solid color-mix(in srgb, var(--color-navy-900) 14%, transparent);
+    color: var(--color-navy-800);
+    font-size: 1.15rem;
+  }
+
+  .contact-card-body {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+  }
+  .contact-card-label {
+    font-family: var(--font-display);
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: color-mix(in srgb, currentColor 60%, transparent);
+  }
+  .contact-card-value {
+    font-family: var(--font-display);
+    font-size: 1.15rem;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    word-break: break-word;
+  }
+  .contact-card-meta {
+    margin-top: 2px;
+    font-size: 0.85rem;
+    color: color-mix(in srgb, currentColor 65%, transparent);
+  }
+
+  /* Variante primaria — il telefono resta il canale d'urto, drenaggio navy
+     come .ds-btn-primary invece del vetro chiaro. */
+  .contact-card--primary {
+    border-color: rgba(255, 255, 255, 0.16);
+    background:
+      var(--glass-sheen),
+      linear-gradient(180deg, var(--color-navy-800), var(--color-navy-950));
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    color: var(--color-paper);
+    box-shadow: var(--shadow-md), inset 0 1px 0 rgba(255, 255, 255, 0.14);
+  }
+  .contact-card--primary:hover {
+    border-color: rgba(255, 255, 255, 0.32);
+    box-shadow: var(--shadow-lg), inset 0 1px 0 rgba(255, 255, 255, 0.18);
+  }
+  .contact-card--primary .contact-card-icon {
+    background: rgba(255, 255, 255, 0.14);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+    color: var(--color-paper);
+  }
+</style>

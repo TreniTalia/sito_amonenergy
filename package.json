@@ -23,6 +23,7 @@
     "@tailwindcss/vite": "^4.3.3",
     "astro": "^7.1.1",
     "astro-icon": "^1.1.5",
+    "maplibre-gl": "^6.6.0",
     "tailwindcss": "^4.3.3"
   },
   "devDependencies": {

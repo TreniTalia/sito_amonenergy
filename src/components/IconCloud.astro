@@ -1,0 +1,381 @@
+---
+// Same math/visual result as MagicUI's `IconCloud` (Fibonacci-sphere layout,
+// 3D rotation, drag + click-to-focus, ease-out settle) — ported to vanilla
+// TS because this project is Astro-only, no React/shadcn installed. Icons
+// are baked to flat-color data URIs server-side (an offscreen `<img>` can't
+// resolve `currentColor`/CSS vars, it's decoded outside the page's cascade)
+// so the whole cloud stays one tone, matching the tech-chip monochrome rule
+// this replaces.
+interface IconEntry {
+  name: string;
+  svg: string;
+  /** Extra draw-size multiplier for marks too fine-grained to read at the
+   * default size (e.g. MySQL's dolphin+wordmark, Teltonika's thin chevrons). */
+  sizeBoost?: number;
+}
+
+interface Props {
+  icons: IconEntry[];
+  /** Baked into each icon in place of `currentColor` — must be a literal color, not a CSS var. */
+  color?: string;
+}
+
+const { icons, color = '#1D5585' } = Astro.props;
+
+function toDataUri(svg: string, fillColor: string): string {
+  let colored = svg.replaceAll('currentColor', fillColor);
+  // Simple Icons ships most marks with no `fill` at all (relying on the
+  // browser's default black) rather than `currentColor` — only the three
+  // files already using `currentColor` (mqtt/zigbee/teltonika + the
+  // monogram badges) got recolored by the line above. For everything else,
+  // force a fill on the root so children without their own `fill` inherit
+  // it instead of defaulting to black. Skipped when the root already
+  // declares one (e.g. the monogram badges' `fill="none"` — forcing a fill
+  // there would turn their circle outline into a solid disc).
+  if (!/<svg\b[^>]*\bfill=/.test(colored)) {
+    colored = colored.replace(/<svg\b/, `<svg fill="${fillColor}"`);
+  }
+  const encoded = Buffer.from(colored, 'utf-8').toString('base64');
+  return `data:image/svg+xml;base64,${encoded}`;
+}
+
+const images = icons.map((icon) => toDataUri(icon.svg, color));
+const names = icons.map((icon) => icon.name);
+const sizeBoosts = icons.map((icon) => icon.sizeBoost ?? 1);
+---
+
+<div class="icon-cloud-wrap" data-reveal>
+  <canvas
+    class="icon-cloud-canvas"
+    role="img"
+    aria-label={`Tecnologie e strumenti che integriamo: ${names.join(', ')}`}
+  ></canvas>
+  <div class="icon-cloud-tooltip" aria-hidden="true"></div>
+</div>
+
+<script define:vars={{ images, names, sizeBoosts }}>
+  {
+    const wrap = document.currentScript.previousElementSibling;
+    const canvas = wrap?.querySelector('canvas');
+    const tooltip = wrap?.querySelector('.icon-cloud-tooltip');
+    if (canvas) {
+      const ctx = canvas.getContext('2d');
+      const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+      // Fibonacci sphere: even coverage without clustering at the poles.
+      const count = images.length;
+      const offset = 2 / count;
+      const increment = Math.PI * (3 - Math.sqrt(5));
+      const icons = Array.from({ length: count }, (_, i) => {
+        const y = i * offset - 1 + offset / 2;
+        const r = Math.sqrt(Math.max(0, 1 - y * y));
+        const phi = i * increment;
+        return { x: Math.cos(phi) * r * 100, y: y * 100, z: Math.sin(phi) * r * 100 };
+      });
+
+      // Each icon pre-rendered once onto its own small offscreen canvas —
+      // the main loop just blits, it never decodes/rasterizes per frame.
+      // Rasterized well above the largest on-screen draw size (44 base *
+      // up to ~1.0 depth scale * up to ~1.4 boost) so a boosted icon never
+      // upscales past its own source resolution and blurs.
+      const OFF = 88;
+      const iconCanvases = images.map(() => {
+        const off = document.createElement('canvas');
+        off.width = OFF;
+        off.height = OFF;
+        return off;
+      });
+      const loaded = new Array(count).fill(false);
+      images.forEach((src, i) => {
+        const img = new Image();
+        img.onload = () => {
+          const offCtx = iconCanvases[i].getContext('2d');
+          if (!offCtx) return;
+          offCtx.clearRect(0, 0, OFF, OFF);
+          offCtx.drawImage(img, 4, 4, OFF - 8, OFF - 8);
+          loaded[i] = true;
+        };
+        img.src = src;
+      });
+
+      // Fixed logical space, same numbers as the original component (sphere
+      // radius 100, canvas "world" 400x400, icon draw size 40). Responsive
+      // sizing is handled entirely by CSS scaling the canvas element — the
+      // draw math never has to know the on-screen size, which is what a
+      // stray extra scale factor here corrupted in an earlier version (icons
+      // ballooned to ~100px). `resize()` only sets the backing-buffer
+      // resolution (for DPR sharpness); it does not change the math below.
+      const WORLD = 400;
+      let rotation = { x: 0, y: -0.3 };
+      let target = null; // {x,y,startX,startY,startTime,duration}
+      let dragging = false;
+      let lastPos = { x: 0, y: 0 };
+      let pointerPos = { x: WORLD / 2, y: WORLD / 2 };
+      let hasPointer = false;
+      // Starts true: the loop must run on its own at setup, not wait for the
+      // IntersectionObserver below to report the first frame. That observer
+      // exists purely to pause the loop once the cloud scrolls off-screen —
+      // gating the very first start on it too turned out to be a real
+      // failure mode, not just a test-only quirk: it depends on the
+      // observer firing promptly, which isn't guaranteed (confirmed with a
+      // throwaway observer that never fired in one browser context). Same
+      // "call the update once, unconditionally, then let the observer take
+      // over" shape as `onScroll()` in Header.astro.
+      let inView = true;
+      let rafId = 0;
+      let cssSize = 0;
+
+      const easeOutCubic = (t) => 1 - Math.pow(1 - t, 3);
+
+      const resize = () => {
+        const w = wrap.clientWidth;
+        if (!w) return;
+        cssSize = w;
+        const dpr = Math.min(window.devicePixelRatio || 1, 2);
+        canvas.width = WORLD * dpr;
+        canvas.height = WORLD * dpr;
+        canvas.style.width = `${w}px`;
+        canvas.style.height = `${w}px`;
+        ctx?.setTransform(dpr, 0, 0, dpr, 0, 0);
+      };
+
+      const project = (icon) => {
+        const cosX = Math.cos(rotation.x);
+        const sinX = Math.sin(rotation.x);
+        const cosY = Math.cos(rotation.y);
+        const sinY = Math.sin(rotation.y);
+        const rx = icon.x * cosY - icon.z * sinY;
+        const rz = icon.x * sinY + icon.z * cosY;
+        const ry = icon.y * cosX + rz * sinX;
+        return { x: rx, y: ry, z: rz };
+      };
+
+      const draw = () => {
+        if (!ctx) return;
+        ctx.clearRect(0, 0, WORLD, WORLD);
+
+        const projected = icons.map((icon, i) => ({ i, p: project(icon) })).sort((a, b) => a.p.z - b.p.z);
+
+        for (const { i, p } of projected) {
+          if (!loaded[i]) continue;
+          // Narrower depth range than a literal port would give (z -100..100
+          // used to map straight to a 0.33x-1.33x scale, a 4x spread that
+          // made anything even a little fine-grained — MySQL's dolphin
+          // wordmark, Teltonika's thin interlocking chevrons — unreadable
+          // once it rotated toward the back). 0.6x-1.0x keeps a real depth
+          // cue without ever shrinking a mark past legible.
+          const scale = 0.6 + 0.4 * ((p.z + 100) / 200);
+          const opacity = Math.max(0.35, Math.min(1, (p.z + 150) / 200));
+          const screenX = WORLD / 2 + p.x;
+          const screenY = WORLD / 2 + p.y;
+          const iconSize = 44 * scale * sizeBoosts[i];
+
+          ctx.save();
+          ctx.globalAlpha = opacity;
+          ctx.drawImage(iconCanvases[i], screenX - iconSize / 2, screenY - iconSize / 2, iconSize, iconSize);
+          ctx.restore();
+        }
+      };
+
+      const tick = () => {
+        rafId = 0;
+        if (target) {
+          const elapsed = performance.now() - target.startTime;
+          const progress = Math.min(1, elapsed / target.duration);
+          const eased = easeOutCubic(progress);
+          rotation = {
+            x: target.startX + (target.x - target.startX) * eased,
+            y: target.startY + (target.y - target.startY) * eased,
+          };
+          if (progress >= 1) target = null;
+        } else if (!dragging && !prefersReduced) {
+          const center = WORLD / 2;
+          const dx = hasPointer ? pointerPos.x - center : 0;
+          const dy = hasPointer ? pointerPos.y - center : 0;
+          const dist = Math.sqrt(dx * dx + dy * dy);
+          const maxDist = Math.SQRT2 * center;
+          // Gentle idle drift on Y even with no pointer nearby, a bit more
+          // (and a touch on X too) the closer the pointer gets to center.
+          const speed = 0.0022 + (dist / maxDist) * 0.007;
+          rotation = {
+            x: rotation.x + (dy / WORLD) * speed,
+            y: rotation.y + speed * (0.4 + (dx / WORLD)),
+          };
+        }
+        draw();
+        const stillLoading = loaded.some((l) => !l);
+        if (inView && (!prefersReduced || dragging || target || stillLoading)) {
+          rafId = requestAnimationFrame(tick);
+        }
+      };
+
+      const ensureLoop = () => {
+        if (!rafId && inView) rafId = requestAnimationFrame(tick);
+      };
+
+      const toWorld = (clientX, clientY) => {
+        const rect = canvas.getBoundingClientRect();
+        const k = rect.width ? WORLD / rect.width : 1;
+        return { x: (clientX - rect.left) * k, y: (clientY - rect.top) * k };
+      };
+
+      // Shared by drag/click (pointerDown) and hover (pointerMove, for the
+      // tooltip) — same nearest-icon-under-the-cursor test either way.
+      const hitTest = (x, y) => {
+        for (let i = 0; i < icons.length; i++) {
+          const p = project(icons[i]);
+          const screenX = WORLD / 2 + p.x;
+          const screenY = WORLD / 2 + p.y;
+          const scale = 0.6 + 0.4 * ((p.z + 100) / 200);
+          const hitRadius = 22 * scale * sizeBoosts[i] + 4;
+          const ddx = x - screenX;
+          const ddy = y - screenY;
+          if (ddx * ddx + ddy * ddy < hitRadius * hitRadius) return i;
+        }
+        return -1;
+      };
+
+      const pointerDown = (e) => {
+        const { x, y } = toWorld(e.clientX, e.clientY);
+        const hit = hitTest(x, y);
+
+        if (hit !== -1) {
+          const targetX = -Math.atan2(icons[hit].y, Math.sqrt(icons[hit].x ** 2 + icons[hit].z ** 2));
+          const targetY = Math.atan2(icons[hit].x, icons[hit].z);
+          const distance = Math.hypot(targetX - rotation.x, targetY - rotation.y);
+          target = {
+            x: targetX,
+            y: targetY,
+            startX: rotation.x,
+            startY: rotation.y,
+            startTime: performance.now(),
+            duration: Math.min(1800, Math.max(600, distance * 900)),
+          };
+          ensureLoop();
+          return;
+        }
+
+        dragging = true;
+        lastPos = { x: e.clientX, y: e.clientY };
+        canvas.setPointerCapture(e.pointerId);
+      };
+
+      const showTooltip = (name, wrapX, wrapY) => {
+        if (!tooltip) return;
+        tooltip.textContent = name;
+        tooltip.style.left = `${wrapX}px`;
+        tooltip.style.top = `${wrapY}px`;
+        tooltip.classList.add('is-visible');
+      };
+      const hideTooltip = () => {
+        tooltip?.classList.remove('is-visible');
+      };
+
+      const pointerMove = (e) => {
+        pointerPos = toWorld(e.clientX, e.clientY);
+        hasPointer = true;
+        if (dragging) {
+          const dxp = e.clientX - lastPos.x;
+          const dyp = e.clientY - lastPos.y;
+          rotation = { x: rotation.x + dyp * 0.006, y: rotation.y + dxp * 0.006 };
+          lastPos = { x: e.clientX, y: e.clientY };
+          hideTooltip();
+        } else {
+          const hit = hitTest(pointerPos.x, pointerPos.y);
+          if (hit !== -1) {
+            const wrapRect = wrap.getBoundingClientRect();
+            showTooltip(names[hit], e.clientX - wrapRect.left, e.clientY - wrapRect.top);
+            canvas.style.cursor = 'pointer';
+          } else {
+            hideTooltip();
+            canvas.style.cursor = dragging ? 'grabbing' : 'grab';
+          }
+        }
+        ensureLoop();
+      };
+
+      const pointerUp = () => {
+        dragging = false;
+      };
+      const pointerLeave = () => {
+        hasPointer = false;
+        hideTooltip();
+      };
+
+      canvas.addEventListener('pointerdown', pointerDown);
+      canvas.addEventListener('pointermove', pointerMove);
+      window.addEventListener('pointerup', pointerUp);
+      canvas.addEventListener('pointerleave', pointerLeave);
+      canvas.style.touchAction = 'none';
+
+      const io = new IntersectionObserver(
+        (entries) => {
+          const wasInView = inView;
+          inView = entries[0]?.isIntersecting ?? false;
+          if (inView && !wasInView) ensureLoop();
+        },
+        { threshold: 0.05 },
+      );
+      io.observe(wrap);
+
+      if ('ResizeObserver' in window) {
+        const ro = new ResizeObserver(() => {
+          resize();
+          draw();
+        });
+        ro.observe(wrap);
+      } else {
+        window.addEventListener('resize', () => {
+          resize();
+          draw();
+        });
+      }
+
+      resize();
+      draw();
+      ensureLoop();
+    }
+  }
+</script>
+
+<style>
+  .icon-cloud-wrap {
+    position: relative;
+    width: 100%;
+    max-width: 34rem;
+    aspect-ratio: 1;
+    margin-inline: auto;
+  }
+  .icon-cloud-canvas {
+    display: block;
+    cursor: grab;
+  }
+  .icon-cloud-canvas:active {
+    cursor: grabbing;
+  }
+  .icon-cloud-tooltip {
+    position: absolute;
+    z-index: 5;
+    top: 0;
+    left: 0;
+    transform: translate(-50%, calc(-100% - 12px));
+    padding: 5px 11px;
+    border-radius: var(--radius-pill);
+    background: var(--color-navy-950);
+    color: var(--color-paper);
+    font-family: var(--font-display);
+    font-size: 0.78rem;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    white-space: nowrap;
+    box-shadow: var(--shadow-sm);
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.15s var(--ease-signature);
+    pointer-events: none;
+  }
+  .icon-cloud-tooltip.is-visible {
+    opacity: 1;
+    visibility: visible;
+  }
+</style>

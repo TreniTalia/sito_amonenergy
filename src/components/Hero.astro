@@ -1,7 +1,6 @@
 ---
 import { Picture } from 'astro:assets';
 import heroPoster from '../assets/img/photos/hero-pattern-circuito.png';
-import WaveDivider from './WaveDivider.astro';
 
 interface Props {
   eyebrow: string;
@@ -115,10 +114,6 @@ const facts = ['Sistemi di monitoraggio', 'Automazioni', 'Reperibilità 24/7'];
       </div>
     </div>
   </div>
-
-  <div class="relative z-10">
-    <WaveDivider tone="signal" />
-  </div>
 </section>
 
 <style>
@@ -132,8 +127,7 @@ const facts = ['Sistemi di monitoraggio', 'Automazioni', 'Reperibilità 24/7'];
      ridosso dei 128px di `sm`, e lì il vecchio numero fisso stava per cedere.
      Sotto `sm` il blocco è centrato fra header e fondo, quindi il valore voluto
      è zero: comanda il franco. Il franco inferiore vale 3.5rem invece dei 2.5
-     di prima perché su telefono la fascia dell'arco è nascosta, e quei pixel
-     erano il piede ottico del blocco. */
+     di prima: sono il piede ottico del blocco su mobile. */
   .hero-col {
     --hero-pt: 0rem;
     --hero-pb: 3.5rem;

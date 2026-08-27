@@ -8,12 +8,19 @@ const progetti = defineCollection({
     z.object({
       titolo: z.string(),
       kv: z.string(),
+      potenza: z.string().optional(),
       committente: z.string(),
       provincia: z.string(),
       tipologia: z.string(),
-      immagine: image(),
+      // Foto reale della stazione. Assente finché non arriva dal pannello:
+      // il componente mostra un placeholder, mai uno schema unifilare (i
+      // clienti non ce li lasciano condividere) né una foto stock spacciata
+      // per quella specifica realizzazione. `z.array(image())` risultava in
+      // un ImageMetadata senza `format` a build time (Astro non lo risolve
+      // correttamente dentro un array) — un solo campo opzionale copre i
+      // dati reali di oggi (0 o 1 foto a stazione) senza quel bug.
+      immagine: image().optional(),
       immagineAlt: z.string(),
-      full: z.boolean().default(false),
       ordine: z.number(),
     }),
 });
