@@ -1,0 +1,549 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Amon Wind — Interactive Digital Twin</title>
+<style>
+  :root{
+    --amon-bg:#00111f;
+    --amon-bg2:#001a2f;
+    --amon-blue:#087fff;
+    --amon-cyan:#10e8f3;
+    --amon-ice:#dffcff;
+    --amon-muted:#6fa6bd;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;width:100%;height:100%;overflow:hidden;background:var(--amon-bg);font-family:Inter,Arial,Helvetica,sans-serif}
+  body{cursor:none}
+  #stage{position:fixed;inset:0}
+  #stage canvas{display:block;width:100%;height:100%}
+  .overlay{
+    pointer-events:none;position:fixed;inset:0;z-index:4;
+    background:
+      radial-gradient(circle at var(--mx,50%) var(--my,50%),rgba(16,232,243,.055),transparent 13rem),
+      linear-gradient(to bottom,rgba(0,6,13,.05),rgba(0,6,13,.20));
+  }
+  .noise{
+    position:absolute;inset:0;opacity:.055;mix-blend-mode:screen;
+    background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 180 180' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.95' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.32'/%3E%3C/svg%3E");
+  }
+  .topbar{
+    position:fixed;left:28px;right:28px;top:25px;z-index:6;
+    display:flex;align-items:center;justify-content:space-between;
+    color:var(--amon-ice);pointer-events:none
+  }
+  .wordmark{display:flex;align-items:center;gap:10px;font-weight:600;font-size:13px;letter-spacing:.055em}
+  .mark{width:17px;height:17px;position:relative}
+  .mark:before,.mark:after{
+    content:"";position:absolute;inset:1px;border:1px solid rgba(223,252,255,.95);
+    transform:rotate(45deg)
+  }
+  .mark:after{inset:5px;border-color:var(--amon-cyan)}
+  .menu{font:10px/1 ui-monospace,SFMono-Regular,Menlo,monospace;color:#a9cad6;letter-spacing:.12em}
+  .hero{
+    position:fixed;left:30px;bottom:28px;z-index:6;color:white;width:min(500px,44vw);pointer-events:none
+  }
+  .eyebrow{
+    display:flex;align-items:center;gap:9px;margin-bottom:12px;color:var(--amon-cyan);
+    font:10px/1 ui-monospace,SFMono-Regular,Menlo,monospace;letter-spacing:.16em;text-transform:uppercase
+  }
+  .eyebrow i{display:block;width:34px;height:1px;background:linear-gradient(90deg,var(--amon-cyan),transparent)}
+  h1{font-size:clamp(31px,3.35vw,58px);line-height:.96;letter-spacing:-.045em;font-weight:430;margin:0}
+  .sub{
+    margin-top:15px;max-width:420px;color:#91b4c3;font-size:11px;line-height:1.6;letter-spacing:.01em
+  }
+  .readout{
+    position:fixed;right:29px;bottom:29px;z-index:6;color:#7faabd;
+    font:9px/1.65 ui-monospace,SFMono-Regular,Menlo,monospace;
+    letter-spacing:.12em;text-transform:uppercase;text-align:right;pointer-events:none
+  }
+  .readout b{color:var(--amon-cyan);font-weight:500}
+  .cursor{
+    position:fixed;left:0;top:0;width:34px;height:34px;border:1px solid rgba(139,241,248,.55);
+    border-radius:50%;z-index:12;pointer-events:none;transform:translate(-50%,-50%);
+    transition:width .25s,height .25s,border-color .25s;
+    box-shadow:0 0 24px rgba(16,232,243,.08)
+  }
+  .cursor:before,.cursor:after{content:"";position:absolute;background:rgba(196,252,255,.75)}
+  .cursor:before{left:50%;top:8px;bottom:8px;width:1px}
+  .cursor:after{top:50%;left:8px;right:8px;height:1px}
+  .cursorDot{
+    position:fixed;left:0;top:0;width:3px;height:3px;border-radius:50%;
+    background:white;box-shadow:0 0 10px var(--amon-cyan);z-index:13;pointer-events:none;
+    transform:translate(-50%,-50%)
+  }
+  .edge{
+    position:fixed;left:0;top:44%;width:3px;height:88px;
+    background:linear-gradient(var(--amon-blue),var(--amon-cyan));z-index:6;box-shadow:0 0 18px rgba(16,232,243,.24)
+  }
+  .loading{
+    position:fixed;inset:0;display:grid;place-items:center;background:var(--amon-bg);color:var(--amon-cyan);
+    z-index:30;font:10px ui-monospace,monospace;letter-spacing:.2em;transition:opacity .6s ease
+  }
+  .loading.hide{opacity:0;pointer-events:none}
+  @media(max-width:760px){
+    .topbar{left:18px;right:18px;top:18px}.hero{left:18px;bottom:20px;width:75vw}
+    .sub{display:none}.readout{right:18px;bottom:18px}.menu{display:none}
+  }
+</style>
+</head>
+<body>
+<div id="stage"></div>
+
+<div class="overlay" id="overlay"><div class="noise"></div></div>
+<div class="edge"></div>
+
+<header class="topbar">
+  <div class="wordmark"><span class="mark"></span><span>AMON / DIGITAL ENERGY</span></div>
+  <div class="menu">LIVE FIELD&nbsp;&nbsp; 01 / 04</div>
+</header>
+
+<section class="hero">
+  <div class="eyebrow"><i></i> WIND DIGITAL TWIN</div>
+  <h1>Energy becomes<br>visible.</h1>
+  <div class="sub">Move the pointer through the field. The terrain, energy traces and turbine react in real time.</div>
+</section>
+
+<div class="readout">
+  ROTOR <b id="rpm">08.4 RPM</b><br>
+  FIELD <b>ACTIVE</b><br>
+  OUTPUT <b id="mw">2.48 MW</b>
+</div>
+
+<div class="cursor" id="cursor"></div>
+<div class="cursorDot" id="cursorDot"></div>
+<div class="loading" id="loading">INITIALIZING DIGITAL FIELD</div>
+
+<script type="module">
+import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.176.0/build/three.module.js';
+
+const AMON = {
+  bg: 0x00111f,
+  navy: 0x001a2f,
+  blue: 0x087fff,
+  cyan: 0x10e8f3,
+  ice: 0xdffcff,
+  muted: 0x4d8aa7
+};
+
+const stage = document.getElementById('stage');
+const overlay = document.getElementById('overlay');
+const loading = document.getElementById('loading');
+const rpmEl = document.getElementById('rpm');
+const mwEl = document.getElementById('mw');
+const cursor = document.getElementById('cursor');
+const cursorDot = document.getElementById('cursorDot');
+
+const renderer = new THREE.WebGLRenderer({ antialias:true, alpha:false, powerPreference:'high-performance' });
+renderer.setPixelRatio(Math.min(devicePixelRatio, 1.8));
+renderer.setSize(innerWidth, innerHeight);
+renderer.setClearColor(AMON.bg,1);
+renderer.outputColorSpace = THREE.SRGBColorSpace;
+stage.appendChild(renderer.domElement);
+
+const scene = new THREE.Scene();
+scene.fog = new THREE.FogExp2(AMON.bg, 0.047);
+
+const camera = new THREE.PerspectiveCamera(41, innerWidth/innerHeight, .1, 80);
+camera.position.set(0, 3.35, 12.7);
+camera.lookAt(0, 2.75, 0);
+
+const root = new THREE.Group();
+scene.add(root);
+
+// ---------- Background glows ----------
+const glowSpriteTex = makeRadialTexture();
+const backGlow = new THREE.Sprite(new THREE.SpriteMaterial({
+  map:glowSpriteTex, color:AMON.blue, transparent:true, opacity:.16,
+  blending:THREE.AdditiveBlending, depthWrite:false
+}));
+backGlow.scale.set(11,8,1);
+backGlow.position.set(0,3.0,-3.5);
+scene.add(backGlow);
+
+const cyanGlow = new THREE.Sprite(new THREE.SpriteMaterial({
+  map:glowSpriteTex, color:AMON.cyan, transparent:true, opacity:.075,
+  blending:THREE.AdditiveBlending, depthWrite:false
+}));
+cyanGlow.scale.set(6,6,1);
+cyanGlow.position.set(0,3.5,-1.2);
+scene.add(cyanGlow);
+
+// ---------- Stars / dust ----------
+const dustGeo = new THREE.BufferGeometry();
+const dustCount = 700;
+const dustPos = new Float32Array(dustCount*3);
+const dustSeed = new Float32Array(dustCount);
+for(let i=0;i<dustCount;i++){
+  dustPos[i*3]   = THREE.MathUtils.randFloatSpread(19);
+  dustPos[i*3+1] = THREE.MathUtils.randFloat(-.4,8.5);
+  dustPos[i*3+2] = THREE.MathUtils.randFloat(-8,5);
+  dustSeed[i] = Math.random();
+}
+dustGeo.setAttribute('position',new THREE.BufferAttribute(dustPos,3));
+dustGeo.setAttribute('aSeed',new THREE.BufferAttribute(dustSeed,1));
+const dustMat = new THREE.ShaderMaterial({
+  transparent:true, depthWrite:false, blending:THREE.AdditiveBlending,
+  uniforms:{uTime:{value:0},uColor:{value:new THREE.Color(AMON.cyan)}},
+  vertexShader:`
+    attribute float aSeed;
+    uniform float uTime;
+    varying float vA;
+    void main(){
+      vec3 p=position;
+      p.y += sin(uTime*.25+aSeed*17.0)*.045;
+      vec4 mv=modelViewMatrix*vec4(p,1.);
+      gl_Position=projectionMatrix*mv;
+      gl_PointSize=(1.0+aSeed*1.2)*(110.0/-mv.z);
+      vA=.12+.32*pow(.5+.5*sin(uTime*.8+aSeed*23.),6.);
+    }`,
+  fragmentShader:`
+    uniform vec3 uColor; varying float vA;
+    void main(){
+      vec2 q=gl_PointCoord-.5; float d=length(q);
+      if(d>.5) discard;
+      float a=smoothstep(.5,0.,d)*vA;
+      gl_FragColor=vec4(uColor,a);
+    }`
+});
+scene.add(new THREE.Points(dustGeo,dustMat));
+
+// ---------- Terrain point field ----------
+const cols=190, rows=112;
+const positions=[], seeds=[], baseY=[];
+for(let iz=0;iz<rows;iz++){
+  const z=THREE.MathUtils.lerp(-5.4,8.2,iz/(rows-1));
+  for(let ix=0;ix<cols;ix++){
+    const x=THREE.MathUtils.lerp(-11.0,11.0,ix/(cols-1));
+    let y=-1.55;
+    y += Math.sin(x*.68+z*.26)*.18;
+    y += Math.cos(x*1.65-z*.33)*.075;
+    y += Math.sin(z*.72)*.06;
+    y += Math.exp(-Math.pow(x-5.0,2)*.18)*.22;
+    y -= Math.exp(-Math.pow(x+1.2,2)*.32)*.10;
+    y=Math.round(y/.045)*.045;
+    positions.push(x,y,z);
+    baseY.push(y);
+    seeds.push(Math.random());
+  }
+}
+const terrainGeo=new THREE.BufferGeometry();
+terrainGeo.setAttribute('position',new THREE.Float32BufferAttribute(positions,3));
+terrainGeo.setAttribute('aSeed',new THREE.Float32BufferAttribute(seeds,1));
+terrainGeo.setAttribute('aBaseY',new THREE.Float32BufferAttribute(baseY,1));
+
+const terrainMat=new THREE.ShaderMaterial({
+  transparent:true, depthWrite:false, blending:THREE.AdditiveBlending,
+  uniforms:{
+    uTime:{value:0},
+    uMouse:{value:new THREE.Vector3(100,0,100)},
+    uColorA:{value:new THREE.Color(AMON.blue)},
+    uColorB:{value:new THREE.Color(AMON.cyan)},
+    uIntensity:{value:1}
+  },
+  vertexShader:`
+    attribute float aSeed;
+    attribute float aBaseY;
+    uniform float uTime;
+    uniform vec3 uMouse;
+    varying float vGlow;
+    varying float vDepth;
+    varying float vSeed;
+
+    void main(){
+      vec3 p=position;
+      float wave = sin(p.x*.9+p.z*.72+uTime*.7)*.018;
+      p.y += wave;
+
+      float d=distance(p.xz,uMouse.xz);
+      float influence=smoothstep(2.6,0.0,d);
+      p.y -= influence*.16;
+      p.y += sin(d*5.5-uTime*4.0)*.055*influence;
+
+      vec2 dir=normalize(p.xz-uMouse.xz+vec2(.0001));
+      p.xz += dir*influence*.115;
+
+      vec4 mv=modelViewMatrix*vec4(p,1.);
+      gl_Position=projectionMatrix*mv;
+
+      float perspective=130.0/max(2.0,-mv.z);
+      gl_PointSize=(1.25+aSeed*1.25)*perspective;
+      vGlow=influence;
+      vDepth=smoothstep(20.0,3.0,-mv.z);
+      vSeed=aSeed;
+    }`,
+  fragmentShader:`
+    uniform vec3 uColorA;
+    uniform vec3 uColorB;
+    uniform float uTime;
+    varying float vGlow;
+    varying float vDepth;
+    varying float vSeed;
+    void main(){
+      vec2 q=gl_PointCoord-.5;
+      float d=max(abs(q.x),abs(q.y));
+      if(d>.48) discard;
+      float tw=.72+.28*sin(uTime*1.3+vSeed*31.);
+      vec3 c=mix(uColorA,uColorB,.22+vGlow*.78);
+      float a=(.13+vDepth*.34+vGlow*.36)*tw;
+      gl_FragColor=vec4(c,a);
+    }`
+});
+const terrain = new THREE.Points(terrainGeo,terrainMat);
+scene.add(terrain);
+
+// ---------- Circuit-like traces over terrain ----------
+const circuitGroup=new THREE.Group();
+scene.add(circuitGroup);
+for(let i=0;i<54;i++){
+  const z=THREE.MathUtils.randFloat(-4.4,6.7);
+  const sx=THREE.MathUtils.randFloat(-9.5,7.4);
+  const len=THREE.MathUtils.randFloat(.7,2.8);
+  const y=-1.34 + Math.sin(sx*.68+z*.26)*.18 + Math.cos(sx*1.65-z*.33)*.075;
+  const pts=[
+    new THREE.Vector3(sx,y,z),
+    new THREE.Vector3(sx+len*.55,y,z),
+    new THREE.Vector3(sx+len*.68,y,z+.13*Math.sign(Math.random()-.5)),
+    new THREE.Vector3(sx+len,y,z+.13*Math.sign(Math.random()-.5))
+  ];
+  const g=new THREE.BufferGeometry().setFromPoints(pts);
+  const m=new THREE.LineBasicMaterial({
+    color:i%5===0?AMON.cyan:AMON.blue,
+    transparent:true,opacity:THREE.MathUtils.randFloat(.08,.28),
+    blending:THREE.AdditiveBlending,depthWrite:false
+  });
+  const l=new THREE.Line(g,m);
+  l.userData.phase=Math.random()*Math.PI*2;
+  circuitGroup.add(l);
+}
+
+// ---------- Wind turbine ----------
+const turbine=new THREE.Group();
+turbine.position.set(0,-1.28,0);
+root.add(turbine);
+
+function pointCloudFromArray(arr,color,size=.026,opacity=.9){
+  const g=new THREE.BufferGeometry();
+  g.setAttribute('position',new THREE.Float32BufferAttribute(arr,3));
+  const m=new THREE.PointsMaterial({
+    color, size, transparent:true,opacity,
+    sizeAttenuation:true, blending:THREE.AdditiveBlending,
+    depthWrite:false
+  });
+  return new THREE.Points(g,m);
+}
+
+// tower dense points
+{
+  const a=[];
+  const h=5.25;
+  for(let j=0;j<125;j++){
+    const y=j/(124)*h;
+    const radius=THREE.MathUtils.lerp(.23,.075,y/h);
+    for(let k=0;k<26;k++){
+      const ang=k/26*Math.PI*2 + (j%2)*.04;
+      a.push(Math.cos(ang)*radius,y,Math.sin(ang)*radius*.55);
+    }
+  }
+  const glow=pointCloudFromArray(a,AMON.blue,.058,.22);
+  const core=pointCloudFromArray(a,AMON.cyan,.024,.88);
+  turbine.add(glow,core);
+
+  const wire=new THREE.Mesh(
+    new THREE.CylinderGeometry(.075,.23,h,10,16,true),
+    new THREE.MeshBasicMaterial({color:AMON.blue,wireframe:true,transparent:true,opacity:.09,blending:THREE.AdditiveBlending})
+  );
+  wire.position.y=h/2; turbine.add(wire);
+}
+
+// nacelle
+{
+  const a=[];
+  for(let x=-.33;x<=.33;x+=.055)
+    for(let y=4.98;y<=5.27;y+=.055)
+      for(let z=-.04;z<=.55;z+=.07)
+        if(Math.random()>.38)a.push(x,y,z);
+  turbine.add(pointCloudFromArray(a,AMON.cyan,.025,.78));
+}
+
+// rotor group
+const rotor=new THREE.Group();
+rotor.position.set(0,5.12,-.09);
+turbine.add(rotor);
+
+// hub
+{
+  const a=[];
+  for(let i=0;i<900;i++){
+    const u=Math.random(),v=Math.random();
+    const th=2*Math.PI*u, ph=Math.acos(2*v-1);
+    const r=.245*Math.pow(Math.random(),.34);
+    a.push(Math.sin(ph)*Math.cos(th)*r,Math.sin(ph)*Math.sin(th)*r,Math.cos(ph)*r*.42);
+  }
+  rotor.add(pointCloudFromArray(a,AMON.ice,.028,.95));
+  const hg=new THREE.Sprite(new THREE.SpriteMaterial({
+    map:glowSpriteTex,color:AMON.cyan,transparent:true,opacity:.28,
+    blending:THREE.AdditiveBlending,depthWrite:false
+  }));
+  hg.scale.set(1.45,1.45,1);
+  rotor.add(hg);
+}
+
+// blades
+for(let b=0;b<3;b++){
+  const blade=new THREE.Group();
+  blade.rotation.z=b*Math.PI*2/3;
+  rotor.add(blade);
+
+  const a=[];
+  const outlineTop=[], outlineBottom=[];
+  const L=2.55;
+  for(let ir=0;ir<82;ir++){
+    const r=.24 + (L-.24)*(ir/81);
+    const k=(r-.24)/(L-.24);
+    const width=THREE.MathUtils.lerp(.23,.035,Math.pow(k,.78));
+    const sweep=.11*Math.sin(k*Math.PI*.72)*k;
+    const centerX=sweep;
+    const centerY=r;
+
+    outlineTop.push(new THREE.Vector3(centerX-width*.5,centerY,0));
+    outlineBottom.push(new THREE.Vector3(centerX+width*.5,centerY,0));
+
+    const across=Math.max(2,Math.round(8*(1-k)+2));
+    for(let j=0;j<across;j++){
+      const t=across===1?0:j/(across-1);
+      const x=centerX+THREE.MathUtils.lerp(-width*.5,width*.5,t);
+      const y=centerY;
+      const z=(Math.random()-.5)*.027;
+      a.push(x,y,z);
+    }
+  }
+  const glow=pointCloudFromArray(a,AMON.blue,.065,.24);
+  const core=pointCloudFromArray(a,AMON.cyan,.026,.94);
+  blade.add(glow,core);
+
+  const outlinePts=[...outlineTop,...outlineBottom.reverse(),outlineTop[0]];
+  const lg=new THREE.BufferGeometry().setFromPoints(outlinePts);
+  blade.add(new THREE.Line(lg,new THREE.LineBasicMaterial({
+    color:AMON.cyan,transparent:true,opacity:.22,
+    blending:THREE.AdditiveBlending,depthWrite:false
+  })));
+}
+
+// ---------- pointer world interaction ----------
+const mouseNDC=new THREE.Vector2(0,0);
+const pointerWorld=new THREE.Vector3(100,0,100);
+const raycaster=new THREE.Raycaster();
+const groundPlane=new THREE.Plane(new THREE.Vector3(0,1,0),1.46);
+
+let mouseX=.5,mouseY=.5,targetX=.5,targetY=.5;
+let cursorX=innerWidth*.5,cursorY=innerHeight*.5;
+let dotX=cursorX,dotY=cursorY;
+let pointerSpeed=0,lastPX=cursorX,lastPY=cursorY;
+let hoverTurbine=0;
+
+function updatePointer(e){
+  targetX=e.clientX/innerWidth; targetY=e.clientY/innerHeight;
+  mouseNDC.x=targetX*2-1; mouseNDC.y=-(targetY*2-1);
+  pointerSpeed=Math.min(1,Math.hypot(e.clientX-lastPX,e.clientY-lastPY)/45);
+  lastPX=e.clientX;lastPY=e.clientY;
+  cursorX=e.clientX;cursorY=e.clientY;
+  overlay.style.setProperty('--mx',`${e.clientX}px`);
+  overlay.style.setProperty('--my',`${e.clientY}px`);
+
+  const dx=e.clientX-innerWidth*.5,dy=e.clientY-innerHeight*.45;
+  hoverTurbine=THREE.MathUtils.clamp(1-Math.hypot(dx/220,dy/300),0,1);
+}
+addEventListener('pointermove',updatePointer,{passive:true});
+addEventListener('pointerleave',()=>{
+  targetX=.5;targetY=.5;hoverTurbine=0;
+},{passive:true});
+
+// ---------- animation ----------
+const clock=new THREE.Clock();
+let rotorSpeed=.18, rotorVelocity=.18;
+let energyPhase=0;
+
+function animate(){
+  const t=clock.getElapsedTime();
+
+  mouseX += (targetX-mouseX)*.055;
+  mouseY += (targetY-mouseY)*.055;
+
+  // camera parallax, deliberately restrained
+  camera.position.x += (((mouseX-.5)*.72)-camera.position.x)*.025;
+  camera.position.y += ((3.35-(mouseY-.5)*.28)-camera.position.y)*.025;
+  camera.lookAt((mouseX-.5)*.18,2.72-(mouseY-.5)*.10,0);
+
+  raycaster.setFromCamera(mouseNDC,camera);
+  const hit=new THREE.Vector3();
+  if(raycaster.ray.intersectPlane(groundPlane,hit)){
+    pointerWorld.lerp(hit,.12);
+    terrainMat.uniforms.uMouse.value.copy(pointerWorld);
+  }
+
+  // rotore: base lenta, accelera lievemente con movimento del mouse
+  const targetSpeed=.20 + pointerSpeed*.20 + hoverTurbine*.055;
+  rotorVelocity += (targetSpeed-rotorVelocity)*.035;
+  rotor.rotation.z -= rotorVelocity*.016;
+  pointerSpeed*=.90;
+
+  // breathing/hover response
+  const scale=1+hoverTurbine*.012+Math.sin(t*.7)*.0015;
+  turbine.scale.setScalar(scale);
+  turbine.rotation.y=(mouseX-.5)*.055;
+  turbine.rotation.x=(mouseY-.5)*.025;
+
+  dustMat.uniforms.uTime.value=t;
+  terrainMat.uniforms.uTime.value=t;
+
+  backGlow.material.opacity=.135+.035*Math.sin(t*.45)+hoverTurbine*.035;
+  cyanGlow.material.opacity=.055+.025*Math.sin(t*.63+1.1)+hoverTurbine*.045;
+
+  circuitGroup.children.forEach((l,i)=>{
+    l.material.opacity=.08+.10*(.5+.5*Math.sin(t*1.1+l.userData.phase));
+  });
+
+  // small live telemetry
+  energyPhase+=.016;
+  const rpm=8.1+Math.sin(energyPhase*.58)*.45+rotorVelocity*.8;
+  const mw=2.42+Math.sin(energyPhase*.37)*.08+hoverTurbine*.05;
+  rpmEl.textContent=rpm.toFixed(1).padStart(4,'0')+' RPM';
+  mwEl.textContent=mw.toFixed(2)+' MW';
+
+  // cursor with inertia
+  dotX+=(cursorX-dotX)*.42; dotY+=(cursorY-dotY)*.42;
+  cursor.style.transform=`translate(${cursorX-17}px,${cursorY-17}px) scale(${1+hoverTurbine*.28})`;
+  cursor.style.borderColor=`rgba(139,241,248,${.45+hoverTurbine*.45})`;
+  cursorDot.style.transform=`translate(${dotX-1.5}px,${dotY-1.5}px)`;
+
+  renderer.render(scene,camera);
+  requestAnimationFrame(animate);
+}
+animate();
+
+addEventListener('resize',()=>{
+  camera.aspect=innerWidth/innerHeight;
+  camera.updateProjectionMatrix();
+  renderer.setPixelRatio(Math.min(devicePixelRatio,1.8));
+  renderer.setSize(innerWidth,innerHeight);
+},{passive:true});
+
+function makeRadialTexture(){
+  const c=document.createElement('canvas');c.width=c.height=256;
+  const x=c.getContext('2d');
+  const g=x.createRadialGradient(128,128,0,128,128,128);
+  g.addColorStop(0,'rgba(255,255,255,1)');
+  g.addColorStop(.08,'rgba(255,255,255,.82)');
+  g.addColorStop(.28,'rgba(255,255,255,.22)');
+  g.addColorStop(1,'rgba(255,255,255,0)');
+  x.fillStyle=g;x.fillRect(0,0,256,256);
+  const tex=new THREE.CanvasTexture(c);
+  return tex;
+}
+
+setTimeout(()=>loading.classList.add('hide'),650);
+</script>
+</body>
+</html>
