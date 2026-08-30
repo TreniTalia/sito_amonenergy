@@ -21,10 +21,12 @@
     "@iconify-json/fa6-solid": "^1.2.4",
     "@iconify-json/lucide": "^1.2.118",
     "@tailwindcss/vite": "^4.3.3",
+    "@types/three": "^0.185.4",
     "astro": "^7.1.1",
     "astro-icon": "^1.1.5",
     "maplibre-gl": "^6.6.0",
-    "tailwindcss": "^4.3.3"
+    "tailwindcss": "^4.3.3",
+    "three": "^0.185.1"
   },
   "devDependencies": {
     "@astrojs/check": "^0.9.9",

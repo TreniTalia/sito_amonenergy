@@ -1,6 +1,7 @@
 ---
 import { Picture } from 'astro:assets';
 import heroPoster from '../assets/img/photos/hero-pattern-circuito.png';
+import HeroTwin from './HeroTwin.astro';
 
 interface Props {
   eyebrow: string;
@@ -43,33 +44,11 @@ const facts = ['Sistemi di monitoraggio', 'Automazioni', 'Reperibilità 24/7'];
     fetchpriority="high"
   />
 
-  <!-- Il `media` sulle <source> è il vero interruttore: sotto i 768px, e con
-       `prefers-reduced-motion`, nessuna sorgente combacia e il video non scarica
-       niente — resta il fermo-immagine. Il `display: none` in CSS è la cintura
-       di sicurezza per i browser che ignorano `media` e pescano la prima
-       sorgente comunque. AV1 in testa (1,4 MB), H.264 dietro (1,7 MB) per chi
-       non lo decodifica. -->
-  <video
-    class="hero-video absolute inset-0 h-full w-full object-cover"
-    autoplay
-    muted
-    loop
-    playsinline
-    preload="none"
-    aria-hidden="true"
-    tabindex="-1"
-  >
-    <source
-      media="(min-width: 768px) and (prefers-reduced-motion: no-preference)"
-      src="/video/pattern-home.av1.mp4"
-      type='video/mp4; codecs="av01.0.05M.08"'
-    />
-    <source
-      media="(min-width: 768px) and (prefers-reduced-motion: no-preference)"
-      src="/video/pattern-home.mp4"
-      type='video/mp4; codecs="avc1.640028"'
-    />
-  </video>
+  <!-- Digital twin del campo eolico al posto del vecchio pattern-video di
+       circuito: stesso ruolo (fondale animato sotto lo scrim), stessa cintura
+       di sicurezza sotto i 768px e con `prefers-reduced-motion` — vedi
+       HeroTwin.astro. -->
+  <HeroTwin />
 
   <div class="hero-scrim absolute inset-0"></div>
 
@@ -172,64 +151,6 @@ const facts = ['Sistemi di monitoraggio', 'Automazioni', 'Reperibilità 24/7'];
   }
 
   /* Lo zoom lento che c'era sulla foto è caduto con la foto: il movimento ora
-     lo dà il video, e sommare le due cose renderebbe il fondale inquieto. */
-
-  /* Cintura di sicurezza: dove il video non deve girare, non deve nemmeno stare
-     nell'albero di compositing — così non può coprire il fermo-immagine se un
-     browser ignora il `media` delle <source>. */
-  @media (max-width: 767px), (prefers-reduced-motion: reduce) {
-    .hero-video {
-      display: none;
-    }
-  }
+     lo dà il digital twin, e sommare le due cose renderebbe il fondale
+     inquieto. */
 </style>
-
-<script>
-  /* `preload="none"` è deliberato: il fermo-immagine è l'elemento LCP e il video
-     non deve competere con lui in rete. Ma con `preload="none"` Chrome non fa
-     partire l'autoplay da sé, quindi la partenza la diamo noi appena il thread
-     è libero — stesso schema usato altrove nel sito per il montaggio differito.
-     Ogni via d'uscita porta allo stesso posto: nessuna sorgente combacia,
-     autoplay negato, decoder assente — resta il fermo-immagine, che è già a
-     schermo. */
-  const video = document.querySelector<HTMLVideoElement>('.hero-video');
-
-  if (video) {
-    const play = () => void video.play().catch(() => {});
-
-    const mount = () => {
-      // La regola CSS gemella spegne il video sotto i 768px e con
-      // `prefers-reduced-motion`: se è spento lì, non deve nemmeno scaricare.
-      if (getComputedStyle(video).display === 'none') return;
-      if (!video.currentSrc) return; // nessuna <source> ha combaciato
-      video.load();
-      play();
-
-      document.addEventListener('visibilitychange', () => {
-        if (document.hidden) video.pause();
-        else play();
-      });
-
-      // L'hero sta in cima, quindi l'osservatore serve solo a *fermare* il
-      // decoder quando la fascia è scrollata via, mai a impedirne l'avvio.
-      if ('IntersectionObserver' in window) {
-        const io = new IntersectionObserver(
-          (entries) => {
-            for (const en of entries) {
-              if (en.isIntersecting && !document.hidden) play();
-              else video.pause();
-            }
-          },
-          { threshold: 0 },
-        );
-        io.observe(video);
-      }
-    };
-
-    if ('requestIdleCallback' in window) {
-      window.requestIdleCallback(mount, { timeout: 1200 });
-    } else {
-      setTimeout(mount, 300);
-    }
-  }
-</script>
