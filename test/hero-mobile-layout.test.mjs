@@ -1,19 +1,20 @@
 /**
- * Regressione di layout e di rete dell'hero su viewport reali.
+ * Regressione di layout e di fondale dell'hero su viewport reali.
  *
  * 1. OCCHIELLO SOTTO LA NAVBAR. L'header è `fixed`: non sta nel flusso e non
  *    spinge nulla. Il padding superiore dell'hero valeva `pt-16` (64px) contro
  *    un'isola alta 78px, così su schermi bassi — dove la colonna di testo cresce
  *    e smette di stare centrata — l'occhiello scivolava dietro al vetro.
  *
- * 2. VIDEO DI FONDO. Il fondale dell'hero è un video (pattern di circuito
- *    gradato sui colori del marchio). Sotto i 768px, e con
- *    `prefers-reduced-motion`, non deve girare *né scaricare*: il gating vive
- *    nell'attributo `media` delle <source>, che è l'unica cosa capace di
- *    impedire il download. Il `display: none` in CSS è solo la cintura di
- *    sicurezza per i browser che ignorano `media`, quindi il test controlla
- *    entrambi — e soprattutto conta i byte, perché è quello che pagherebbe
- *    l'utente in 4G.
+ * 2. UN SOLO FONDALE. Il fondale dell'hero è il digital twin in WebGL, e
+ *    nient'altro. Prima sotto ci stavano un video di pattern e il suo
+ *    fermo-immagine: si affacciavano ogni volta che il canvas non stava
+ *    dipingendo — il primo frame, `prefers-reduced-motion`, un contesto perso —
+ *    e vedere comparire un fondale diverso da quello della scena era peggio che
+ *    non vedere nulla. Il test verifica che di quei due non resti traccia a
+ *    nessuna larghezza, che il canvas ci sia sempre e dipinga (`is-ready`)
+ *    anche con `prefers-reduced-motion`, e che sotto ci sia il navy pieno della
+ *    sezione, che è anche il colore con cui il canvas pulisce.
  *
  * Il test parte dal `dist` già costruito e si salta se non c'è, perche' `npm
  * test` deve restare eseguibile senza una build.
@@ -110,25 +111,48 @@ describe('layout dell’hero su viewport reali', { skip }, () => {
       }
     });
     await page.goto(origin, { waitUntil: 'load' });
-    // L'avvio del video passa da requestIdleCallback con timeout 1200ms.
+    // Il canvas si monta dopo il primo paint e sfuma in 0.5s.
     await page.waitForTimeout(2000);
     const m = await page.evaluate(() => {
+      const hero = document.querySelector('.hero');
       const wrap = document.querySelector('.ds-header-wrap');
       const eyebrow = document.querySelector('.hero .ds-eyebrow');
-      const video = document.querySelector('.hero .hero-video');
-      const poster = document.querySelector('.hero .hero-media');
+      const twin = document.querySelector('.hero .hero-twin');
       return {
         headerBottom: wrap.getBoundingClientRect().bottom,
         eyebrowTop: eyebrow.getBoundingClientRect().top,
-        videoDisplay: video ? getComputedStyle(video).display : 'assente',
-        // networkState 3 = NETWORK_NO_SOURCE: nessuna <source> ha combaciato.
-        videoNetworkState: video ? video.networkState : null,
-        videoCurrentSrc: video ? video.currentSrc : null,
-        posterPresent: Boolean(poster),
+        heroBg: getComputedStyle(hero).backgroundColor,
+        legacyBackdrops: hero.querySelectorAll('video, .hero-media, picture, img').length,
+        twinPresent: Boolean(twin),
+        twinDisplay: twin ? getComputedStyle(twin).display : 'assente',
+        twinReady: twin ? twin.classList.contains('is-ready') : false,
+        twinWidth: twin ? Math.round(twin.getBoundingClientRect().width) : 0,
       };
     });
     await ctx.close();
     return { ...m, videoBytes, videoRequests, clearance: m.eyebrowTop - m.headerBottom };
+  };
+
+  // navy-950 (#0A2A44): è il fondo pieno della sezione ed è lo stesso colore con
+  // cui il canvas pulisce, così nel frame prima che dipinga non c'è stacco.
+  const NAVY_950 = 'rgb(10, 42, 68)';
+
+  /** Le verifiche sul fondale valgono identiche a ogni larghezza. */
+  const assertBackdrop = (m, width) => {
+    assert.equal(
+      m.legacyBackdrops,
+      0,
+      `nell'hero è tornato un fondale che non è il digital twin (${m.legacyBackdrops} fra video/picture/img)`,
+    );
+    assert.ok(m.twinPresent, 'manca il canvas del digital twin, che è l’unico fondale dell’hero');
+    assert.notEqual(m.twinDisplay, 'none', 'il canvas è nascosto: sotto resterebbe scoperto il fondo della sezione');
+    assert.ok(m.twinReady, 'il canvas non ha dipinto nemmeno un frame');
+    assert.equal(m.heroBg, NAVY_950, 'l’hero non ha il fondo navy pieno sotto al canvas');
+    assert.ok(
+      Math.abs(m.twinWidth - width) <= 1,
+      `il canvas non copre la larghezza dell’hero (${m.twinWidth}px su ${width}px)`,
+    );
+    assert.equal(m.videoBytes, 0, `scaricato un video di fondo (${m.videoBytes} byte in ${m.videoRequests} richieste)`);
   };
 
   // Il caso peggiore e' lo schermo *basso*, non stretto: e' l'altezza che fa
@@ -144,41 +168,34 @@ describe('layout dell’hero su viewport reali', { skip }, () => {
   ];
 
   for (const [w, h] of PHONES) {
-    test(`${w}x${h}: l’occhiello non tocca l’header e il video non scarica`, async () => {
+    test(`${w}x${h}: l’occhiello resta libero e il fondale è solo il digital twin`, async () => {
       const m = await load(w, h);
       assert.ok(
         m.clearance > 0,
         `l’occhiello invade l’header di ${(-m.clearance).toFixed(1)}px: il padding dell’hero non copre l’isola fissa (${m.headerBottom.toFixed(1)}px)`,
       );
-      assert.equal(m.videoDisplay, 'none', 'il video di fondo è visibile sotto i 768px');
-      assert.equal(m.videoCurrentSrc, '', 'una <source> ha combaciato sotto i 768px');
-      assert.equal(m.videoNetworkState, 3, 'il video non è in NETWORK_NO_SOURCE sotto i 768px');
-      assert.equal(m.videoBytes, 0, `video scaricato su telefono (${m.videoBytes} byte in ${m.videoRequests} richieste)`);
-      assert.ok(m.posterPresent, 'manca il fermo-immagine, che è l’unico fondale sotto i 768px');
+      assertBackdrop(m, w);
     });
   }
 
-  // Sopra la soglia il video deve esserci: il gating non deve spegnerlo dove
-  // serve.
+  // Il digital twin non è un video: gira a ogni larghezza, senza gating.
   for (const [w, h] of [
     [768, 800],
     [844, 390], // landscape corto: qui l'isola cresce a ~104px
     [1280, 900],
+    [1920, 1080],
   ]) {
-    test(`${w}x${h}: il video di fondo parte e l’occhiello resta libero`, async () => {
+    test(`${w}x${h}: il digital twin dipinge e l’occhiello resta libero`, async () => {
       const m = await load(w, h);
-      assert.equal(m.videoDisplay, 'block', 'il video di fondo è nascosto sopra i 768px');
-      assert.match(m.videoCurrentSrc, /pattern-home(\.av1)?\.mp4$/, 'nessuna <source> ha combaciato sopra i 768px');
-      assert.ok(m.videoBytes > 0, 'il video non è stato scaricato sopra i 768px');
+      assertBackdrop(m, w);
       assert.ok(m.clearance > 0, `l’occhiello invade l’header di ${(-m.clearance).toFixed(1)}px`);
     });
   }
 
-  test('con prefers-reduced-motion il video non parte nemmeno su desktop', async () => {
+  // È il caso che prima scopriva il fondale: il canvas veniva nascosto e sotto
+  // riemergeva il vecchio pattern. Ora resta al suo posto e dipinge un fermo.
+  test('con prefers-reduced-motion il canvas resta e dipinge un fotogramma fermo', async () => {
     const m = await load(1280, 900, { reducedMotion: 'reduce' });
-    assert.equal(m.videoDisplay, 'none', 'il video gira con prefers-reduced-motion');
-    assert.equal(m.videoCurrentSrc, '', 'una <source> ha combaciato con prefers-reduced-motion');
-    assert.equal(m.videoBytes, 0, `video scaricato con prefers-reduced-motion (${m.videoBytes} byte)`);
-    assert.ok(m.posterPresent, 'manca il fermo-immagine con prefers-reduced-motion');
+    assertBackdrop(m, 1280);
   });
 });

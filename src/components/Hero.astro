@@ -1,6 +1,4 @@
 ---
-import { Picture } from 'astro:assets';
-import heroPoster from '../assets/img/photos/hero-pattern-circuito.png';
 import HeroTwin from './HeroTwin.astro';
 
 interface Props {
@@ -23,31 +21,13 @@ const facts = ['Sistemi di monitoraggio', 'Automazioni', 'Reperibilità 24/7'];
      `dvh`: con dvh l'altezza cambia mentre la barra del browser mobile si
      ritrae e l'arco slitterebbe durante lo scroll. -->
 <section class="hero relative isolate flex min-h-svh flex-col justify-end overflow-hidden text-paper">
-  <!-- Il fondale è il pattern di circuito, gradato sui colori del marchio: la
-       traccia viva è portata sulla tinta di `signal-400` e il nero resta un
-       nero-navy, così la fascia non introduce un blu estraneo alla rampa.
-       Il primo strato è il fermo-immagine del video, non un ripiego: è lui che
-       dipinge (ed è l'elemento LCP), il video gli si sovrappone quando parte.
-       `display: contents` impedisce a <picture> di aggiungere un elemento flex
-       fantasma alla colonna dell'hero. -->
-  <Picture
-    src={heroPoster}
-    alt=""
-    formats={['avif', 'webp']}
-    fallbackFormat="webp"
-    quality={82}
-    class="hero-media absolute inset-0 h-full w-full object-cover"
-    pictureAttributes={{ class: 'contents' }}
-    widths={[768, 1280, 1600]}
-    sizes="100vw"
-    loading="eager"
-    fetchpriority="high"
-  />
-
-  <!-- Digital twin del campo eolico al posto del vecchio pattern-video di
-       circuito: stesso ruolo (fondale animato sotto lo scrim), stessa cintura
-       di sicurezza sotto i 768px e con `prefers-reduced-motion` — vedi
-       HeroTwin.astro. -->
+  <!-- Il fondale è solo il digital twin: il vecchio fermo-immagine del pattern
+       di circuito è stato tolto del tutto. Finché era lì si affacciava in ogni
+       momento in cui il canvas non stava dipingendo — il primo frame prima del
+       fade-in, un contesto WebGL perso, `prefers-reduced-motion` — e vedere
+       comparire un fondale diverso da quello della scena era peggio che non
+       vedere nulla. Sotto ci sta il navy pieno della sezione, che è anche il
+       colore con cui il canvas pulisce: nessuno stacco in nessun frame. -->
   <HeroTwin />
 
   <div class="hero-scrim absolute inset-0"></div>
@@ -58,7 +38,7 @@ const facts = ['Sistemi di monitoraggio', 'Automazioni', 'Reperibilità 24/7'];
        colonna di testo lunga vuole stare. I padding di .hero-col sono franchi di
        sicurezza, non spaziatura di layout: entrano in gioco solo quando lo
        spazio libero finisce e il blocco smette di stare centrato. -->
-  <div class="relative z-10 flex flex-1 flex-col justify-center sm:flex-none sm:justify-end">
+  <div class="hero-depart relative z-10 flex flex-1 flex-col justify-center sm:flex-none sm:justify-end">
     <div class="hero-col wrap-wide">
       <div class="max-w-xl md:max-w-2xl lg:max-w-3xl xl:max-w-4xl 2xl:max-w-5xl">
         <div class="ds-eyebrow" data-reveal style="--reveal-delay:80ms">
@@ -125,19 +105,30 @@ const facts = ['Sistemi di monitoraggio', 'Automazioni', 'Reperibilità 24/7'];
     }
   }
 
+  /* Il fondo pieno della sezione: è ciò che si vede prima che il canvas
+     dipinga il primo frame, ed è lo stesso navy con cui il canvas pulisce. */
+  .hero {
+    background-color: var(--color-navy-950);
+  }
+
   .hero-scrim {
     background:
+      /* Il velo verticale era a 92% sul fondo: sufficiente per il testo, ma
+         cancellava del tutto la piana di blocchi del digital twin, che vive
+         proprio nella metà bassa. Ora scende a 74% e il contrasto per la
+         colonna di testo lo recupera il velo orizzontale qui sotto, che è
+         acceso solo dov'è il testo e lascia libera la metà destra. */
       linear-gradient(
         to top,
-        color-mix(in srgb, var(--color-navy-950) 92%, transparent) 0%,
-        color-mix(in srgb, var(--color-navy-950) 62%, transparent) 20%,
-        color-mix(in srgb, var(--color-navy-950) 24%, transparent) 52%,
-        color-mix(in srgb, var(--color-navy-950) 14%, transparent) 100%
+        color-mix(in srgb, var(--color-navy-950) 74%, transparent) 0%,
+        color-mix(in srgb, var(--color-navy-950) 48%, transparent) 20%,
+        color-mix(in srgb, var(--color-navy-950) 20%, transparent) 52%,
+        color-mix(in srgb, var(--color-navy-950) 12%, transparent) 100%
       ),
       linear-gradient(
         to right,
-        color-mix(in srgb, var(--color-navy-950) 74%, transparent) 0%,
-        color-mix(in srgb, var(--color-navy-950) 30%, transparent) 45%,
+        color-mix(in srgb, var(--color-navy-950) 84%, transparent) 0%,
+        color-mix(in srgb, var(--color-navy-950) 40%, transparent) 45%,
         transparent 72%
       ),
       /* Flat veil that takes the whole photo down a notch. A uniform layer here
@@ -148,6 +139,77 @@ const facts = ['Sistemi di monitoraggio', 'Automazioni', 'Reperibilità 24/7'];
         color-mix(in srgb, var(--color-navy-950) 12%, transparent) 0%,
         color-mix(in srgb, var(--color-navy-950) 12%, transparent) 100%
       );
+  }
+
+  /* Sotto i 768px la colonna di testo prende tutta la larghezza, e il velo
+     orizzontale — che esiste per proteggere la colonna sinistra del desktop —
+     finisce per scurire l'intera scena invece della sola zona del testo: i due
+     veli sovrapposti arrivavano a coprire il fondale di circa tre quarti. Qui
+     resta il solo velo verticale, un po' più pieno per reggere da solo il
+     contrasto, e il digital twin torna a leggersi. */
+  @media (max-width: 767px) {
+    .hero-scrim {
+      background: linear-gradient(
+        to top,
+        color-mix(in srgb, var(--color-navy-950) 78%, transparent) 0%,
+        color-mix(in srgb, var(--color-navy-950) 62%, transparent) 30%,
+        color-mix(in srgb, var(--color-navy-950) 44%, transparent) 62%,
+        color-mix(in srgb, var(--color-navy-950) 18%, transparent) 100%
+      );
+    }
+  }
+
+  /* Congedo dell'hero. Non un parallasse decorativo: le due parti si separano
+     a velocità diverse mentre l'hero esce, il testo più svelto del fondale, e
+     da quella differenza nasce la profondità. È agganciato allo scroll della
+     pagina e non a un timer, quindi segue il dito e torna indietro se si
+     risale. `scroll(root)` invece di `view()` perché l'hero sta in cima: lo
+     scorrimento della pagina *è* la sua uscita, e l'intervallo si scrive
+     diretto in altezze di viewport.
+
+     Il canvas si muove meno e non viene scalato: ingrandire un canvas WebGL
+     lo ricampiona e si vede. Traslandolo resta scoperta una fascia in fondo
+     all'hero, ma è dello stesso navy del fondo della sezione, quindi non si
+     legge. Niente animazione sulla sua opacità: lì comanda già la transizione
+     di `.is-ready`, e le due si pesterebbero. */
+  @media (prefers-reduced-motion: no-preference) {
+    @supports (animation-timeline: scroll()) {
+      .hero-depart {
+        animation: hero-depart linear both;
+        animation-timeline: scroll(root block);
+        animation-range: 0 82svh;
+      }
+      .hero :global(.hero-twin) {
+        animation: hero-backdrop-depart linear both;
+        animation-timeline: scroll(root block);
+        animation-range: 0 82svh;
+      }
+      /* I figli non si congedano per conto proprio: qui se ne occupa il blocco
+         intero, e sommare le due dissolvenze le raddoppiava. */
+      .hero-depart :global([data-reveal]) {
+        animation: none;
+      }
+    }
+  }
+
+  @keyframes hero-depart {
+    from {
+      opacity: 1;
+      transform: none;
+    }
+    to {
+      opacity: 0;
+      transform: translateY(-11%);
+    }
+  }
+
+  @keyframes hero-backdrop-depart {
+    from {
+      transform: none;
+    }
+    to {
+      transform: translateY(-3.5%);
+    }
   }
 
   /* Lo zoom lento che c'era sulla foto è caduto con la foto: il movimento ora
