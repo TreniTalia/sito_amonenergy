@@ -74,6 +74,14 @@
   --ease-signature: cubic-bezier(0.22, 1, 0.36, 1); /* out-quint-ish */
   --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
 
+  /* Durate: prima erano tutte letterali sparse nei componenti, senza un nome.
+     Quattro passi, uno per intento, così due cose che devono sembrare la
+     stessa cosa non finiscono a 0.25s e 0.3s per distrazione. */
+  --dur-tap: 150ms; /* feedback immediato: hover, focus, premuta */
+  --dur-state: 250ms; /* cambio di stato visibile: colore, ombra, vetro */
+  --dur-move: 400ms; /* qualcosa si sposta o cambia dimensione */
+  --dur-reveal: 700ms; /* ingresso di un blocco di contenuto */
+
   /* Semantic z-index scale — never arbitrary 999s. */
   --z-sticky: 30;
   --z-header: 40;
@@ -107,6 +115,14 @@
      nonzero max even with body clipped). */
   html {
     overflow-x: hidden;
+    /* Scorrimento morbido nativo per le àncore — la pagina servizi ne ha
+       quattro e finora saltavano di netto. Nativo e non una libreria di
+       smooth-scroll: quelle sequestrano lo slancio del dito su ogni gesto,
+       che è la cosa che invecchia peggio e che pesa sull'accessibilità. Il
+       blocco prefers-reduced-motion più in basso lo riporta a `auto`. */
+    scroll-behavior: smooth;
+    /* L'header è fisso: senza questo margine l'àncora finisce sotto al vetro. */
+    scroll-padding-top: calc(var(--header-h, 4.875rem) + 1.5rem);
   }
 
   body {
@@ -115,7 +131,13 @@
     font-family: var(--font-body);
     -webkit-font-smoothing: antialiased;
     text-rendering: optimizeLegibility;
-    overflow-x: hidden;
+    /* `clip` e non `hidden`: taglia in orizzontale allo stesso modo, ma non
+       trasforma il body in un contenitore di scorrimento. Con `hidden`,
+       `overflow-y` computava ad `auto` e il body diventava uno scroller alto
+       quanto tutto il suo contenuto: per le timeline `view()` nessun elemento
+       entrava o usciva mai da quello scrollport, e le animazioni agganciate
+       allo scroll restavano ferme. */
+    overflow-x: clip;
   }
 
   :focus-visible {
@@ -642,10 +664,12 @@
 @media (prefers-reduced-motion: no-preference) {
   [data-reveal] {
     opacity: 0;
-    transform: translateY(18px);
+    /* 30px e un filo di scala: i 18px di prima erano sotto la soglia in cui
+       l'arrivo si nota, e l'ingresso passava per un semplice apparire. */
+    transform: translateY(30px) scale(0.985);
     transition:
-      opacity 0.7s var(--ease-out-expo),
-      transform 0.7s var(--ease-out-expo);
+      opacity var(--dur-reveal) var(--ease-out-expo),
+      transform var(--dur-reveal) var(--ease-out-expo);
     transition-delay: var(--reveal-delay, 0ms);
   }
   [data-reveal].is-visible {
@@ -656,6 +680,49 @@
   .no-js [data-reveal] {
     opacity: 1;
     transform: none;
+  }
+}
+
+/* Congedo — la metà che mancava. L'ingresso resta a tempo (arrivare è un
+   momento, e le sue cadenze sono già tarate elemento per elemento con
+   --reveal-delay); l'uscita invece è agganciata allo scroll, perché uscire è
+   un gesto e deve seguire il dito, avanti e indietro.
+
+   Due accorgimenti tengono in piedi la regola che i reveal non nascondono mai
+   il contenuto:
+   - `forwards` e non `both`: fuori dal proprio intervallo l'animazione non si
+     applica affatto, quindi non tocca l'ingresso a transizione e non lo
+     sovrascrive. Sono due sistemi che non si incontrano mai.
+   - dove `animation-timeline` manca, o dove la timeline non si risolve perché
+     l'elemento non sta in un contenitore scorrevole, non succede niente e vale
+     il valore non animato: visibile. Il caso peggiore è il sito di oggi. */
+@media (prefers-reduced-motion: no-preference) {
+  @supports (animation-timeline: view()) {
+    [data-reveal] {
+      animation: reveal-depart linear forwards;
+      animation-timeline: view();
+      /* `cover` e non `exit`, ed è il punto della faccenda. La fase `exit` dura
+         quanto l'altezza dell'elemento: su un blocco da 48px il congedo si
+         consumava in 48px di scroll, una frazione di rotella, e per giunta
+         sopra il bordo alto del quadro — cioè dietro al vetro dell'header.
+         `cover` invece dura viewport + altezza, quindi non collassa sugli
+         elementi bassi, e prendendone la coda il movimento cade nella parte
+         alta dell'inquadratura, dove si vede. */
+      animation-range: cover 70% cover 92%;
+    }
+  }
+}
+
+@keyframes reveal-depart {
+  from {
+    opacity: 1;
+    transform: none;
+    filter: blur(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(-30px) scale(0.985);
+    filter: blur(5px);
   }
 }
 

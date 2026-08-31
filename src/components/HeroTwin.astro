@@ -1,0 +1,1147 @@
+---
+// Sfondo del hero: campo eolico "digital twin" in Three.js, sostituto del
+// vecchio pattern-video di circuito. Stessa palette del pattern che
+// rimpiazza — navy-950 di fondo, la traccia viva su signal-400 — con
+// green-400 riservato al mozzo del rotore, l'unico punto "vivo" della scena
+// (Leaf Rarity Rule, DESIGN.md §"Do keep green-500/green-400 to micro-accents").
+---
+
+<canvas class="hero-twin absolute inset-0 h-full w-full" aria-hidden="true"></canvas>
+
+<style>
+  .hero-twin {
+    /* Lo stesso navy con cui il canvas pulisce: durante il fade-in, e in ogni
+       frame in cui il canvas non stesse dipingendo, dietro non si affaccia
+       nulla di diverso dal fondo della scena. */
+    background-color: var(--color-navy-950);
+    opacity: 0;
+    transition: opacity 0.5s ease;
+  }
+  .hero-twin.is-ready {
+    opacity: 1;
+  }
+  /* Gira a ogni larghezza: è WebGL a punti, non un decoder video, e il budget
+     di geometria si abbassa da script invece che sparire del tutto. Con
+     prefers-reduced-motion il canvas resta al suo posto e dipinge un fotogramma
+     fermo (vedi `reducedMotion` nello script): nasconderlo lasciava scoperto il
+     fondale sotto, ed è proprio quello che non si deve mai vedere. */
+</style>
+
+<script>
+  import * as THREE from 'three';
+
+  const canvas = document.querySelector<HTMLCanvasElement>('.hero-twin');
+  if (canvas && getComputedStyle(canvas).display !== 'none') {
+    mount(canvas);
+  }
+
+  function mount(canvas: HTMLCanvasElement) {
+    // Rampa navy + signal-400 del sito (DESIGN.md), non il blu/ciano originale
+    // dell'animazione "Amon Wind".
+    const NAVY_BG = 0x0a2a44;
+    const SIGNAL = 0x4fb3d9;
+    const SIGNAL_DEEP = 0x1d5585;
+    const GREEN = 0x4fd07f;
+    const ICE = 0xe8eff5;
+
+    let renderer: THREE.WebGLRenderer;
+    let scene: THREE.Scene;
+    let camera: THREE.PerspectiveCamera;
+    let raf = 0;
+    let started = false;
+
+    const section = canvas.closest('section');
+    const isMobile = matchMedia('(max-width: 767px)').matches;
+    const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    // Il campo fotovoltaico compare solo da qui in su: sotto, la turbina e la
+    // piana devono avere tutta la larghezza, e l'impianto finirebbe comunque
+    // mezzo fuori quadro. La soglia è in px CSS del canvas, non del viewport,
+    // così vale anche se l'hero non è a tutta pagina.
+    const SOLAR_MIN_W = 1200;
+
+    function radialTexture() {
+      const c = document.createElement('canvas');
+      c.width = c.height = 256;
+      const x = c.getContext('2d')!;
+      const g = x.createRadialGradient(128, 128, 0, 128, 128, 128);
+      g.addColorStop(0, 'rgba(255,255,255,1)');
+      g.addColorStop(0.08, 'rgba(255,255,255,.82)');
+      g.addColorStop(0.28, 'rgba(255,255,255,.22)');
+      g.addColorStop(1, 'rgba(255,255,255,0)');
+      x.fillStyle = g;
+      x.fillRect(0, 0, 256, 256);
+      return new THREE.CanvasTexture(c);
+    }
+
+    function pointCloud(arr: number[], color: number, size = 0.026, opacity = 0.9, fog = true) {
+      const g = new THREE.BufferGeometry();
+      g.setAttribute('position', new THREE.Float32BufferAttribute(arr, 3));
+      const m = new THREE.PointsMaterial({
+        color,
+        size,
+        transparent: true,
+        opacity,
+        sizeAttenuation: true,
+        blending: THREE.AdditiveBlending,
+        depthWrite: false,
+        fog,
+      });
+      return new THREE.Points(g, m);
+    }
+
+    function init() {
+      renderer = new THREE.WebGLRenderer({
+        canvas,
+        antialias: !isMobile,
+        alpha: false,
+        powerPreference: 'high-performance',
+      });
+      renderer.setPixelRatio(Math.min(devicePixelRatio, isMobile ? 1.4 : 1.8));
+      renderer.setClearColor(NAVY_BG, 1);
+      renderer.outputColorSpace = THREE.SRGBColorSpace;
+
+      scene = new THREE.Scene();
+      scene.fog = new THREE.FogExp2(NAVY_BG, 0.032);
+
+      // La camera è alzata e inclinata verso il basso rispetto a prima: con lo
+      // sguardo quasi orizzontale la piana di blocchi si vedeva di taglio e si
+      // riduceva a una striscia sull'orizzonte. Così l'orizzonte sale a ~1/4
+      // dell'inquadratura e il terreno occupa la metà bassa, che è il punto di
+      // vista del riferimento (oxigen.sa).
+      camera = new THREE.PerspectiveCamera(41, 1, 0.1, 120);
+      camera.position.set(2.5, 4.3, 12.8);
+      camera.lookAt(2.4, 2.1, 0);
+
+      const glowTex = radialTexture();
+
+      // Dust / particelle sospese
+      const dustCount = isMobile ? 220 : 500;
+      const dustPos = new Float32Array(dustCount * 3);
+      const dustSeed = new Float32Array(dustCount);
+      for (let i = 0; i < dustCount; i++) {
+        dustPos[i * 3] = THREE.MathUtils.randFloatSpread(20) + 2;
+        dustPos[i * 3 + 1] = THREE.MathUtils.randFloat(-0.4, 8.5);
+        dustPos[i * 3 + 2] = THREE.MathUtils.randFloat(-8, 5);
+        dustSeed[i] = Math.random();
+      }
+      const dustGeo = new THREE.BufferGeometry();
+      dustGeo.setAttribute('position', new THREE.BufferAttribute(dustPos, 3));
+      dustGeo.setAttribute('aSeed', new THREE.BufferAttribute(dustSeed, 1));
+      const dustMat = new THREE.ShaderMaterial({
+        transparent: true,
+        depthWrite: false,
+        blending: THREE.AdditiveBlending,
+        uniforms: { uTime: { value: 0 }, uColor: { value: new THREE.Color(SIGNAL) } },
+        vertexShader: `
+          attribute float aSeed;
+          uniform float uTime;
+          varying float vA;
+          void main(){
+            vec3 p=position;
+            p.y += sin(uTime*.25+aSeed*17.0)*.045;
+            vec4 mv=modelViewMatrix*vec4(p,1.);
+            gl_Position=projectionMatrix*mv;
+            gl_PointSize=(1.0+aSeed*1.2)*(110.0/-mv.z);
+            vA=.10+.26*pow(.5+.5*sin(uTime*.8+aSeed*23.),6.);
+          }`,
+        fragmentShader: `
+          uniform vec3 uColor; varying float vA;
+          void main(){
+            vec2 q=gl_PointCoord-.5; float d=length(q);
+            if(d>.5) discard;
+            float a=smoothstep(.5,0.,d)*vA;
+            gl_FragColor=vec4(uColor,a);
+          }`,
+      });
+      scene.add(new THREE.Points(dustGeo, dustMat));
+
+      // ---------- Piana di blocchi ----------
+      // Prismi opachi su griglia regolare, quote quantizzate a gradoni: è la
+      // lettura "voxel" del riferimento (oxigen.sa). Ogni blocco porta tre
+      // facce — cielo, fronte e il fianco rivolto alla camera — con tre livelli
+      // di luce fissi, così il volume si legge dalla forma e non da un glow.
+      // Colore sulla sola rampa navy (navy-900 → navy-100): il blu di segnale
+      // resta esclusiva di turbina e pannelli, che così staccano sul fondo.
+      const CELL = isMobile ? 0.52 : 0.34;
+      // Il bordo vicino arriva fino a z = 16, ben oltre quanto serva sul
+      // desktop: su schermo stretto la camera arretra e guarda più in basso, e
+      // con un limite più corto sotto la piana restava una striscia di fondo
+      // vuoto in fondo al quadro.
+      const tX0 = -17,
+        tX1 = 23,
+        tZ0 = -21,
+        tZ1 = 16;
+      const terrCols = Math.floor((tX1 - tX0) / CELL);
+      const terrRows = Math.floor((tZ1 - tZ0) / CELL);
+      const bx = CELL * 0.44,
+        bz = CELL * 0.44;
+
+      // Quota della piana, in un posto solo: la usano il campo di blocchi per
+      // costruirsi e turbina, pannelli e cavo per appoggiarcisi sopra. Finché
+      // la formula stava solo dentro al ciclo, le strutture avevano quote
+      // scritte a mano e sembravano appoggiate su un altro terreno.
+      const BLOCK_TOP = 0.36;
+      function terrainRawY(x: number, z: number) {
+        let y = -1.7;
+        y += Math.sin(x * 0.21 + z * 0.16) * 0.62;
+        y += Math.cos(x * 0.39 - z * 0.27) * 0.3;
+        y += Math.sin(x * 0.12 + z * 0.58) * 0.2;
+        y += Math.sin(x * 0.83 + z * 0.66) * 0.06;
+        return Math.round(y / 0.13) * 0.13;
+      }
+
+      // Sedime spianato sotto il campo fotovoltaico, con un raccordo morbido
+      // sui bordi. Un impianto vero si costruisce su un piano livellato, e
+      // finché i moduli seguivano i gradoni della piana sembravano buttati lì
+      // uno a una quota diversa dall'altro invece che posati su un sito.
+      const PAD_X = 7.9,
+        PAD_Z = 0.94,
+        PAD_HX = 3.4,
+        PAD_HZ = 2.8;
+      const PAD_Y = terrainRawY(PAD_X, PAD_Z);
+      function terrainBaseY(x: number, z: number) {
+        const d = Math.hypot((x - PAD_X) / PAD_HX, (z - PAD_Z) / PAD_HZ);
+        const t = 1 - THREE.MathUtils.smoothstep(d, 0.7, 1.0);
+        return THREE.MathUtils.lerp(terrainRawY(x, z), PAD_Y, t);
+      }
+      function groundTopY(x: number, z: number) {
+        return terrainBaseY(x, z) + BLOCK_TOP;
+      }
+
+      const VERTS_PER_BLOCK = 18;
+      const vertTotal = terrCols * terrRows * VERTS_PER_BLOCK;
+      const tAnchors = new Float32Array(vertTotal * 3);
+      const tLocals = new Float32Array(vertTotal * 3);
+      const tShades = new Float32Array(vertTotal);
+      let vi = 0;
+
+      function terrainQuad(
+        ax: number,
+        ay: number,
+        az: number,
+        corners: number[][],
+        shade: number,
+      ) {
+        for (const ci of [0, 1, 2, 0, 2, 3]) {
+          const c = corners[ci];
+          tAnchors[vi * 3] = ax;
+          tAnchors[vi * 3 + 1] = ay;
+          tAnchors[vi * 3 + 2] = az;
+          tLocals[vi * 3] = c[0];
+          tLocals[vi * 3 + 1] = c[1];
+          tLocals[vi * 3 + 2] = c[2];
+          tShades[vi] = shade;
+          vi++;
+        }
+      }
+
+      for (let iz = 0; iz < terrRows; iz++) {
+        const z = tZ0 + iz * CELL;
+        for (let ix = 0; ix < terrCols; ix++) {
+          const x = tX0 + ix * CELL;
+
+          // Dune larghe + increspatura fine, poi quantizzate: i gradoni sono
+          // ciò che rende la piana "a quadrettoni" invece che una collina liscia.
+          const y = terrainBaseY(x, z);
+
+          const h = BLOCK_TOP - 0.06 + Math.random() * 0.12;
+          // Il fianco disegnato è quello che guarda la camera: metà destra del
+          // campo mostra il fianco sinistro e viceversa. Due facce laterali su
+          // due sarebbero invisibili, quindi se ne emette una sola.
+          const sideSign = x > 2.5 ? -1 : 1;
+
+          terrainQuad(
+            x,
+            y,
+            z,
+            [
+              [-bx, h, -bz],
+              [bx, h, -bz],
+              [bx, h, bz],
+              [-bx, h, bz],
+            ],
+            1.0,
+          );
+          terrainQuad(
+            x,
+            y,
+            z,
+            [
+              [-bx, -0.6, bz],
+              [bx, -0.6, bz],
+              [bx, h, bz],
+              [-bx, h, bz],
+            ],
+            0.54,
+          );
+          terrainQuad(
+            x,
+            y,
+            z,
+            [
+              [bx * sideSign, -0.6, -bz],
+              [bx * sideSign, -0.6, bz],
+              [bx * sideSign, h, bz],
+              [bx * sideSign, h, -bz],
+            ],
+            0.32,
+          );
+        }
+      }
+      const terrainGeo = new THREE.BufferGeometry();
+      // L'ancora del blocco DEVE chiamarsi `position`: per una geometria non
+      // indicizzata three.js prende il numero di vertici da lì e, senza,
+      // salta del tutto la draw call (il terreno non veniva mai disegnato).
+      terrainGeo.setAttribute('position', new THREE.BufferAttribute(tAnchors, 3));
+      terrainGeo.setAttribute('aLocal', new THREE.BufferAttribute(tLocals, 3));
+      terrainGeo.setAttribute('aShade', new THREE.BufferAttribute(tShades, 1));
+
+      const terrainMat = new THREE.ShaderMaterial({
+        side: THREE.DoubleSide,
+        uniforms: {
+          uTime: { value: 0 },
+          uMouse: { value: new THREE.Vector3(100, 0, 100) },
+          uRadius: { value: 6.2 },
+          // Non ICE pieno: la piana deve restare un grigio-navy di materia. Con
+          // il bianco ghiaccio le facce alte bruciavano e turbina e pannelli,
+          // che sono additivi, ci si perdevano sopra.
+          uColorLow: { value: new THREE.Color(0x0b2942) },
+          uColorHigh: { value: new THREE.Color(0x9fb6c8) },
+          uFogColor: { value: new THREE.Color(NAVY_BG) },
+        },
+        vertexShader: `
+          attribute vec3 aLocal;
+          attribute float aShade;
+          uniform float uTime;
+          uniform float uRadius;
+          uniform vec3 uMouse;
+          varying float vShade;
+          varying float vFog;
+          varying float vNear;
+          void main(){
+            // position = ancora del blocco (centro base);
+            // aLocal = scostamento del vertice dentro il prisma.
+            vec3 anchor = position;
+
+            // Respiro lento di fondo: la piana non è mai del tutto ferma.
+            float y = anchor.y + sin(anchor.x*.38 + anchor.z*.29 + uTime*.5)*.05;
+
+            // Il puntatore preme la piana: conca + onda concentrica + spinta
+            // radiale. Raggio e ampiezza sono molto più larghi di prima —
+            // con 3.8 unità e 0.26 di affondo la deformazione era invisibile
+            // a questa distanza di camera.
+            float d = distance(anchor.xz, uMouse.xz);
+            float influence = smoothstep(uRadius, 0.0, d);
+            y -= influence*.8;
+            y += sin(d*2.4 - uTime*3.2)*.3*influence;
+            vec2 dir = normalize(anchor.xz - uMouse.xz + vec2(.0001));
+            vec2 xz = anchor.xz + dir*influence*.45;
+
+            vec3 worldPos = vec3(xz.x + aLocal.x, y + aLocal.y, xz.y + aLocal.z);
+            vec4 mv = modelViewMatrix*vec4(worldPos,1.0);
+            gl_Position = projectionMatrix*mv;
+
+            // Le creste alte schiariscono, gli avvallamenti restano navy: dà
+            // rilievo al campo senza aggiungere una sorgente di luce.
+            float hn = smoothstep(-2.6, -0.4, anchor.y);
+            vShade = clamp(aShade*(.74 + .5*hn) + influence*.3, 0.0, 1.0);
+            vFog = smoothstep(9.0, 34.0, -mv.z);
+            vNear = mix(.55, 1.0, smoothstep(5.0, 15.0, -mv.z));
+          }`,
+        fragmentShader: `
+          uniform vec3 uColorLow;
+          uniform vec3 uColorHigh;
+          uniform vec3 uFogColor;
+          varying float vShade;
+          varying float vFog;
+          varying float vNear;
+          void main(){
+            vec3 c = mix(uColorLow, uColorHigh, vShade);
+            // Primo piano più scuro: tiene la piana sotto la colonna di testo
+            // e dà profondità (scuro vicino → chiaro a media distanza → nebbia).
+            c *= vNear;
+            c = mix(c, uFogColor, vFog);
+            gl_FragColor = vec4(c, 1.0);
+          }`,
+      });
+      const terrain = new THREE.Mesh(terrainGeo, terrainMat);
+      terrain.frustumCulled = false;
+      scene.add(terrain);
+
+      // Il vecchio campo di punti a montagne è stato rimosso: sopra la piana di
+      // blocchi si leggeva come una fascia di pixel sparsi, non come rilievo. Il
+      // crinale all'orizzonte lo disegnano ora le dune della piana stessa, che è
+      // volume vero e sta nella stessa lingua visiva del resto.
+
+      // ---------- Sole ----------
+      // Non un disco caldo fotorealistico: resta sulla rampa navy/signal. Sta
+      // alto sopra il crinale, così è il sole a dare il punto luminoso della
+      // scena invece di un alone generico a mezz'aria.
+      const sun = new THREE.Group();
+      sun.position.set(10.5, 4.6, -30);
+      scene.add(sun);
+      const sunWash = new THREE.Sprite(
+        new THREE.SpriteMaterial({
+          map: glowTex,
+          color: SIGNAL_DEEP,
+          transparent: true,
+          opacity: 0.5,
+          blending: THREE.AdditiveBlending,
+          depthWrite: false,
+          fog: false,
+        }),
+      );
+      sunWash.scale.set(42, 20, 1);
+      sun.add(sunWash);
+      const sunHalo = new THREE.Sprite(
+        new THREE.SpriteMaterial({
+          map: glowTex,
+          color: SIGNAL,
+          transparent: true,
+          opacity: 0.34,
+          blending: THREE.AdditiveBlending,
+          depthWrite: false,
+          fog: false,
+        }),
+      );
+      sunHalo.scale.set(13, 13, 1);
+      sun.add(sunHalo);
+      const sunCore = new THREE.Sprite(
+        new THREE.SpriteMaterial({
+          map: glowTex,
+          color: ICE,
+          transparent: true,
+          opacity: 0.95,
+          blending: THREE.AdditiveBlending,
+          depthWrite: false,
+          fog: false,
+        }),
+      );
+      sunCore.scale.set(3.6, 3.6, 1);
+      sun.add(sunCore);
+
+      // ---------- Pannelli solari ----------
+      // Il campo è ruotato rispetto agli assi della scena: allineato alla
+      // griglia sembrava un oggetto incollato sopra il paesaggio invece che
+      // un impianto posato in un punto del terreno. Il gruppo sta a quota 0 e
+      // ogni pezzo si prende la propria quota da groundTopY(), così l'impianto
+      // segue le ondulazioni della piana invece di galleggiare su un piano suo.
+      const SOLAR_X = 6.3,
+        SOLAR_Z = -0.6,
+        SOLAR_YAW = -0.22;
+      const solarGroup = new THREE.Group();
+      solarGroup.position.set(SOLAR_X, 0, SOLAR_Z);
+      solarGroup.rotation.y = SOLAR_YAW;
+      solarGroup.visible = false;
+      scene.add(solarGroup);
+
+      const panels: THREE.Group[] = [];
+      let solarBuilt = false;
+
+      function buildSolarField() {
+        if (solarBuilt) return;
+        solarBuilt = true;
+
+        const yawCos = Math.cos(SOLAR_YAW),
+          yawSin = Math.sin(SOLAR_YAW);
+        // Dal locale del gruppo al mondo, per poter interrogare la quota della
+        // piana sotto ogni pezzo.
+        const wx = (lx: number, lz: number) => SOLAR_X + lx * yawCos + lz * yawSin;
+        const wz = (lx: number, lz: number) => SOLAR_Z - lx * yawSin + lz * yawCos;
+
+        const solarRows = 3,
+          solarCols = 5;
+        const PITCH_X = 0.95,
+          PITCH_Z = 1.15;
+        const PW = 0.78,
+          PH = 0.44,
+          PDEPTH = 0.05;
+        const CELL_COLS = 6,
+          CELL_ROWS = 3;
+        const tiltX = -0.55;
+        const CLEARANCE = 0.3;
+
+        // Bagliore dietro al campo, tenue: serve solo a staccarlo dal fondo.
+        const solarGlow = new THREE.Sprite(
+          new THREE.SpriteMaterial({
+            map: glowTex,
+            color: SIGNAL,
+            transparent: true,
+            opacity: 0.13,
+            blending: THREE.AdditiveBlending,
+            depthWrite: false,
+            fog: false,
+          }),
+        );
+        solarGlow.scale.set(6.4, 3.2, 1);
+        solarGlow.position.set(((solarCols - 1) * PITCH_X) / 2, -0.1, PITCH_Z);
+        solarGroup.add(solarGlow);
+
+        // I telai sono in blending normale: sopra la piana chiara l'additivo
+        // saturava verso il bianco e i moduli sparivano. Da scuri si staccano
+        // come oggetti, e il segnale resta acceso solo su bordo e celle.
+        const structMat = new THREE.LineBasicMaterial({
+          color: 0x0b2942,
+          transparent: true,
+          opacity: 0.92,
+          depthWrite: false,
+          fog: false,
+        });
+        const railMat = new THREE.LineBasicMaterial({
+          color: 0x14405f,
+          transparent: true,
+          opacity: 0.95,
+          depthWrite: false,
+          fog: false,
+        });
+        const cellMat = new THREE.LineBasicMaterial({
+          color: 0x2a648f,
+          transparent: true,
+          opacity: 0.8,
+          depthWrite: false,
+          fog: false,
+        });
+        // Meno acceso di prima: contro una piana smorzata un telaio al massimo
+        // del segnale è la ragione principale per cui il campo si staccava
+        // dal contesto invece di starci dentro.
+        const frameMat = new THREE.LineBasicMaterial({
+          color: SIGNAL,
+          transparent: true,
+          opacity: 0.72,
+          blending: THREE.AdditiveBlending,
+          depthWrite: false,
+          fog: false,
+        });
+        const topEdgeMat = new THREE.LineBasicMaterial({
+          color: ICE,
+          transparent: true,
+          opacity: 0.5,
+          blending: THREE.AdditiveBlending,
+          depthWrite: false,
+          fog: false,
+        });
+        // Ombra di contatto: senza, i moduli non toccavano niente. È la stessa
+        // texture radiale dei bagliori usata al contrario, in navy scuro e in
+        // blending normale, appoggiata piatta sui blocchi.
+        const shadowMat = new THREE.MeshBasicMaterial({
+          map: glowTex,
+          color: 0x061b2e,
+          transparent: true,
+          opacity: 0.5,
+          depthWrite: false,
+          fog: false,
+        });
+
+        // Le ombre vanno inserite per prime: bringToFront assegna l'ordine di
+        // disegno seguendo l'ordine dei figli, e devono finire sotto ai moduli.
+        for (let r = 0; r < solarRows; r++) {
+          for (let c = 0; c < solarCols; c++) {
+            const lx = c * PITCH_X,
+              lz = r * PITCH_Z;
+            const shadow = new THREE.Mesh(new THREE.PlaneGeometry(PW * 1.5, PW * 1.05), shadowMat);
+            shadow.rotation.x = -Math.PI / 2;
+            shadow.position.set(lx, groundTopY(wx(lx, lz), wz(lx, lz)) + 0.02, lz + 0.08);
+            solarGroup.add(shadow);
+          }
+        }
+
+        for (let r = 0; r < solarRows; r++) {
+          for (let c = 0; c < solarCols; c++) {
+            const lx = c * PITCH_X,
+              lz = r * PITCH_Z;
+            const panel = new THREE.Group();
+            panel.position.set(lx, groundTopY(wx(lx, lz), wz(lx, lz)) + CLEARANCE, lz);
+            panel.rotation.x = tiltX;
+            panel.rotation.y = 0.05;
+            solarGroup.add(panel);
+            panels.push(panel);
+
+            // Faccia piena: dà al modulo una silhouette vera contro la piana
+            // chiara. È `transparent` non perché lo sia, ma per finire nella
+            // stessa passata delle ombre e rispettarne l'ordine di disegno.
+            const face = new THREE.Mesh(
+              new THREE.PlaneGeometry(PW, PH),
+              new THREE.MeshBasicMaterial({
+                color: 0x0a2338,
+                transparent: true,
+                opacity: 1,
+                depthWrite: false,
+                fog: false,
+              }),
+            );
+            face.position.z = -PDEPTH * 0.5;
+            panel.add(face);
+
+            // Fughe fra le celle: è il dettaglio che fa leggere il rettangolo
+            // come un modulo fotovoltaico e non come una lastra qualsiasi.
+            const cellPts: THREE.Vector3[] = [];
+            for (let i = 1; i < CELL_COLS; i++) {
+              const x = -PW / 2 + (PW * i) / CELL_COLS;
+              cellPts.push(new THREE.Vector3(x, -PH / 2, 0.002), new THREE.Vector3(x, PH / 2, 0.002));
+            }
+            for (let i = 1; i < CELL_ROWS; i++) {
+              const y = -PH / 2 + (PH * i) / CELL_ROWS;
+              cellPts.push(new THREE.Vector3(-PW / 2, y, 0.002), new THREE.Vector3(PW / 2, y, 0.002));
+            }
+            panel.add(new THREE.LineSegments(new THREE.BufferGeometry().setFromPoints(cellPts), cellMat));
+
+            // Trama di punti sul vetro, rada: lega il modulo alla lingua a
+            // punti del resto della scena, non lo disegna.
+            const glass: number[] = [];
+            for (let x = -PW / 2; x <= PW / 2; x += 0.065)
+              for (let y = -PH / 2; y <= PH / 2; y += 0.065) glass.push(x, y, 0.003);
+            const glowMat = pointCloud(glass, SIGNAL, 0.03, 0.4, false);
+            panel.add(glowMat);
+            panel.userData.glowMat = glowMat;
+
+            const fr = [
+              [-PW / 2, -PH / 2],
+              [PW / 2, -PH / 2],
+              [PW / 2, PH / 2],
+              [-PW / 2, PH / 2],
+              [-PW / 2, -PH / 2],
+            ].map(([x, y]) => new THREE.Vector3(x, y, 0.004));
+            panel.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(fr), frameMat));
+
+            // Il bordo alto è quello rivolto al sole: acceso più del resto del
+            // telaio, dà spessore e direzione della luce a tutto il campo.
+            panel.add(
+              new THREE.Line(
+                new THREE.BufferGeometry().setFromPoints([
+                  new THREE.Vector3(-PW / 2, PH / 2, 0.005),
+                  new THREE.Vector3(PW / 2, PH / 2, 0.005),
+                ]),
+                topEdgeMat,
+              ),
+            );
+
+            // Spigoli frontale→dorso: vendono lo spessore da qualsiasi angolo.
+            const edgePts: THREE.Vector3[] = [];
+            for (const [ex, ey] of [
+              [-PW / 2, -PH / 2],
+              [PW / 2, -PH / 2],
+              [PW / 2, PH / 2],
+              [-PW / 2, PH / 2],
+            ]) {
+              edgePts.push(new THREE.Vector3(ex, ey, 0.002), new THREE.Vector3(ex, ey, -PDEPTH));
+            }
+            panel.add(new THREE.LineSegments(new THREE.BufferGeometry().setFromPoints(edgePts), structMat));
+
+            // Riflesso obliquo sul vetro: la stessa texture radiale dei
+            // bagliori, schiacciata e inclinata, così è una velatura morbida
+            // e non una barra piatta. È quel che fa leggere il vetro.
+            const sheen = new THREE.Mesh(
+              new THREE.PlaneGeometry(PW * 1.05, PH * 0.55),
+              new THREE.MeshBasicMaterial({
+                map: glowTex,
+                color: ICE,
+                transparent: true,
+                opacity: 0.13,
+                blending: THREE.AdditiveBlending,
+                depthWrite: false,
+                fog: false,
+              }),
+            );
+            sheen.position.set(-PW * 0.14, PH * 0.14, 0.006);
+            sheen.rotation.z = 0.36;
+            panel.add(sheen);
+          }
+        }
+
+        // Struttura di sostegno: un tubo di torsione per fila con due plinti,
+        // invece di due gambette per modulo. È come sta in piedi un inseguitore
+        // vero, e il tubo segue la quota del terreno colonna per colonna.
+        for (let r = 0; r < solarRows; r++) {
+          const lz = r * PITCH_Z;
+          const railPts: THREE.Vector3[] = [];
+          for (let c = -0.5; c <= solarCols - 0.5; c += 0.5) {
+            const lx = c * PITCH_X;
+            railPts.push(new THREE.Vector3(lx, groundTopY(wx(lx, lz), wz(lx, lz)) + 0.06, lz + 0.02));
+          }
+          solarGroup.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(railPts), railMat));
+
+          for (const c of [0, solarCols - 1]) {
+            const lx = c * PITCH_X;
+            const g = groundTopY(wx(lx, lz), wz(lx, lz));
+            solarGroup.add(
+              new THREE.Line(
+                new THREE.BufferGeometry().setFromPoints([
+                  new THREE.Vector3(lx, g + 0.06, lz + 0.02),
+                  new THREE.Vector3(lx, g - 0.06, lz + 0.02),
+                ]),
+                structMat,
+              ),
+            );
+          }
+        }
+
+        bringToFront(solarGroup, 100);
+      }
+      // Filo verde che collega il campo fotovoltaico alla turbina — l'unico
+      // altro accento "vivo" oltre al mozzo del rotore (Leaf Rarity Rule).
+      const wireLine = new THREE.Line(
+        new THREE.BufferGeometry().setFromPoints(
+          [6.0, 5.4, 4.7, 4.0, 3.4, 2.8].map((x, i) => {
+            const z = -0.3 + i * 0.16;
+            return new THREE.Vector3(x, groundTopY(x, z) + 0.04, z);
+          }),
+        ),
+        new THREE.LineBasicMaterial({
+          color: GREEN,
+          transparent: true,
+          opacity: 0.3,
+          blending: THREE.AdditiveBlending,
+          depthWrite: false,
+        }),
+      );
+      scene.add(wireLine);
+
+      // Turbina eolica
+      const turbine = new THREE.Group();
+      turbine.position.set(2.6, groundTopY(2.6, 0) - 0.05, 0);
+      scene.add(turbine);
+
+      {
+        const a: number[] = [];
+        const h = 5.25;
+        for (let j = 0; j < 100; j++) {
+          const y = (j / 99) * h;
+          const radius = THREE.MathUtils.lerp(0.23, 0.075, y / h);
+          for (let k = 0; k < 22; k++) {
+            const ang = (k / 22) * Math.PI * 2 + (j % 2) * 0.04;
+            a.push(Math.cos(ang) * radius, y, Math.sin(ang) * radius * 0.55);
+          }
+        }
+        turbine.add(pointCloud(a, SIGNAL_DEEP, 0.058, 0.2), pointCloud(a, SIGNAL, 0.024, 0.85));
+      }
+
+      {
+        const a: number[] = [];
+        for (let x = -0.33; x <= 0.33; x += 0.055)
+          for (let y = 4.98; y <= 5.27; y += 0.055)
+            for (let z = -0.04; z <= 0.55; z += 0.07) if (Math.random() > 0.38) a.push(x, y, z);
+        turbine.add(pointCloud(a, SIGNAL, 0.025, 0.75));
+      }
+
+      // Luce di segnalazione aerea in cima alla navicella — lo strobo classico
+      // sulle pale, ma in green-400 invece del rosso, per spezzare il blu
+      // dominante con l'unico altro accento "vivo" del sito oltre al mozzo.
+      const beacon = new THREE.Sprite(
+        new THREE.SpriteMaterial({
+          map: glowTex,
+          color: GREEN,
+          transparent: true,
+          opacity: 0,
+          blending: THREE.AdditiveBlending,
+          depthWrite: false,
+          fog: false,
+        }),
+      );
+      beacon.scale.set(0.62, 0.62, 1);
+      beacon.position.set(0, 5.52, 0.28);
+      turbine.add(beacon);
+      const beaconHalo = new THREE.Sprite(
+        new THREE.SpriteMaterial({
+          map: glowTex,
+          color: GREEN,
+          transparent: true,
+          opacity: 0,
+          blending: THREE.AdditiveBlending,
+          depthWrite: false,
+          fog: false,
+        }),
+      );
+      beaconHalo.scale.set(2.6, 2.6, 1);
+      beaconHalo.position.copy(beacon.position);
+      turbine.add(beaconHalo);
+
+      // Palo che monta il beacon sul tetto della navicella — senza,
+      // la luce leggeva come un punto casuale sospeso nel cielo.
+      const beaconMast = new THREE.Line(
+        new THREE.BufferGeometry().setFromPoints([
+          new THREE.Vector3(0, 5.27, 0.28),
+          new THREE.Vector3(0, 5.5, 0.28),
+        ]),
+        new THREE.LineBasicMaterial({
+          color: GREEN,
+          transparent: true,
+          opacity: 0.35,
+          blending: THREE.AdditiveBlending,
+          depthWrite: false,
+          fog: false,
+        }),
+      );
+      turbine.add(beaconMast);
+
+      const rotor = new THREE.Group();
+      rotor.position.set(0, 5.12, -0.09);
+      turbine.add(rotor);
+
+      {
+        const a: number[] = [];
+        for (let i = 0; i < 700; i++) {
+          const u = Math.random(),
+            v = Math.random();
+          const th = 2 * Math.PI * u,
+            ph = Math.acos(2 * v - 1);
+          const r = 0.245 * Math.pow(Math.random(), 0.34);
+          a.push(Math.sin(ph) * Math.cos(th) * r, Math.sin(ph) * Math.sin(th) * r, Math.cos(ph) * r * 0.42);
+        }
+        rotor.add(pointCloud(a, ICE, 0.028, 0.92));
+        const hubGlow = new THREE.Sprite(
+          new THREE.SpriteMaterial({
+            map: glowTex,
+            color: GREEN,
+            transparent: true,
+            opacity: 0.3,
+            blending: THREE.AdditiveBlending,
+            depthWrite: false,
+          }),
+        );
+        hubGlow.scale.set(1.35, 1.35, 1);
+        rotor.add(hubGlow);
+      }
+
+      for (let b = 0; b < 3; b++) {
+        const blade = new THREE.Group();
+        blade.rotation.z = (b * Math.PI * 2) / 3;
+        rotor.add(blade);
+
+        const a: number[] = [];
+        const leading: THREE.Vector3[] = [];
+        const trailing: THREE.Vector3[] = [];
+        const spar: THREE.Vector3[] = [];
+        const L = 2.55;
+        const ROOT = 0.24;
+        for (let ir = 0; ir < 72; ir++) {
+          const k = ir / 71;
+          const r = ROOT + (L - ROOT) * k;
+
+          // Planform da pala moderna: attacco stretto al mozzo, corda massima
+          // intorno al 18% dell'apertura, poi una rastremazione lunga fino a
+          // una punta sottile. Prima la corda calava monotona dalla radice e
+          // la pala leggeva come una scheggia dritta.
+          const chord =
+            k < 0.18
+              ? THREE.MathUtils.lerp(0.1, 0.27, k / 0.18)
+              : THREE.MathUtils.lerp(0.27, 0.036, Math.pow((k - 0.18) / 0.82, 0.85));
+          const cx = 0.16 * Math.pow(k, 1.6);
+
+          leading.push(new THREE.Vector3(cx - chord * 0.5, r, 0));
+          trailing.push(new THREE.Vector3(cx + chord * 0.5, r, 0));
+          spar.push(new THREE.Vector3(cx - chord * 0.12, r, 0));
+
+          const across = Math.max(2, Math.round(6 * (1 - k) + 2));
+          for (let j = 0; j < across; j++) {
+            const t = across === 1 ? 0 : j / (across - 1);
+            a.push(
+              cx + THREE.MathUtils.lerp(-chord * 0.5, chord * 0.5, t),
+              r,
+              (Math.random() - 0.5) * 0.024,
+            );
+          }
+        }
+        blade.add(pointCloud(a, SIGNAL_DEEP, 0.062, 0.2), pointCloud(a, SIGNAL, 0.024, 0.85));
+
+        function bladeLine(pts: THREE.Vector3[], color: number, opacity: number) {
+          return new THREE.Line(
+            new THREE.BufferGeometry().setFromPoints(pts),
+            new THREE.LineBasicMaterial({
+              color,
+              transparent: true,
+              opacity,
+              blending: THREE.AdditiveBlending,
+              depthWrite: false,
+            }),
+          );
+        }
+        // Bordo d'attacco acceso, bordo d'uscita smorzato, longherone appena
+        // accennato: sono le tre linee che danno alla pala un taglio netto e
+        // una lettura tecnica, al posto del contorno unico e slavato di prima.
+        blade.add(
+          bladeLine(leading, ICE, 0.6),
+          bladeLine(trailing, SIGNAL, 0.34),
+          bladeLine(spar, SIGNAL, 0.22),
+        );
+
+        const tipGlow = new THREE.Sprite(
+          new THREE.SpriteMaterial({
+            map: glowTex,
+            color: ICE,
+            transparent: true,
+            opacity: 0.4,
+            blending: THREE.AdditiveBlending,
+            depthWrite: false,
+            fog: false,
+          }),
+        );
+        tipGlow.scale.set(0.32, 0.32, 1);
+        tipGlow.position.set(leading[leading.length - 1].x + 0.018, L, 0);
+        blade.add(tipGlow);
+      }
+
+      // ---------- impianto sempre in primo piano ----------
+      // La piana è un mesh opaco: col test di profondità attivo i blocchi
+      // seppellivano la base del traliccio e i piedi dei pannelli, e a ogni
+      // ondata del terreno le strutture ci finivano dentro. Qui il test di
+      // profondità si spegne e l'ordine di disegno lo fissiamo a mano, così
+      // impianto e turbina restano davanti alla piana in ogni condizione.
+      // L'ordine segue la traversata (padre prima dei figli, figli in ordine
+      // di inserimento), che è già quello giusto: la faccia piena di ogni
+      // modulo è il primo figlio e quindi finisce sotto la sua trama di punti.
+      function bringToFront(root: THREE.Object3D, base: number) {
+        let i = 0;
+        root.traverse((o) => {
+          const mat = (o as THREE.Mesh).material;
+          if (!mat) return;
+          for (const m of Array.isArray(mat) ? mat : [mat]) m.depthTest = false;
+          o.renderOrder = base + i++;
+        });
+      }
+      // solarGroup se lo fa da sé quando viene costruito, che è più tardi.
+      bringToFront(wireLine, 300);
+      bringToFront(turbine, 400);
+
+      // ---------- interazione puntatore ----------
+      const mouseNDC = new THREE.Vector2(0, 0);
+      const pointerWorld = new THREE.Vector3(100, 0, 100);
+      const raycaster = new THREE.Raycaster();
+      const groundPlane = new THREE.Plane(new THREE.Vector3(0, 1, 0), 1.15);
+
+      let targetX = 0.5,
+        targetY = 0.5,
+        mouseX = 0.5,
+        mouseY = 0.5;
+      let pointerSpeed = 0,
+        lastPX = 0,
+        lastPY = 0;
+      let hoverTurbine = 0;
+      let rotorVelocity = 0.18;
+
+      function onPointerMove(e: PointerEvent) {
+        const rect = canvas.getBoundingClientRect();
+        const localX = e.clientX - rect.left;
+        const localY = e.clientY - rect.top;
+        targetX = localX / rect.width;
+        targetY = localY / rect.height;
+        mouseNDC.x = targetX * 2 - 1;
+        mouseNDC.y = -(targetY * 2 - 1);
+        pointerSpeed = Math.min(1, Math.hypot(localX - lastPX, localY - lastPY) / 45);
+        lastPX = localX;
+        lastPY = localY;
+
+        const dx = localX - rect.width * 0.52;
+        const dy = localY - rect.height * 0.45;
+        hoverTurbine = THREE.MathUtils.clamp(1 - Math.hypot(dx / 260, dy / 340), 0, 1);
+      }
+      function onPointerLeave() {
+        targetX = 0.5;
+        targetY = 0.5;
+        hoverTurbine = 0;
+      }
+      addEventListener('pointermove', onPointerMove, { passive: true });
+      addEventListener('pointerleave', onPointerLeave, { passive: true });
+
+      // ---------- resize / inquadratura responsive ----------
+      // Il campo visivo di una PerspectiveCamera è quello *verticale*: tenendo
+      // 41° fissi, su un telefono in verticale il quadro si stringe soltanto in
+      // orizzontale e la turbina finisce addosso alla colonna di testo. Qui i
+      // parametri di ripresa cambiano per fascia di proporzione: più stretto è
+      // lo schermo, più la camera arretra, sale e apre l'angolo, così la scena
+      // resta la stessa e cambia solo quanta se ne vede.
+      const view = { camX: 2.5, camY: 4.3, camZ: 12.8, tgtX: 2.4, tgtY: 2.1, turbineScale: 0.92 };
+      function applyView(aspect: number) {
+        if (aspect < 0.62) {
+          // Telefono in verticale. La turbina resta centrata — spostarla al
+          // margine per schivare il testo la lasciava tagliata e sbilanciata —
+          // e a guadagnare spazio è invece l'inquadratura: camera più arretrata
+          // e più bassa, con lo sguardo puntato sotto la base. Così l'insieme
+          // sale nel quadro e occupa la metà alta, mentre la metà bassa, dove
+          // stanno paragrafo e pulsanti, resta piana libera.
+          camera.fov = 45;
+          view.camX = 2.6;
+          view.camY = 3.4;
+          view.camZ = 20.5;
+          view.tgtX = 2.55;
+          view.tgtY = 0.25;
+          // Più piccola che altrove: a scala piena le pale toccavano il bordo
+          // alto del quadro e finivano tagliate dall'isola dell'header.
+          view.turbineScale = 0.82;
+        } else if (aspect < 0.95) {
+          camera.fov = 54;
+          view.camX = 2.6;
+          view.camY = 4.9;
+          view.camZ = 14.6;
+          view.tgtX = 2.5;
+          view.tgtY = 2.7;
+          view.turbineScale = 0.88;
+        } else if (aspect < 1.5) {
+          camera.fov = 47;
+          view.camX = 2.55;
+          view.camY = 4.6;
+          view.camZ = 13.8;
+          view.tgtX = 2.45;
+          view.tgtY = 2.4;
+          view.turbineScale = 0.92;
+        } else {
+          camera.fov = 41;
+          view.camX = 2.5;
+          view.camY = 4.3;
+          view.camZ = 12.8;
+          view.tgtX = 2.4;
+          view.tgtY = 2.1;
+          view.turbineScale = 0.92;
+        }
+      }
+
+      function resize() {
+        const rect = canvas.getBoundingClientRect();
+        const w = Math.max(1, rect.width);
+        const h = Math.max(1, rect.height);
+        camera.aspect = w / h;
+        applyView(camera.aspect);
+        camera.updateProjectionMatrix();
+        renderer.setPixelRatio(Math.min(devicePixelRatio, isMobile ? 1.4 : 1.8));
+        renderer.setSize(w, h, false);
+
+        // Il campo fotovoltaico esiste solo dove c'è larghezza per contenerlo:
+        // si costruisce alla prima volta che serve, così un telefono non paga
+        // mai la geometria di quindici moduli che non vedrà.
+        const showSolar = w >= SOLAR_MIN_W;
+        if (showSolar) buildSolarField();
+        solarGroup.visible = showSolar;
+        wireLine.visible = showSolar;
+        if (reducedMotion) renderStill();
+      }
+      const ro = new ResizeObserver(resize);
+      ro.observe(canvas);
+      resize();
+
+      // ---------- pausa fuori schermo ----------
+      // Il loop si ferma sia uscendo dallo schermo sia cambiando scheda, e a
+      // rimetterlo in moto è sempre e solo `ensureRunning()`, chiamato da
+      // entrambi i rientri. Prima l'IntersectionObserver si limitava a
+      // rialzare `visible` senza rischedulare nulla, e l'unico punto che
+      // rilanciava il loop era `visibilitychange`, che allo scroll non scatta:
+      // scrollando via dall'hero e tornandoci l'animazione restava ferma.
+      let visible = true;
+      if (section && 'IntersectionObserver' in window) {
+        const io = new IntersectionObserver(
+          (entries) => {
+            for (const en of entries) visible = en.isIntersecting;
+            ensureRunning();
+          },
+          { threshold: 0 },
+        );
+        io.observe(section);
+      }
+      document.addEventListener('visibilitychange', ensureRunning);
+
+      // ---------- animazione ----------
+      // Tempo accumulato invece di (now - startTime): così al rientro da una
+      // pausa le fasi animate riprendono da dove erano, invece di saltare in
+      // avanti di tutti i secondi passati fuori schermo.
+      let elapsed = 0;
+      let lastNow = performance.now();
+
+      function markReady() {
+        if (started) return;
+        started = true;
+        canvas.classList.add('is-ready');
+      }
+
+      // Con prefers-reduced-motion il canvas resta al suo posto e dipinge un
+      // fotogramma fermo, invece di sparire: nasconderlo scopriva il fondale
+      // della sezione, ed è proprio quello che non si deve mai vedere.
+      function renderStill() {
+        renderer.render(scene, camera);
+        markReady();
+      }
+
+      function ensureRunning() {
+        if (reducedMotion) {
+          renderStill();
+          return;
+        }
+        if (raf || document.hidden || !visible) return;
+        lastNow = performance.now();
+        raf = requestAnimationFrame(tick);
+      }
+
+      function tick() {
+        raf = 0;
+        if (document.hidden || !visible) return;
+        raf = requestAnimationFrame(tick);
+
+        const now = performance.now();
+        const dt = Math.min(0.05, (now - lastNow) / 1000);
+        lastNow = now;
+        elapsed += dt;
+        const t = elapsed;
+
+        mouseX += (targetX - mouseX) * 0.055;
+        mouseY += (targetY - mouseY) * 0.055;
+
+        camera.position.x += (view.camX + (mouseX - 0.5) * 1.6 - camera.position.x) * 0.03;
+        camera.position.y += (view.camY - (mouseY - 0.5) * 0.75 - camera.position.y) * 0.03;
+        camera.position.z += (view.camZ - camera.position.z) * 0.03;
+        camera.lookAt(view.tgtX + (mouseX - 0.5) * 0.5, view.tgtY - (mouseY - 0.5) * 0.3, 0);
+
+        raycaster.setFromCamera(mouseNDC, camera);
+        const hit = new THREE.Vector3();
+        if (raycaster.ray.intersectPlane(groundPlane, hit)) {
+          pointerWorld.lerp(hit, 0.16);
+          terrainMat.uniforms.uMouse.value.copy(pointerWorld);
+        }
+
+        const targetSpeed = 0.2 + pointerSpeed * 0.2 + hoverTurbine * 0.055;
+        rotorVelocity += (targetSpeed - rotorVelocity) * 0.035;
+        rotor.rotation.z -= rotorVelocity * dt;
+        pointerSpeed *= 0.9;
+
+        // La scala di base viene dall'inquadratura: la turbina è appoggiata
+        // sulla piana e senza questo rientro le pale escono dal bordo alto,
+        // tanto più quanto più il quadro è stretto.
+        const scale = view.turbineScale * (1 + hoverTurbine * 0.012 + Math.sin(t * 0.7) * 0.0015);
+        turbine.scale.setScalar(scale);
+        turbine.rotation.y = (mouseX - 0.5) * 0.055;
+        turbine.rotation.x = (mouseY - 0.5) * 0.025;
+
+        dustMat.uniforms.uTime.value = t;
+        terrainMat.uniforms.uTime.value = t;
+
+        sunCore.material.opacity = 0.88 + 0.09 * Math.sin(t * 0.5);
+        sunHalo.material.opacity = 0.3 + 0.06 * Math.sin(t * 0.37 + 0.6);
+        sun.position.y = 4.6 + Math.sin(t * 0.1) * 0.16;
+
+        panels.forEach((p, i) => {
+          const glowMat = p.userData.glowMat as THREE.Points;
+          (glowMat.material as THREE.PointsMaterial).opacity =
+            0.3 + 0.16 * Math.sin(t * 0.9 + i * 0.7);
+        });
+        (wireLine.material as THREE.LineBasicMaterial).opacity = 0.22 + 0.14 * (0.5 + 0.5 * Math.sin(t * 1.6));
+
+        // Strobo aeronautico: un lampo netto ogni ~2.2s, non un respiro sinusoidale.
+        const beaconPhase = t % 2.2;
+        const flash = beaconPhase < 0.35 ? Math.exp(-beaconPhase * 14) : 0;
+        beacon.material.opacity = 0.15 + flash * 0.85;
+        beaconHalo.material.opacity = flash * 0.85;
+
+        renderer.render(scene, camera);
+        markReady();
+      }
+      ensureRunning();
+    }
+
+    function start() {
+      if (renderer) return;
+      init();
+    }
+
+    // Il fermo-immagine resta il paint LCP, ma non deve restare a schermo più
+    // di un frame: si monta subito dopo il primo paint, non in idle (che con
+    // il thread occupato da altro lavoro di pagina poteva slittare parecchio).
+    requestAnimationFrame(() => requestAnimationFrame(start));
+  }
+</script>
