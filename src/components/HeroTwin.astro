@@ -25,17 +25,47 @@
      prefers-reduced-motion il canvas resta al suo posto e dipinge un fotogramma
      fermo (vedi `reducedMotion` nello script): nasconderlo lasciava scoperto il
      fondale sotto, ed è proprio quello che non si deve mai vedere. */
+
+  /* Sotto 768px niente WebGL: `three` non viene nemmeno scaricato (vedi lo
+     script, import dinamico condizionato). Il canvas resta nel DOM ma senza
+     contesto GL non disegna nulla, quindi qui gli si dà lo stesso fermo-
+     immagine della scena come sfondo CSS — stesso inquadramento del digital
+     twin, zero JS aggiuntivo da eseguire sul thread principale del telefono. */
+  @media (max-width: 767px) {
+    .hero-twin {
+      opacity: 1;
+      background-image: url('../assets/img/photos/hero-twin-mobile-still.webp');
+      background-image: image-set(
+        url('../assets/img/photos/hero-twin-mobile-still.avif') type('image/avif'),
+        url('../assets/img/photos/hero-twin-mobile-still.webp') type('image/webp')
+      );
+      background-size: cover;
+      background-position: center 38%;
+    }
+  }
 </style>
 
 <script>
-  import * as THREE from 'three';
+  // Solo per i tipi, azzerato a compile time da esbuild/vite: non scarica mai
+  // `three`, è ciò che tiene valide le annotazioni `THREE.WebGLRenderer` ecc.
+  // qui sotto anche se il valore vero di THREE arriva a runtime dall'import
+  // dinamico, come parametro di `mount` (type-space e value-space sono
+  // namespace separati in TS: i due `THREE` non collidono).
+  import type * as THREE from 'three';
 
+  // `three` (~600KB parsed/executed) non si scarica affatto sotto 768px: il
+  // digital twin lì è un fermo-immagine CSS (vedi lo style qui sopra), e il
+  // codice sotto non lo tocca mai. L'import dinamico, non lo statico che c'era
+  // prima, è ciò che tiene il chunk fuori dal bundle scaricato dal telefono —
+  // uno statico avrebbe portato three.js su ogni device comunque, isMobile o no.
   const canvas = document.querySelector<HTMLCanvasElement>('.hero-twin');
-  if (canvas && getComputedStyle(canvas).display !== 'none') {
-    mount(canvas);
+  const isMobile = matchMedia('(max-width: 767px)').matches;
+
+  if (canvas && !isMobile && getComputedStyle(canvas).display !== 'none') {
+    import('three').then((THREE) => mount(canvas, THREE));
   }
 
-  function mount(canvas: HTMLCanvasElement) {
+  function mount(canvas: HTMLCanvasElement, THREE: typeof import('three')) {
     // Rampa navy + signal-400 del sito (DESIGN.md), non il blu/ciano originale
     // dell'animazione "Amon Wind".
     const NAVY_BG = 0x0a2a44;
@@ -51,7 +81,6 @@
     let started = false;
 
     const section = canvas.closest('section');
-    const isMobile = matchMedia('(max-width: 767px)').matches;
     const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
 
     // Il campo fotovoltaico compare solo da qui in su: sotto, la turbina e la

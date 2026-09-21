@@ -6,15 +6,20 @@
  *    un'isola alta 78px, così su schermi bassi — dove la colonna di testo cresce
  *    e smette di stare centrata — l'occhiello scivolava dietro al vetro.
  *
- * 2. UN SOLO FONDALE. Il fondale dell'hero è il digital twin in WebGL, e
- *    nient'altro. Prima sotto ci stavano un video di pattern e il suo
- *    fermo-immagine: si affacciavano ogni volta che il canvas non stava
- *    dipingendo — il primo frame, `prefers-reduced-motion`, un contesto perso —
- *    e vedere comparire un fondale diverso da quello della scena era peggio che
- *    non vedere nulla. Il test verifica che di quei due non resti traccia a
- *    nessuna larghezza, che il canvas ci sia sempre e dipinga (`is-ready`)
- *    anche con `prefers-reduced-motion`, e che sotto ci sia il navy pieno della
- *    sezione, che è anche il colore con cui il canvas pulisce.
+ * 2. UN SOLO FONDALE. Il fondale dell'hero è il digital twin, e nient'altro.
+ *    Prima sotto ci stavano un video di pattern e il suo fermo-immagine: si
+ *    affacciavano ogni volta che il canvas non stava dipingendo — il primo
+ *    frame, `prefers-reduced-motion`, un contesto perso — e vedere comparire
+ *    un fondale diverso da quello della scena era peggio che non vedere
+ *    nulla. Il test verifica che di quei due non resti traccia a nessuna
+ *    larghezza, e che sotto ci sia il navy pieno della sezione, che è anche
+ *    il colore con cui il canvas pulisce.
+ *
+ * 3. WEBGL SOLO DA 768px IN SU. Sotto quella soglia `three` (~700KB) non si
+ *    scarica affatto: il canvas resta nel DOM ma senza contesto GL, e il
+ *    fondale è il fermo-immagine CSS della stessa scena. Da 768px in su il
+ *    digital twin gira come sempre, `is-ready` compreso, anche con
+ *    `prefers-reduced-motion`.
  *
  * Il test parte dal `dist` già costruito e si salta se non c'è, perche' `npm
  * test` deve restare eseguibile senza una build.
@@ -99,8 +104,10 @@ describe('layout dell’hero su viewport reali', { skip }, () => {
     const page = await ctx.newPage();
     let videoBytes = 0;
     let videoRequests = 0;
+    let threeRequests = 0;
     page.on('request', (q) => {
       if (/\.(mp4|webm)(\?|$)/.test(q.url())) videoRequests++;
+      if (/three\.module/.test(q.url())) threeRequests++;
     });
     page.on('response', async (r) => {
       if (!/\.(mp4|webm)(\?|$)/.test(r.url())) return;
@@ -127,17 +134,18 @@ describe('layout dell’hero su viewport reali', { skip }, () => {
         twinDisplay: twin ? getComputedStyle(twin).display : 'assente',
         twinReady: twin ? twin.classList.contains('is-ready') : false,
         twinWidth: twin ? Math.round(twin.getBoundingClientRect().width) : 0,
+        twinBg: twin ? getComputedStyle(twin).backgroundImage : 'none',
       };
     });
     await ctx.close();
-    return { ...m, videoBytes, videoRequests, clearance: m.eyebrowTop - m.headerBottom };
+    return { ...m, videoBytes, videoRequests, threeRequests, clearance: m.eyebrowTop - m.headerBottom };
   };
 
   // navy-950 (#0A2A44): è il fondo pieno della sezione ed è lo stesso colore con
   // cui il canvas pulisce, così nel frame prima che dipinga non c'è stacco.
   const NAVY_950 = 'rgb(10, 42, 68)';
 
-  /** Le verifiche sul fondale valgono identiche a ogni larghezza. */
+  /** Le verifiche sul fondale che valgono identiche a ogni larghezza. */
   const assertBackdrop = (m, width) => {
     assert.equal(
       m.legacyBackdrops,
@@ -146,13 +154,26 @@ describe('layout dell’hero su viewport reali', { skip }, () => {
     );
     assert.ok(m.twinPresent, 'manca il canvas del digital twin, che è l’unico fondale dell’hero');
     assert.notEqual(m.twinDisplay, 'none', 'il canvas è nascosto: sotto resterebbe scoperto il fondo della sezione');
-    assert.ok(m.twinReady, 'il canvas non ha dipinto nemmeno un frame');
     assert.equal(m.heroBg, NAVY_950, 'l’hero non ha il fondo navy pieno sotto al canvas');
     assert.ok(
       Math.abs(m.twinWidth - width) <= 1,
       `il canvas non copre la larghezza dell’hero (${m.twinWidth}px su ${width}px)`,
     );
     assert.equal(m.videoBytes, 0, `scaricato un video di fondo (${m.videoBytes} byte in ${m.videoRequests} richieste)`);
+  };
+
+  /** Sotto 768px: niente WebGL, il fermo-immagine CSS fa da fondale. */
+  const assertMobileBackdrop = (m, width) => {
+    assertBackdrop(m, width);
+    assert.equal(m.threeRequests, 0, `three.js scaricato sotto 768px (${m.threeRequests} richieste)`);
+    assert.equal(m.twinReady, false, 'il canvas ha dipinto un frame WebGL: sotto 768px non dovrebbe montare three.js');
+    assert.notEqual(m.twinBg, 'none', 'manca il fermo-immagine CSS del digital twin sotto 768px');
+  };
+
+  /** Da 768px in su: il digital twin gira in WebGL come sempre. */
+  const assertDesktopBackdrop = (m, width) => {
+    assertBackdrop(m, width);
+    assert.ok(m.twinReady, 'il canvas non ha dipinto nemmeno un frame');
   };
 
   // Il caso peggiore e' lo schermo *basso*, non stretto: e' l'altezza che fa
@@ -174,11 +195,11 @@ describe('layout dell’hero su viewport reali', { skip }, () => {
         m.clearance > 0,
         `l’occhiello invade l’header di ${(-m.clearance).toFixed(1)}px: il padding dell’hero non copre l’isola fissa (${m.headerBottom.toFixed(1)}px)`,
       );
-      assertBackdrop(m, w);
+      assertMobileBackdrop(m, w);
     });
   }
 
-  // Il digital twin non è un video: gira a ogni larghezza, senza gating.
+  // Il digital twin non è un video: gira in WebGL da 768px in su, senza gating.
   for (const [w, h] of [
     [768, 800],
     [844, 390], // landscape corto: qui l'isola cresce a ~104px
@@ -187,7 +208,7 @@ describe('layout dell’hero su viewport reali', { skip }, () => {
   ]) {
     test(`${w}x${h}: il digital twin dipinge e l’occhiello resta libero`, async () => {
       const m = await load(w, h);
-      assertBackdrop(m, w);
+      assertDesktopBackdrop(m, w);
       assert.ok(m.clearance > 0, `l’occhiello invade l’header di ${(-m.clearance).toFixed(1)}px`);
     });
   }
@@ -196,6 +217,6 @@ describe('layout dell’hero su viewport reali', { skip }, () => {
   // riemergeva il vecchio pattern. Ora resta al suo posto e dipinge un fermo.
   test('con prefers-reduced-motion il canvas resta e dipinge un fotogramma fermo', async () => {
     const m = await load(1280, 900, { reducedMotion: 'reduce' });
-    assertBackdrop(m, 1280);
+    assertDesktopBackdrop(m, 1280);
   });
 });

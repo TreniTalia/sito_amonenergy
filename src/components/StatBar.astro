@@ -28,7 +28,7 @@ const parsed = items.map((item) => {
   <div class="wrap-wide relative z-10 py-16 lg:py-24">
     {
       nota && (
-        <p class="stat-nota mb-10 flex items-center gap-3 text-xs font-semibold uppercase tracking-[0.14em] text-paper/55">
+        <p class="stat-nota text-micro mb-10 flex items-center gap-3 font-semibold uppercase tracking-[0.14em] text-paper/55">
           <span class="ds-eyebrow-dash shrink-0" />
           {nota}
         </p>
@@ -40,15 +40,14 @@ const parsed = items.map((item) => {
           <div class="ds-panel stat-card flex flex-col p-6" data-reveal style={`--reveal-delay:${i * 90}ms`}>
             <span class="stat-dash mb-4 block h-[3px] w-10 rounded-full bg-signal-400" aria-hidden="true" />
             <p
-              class="stat-value tnum text-display leading-none text-paper"
-              style="font-size: clamp(2.8rem, 1.4rem + 3.4vw, 4.75rem); font-stretch: 125%; font-weight: 800;"
+              class="stat-value tnum text-display text-paper"
               data-numero={item.numero}
               data-suffisso={item.suffisso}
             >
               {item.numero ? '0' : ''}
               {item.suffisso}
             </p>
-            <p class="stat-label mt-3 text-sm font-medium leading-snug text-paper/85">
+            <p class="stat-label text-small mt-3 font-medium text-paper/85">
               {item.label}
               {item.finto && <Fragment set:html="<!-- DATO-FINTO -->" />}
             </p>

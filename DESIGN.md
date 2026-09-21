@@ -235,14 +235,37 @@ A two-register palette: a deep navy family that does almost all of the work, plu
 
 **Character:** A geometric, technically-confident expanded display face against a neutral, highly-legible body face — the contrast is in width and personality (engineered vs. readable), not in serif/sans, which keeps the pairing calm rather than decorative.
 
-### Hierarchy
-- **Hero / Display** (`typography.hero` / `typography.display`): H1s only — one per page. `.text-hero` adds the Archivo width axis at 112%; `.text-display` opens it to 125%.
-- **Headline** (`typography.headline`): H2 section titles, Archivo at 125% width.
-- **Control** (`typography.control`): the authority voice — H2s in the Control Room / RCS narrative only. Since §0.2 it is Archivo at normal width (100%) against the Expanded 125% of the field displays; before that it was Source Serif 4. It is this width contrast, not a colour, that marks the control world.
-- **Body** (400/500, 1rem, line-height 1.65): running copy. Capped at 65ch measure at every breakpoint — never wider.
-- **Label** (600, 0.8rem, letter-spacing 0.1em, uppercase, color `signal-400` or `green-500`): the eyebrow line that opens most sections, preceded by a short 32×2px dash in navy or signal.
+### The scale
+
+One ladder, eleven steps, defined once as `--fs-*` / `--lh-*` in `global.css` and consumed by the classes below. Every step is fluid between a 390px and a 1600px viewport and flat outside that range. Nothing is sized by hand in a component: a literal `font-size` in an `.astro` file is a bug, not a decision.
+
+| class | 390px → 1600px | line-height | role |
+|---|---|---|---|
+| `.text-hero` | 40 → 72 | 1.05 | the homepage H1, and only that |
+| `.text-display` | 34 → 60 | 1.07 | H1 on inner pages; the StatBar numbers |
+| `.text-headline` | 28 → 44 | 1.15 | H2 section titles |
+| `.text-control` | 28 → 44 | 1.15 | H2 in the Control Room / RCS narrative |
+| `.text-subhead` | 22 → 28 | 1.15 | paragraph headings inside a long document |
+| `.text-title` | 18 → 22 | 1.25 | every card and panel title |
+| `.text-lead` | 18 → 20 | 1.5 | the paragraph under an H1 or H2 |
+| `.text-body` | 16 → 18 | 1.65 | running copy |
+| `.text-small` | 14 → 16 | 1.55 | copy inside cards, meta rows |
+| `ds-btn` / nav | 15.2 | 1 | every CTA and nav link |
+| `.ds-eyebrow-label` | 12.8 | 1.2 | the eyebrow, uppercase, tracking 0.1em |
+| `.text-micro` | 12 | 1.2 | pills, chips, captions — the floor |
 
 ### Named Rules
+
+**The Two-Curve Rule.** Display type grows about 1.8× from phone to desktop, body type about 1.13×. Both curves are anchored to the same two viewports so the ratio between a heading and its paragraph stays roughly constant instead of drifting — before this, body copy was frozen at 16px while headings nearly doubled, and the contrast went from 2.3× on a phone to 4.2× on a desktop.
+
+**The 12px Floor.** Nothing renders below 12px, at any breakpoint, in any component — WCAG 2.2 AA is a stated requirement in PRODUCT.md. Anything that wants to be smaller becomes uppercase `--fs-micro` with tracking instead.
+
+**Width, not size, marks the control voice.** `.text-control` and `.text-headline` are the same size because they are both H2s; two H2s at different sizes read as two levels of hierarchy that do not exist. What separates them is the Archivo width axis — 100% against the Expanded 125% of the field displays — plus a lower weight. Never reintroduce a size difference to "make the control world feel different".
+
+**Measure before size.** Body copy is capped at 65ch (`.measure`), 54ch (`.measure-tight`), never wider — including inside cards and panels, which is where it last got away (14px copy running 91 characters per line in a 665px panel).
+
+**Balance titles, pretty paragraphs.** Display classes carry `text-wrap: balance`, which evens out line lengths across a two- or three-line title. Running copy carries `text-wrap: pretty`, which pulls a word down rather than leaving one alone on the last line. Neither is optional and neither is interchangeable.
+
 **The No-Fluff Rule.** Copy is short, factual, and technically specific (norms, equipment, kV ratings) rather than motivational. If a sentence could appear on any B2B site regardless of industry, cut it.
 
 **The Deliberate Eyebrow Rule.** The eyebrow-dash-title pattern is inherited directly from the client's print brochure — it is brand continuity, not a default scaffold. Because a tracked-uppercase kicker above every section is also the most common AI-generated-site tell, treat it as a *single system* applied consistently (same dash, same tracking, same two accent colors) rather than as filler reached for per-section; vary section rhythm through spacing, StatBar, marquee, and full-bleed gallery breaks so the eyebrow doesn't become the only structural device on the page.

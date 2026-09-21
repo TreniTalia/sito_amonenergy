@@ -48,7 +48,7 @@ const facts = ['Sistemi di monitoraggio', 'Automazioni', 'Reperibilità 24/7'];
 
         <h1 class="text-hero" data-reveal style="--reveal-delay:160ms">{h1}</h1>
 
-        <p class="measure mt-6 text-lg text-paper/85 lg:text-xl" data-reveal style="--reveal-delay:260ms">
+        <p class="measure text-lead mt-6 text-paper/85" data-reveal style="--reveal-delay:260ms">
           {sub}
         </p>
 
@@ -63,7 +63,7 @@ const facts = ['Sistemi di monitoraggio', 'Automazioni', 'Reperibilità 24/7'];
         <ul class="mt-11 hidden flex-wrap items-center gap-x-7 gap-y-3 sm:flex" data-reveal style="--reveal-delay:460ms">
           {
             facts.map((f, i) => (
-              <li class="flex items-center gap-2.5 text-[0.9375rem] font-semibold tracking-wide text-paper/90">
+              <li class="text-small flex items-center gap-2.5 font-semibold tracking-wide text-paper/90">
                 <span class="ds-live-dot ds-live-dot--sm" aria-hidden="true" style={`--live-delay:${i * 800}ms`} />
                 {f}
               </li>

@@ -54,7 +54,7 @@ const progettiPreview = (await getCollection('progetti'))
           <span class="ds-eyebrow-dash"></span>
           <span class="ds-eyebrow-label">Chi siamo</span>
         </div>
-        <p class="measure text-xl leading-relaxed text-ink/90">{chiSiamoBreve.testo}</p>
+        <p class="measure text-lead text-ink/90">{chiSiamoBreve.testo}</p>
         <a
           href={chiSiamoBreve.link}
           class="group mt-7 inline-flex items-center gap-2 font-semibold text-navy-900 transition-colors hover:text-navy-700"
@@ -67,9 +67,9 @@ const progettiPreview = (await getCollection('progetti'))
           {
             percheAmon.map((p, i) => (
               <div data-reveal style={`--reveal-delay:${i * 90}ms`}>
-                <span class="tnum font-display text-sm font-semibold text-green-500">0{i + 1}</span>
-                <h3 class="mt-2.5 font-display text-lg font-bold tracking-tight text-ink">{p.titolo}</h3>
-                <p class="mt-2 text-sm leading-relaxed text-ink/70">{p.testo}</p>
+                <span class="tnum font-display text-small font-semibold text-green-500">0{i + 1}</span>
+                <h3 class="text-title mt-2.5 text-ink">{p.titolo}</h3>
+                <p class="text-small mt-2 text-ink/70">{p.testo}</p>
               </div>
             ))
           }
@@ -96,8 +96,8 @@ const progettiPreview = (await getCollection('progetti'))
     </div>
     <div class="mb-12 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between" data-reveal>
       <div>
-        <h2 class="text-headline max-w-[18ch]">Un impianto ha tante fasi. Le conosciamo tutte.</h2>
-        <p class="measure mt-3 text-ink/70">
+        <h2 class="text-headline max-w-[22ch]">Un impianto ha tante fasi. Le conosciamo tutte.</h2>
+        <p class="measure text-body mt-3 text-ink/70">
           Costruzione, verifiche strumentali, ricerca guasti, monitoraggio e automazione — la stessa
           squadra segue l'impianto in ogni fase.
         </p>
@@ -136,7 +136,7 @@ const progettiPreview = (await getCollection('progetti'))
           <span class="ds-eyebrow-dash"></span>
           <span class="ds-eyebrow-label">Realizzazioni</span>
         </div>
-        <h2 class="text-headline">Stazioni elettriche che abbiamo costruito.</h2>
+        <h2 class="text-headline max-w-[22ch]">Stazioni elettriche che abbiamo costruito.</h2>
       </div>
       <a href="/lavori/" class="hidden shrink-0 font-semibold text-navy-900 hover:text-navy-700 sm:inline-flex">
         Tutti i progetti →
@@ -159,8 +159,8 @@ const progettiPreview = (await getCollection('progetti'))
               <span class="ds-chip-kv absolute left-3 top-3">{p.data.kv}</span>
             </div>
             <div class="mt-4">
-              <h3 class="font-display text-lg font-bold tracking-tight text-ink">{p.data.titolo}</h3>
-              <p class="mt-1 text-sm text-ink/60">{p.data.tipologia} · prov. {p.data.provincia}</p>
+              <h3 class="text-title text-ink">{p.data.titolo}</h3>
+              <p class="text-small mt-1 text-ink/60">{p.data.tipologia} · prov. {p.data.provincia}</p>
             </div>
           </a>
         ))

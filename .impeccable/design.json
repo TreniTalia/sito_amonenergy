@@ -9,139 +9,381 @@
         "displayName": "Deep Navy",
         "canonical": "#0A2A44",
         "note": "The darkest step and the site's primary drench: hero, footer, dark sub-heroes, control sections, lightbox backdrop.",
-        "tonalRamp": ["#04131F", "#0A2A44", "#103B5F", "#14486F", "#1D5585", "#3B75A0", "#7EA6C4", "#E8EFF5"]
+        "tonalRamp": [
+          "#04131F",
+          "#0A2A44",
+          "#103B5F",
+          "#14486F",
+          "#1D5585",
+          "#3B75A0",
+          "#7EA6C4",
+          "#E8EFF5"
+        ]
       },
       "navy-900": {
         "role": "primary",
         "displayName": "Amon Navy",
         "canonical": "#103B5F",
         "note": "The brand's primary colour. Primary CTA gradient, interactive elements, resting state of body links.",
-        "tonalRamp": ["#04131F", "#0A2A44", "#103B5F", "#14486F", "#1D5585", "#3B75A0", "#7EA6C4", "#E8EFF5"]
+        "tonalRamp": [
+          "#04131F",
+          "#0A2A44",
+          "#103B5F",
+          "#14486F",
+          "#1D5585",
+          "#3B75A0",
+          "#7EA6C4",
+          "#E8EFF5"
+        ]
       },
       "navy-800": {
         "role": "primary",
         "displayName": "Navy Mid",
         "canonical": "#14486F",
         "note": "Top stop of the primary-button gradient and of ambient section glows.",
-        "tonalRamp": ["#04131F", "#0A2A44", "#103B5F", "#14486F", "#1D5585", "#3B75A0", "#7EA6C4", "#E8EFF5"]
+        "tonalRamp": [
+          "#04131F",
+          "#0A2A44",
+          "#103B5F",
+          "#14486F",
+          "#1D5585",
+          "#3B75A0",
+          "#7EA6C4",
+          "#E8EFF5"
+        ]
       },
       "navy-700": {
         "role": "primary",
         "displayName": "Navy Hover",
         "canonical": "#1D5585",
         "note": "Interactive hover/focus on light surfaces: card borders, link underlines, glow washes.",
-        "tonalRamp": ["#04131F", "#0A2A44", "#103B5F", "#14486F", "#1D5585", "#3B75A0", "#7EA6C4", "#E8EFF5"]
+        "tonalRamp": [
+          "#04131F",
+          "#0A2A44",
+          "#103B5F",
+          "#14486F",
+          "#1D5585",
+          "#3B75A0",
+          "#7EA6C4",
+          "#E8EFF5"
+        ]
       },
       "navy-300": {
         "role": "neutral",
         "displayName": "Muted Navy",
         "canonical": "#7EA6C4",
         "note": "Secondary text and map labels on dark surfaces; the cold tone of the spark-gap divider.",
-        "tonalRamp": ["#04131F", "#0A2A44", "#103B5F", "#14486F", "#1D5585", "#3B75A0", "#7EA6C4", "#E8EFF5"]
+        "tonalRamp": [
+          "#04131F",
+          "#0A2A44",
+          "#103B5F",
+          "#14486F",
+          "#1D5585",
+          "#3B75A0",
+          "#7EA6C4",
+          "#E8EFF5"
+        ]
       },
       "navy-100": {
         "role": "neutral",
         "displayName": "Pale Navy",
         "canonical": "#E8EFF5",
         "note": "Light alternating section background, resting card borders, and body text on navy drenches.",
-        "tonalRamp": ["#04131F", "#0A2A44", "#103B5F", "#14486F", "#1D5585", "#3B75A0", "#7EA6C4", "#E8EFF5"]
+        "tonalRamp": [
+          "#04131F",
+          "#0A2A44",
+          "#103B5F",
+          "#14486F",
+          "#1D5585",
+          "#3B75A0",
+          "#7EA6C4",
+          "#E8EFF5"
+        ]
       },
       "green-500": {
         "role": "accent",
         "displayName": "Signal Leaf",
         "canonical": "#3E8E5A",
         "note": "ACCENT ONLY. The logo's leaf. Service-card icons, eyebrow dashes, step numbers, bullets, text selection. Never a background, never a large fill (the Leaf Rarity Rule). The dark steps of this ramp are reference tone only — they were deleted from the palette in DESIGN.md section 0.1 and must not be used as surfaces.",
-        "tonalRamp": ["#061C12", "#0B2C1D", "#123F2A", "#1A5335", "#227244", "#3E8E5A", "#4FD07F", "#BFE6CD"]
+        "tonalRamp": [
+          "#061C12",
+          "#0B2C1D",
+          "#123F2A",
+          "#1A5335",
+          "#227244",
+          "#3E8E5A",
+          "#4FD07F",
+          "#BFE6CD"
+        ]
       },
       "green-400": {
         "role": "accent",
         "displayName": "Live Signal",
         "canonical": "#4FD07F",
         "note": "ACCENT ONLY. The 24/7 heartbeat: live dots, telemetry pulse, checkmarks, the coverage-map pin and radius rings. Never a fill larger than a marker.",
-        "tonalRamp": ["#061C12", "#0B2C1D", "#123F2A", "#1A5335", "#227244", "#3E8E5A", "#4FD07F", "#BFE6CD"]
+        "tonalRamp": [
+          "#061C12",
+          "#0B2C1D",
+          "#123F2A",
+          "#1A5335",
+          "#227244",
+          "#3E8E5A",
+          "#4FD07F",
+          "#BFE6CD"
+        ]
       },
       "signal-400": {
         "role": "secondary",
         "displayName": "Circuit Blue",
         "canonical": "#4FB3D9",
         "note": "The technical signal accent: eyebrow labels and dashes, focus-visible outlines, the spark-gap arc, hover glow on dark CTAs, the coverage-map wash.",
-        "tonalRamp": ["#08222E", "#0D3547", "#134A61", "#1B6284", "#2B87AC", "#4FB3D9", "#8FD3EC", "#DCF1F9"]
+        "tonalRamp": [
+          "#08222E",
+          "#0D3547",
+          "#134A61",
+          "#1B6284",
+          "#2B87AC",
+          "#4FB3D9",
+          "#8FD3EC",
+          "#DCF1F9"
+        ]
       },
       "tier-basic": {
         "role": "tertiary",
         "displayName": "RCS Basic",
         "canonical": "#43B26A",
         "note": "RCS tier marker, from the company presentation. Top rule and heading of the Basic tier card only.",
-        "tonalRamp": ["#0B2716", "#123C22", "#19542F", "#22713F", "#2F9354", "#43B26A", "#86D3A2", "#D2F0DE"]
+        "tonalRamp": [
+          "#0B2716",
+          "#123C22",
+          "#19542F",
+          "#22713F",
+          "#2F9354",
+          "#43B26A",
+          "#86D3A2",
+          "#D2F0DE"
+        ]
       },
       "tier-advance": {
         "role": "tertiary",
         "displayName": "RCS Advance",
         "canonical": "#E0912F",
         "note": "RCS tier marker. Top rule and heading of the Advance tier card only.",
-        "tonalRamp": ["#2C1A05", "#43280A", "#5E3810", "#7E4B16", "#AD681F", "#E0912F", "#EEBA7B", "#FAE7CE"]
+        "tonalRamp": [
+          "#2C1A05",
+          "#43280A",
+          "#5E3810",
+          "#7E4B16",
+          "#AD681F",
+          "#E0912F",
+          "#EEBA7B",
+          "#FAE7CE"
+        ]
       },
       "tier-pro": {
         "role": "tertiary",
         "displayName": "RCS Pro",
         "canonical": "#E05A3D",
         "note": "RCS tier marker. Top rule and heading of the Pro tier card only.",
-        "tonalRamp": ["#2E0F07", "#46180C", "#622212", "#832E19", "#B24124", "#E05A3D", "#EE9683", "#FADCD4"]
+        "tonalRamp": [
+          "#2E0F07",
+          "#46180C",
+          "#622212",
+          "#832E19",
+          "#B24124",
+          "#E05A3D",
+          "#EE9683",
+          "#FADCD4"
+        ]
       },
       "paper": {
         "role": "neutral",
         "displayName": "Paper",
         "canonical": "#FAFBFC",
         "note": "Base page background on light sections; text colour on navy drenches.",
-        "tonalRamp": ["#16222E", "#2B3A48", "#465767", "#697A8A", "#94A3B0", "#C4CED6", "#E8EDF1", "#FAFBFC"]
+        "tonalRamp": [
+          "#16222E",
+          "#2B3A48",
+          "#465767",
+          "#697A8A",
+          "#94A3B0",
+          "#C4CED6",
+          "#E8EDF1",
+          "#FAFBFC"
+        ]
       },
       "ink": {
         "role": "neutral",
         "displayName": "Ink",
         "canonical": "#16222E",
         "note": "Body text on paper. Muted variants are opacity steps of ink, never a separate gray.",
-        "tonalRamp": ["#16222E", "#2B3A48", "#465767", "#697A8A", "#94A3B0", "#C4CED6", "#E8EDF1", "#FAFBFC"]
+        "tonalRamp": [
+          "#16222E",
+          "#2B3A48",
+          "#465767",
+          "#697A8A",
+          "#94A3B0",
+          "#C4CED6",
+          "#E8EDF1",
+          "#FAFBFC"
+        ]
       }
     },
     "typographyMeta": {
-      "hero": { "displayName": "Hero", "purpose": "The homepage H1 only. Archivo with the width axis at 112% and weight 760." },
-      "display": { "displayName": "Display", "purpose": "H1 on inner pages. Archivo width axis opened to 125%." },
-      "headline": { "displayName": "Headline", "purpose": "H2 section titles, Archivo at 125% width, text-wrap: balance." },
-      "control": { "displayName": "Control", "purpose": "H2s in the Control Room / RCS narrative. Since section 0.2 it is Archivo at normal width (100%, weight 620) against the Expanded 125% of the field displays — that width contrast, not a colour and no longer a serif, is what marks the control voice. Source Serif 4 has been removed from the project." },
-      "body": { "displayName": "Body", "purpose": "Running copy, Inter. Capped at 68ch (.measure) or 54ch (.measure-tight)." },
-      "button": { "displayName": "Button", "purpose": "Every CTA. A hair under body so a pill reads as a control, not a sentence." },
-      "label": { "displayName": "Label", "purpose": "The eyebrow line opening most sections, preceded by a 32x2px dash." },
-      "pill-label": { "displayName": "Pill Label", "purpose": "Tags and spec chips inside telemetry panels." }
+      "hero": {
+        "displayName": "Hero",
+        "purpose": "The homepage H1 only, 40px at 390px viewport to 72px at 1600. Archivo, width axis 112%, weight 760."
+      },
+      "display": {
+        "displayName": "Display",
+        "purpose": "H1 on inner pages and the StatBar numbers, 34 to 60. Archivo, width axis 125%."
+      },
+      "headline": {
+        "displayName": "Headline",
+        "purpose": "H2 section titles, 28 to 44, Archivo at 125% width, text-wrap: balance."
+      },
+      "control": {
+        "displayName": "Control",
+        "purpose": "H2s in the Control Room / RCS narrative. Same SIZE as headline (28 to 44) because both are H2s: what marks the control voice is the Archivo width axis at 100% against the Expanded 125% of the field displays, plus weight 620. Source Serif 4 has been removed from the project."
+      },
+      "body": {
+        "displayName": "Body",
+        "purpose": "Running copy, Inter, 16 to 18, line-height 1.65. Capped at 65ch (.measure) or 54ch (.measure-tight), cards and panels included."
+      },
+      "button": {
+        "displayName": "Button",
+        "purpose": "Every CTA and nav link, 15.2 fixed. A hair under body so a pill reads as a control, not a sentence."
+      },
+      "label": {
+        "displayName": "Label",
+        "purpose": "The eyebrow line opening most sections, 12.8 fixed, uppercase, tracking 0.1em, preceded by a 32x2px dash."
+      },
+      "pill-label": {
+        "displayName": "Pill Label",
+        "purpose": "Tags, spec chips and captions, 12 fixed: the floor of the scale, nothing renders smaller anywhere (WCAG 2.2 AA)."
+      },
+      "subhead": {
+        "displayName": "Subhead",
+        "purpose": "Paragraph headings inside a long document (the privacy policy), 22 to 28. The step that was missing between headline and title, where the scale jumped 2x."
+      },
+      "title": {
+        "displayName": "Title",
+        "purpose": "Every card and panel title, 18 to 22. Replaces the seven hand-written sizes this role used to have (1.1 / 1.125 / 1.15 / 1.25 / 1.375 / 1.4 / 1.5rem)."
+      },
+      "lead": {
+        "displayName": "Lead",
+        "purpose": "The paragraph directly under an H1 or H2, 18 to 20, line-height 1.5."
+      },
+      "small": {
+        "displayName": "Small",
+        "purpose": "Copy inside cards and meta rows, 14 to 16, line-height 1.55."
+      }
     },
     "shadows": [
-      { "name": "shadow-sm", "value": "0 1px 2px rgba(10,42,68,0.06), 0 4px 12px -4px rgba(10,42,68,0.1)", "purpose": "Resting cards, chips, secondary buttons." },
-      { "name": "shadow-md", "value": "0 2px 6px rgba(10,42,68,0.07), 0 16px 40px -12px rgba(10,42,68,0.18)", "purpose": "Primary CTAs, light glass panels, the coverage-map card." },
-      { "name": "shadow-lg", "value": "0 10px 30px -10px rgba(10,42,68,0.22), 0 30px 70px -24px rgba(10,42,68,0.3)", "purpose": "Hover-lifted cards and buttons. Always paired with a -2px to -4px translateY." },
-      { "name": "shadow-glass", "value": "0 10px 34px -10px rgba(10,42,68,0.3), inset 0 1px 0 rgba(255,255,255,0.16)", "purpose": "Dark glass only. The inset top highlight is the specular edge; without it glass reads as flat translucency." },
-      { "name": "glow-signal", "value": "0 0 44px -8px rgba(79,179,217,0.55)", "purpose": "Hover glow on dark CTAs and the telemetry monitor. Never at rest." },
-      { "name": "glow-green", "value": "0 0 44px -8px rgba(79,208,127,0.55)", "purpose": "Live-state glow on telemetry accents. Marker scale only, per the Leaf Rarity Rule." }
+      {
+        "name": "shadow-sm",
+        "value": "0 1px 2px rgba(10,42,68,0.06), 0 4px 12px -4px rgba(10,42,68,0.1)",
+        "purpose": "Resting cards, chips, secondary buttons."
+      },
+      {
+        "name": "shadow-md",
+        "value": "0 2px 6px rgba(10,42,68,0.07), 0 16px 40px -12px rgba(10,42,68,0.18)",
+        "purpose": "Primary CTAs, light glass panels, the coverage-map card."
+      },
+      {
+        "name": "shadow-lg",
+        "value": "0 10px 30px -10px rgba(10,42,68,0.22), 0 30px 70px -24px rgba(10,42,68,0.3)",
+        "purpose": "Hover-lifted cards and buttons. Always paired with a -2px to -4px translateY."
+      },
+      {
+        "name": "shadow-glass",
+        "value": "0 10px 34px -10px rgba(10,42,68,0.3), inset 0 1px 0 rgba(255,255,255,0.16)",
+        "purpose": "Dark glass only. The inset top highlight is the specular edge; without it glass reads as flat translucency."
+      },
+      {
+        "name": "glow-signal",
+        "value": "0 0 44px -8px rgba(79,179,217,0.55)",
+        "purpose": "Hover glow on dark CTAs and the telemetry monitor. Never at rest."
+      },
+      {
+        "name": "glow-green",
+        "value": "0 0 44px -8px rgba(79,208,127,0.55)",
+        "purpose": "Live-state glow on telemetry accents. Marker scale only, per the Leaf Rarity Rule."
+      }
     ],
     "motion": [
-      { "name": "ease-signature", "value": "cubic-bezier(0.22, 1, 0.36, 1)", "purpose": "The default: an out-quint. All state transitions, reveals, and hover lifts." },
-      { "name": "ease-out-expo", "value": "cubic-bezier(0.16, 1, 0.3, 1)", "purpose": "The live-dot ping and other one-shot pulses that must decay fast." },
-      { "name": "live-ping", "value": "2.4s var(--ease-out-expo) infinite", "purpose": "The 24/7 heartbeat ring expanding out of .ds-live-dot." },
-      { "name": "scan", "value": "4.5s var(--ease-signature) infinite", "purpose": "The scanline sweeping the RCS monitor screenshot. Suppressed under prefers-reduced-motion." }
+      {
+        "name": "ease-signature",
+        "value": "cubic-bezier(0.22, 1, 0.36, 1)",
+        "purpose": "The default: an out-quint. All state transitions, reveals, and hover lifts."
+      },
+      {
+        "name": "ease-out-expo",
+        "value": "cubic-bezier(0.16, 1, 0.3, 1)",
+        "purpose": "The live-dot ping and other one-shot pulses that must decay fast."
+      },
+      {
+        "name": "live-ping",
+        "value": "2.4s var(--ease-out-expo) infinite",
+        "purpose": "The 24/7 heartbeat ring expanding out of .ds-live-dot."
+      },
+      {
+        "name": "scan",
+        "value": "4.5s var(--ease-signature) infinite",
+        "purpose": "The scanline sweeping the RCS monitor screenshot. Suppressed under prefers-reduced-motion."
+      }
     ],
     "breakpoints": [
-      { "name": "xs", "value": "400px" },
-      { "name": "sm", "value": "640px" },
-      { "name": "md", "value": "768px" },
-      { "name": "lg", "value": "1024px" },
-      { "name": "xl", "value": "1280px" },
-      { "name": "2xl", "value": "1536px" },
-      { "name": "3xl", "value": "1920px" }
+      {
+        "name": "xs",
+        "value": "400px"
+      },
+      {
+        "name": "sm",
+        "value": "640px"
+      },
+      {
+        "name": "md",
+        "value": "768px"
+      },
+      {
+        "name": "lg",
+        "value": "1024px"
+      },
+      {
+        "name": "xl",
+        "value": "1280px"
+      },
+      {
+        "name": "2xl",
+        "value": "1536px"
+      },
+      {
+        "name": "3xl",
+        "value": "1920px"
+      }
     ],
     "zIndex": [
-      { "name": "sticky", "value": "30" },
-      { "name": "header", "value": "40" },
-      { "name": "mobilebar", "value": "45" },
-      { "name": "modal", "value": "50" },
-      { "name": "skip", "value": "100" }
+      {
+        "name": "sticky",
+        "value": "30"
+      },
+      {
+        "name": "header",
+        "value": "40"
+      },
+      {
+        "name": "mobilebar",
+        "value": "45"
+      },
+      {
+        "name": "modal",
+        "value": "50"
+      },
+      {
+        "name": "skip",
+        "value": "100"
+      }
     ]
   },
   "components": [
@@ -221,13 +463,41 @@
       "Mobile-first, touch-parity by construction: nothing shown only on hover"
     ],
     "rules": [
-      { "name": "The One Surface Rule", "body": "Navy is the only surface colour of the site, control sections included. The dark green steps were deleted from the palette so a green section cannot come back by accident. Continuity over contrast.", "section": "colors" },
-      { "name": "The Leaf Rarity Rule", "body": "green-500 and green-400 never fill a background, a button, or a section. They appear only as small marks — a live dot, an eyebrow dash, a step number, an icon, a bullet, a map pin — and their rarity is what keeps green feeling like the logo's signature colour rather than a UI colour.", "section": "colors" },
-      { "name": "The Navy Ramp Rule", "body": "navy-950 through navy-100 is a single continuous tonal ramp, not six unrelated colours. Any new navy-family need should sit somewhere on this same ramp rather than introducing an unrelated blue.", "section": "colors" },
-      { "name": "The Navy Shadow Rule", "body": "Every shadow is mixed from rgba(10, 42, 68, ...). A neutral or black shadow anywhere in the system is a bug — on the paper background it reads as smudge rather than depth.", "section": "elevation" },
-      { "name": "The Earned Blur Rule", "body": "backdrop-filter is for elements that genuinely float over something: the navbar island over the hero, captions over photography, the lightbox, telemetry panels over a drench. Glass on a static section against a flat background is decoration, and PRODUCT.md rules out decorative glassmorphism by name.", "section": "elevation" },
-      { "name": "The No-Fluff Rule", "body": "Copy is short, factual, and technically specific (norms, equipment, kV ratings) rather than motivational. If a sentence could appear on any B2B site regardless of industry, cut it.", "section": "typography" },
-      { "name": "The Deliberate Eyebrow Rule", "body": "The eyebrow-dash-title pattern is inherited directly from the client's print brochure — it is brand continuity, not a default scaffold. Because a tracked-uppercase kicker above every section is also the most common AI-generated-site tell, treat it as a single system applied consistently rather than as filler reached for per-section; vary section rhythm through spacing, StatBar, marquee, and full-bleed gallery breaks.", "section": "typography" }
+      {
+        "name": "The One Surface Rule",
+        "body": "Navy is the only surface colour of the site, control sections included. The dark green steps were deleted from the palette so a green section cannot come back by accident. Continuity over contrast.",
+        "section": "colors"
+      },
+      {
+        "name": "The Leaf Rarity Rule",
+        "body": "green-500 and green-400 never fill a background, a button, or a section. They appear only as small marks — a live dot, an eyebrow dash, a step number, an icon, a bullet, a map pin — and their rarity is what keeps green feeling like the logo's signature colour rather than a UI colour.",
+        "section": "colors"
+      },
+      {
+        "name": "The Navy Ramp Rule",
+        "body": "navy-950 through navy-100 is a single continuous tonal ramp, not six unrelated colours. Any new navy-family need should sit somewhere on this same ramp rather than introducing an unrelated blue.",
+        "section": "colors"
+      },
+      {
+        "name": "The Navy Shadow Rule",
+        "body": "Every shadow is mixed from rgba(10, 42, 68, ...). A neutral or black shadow anywhere in the system is a bug — on the paper background it reads as smudge rather than depth.",
+        "section": "elevation"
+      },
+      {
+        "name": "The Earned Blur Rule",
+        "body": "backdrop-filter is for elements that genuinely float over something: the navbar island over the hero, captions over photography, the lightbox, telemetry panels over a drench. Glass on a static section against a flat background is decoration, and PRODUCT.md rules out decorative glassmorphism by name.",
+        "section": "elevation"
+      },
+      {
+        "name": "The No-Fluff Rule",
+        "body": "Copy is short, factual, and technically specific (norms, equipment, kV ratings) rather than motivational. If a sentence could appear on any B2B site regardless of industry, cut it.",
+        "section": "typography"
+      },
+      {
+        "name": "The Deliberate Eyebrow Rule",
+        "body": "The eyebrow-dash-title pattern is inherited directly from the client's print brochure — it is brand continuity, not a default scaffold. Because a tracked-uppercase kicker above every section is also the most common AI-generated-site tell, treat it as a single system applied consistently rather than as filler reached for per-section; vary section rhythm through spacing, StatBar, marquee, and full-bleed gallery breaks.",
+        "section": "typography"
+      }
     ],
     "dos": [
       "Do keep green-500 / green-400 to micro-accents only — a live dot, an eyebrow dash, a step number, an icon, a bullet (the Leaf Rarity Rule).",

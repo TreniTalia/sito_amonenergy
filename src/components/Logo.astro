@@ -14,9 +14,11 @@ interface Props {
   /** Logo height in px (width scales proportionally). */
   size?: number;
   class?: string;
+  /** 'eager' for the header (above the fold everywhere); footer stays 'lazy'. */
+  loading?: 'eager' | 'lazy';
 }
 
-const { variant = 'full', size = 34, class: className = '' } = Astro.props;
+const { variant = 'full', size = 34, class: className = '', loading = 'lazy' } = Astro.props;
 
 const fullRatio = logoWhite.width / logoWhite.height;
 const cssWidth = Math.ceil(size * (variant === 'full' ? fullRatio : 1));
@@ -31,7 +33,7 @@ const cssWidth = Math.ceil(size * (variant === 'full' ? fullRatio : 1));
       sizes={`${cssWidth}px`}
       style={`--logo-h:${size}px`}
       class:list={['amon-logo', className]}
-      loading="eager"
+      loading={loading}
     />
   ) : (
     <Image
@@ -41,7 +43,7 @@ const cssWidth = Math.ceil(size * (variant === 'full' ? fullRatio : 1));
       sizes={`${size}px`}
       style={`--logo-h:${size}px`}
       class:list={['amon-logo', className]}
-      loading="eager"
+      loading={loading}
     />
   )
 }

@@ -16,10 +16,10 @@ const year = new Date().getFullYear();
   <div class="wrap-wide py-16 lg:py-24 grid gap-12 sm:grid-cols-2 lg:grid-cols-3">
     <div>
       <Logo size={32} />
-      <p class="mt-4 text-paper/85 measure">Professionisti dell'energia.</p>
+      <p class="text-small measure mt-4 text-paper/85">Professionisti dell'energia.</p>
       <a
         href={contatti.linkedin}
-        class="inline-flex items-center gap-2.5 mt-6 text-sm text-paper/90 hover:text-signal-400 transition-colors"
+        class="text-small inline-flex items-center gap-2.5 mt-6 text-paper/90 hover:text-signal-400 transition-colors"
         target="_blank"
         rel="noopener noreferrer"
       >
@@ -32,7 +32,7 @@ const year = new Date().getFullYear();
 
     <div>
       <p class="ds-eyebrow-label" style="color: var(--color-paper); opacity: 0.75;">Naviga</p>
-      <ul class="mt-4 flex flex-col gap-3">
+      <ul class="text-small mt-4 flex flex-col gap-3">
         {quickLinks.map((s) => (
           <li><a href={s.href} class="text-paper/90 hover:text-signal-400 transition-colors">{s.label}</a></li>
         ))}
@@ -41,7 +41,7 @@ const year = new Date().getFullYear();
 
     <div>
       <p class="ds-eyebrow-label" style="color: var(--color-paper); opacity: 0.75;">Contatti</p>
-      <ul class="mt-4 flex flex-col gap-3 text-paper/90">
+      <ul class="text-small mt-4 flex flex-col gap-3 text-paper/90">
         <li>{contatti.indirizzo}</li>
         <li><a href={contatti.telefonoHref} class="hover:text-signal-400 transition-colors">{contatti.telefono}</a></li>
         <li><a href={`mailto:${contatti.email}`} class="hover:text-signal-400 transition-colors">{contatti.email}</a></li>
@@ -53,7 +53,7 @@ const year = new Date().getFullYear();
   </div>
 
   <div class="border-t border-navy-700">
-    <div class="wrap-wide pt-6 pb-6 flex flex-col sm:flex-row items-center justify-between gap-3 text-sm text-paper/75">
+    <div class="text-small wrap-wide pt-6 pb-6 flex flex-col sm:flex-row items-center justify-between gap-3 text-paper/75">
       <p>© {year} {contatti.ragioneSociale}</p>
       <div class="flex items-center gap-6">
         <a href="/privacy-policy/" class="hover:text-signal-400 transition-colors">Privacy Policy</a>

@@ -3,8 +3,10 @@ import { Image } from 'astro:assets';
 // The real RCS platform. Shown whole (16:9, uncropped) — the dashboard is the
 // proof, so cropping it to fit a panel would throw away the argument.
 import controlRoom from '../assets/img/rcs/rcs-dashboard.png';
-import patternDesktop from '../assets/img/rcs/pattern-rcs.jpg';
-import patternMobile from '../assets/img/rcs/pattern-rcs-mobile.jpg';
+// Traliccio AT reale in controluce (Pexels), stesso trattamento duotone di
+// `servizi-controllo-pattern.jpg` in servizi/index.astro: desaturato +
+// tinta navy in `mix-blend-mode: color`, non un'illustrazione a sé.
+import pattern from '../assets/img/rcs/pattern-grid-twilight.jpg';
 
 interface Props {
   eyebrow: string;
@@ -44,23 +46,14 @@ const sistemi = [
 <section class="control relative isolate overflow-hidden bg-navy-950 text-paper">
   <div class="control-pattern" aria-hidden="true">
     <Image
-      src={patternDesktop}
+      src={pattern}
       alt=""
-      class="control-pattern-img hidden md:block"
+      class="control-pattern-img"
       data-parallax
-      widths={[900, 1325, 1800, 2400]}
+      widths={[480, 768, 1100, 1800, 2400]}
       sizes="100vw"
-      quality={92}
     />
-    <Image
-      src={patternMobile}
-      alt=""
-      class="control-pattern-img md:hidden"
-      data-parallax
-      widths={[480, 768, 1100]}
-      sizes="100vw"
-      quality={92}
-    />
+    <div class="control-pattern-tint" aria-hidden="true"></div>
   </div>
   <div class="control-glow" aria-hidden="true"></div>
 
@@ -72,8 +65,8 @@ const sistemi = [
           <span class="ds-live-dot" aria-hidden="true"></span>
           <span class="ds-eyebrow-label ds-eyebrow-label--signal">{eyebrow}</span>
         </div>
-        <h2 class="text-control max-w-[18ch]" data-reveal style="--reveal-delay:80ms">{titolo}</h2>
-        <p class="measure mt-6 text-lg text-navy-100" data-reveal style="--reveal-delay:160ms">{testo}</p>
+        <h2 class="text-control max-w-[22ch]" data-reveal style="--reveal-delay:80ms">{titolo}</h2>
+        <p class="measure text-lead mt-6 text-navy-100" data-reveal style="--reveal-delay:160ms">{testo}</p>
         <a
           href={href}
           class="ds-btn-signal mt-9 inline-flex"
@@ -91,12 +84,12 @@ const sistemi = [
           <span class="h-2.5 w-2.5 shrink-0 rounded-full bg-tier-pro/80"></span>
           <span class="h-2.5 w-2.5 shrink-0 rounded-full bg-tier-advance/80"></span>
           <span class="h-2.5 w-2.5 shrink-0 rounded-full bg-tier-basic/80"></span>
-          <span class="ml-3 truncate font-display text-xs font-semibold uppercase tracking-[0.12em] text-navy-100/75">
+          <span class="text-micro ml-3 truncate font-display font-semibold uppercase tracking-[0.12em] text-navy-100/75">
             Amon · Control Room — Castelluccio dei Sauri (FG)
           </span>
           <span class="ml-auto flex shrink-0 items-center gap-2 pl-3">
             <span class="ds-live-dot" aria-hidden="true"></span>
-            <span class="font-display text-[0.7rem] font-bold uppercase tracking-[0.14em] text-navy-100">Live · 24/7</span>
+            <span class="text-micro font-display font-bold uppercase tracking-[0.14em] text-navy-100">Live · 24/7</span>
           </span>
         </div>
         <Image
@@ -115,11 +108,11 @@ const sistemi = [
         sistemi.map((s, i) => (
           <article class="ds-panel flex flex-col p-7 lg:p-8" data-reveal style={`--reveal-delay:${i * 100}ms`}>
             <span class="ds-pill self-start">{s.tag}</span>
-            <h3 class="mt-5 font-display text-xl font-bold tracking-tight">{s.titolo}</h3>
-            <p class="mt-3 text-sm leading-relaxed text-navy-100/95">{s.testo}</p>
+            <h3 class="text-title mt-5">{s.titolo}</h3>
+            <p class="text-small mt-3 text-navy-100/95">{s.testo}</p>
             <ul class="mt-6 flex flex-wrap gap-2 border-t border-white/12 pt-5">
               {s.specs.map((spec) => (
-                <li class="rounded-full border border-white/18 bg-white/8 px-3 py-1 font-display text-[0.72rem] font-medium tracking-wide text-navy-100">
+                <li class="text-micro rounded-full border border-white/18 bg-white/8 px-3 py-1 font-display font-medium tracking-wide text-navy-100">
                   {spec}
                 </li>
               ))}
@@ -132,13 +125,15 @@ const sistemi = [
 </section>
 
 <style>
-  /* Pattern di sfondo (turbine/skyline wireframe) — texture atmosferica, non
-     un'illustrazione da mettere in mostra: opacità bassa + gradiente navy
-     sopra tengono il contrasto del testo e dei pannelli in primo piano. La
-     `.control-glow` (sotto) resta sopra il pattern e sotto il contenuto,
-     così i suoi bagliori signal/verde restano leggibili invariati. Il layer
-     è più alto del contenitore (`height: 130%`) per lasciare spazio al
-     traslare verticale della parallasse senza scoprire un bordo vuoto. */
+  /* Pattern di sfondo — traliccio AT reale in controluce, non un'illustrazione
+     da mettere in mostra: desaturato e scurito, poi un layer navy in
+     `mix-blend-mode: color` (`.control-pattern-tint`, stesso trucco duotone
+     di `servizi-controllo-pattern.jpg`) gli impone la tinta del sistema
+     invece del blu naturale della foto. La `.control-glow` (sotto) resta
+     sopra il pattern e sotto il contenuto, così i suoi bagliori signal/verde
+     restano leggibili invariati. Il layer è più alto del contenitore
+     (`height: 150%`) per lasciare spazio al traslare verticale della
+     parallasse senza scoprire un bordo vuoto. */
   .control-pattern {
     position: absolute;
     inset: 0;
@@ -153,9 +148,17 @@ const sistemi = [
     height: 150%;
     max-width: none;
     object-fit: cover;
-    opacity: 0.52;
+    object-position: center 30%;
+    filter: grayscale(1) brightness(0.85) contrast(1.15);
+    opacity: 0.9;
     transform: translate3d(-50%, 0, 0) scale(1);
     will-change: transform;
+  }
+  .control-pattern-tint {
+    position: absolute;
+    inset: 0;
+    background: var(--color-navy-700);
+    mix-blend-mode: color;
   }
   .control-pattern::after {
     content: '';
@@ -170,6 +173,36 @@ const sistemi = [
         color-mix(in srgb, var(--color-navy-950) 45%, transparent) 38%,
         transparent 52%
       );
+  }
+
+  /* Su telefono la sezione è alta oltre 2000px (i tre pannelli si impilano) e
+     una foto in orizzontale, tirata a coprirla tutta, veniva ingrandita fino a
+     ~4000px di larghezza: se ne vedeva un decimo, un reticolo di tralicci
+     illeggibile e molliccio. Qui il pattern smette di coprire tutta la fascia e
+     resta dove serve — l'apertura, sotto occhiello, titolo e monitor — poi
+     sfuma nel navy pieno della sezione, che è lo stesso colore con cui il
+     gradiente chiude. Il resto della fascia è navy, non un'immagine sgranata.
+     Il velo orizzontale del desktop qui non serve: il testo prende tutta la
+     larghezza, quindi comanda il solo velo verticale. */
+  @media (max-width: 767px) {
+    .control-pattern {
+      bottom: auto;
+      /* L'altezza della fascia decide quanto della foto si vede: `cover` su un
+         riquadro più alto che largo scala sull'altezza e taglia ai fianchi,
+         quindi più la fascia è alta, più stretta è la fetta di traliccio che
+         resta. A ~46svh il riquadro è quasi quadrato e in quadro ci sta il
+         traliccio intero, bracci compresi, invece di un dettaglio di reticolo. */
+      height: clamp(300px, 46svh, 440px);
+    }
+    .control-pattern::after {
+      background: linear-gradient(
+        180deg,
+        var(--color-navy-950) 0%,
+        color-mix(in srgb, var(--color-navy-950) 35%, transparent) 22%,
+        color-mix(in srgb, var(--color-navy-950) 55%, transparent) 62%,
+        var(--color-navy-950) 100%
+      );
+    }
   }
   .control-glow {
     position: absolute;
@@ -188,6 +221,20 @@ const sistemi = [
       transform: translate3d(-50%, 0, 0) scale(1) !important;
     }
   }
+
+  /* `.control` è `overflow-hidden` per tagliare `.control-pattern-img`
+     (150% di altezza, posizionato assoluto): questo lo rende un vero scroll
+     container per lo scroll-timeline della sezione "Scroll reveal — congedo"
+     di global.css, e la `view()` timeline dei suoi `[data-reveal]` si risolve
+     contro quel container invece che contro il documento. Ne segue un
+     progress sballato, indipendente dallo scroll reale della pagina, che può
+     bloccare gli elementi a un'opacità intermedia per sempre (visto su
+     mobile). L'hero ha lo stesso problema e lo disattiva già così — qui si
+     applica la stessa cura: niente congedo, resta la sola transizione
+     d'ingresso via `.is-visible`. */
+  .control :global([data-reveal]) {
+    animation: none;
+  }
 </style>
 
 <script>
@@ -204,18 +251,23 @@ const sistemi = [
     let inView = false;
     let ticking = false;
     const depth = 0.32; // frazione della sezione percorsa che il layer trasla
-    // Il layer è alto 150% con -25% di top: 25% di margine per lato, la
-    // depth qui sopra resta abbondantemente dentro quel margine (vedi commento
-    // su .control-pattern-img più sotto per i numeri).
 
     const apply = () => {
       ticking = false;
       const rect = section.getBoundingClientRect();
       const vh = window.innerHeight || document.documentElement.clientHeight;
       const progress = (vh - rect.top) / (vh + rect.height); // 0 all'ingresso, 1 all'uscita
-      const offset = (progress - 0.5) * rect.height * depth;
+      const raw = (progress - 0.5) * rect.height * depth;
       const scale = 1 + Math.abs(progress - 0.5) * 0.08; // leggero respiro 3D ai bordi
       layers.forEach((layer) => {
+        // Il layer è alto 150% del suo contenitore con -25% di top: il margine
+        // per lato vale un sesto della sua altezza, ed è tutto quello che la
+        // traslata ha a disposizione prima di scoprire un bordo vuoto. Sul
+        // desktop la corsa ci sta comodamente dentro; su mobile no — lì il
+        // contenitore è una fascia corta ma la sezione è altissima, e senza
+        // questo limite l'offset varrebbe il doppio del margine.
+        const travel = (layer.offsetHeight / 6) * 0.9;
+        const offset = Math.max(-travel, Math.min(travel, raw));
         layer.style.transform = `translate3d(-50%, ${offset.toFixed(1)}px, 0) scale(${scale.toFixed(3)})`;
       });
     };

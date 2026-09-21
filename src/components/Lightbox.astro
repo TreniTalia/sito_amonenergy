@@ -223,7 +223,8 @@
   .lb-index {
     font-family: var(--font-body);
     font-variant-numeric: tabular-nums;
-    font-size: 0.8125rem;
+    font-size: var(--fs-micro);
+    line-height: var(--lh-label);
     color: var(--color-signal-400);
   }
 
@@ -235,19 +236,21 @@
     margin-top: 0.5rem;
     font-family: var(--font-display);
     font-weight: 600;
-    font-size: 1.125rem;
+    font-size: var(--fs-title);
+    line-height: var(--lh-title);
   }
 
   .lb-meta {
     margin-top: 0.25rem;
-    font-size: 0.8125rem;
+    font-size: var(--fs-micro);
+    line-height: var(--lh-label);
     color: color-mix(in oklab, var(--color-paper) 65%, transparent);
   }
 
   .lb-counter {
     font-family: var(--font-body);
     font-variant-numeric: tabular-nums;
-    font-size: 0.875rem;
+    font-size: var(--fs-small);
     color: color-mix(in oklab, var(--color-paper) 60%, transparent);
     white-space: nowrap;
   }
