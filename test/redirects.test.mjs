@@ -5,6 +5,10 @@ import assert from 'node:assert/strict';
 import { fileURLToPath } from 'node:url';
 
 const CONF = readFileSync(fileURLToPath(new URL('../docker/nginx.conf', import.meta.url)), 'utf8');
+const DIST = fileURLToPath(new URL('../dist', import.meta.url));
+const distSkip = existsSync(path.join(DIST, 'index.html'))
+  ? false
+  : 'dist assente: esegui `npm run build` prima di questo test';
 
 /** Estrae le coppie pattern/destinazione da un blocco `map ... $nome { ... }`. */
 export function leggiMappa(nome) {
@@ -56,6 +60,80 @@ describe('nginx: dominio canonico e residui WordPress', () => {
     assert.equal(legacy.get('~^/page-sitemap\\.xml$'), '/sitemap-index.xml');
     assert.equal(legacy.get('~^/feed/?$'), '/');
     assert.equal(legacy.get('~^/comments/feed/?$'), '/');
+  });
+
+  // Regressione R1: senza `default_server` esplicito sul blocco `server_name
+  // _;`, un Host non riconosciuto (amonenergy.it nudo, test.amonenergy.it,
+  // localhost) ricadrebbe sul primo blocco `listen 80` del file — quello del
+  // redirect www — e genererebbe un loop di redirect sull'intero dominio.
+  // `server_name _` NON è un jolly: senza `default_server` questo difetto è
+  // sintatticamente valido e `nginx -t` non lo intercetta.
+  test('il blocco server_name _ dichiara default_server esplicito', () => {
+    assert.match(
+      CONF,
+      /listen\s+80\s+default_server;\s*\n\s*server_name\s+_;/,
+      'listen 80 default_server manca (o non precede) server_name _: rischio di loop di redirect sul dominio nudo',
+    );
+  });
+
+  // Regressione R13: la regex `\.(?:pdf|txt|...)$` cattura anche /llms.txt
+  // (estensione .txt), dandogli la cache di un mese e nessun X-Robots-Tag.
+  // `location = /llms.txt` (corrispondenza esatta) vince sempre sulla regex,
+  // quindi deve esistere ed essere equivalente a quella di /robots.txt.
+  test('/llms.txt ha una location esatta con la stessa cache di robots.txt', () => {
+    assert.match(
+      CONF,
+      /location\s*=\s*\/llms\.txt\s*\{[^}]*expires\s+1d;[^}]*add_header\s+X-Robots-Tag\s+\$robots_tag\s+always;[^}]*\}/s,
+      'manca location = /llms.txt con expires 1d e X-Robots-Tag $robots_tag',
+    );
+  });
+
+  // Regressione R14: su tutto ciò che non è HTML — /_astro/, immagini/pdf,
+  // .mjs, sitemap*.xml — mancava X-Robots-Tag: sui domini di staging
+  // (dove $robots_tag vale "noindex, nofollow") quei file restavano
+  // indicizzabili anche a pagine HTML tutte noindex.
+  test('X-Robots-Tag è presente su _astro, asset statici, .mjs e sitemap', () => {
+    const blocchi = [
+      /location\s*\^~\s*\/_astro\/\s*\{[^}]*\}/s,
+      /location\s*~\*\s*\\\.\(\?:pdf\|txt\|ico\|png\|jpe\?g\|svg\|webp\|avif\|woff2\)\$\s*\{[^}]*\}/s,
+      /location\s*~\*\s*\\\.mjs\$\s*\{[^}]*\}/s,
+      /location\s*~\*\s*\^\/sitemap\.\*\\\.xml\$\s*\{[^}]*\}/s,
+    ];
+    for (const re of blocchi) {
+      const m = CONF.match(re);
+      assert.ok(m, `location non trovata per il pattern ${re}`);
+      assert.match(m[0], /add_header\s+X-Robots-Tag\s+\$robots_tag\s+always;/, `manca X-Robots-Tag in: ${m[0].slice(0, 60)}...`);
+    }
+  });
+
+  test('.mjs dichiara X-Content-Type-Options nosniff', () => {
+    const m = CONF.match(/location\s*~\*\s*\\\.mjs\$\s*\{[^}]*\}/s);
+    assert.ok(m, 'location .mjs non trovata');
+    assert.match(m[0], /add_header\s+X-Content-Type-Options\s+"nosniff"\s+always;/, 'manca X-Content-Type-Options: nosniff sulla location .mjs');
+  });
+
+  // Regressione R17: dist/404.html esisteva solo in italiano, quindi un 404
+  // sotto /en/* mostrava la pagina italiana. `location /en/` con un
+  // `error_page 404` proprio deve avere la precedenza sull'`error_page 404
+  // /404.html;` globale.
+  test('/en/ ha un error_page 404 proprio, diverso da quello globale', () => {
+    const globale = CONF.match(/^\s*error_page\s+404\s+(\S+);/m);
+    assert.ok(globale, 'error_page 404 globale non trovato');
+
+    const blocco = CONF.match(/location\s+\/en\/\s*\{([^}]*)\}/s);
+    assert.ok(blocco, 'location /en/ non trovata in docker/nginx.conf');
+    const locale = blocco[1].match(/error_page\s+404\s+(\S+);/);
+    assert.ok(locale, 'location /en/ non dichiara un error_page 404 proprio');
+    assert.notEqual(locale[1], globale[1], "location /en/ deve puntare a una 404 diversa da quella italiana");
+    assert.match(locale[1], /^\/en\//, "la 404 di /en/ deve stare sotto /en/");
+  });
+
+  test('dist/en/404/index.html esiste ed è in inglese', { skip: distSkip }, () => {
+    const f = path.join(DIST, 'en', '404', 'index.html');
+    assert.ok(existsSync(f), 'manca dist/en/404/index.html: src/pages/en/404.astro non genera questo output');
+    const html = readFileSync(f, 'utf8');
+    assert.match(html, /<html lang="en"/, 'dist/en/404/index.html non dichiara lang="en"');
+    assert.match(html, /doesn't exist/i, "dist/en/404/index.html non sembra il testo della 404 inglese");
   });
 });
 

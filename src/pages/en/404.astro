@@ -1,0 +1,21 @@
+---
+// Gemella inglese di src/pages/404.astro. Esiste perché nginx (docker/nginx.conf)
+// serve /en/404.html per qualunque 404 sotto /en/*: senza questo file un
+// lettore che sbaglia un URL inglese vedeva comunque la pagina italiana.
+import Base from '../../layouts/Base.astro';
+---
+
+<Base title="Page not found" description="The requested page doesn't exist or has been moved." headerTransparent={false}>
+  <section class="wrap py-32 lg:py-40 text-center">
+    <p class="ds-eyebrow-label justify-center flex">Error 404</p>
+    <h1 class="text-display mt-4">This page doesn't exist.</h1>
+    <p class="measure text-lead mx-auto mt-5 text-ink/75">
+      The link may be outdated, or the page has been moved. Try going back to the home page or
+      contacting us directly.
+    </p>
+    <div class="mt-10 flex flex-col sm:flex-row justify-center gap-4">
+      <a href="/en/" class="ds-btn-primary justify-center">Back to home</a>
+      <a href="/en/contacts/" class="ds-btn-secondary justify-center">Contact us</a>
+    </div>
+  </section>
+</Base>
