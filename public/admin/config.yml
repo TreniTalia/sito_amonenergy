@@ -251,36 +251,39 @@ collections:
             field: { label: "Strumento", name: "item", widget: "string" }
 
   # Le nove pagine tecniche di dettaglio (una per prova/servizio diagnostico).
-  # ATTENZIONE: lo slug del file segue la lingua del contenuto (es.
-  # "sfra.md" in entrambe, ma "cci-controllore-centrale-impianto.md" in
-  # italiano contro "cci-central-plant-controller.md" in inglese) — nomi già
-  # diversi in origine per via delle rispettive URL SEO. Il pannello associa
-  # le due lingue di una pagina per SLUG, non per titolo: se lo slug non
-  # coincide fra le cartelle it/ ed en/, l'editor può mostrare la scheda di
-  # una lingua come vuota anche se il file esiste dall'altra parte. Da
-  # verificare alla prima apertura reale del pannello.
-  - name: "servizi-dettaglio"
-    label: "Pagine tecniche (servizi di dettaglio)"
-    label_singular: "Pagina tecnica"
-    description: "Le nove pagine di approfondimento su prove e sistemi diagnostici, una per servizio."
-    folder: "src/content/servizi-dettaglio"
-    i18n: true
+  # ATTENZIONE: lo slug del file segue la lingua del contenuto, per scelta SEO
+  # deliberata e già usata nei redirect (es. "cci-controllore-centrale-impianto"
+  # in italiano contro "cci-central-plant-controller" in inglese; solo "sfra"
+  # coincide per caso). Decap/Sveltia accoppierebbe le due lingue di una
+  # collection i18n per SLUG UGUALE fra le cartelle it/ ed en/: con slug
+  # diversi l'editor mostrerebbe il lato di una lingua come vuoto anche se il
+  # file esiste dall'altra parte — un accoppiamento che si rompe in silenzio.
+  # Per questo la collection NON è i18n: sono due collection di cartella
+  # distinte, una per lingua, con gli stessi campi (condivisi con
+  # l'ancora YAML qui sotto) ma editate separatamente. È responsabilità di chi
+  # scrive tenere allineati manualmente i valori che devono restare identici
+  # fra le due pagine gemelle (ordine, disegno, codice norma, progetto
+  # collegato) — i relativi hint lo ricordano campo per campo.
+  - name: "servizi-dettaglio-it"
+    label: "Pagine tecniche (italiano)"
+    label_singular: "Pagina tecnica (IT)"
+    description: "Le nove pagine italiane di approfondimento su prove e sistemi diagnostici, una per servizio."
+    folder: "src/content/servizi-dettaglio/it"
     create: true
     delete: true
     slug: "{{slug}}"
     identifier_field: "titolo"
     summary: "{{titolo}}"
-    fields:
-      - { label: "Titolo", name: "titolo", widget: "string", i18n: true, hint: "Il titolo della pagina, es. \"Prova SFRA sui trasformatori di potenza\"." }
-      - { label: "Testo introduttivo (lead)", name: "lead", widget: "text", i18n: true, hint: "2-3 righe subito sotto il titolo: che cos'è la prova e perché serve." }
-      - { label: "Titolo SEO", name: "seoTitle", widget: "string", i18n: true, hint: "Il titolo che compare su Google, diverso dal titolo grande della pagina." }
-      - { label: "Descrizione SEO", name: "seoDescription", widget: "text", i18n: true, hint: "1-2 righe che compaiono sotto il link nei risultati Google." }
-      - { label: "Ordine", name: "ordine", widget: "number", value_type: "int", i18n: "duplicate", hint: "Stesso numero in italiano e inglese, altrimenti le pagine si ordinano in modo diverso nelle due lingue." }
+    fields: &servizio_dettaglio_fields
+      - { label: "Titolo", name: "titolo", widget: "string", hint: "Il titolo della pagina, es. \"Prova SFRA sui trasformatori di potenza\"." }
+      - { label: "Testo introduttivo (lead)", name: "lead", widget: "text", hint: "2-3 righe subito sotto il titolo: che cos'è la prova e perché serve." }
+      - { label: "Titolo SEO", name: "seoTitle", widget: "string", hint: "Il titolo che compare su Google, diverso dal titolo grande della pagina." }
+      - { label: "Descrizione SEO", name: "seoDescription", widget: "text", hint: "1-2 righe che compaiono sotto il link nei risultati Google." }
+      - { label: "Ordine", name: "ordine", widget: "number", value_type: "int", hint: "Stesso numero della pagina gemella nell'altra lingua, altrimenti le pagine si ordinano in modo diverso nelle due lingue." }
       - label: "Disegno tecnico"
         name: "diagramma"
         widget: "select"
-        i18n: "duplicate"
-        hint: "Il disegno mostrato nella pagina. La scelta è uguale in italiano e inglese: un valore fuori da questo elenco lascerebbe la pagina senza disegno."
+        hint: "Il disegno mostrato nella pagina. Scegli lo stesso disegno della pagina gemella nell'altra lingua: un valore fuori da questo elenco lascerebbe la pagina senza disegno."
         options:
           - { label: "Grafico risposta in frequenza (SFRA)", value: "risposta-frequenza" }
           - { label: "Schema misura scariche parziali", value: "scariche-parziali" }
@@ -294,70 +297,73 @@ collections:
       - label: "Il problema (2-3 paragrafi)"
         name: "problema"
         widget: "list"
-        i18n: true
         hint: "Il corpo centrale della pagina: perché questa prova serve e che cosa rischia chi non la fa. Almeno 2 paragrafi, uno per riga dell'elenco."
         field: { label: "Paragrafo", name: "item", widget: "text" }
       - label: "Parametri della prova (almeno 4 card)"
         name: "parametri"
         widget: "list"
-        i18n: true
         hint: "Le card con i numeri e le caratteristiche della prova (banda, tensione, durata...). Almeno 4."
         fields:
-          - { label: "Titolo", name: "titolo", widget: "string", i18n: true }
-          - { label: "Testo", name: "testo", widget: "text", i18n: true }
-          - { label: "Icona (es. \"fa6-solid:bolt\")", name: "icona", widget: "string", i18n: "duplicate", hint: "Uguale in italiano e inglese: non tradurre la chiave dell'icona." }
+          - { label: "Titolo", name: "titolo", widget: "string" }
+          - { label: "Testo", name: "testo", widget: "text" }
+          - { label: "Icona (es. \"fa6-solid:bolt\")", name: "icona", widget: "string", hint: "La stessa chiave icona della pagina gemella nell'altra lingua: non si traduce." }
       - label: "Fasi dell'intervento (almeno 3)"
         name: "fasi"
         widget: "list"
-        i18n: true
         hint: "I passi con cui si svolge la prova sul campo, in ordine cronologico."
         fields:
-          - { label: "Titolo", name: "titolo", widget: "string", i18n: true }
-          - { label: "Testo", name: "testo", widget: "text", i18n: true }
+          - { label: "Titolo", name: "titolo", widget: "string" }
+          - { label: "Testo", name: "testo", widget: "text" }
       - label: "Strumentazione impiegata (almeno 1)"
         name: "strumentazione"
         widget: "list"
-        i18n: true
         hint: "Gli apparecchi usati in questa prova specifica."
         fields:
-          - { label: "Modello", name: "modello", widget: "string", i18n: "duplicate", hint: "Il nome dell'apparecchio: uguale in italiano e inglese, non si traduce." }
-          - { label: "Ruolo nella prova", name: "nota", widget: "string", i18n: true, hint: "Una parola o due, es. \"Misura\" o \"Messa a terra\": va tradotta." }
+          - { label: "Modello", name: "modello", widget: "string", hint: "Il nome dell'apparecchio. Un nome commerciale (es. \"Megger HV Test 80 kV\") resta uguale nella pagina gemella; una descrizione generica (es. \"Analizzatore di risposta in frequenza\") va invece tradotta lì." }
+          - { label: "Ruolo nella prova", name: "nota", widget: "string", hint: "Una parola o due, es. \"Misura\" o \"Messa a terra\"." }
       - label: "Assetto di misura (facoltativo)"
         name: "assettoMisura"
         widget: "list"
-        i18n: true
         required: false
         hint: "Come si misura — tensione di prova, banda, cablaggio, messa a terra. Non tutte le pagine ce l'hanno: i sistemi (RCS, CCI, teledistacco, lettura contatori) non sono prove strumentali e questo campo va lasciato vuoto."
         fields:
-          - { label: "Etichetta", name: "etichetta", widget: "string", i18n: true }
-          - { label: "Valore", name: "valore", widget: "string", i18n: true }
+          - { label: "Etichetta", name: "etichetta", widget: "string" }
+          - { label: "Valore", name: "valore", widget: "string" }
       - label: "Norma di riferimento"
         name: "norma"
         widget: "object"
-        i18n: true
         fields:
-          - { label: "Codice (es. \"IEC 60076-18\")", name: "codice", widget: "string", i18n: "duplicate", hint: "Uguale in italiano e inglese: non si traduce un codice di norma." }
-          - { label: "Titolo della norma", name: "titolo", widget: "text", i18n: true }
-          - { label: "Nota esplicativa", name: "note", widget: "text", i18n: true }
+          - { label: "Codice (es. \"IEC 60076-18\")", name: "codice", widget: "string", hint: "Stesso codice della pagina gemella nell'altra lingua: non si traduce un codice di norma." }
+          - { label: "Titolo della norma", name: "titolo", widget: "text" }
+          - { label: "Nota esplicativa", name: "note", widget: "text" }
       - label: "Caso reale (facoltativo)"
         name: "caso"
         widget: "object"
-        i18n: true
         required: false
         hint: "Un riferimento a un progetto reale dell'archivio Progetti in cui è stata eseguita questa prova. Lasciare vuoto se non c'è ancora un caso da raccontare."
         fields:
-          - { label: "Progetto collegato (slug, es. \"banzi-montemilone\")", name: "progetto", widget: "string", i18n: "duplicate", hint: "Lo slug del progetto nell'archivio Progetti: uguale in italiano e inglese, perché i progetti non hanno una versione inglese propria." }
-          - { label: "Testo del caso", name: "testo", widget: "text", i18n: true }
+          - { label: "Progetto collegato (slug, es. \"banzi-montemilone\")", name: "progetto", widget: "string", hint: "Lo slug del progetto nell'archivio Progetti: stesso valore nella pagina gemella, perché i progetti non hanno una versione inglese propria." }
+          - { label: "Testo del caso", name: "testo", widget: "text" }
       - label: "Domande frequenti (almeno 3)"
         name: "faq"
         widget: "list"
-        i18n: true
         fields:
-          - { label: "Domanda", name: "d", widget: "string", i18n: true }
-          - { label: "Risposta", name: "r", widget: "text", i18n: true }
+          - { label: "Domanda", name: "d", widget: "string" }
+          - { label: "Risposta", name: "r", widget: "text" }
       - label: "Pagine correlate (almeno 2)"
         name: "correlati"
         widget: "list"
-        i18n: true
-        hint: "Gli slug di altre pagine tecniche da proporre in fondo alla pagina — nella lingua corrispondente, perché lo slug della stessa pagina tecnica cambia fra italiano e inglese."
+        hint: "Gli slug di altre pagine tecniche da proporre in fondo alla pagina, nella STESSA lingua di questa pagina (lo slug della pagina gemella nell'altra lingua è diverso)."
         field: { label: "Slug pagina", name: "item", widget: "string" }
+
+  - name: "servizi-dettaglio-en"
+    label: "Pagine tecniche (inglese)"
+    label_singular: "Pagina tecnica (EN)"
+    description: "Le nove pagine inglesi di approfondimento su prove e sistemi diagnostici, una per servizio."
+    folder: "src/content/servizi-dettaglio/en"
+    create: true
+    delete: true
+    slug: "{{slug}}"
+    identifier_field: "titolo"
+    summary: "{{titolo}}"
+    fields: *servizio_dettaglio_fields
