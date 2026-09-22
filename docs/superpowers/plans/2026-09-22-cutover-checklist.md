@@ -107,6 +107,20 @@ questa sezione con Docker attivo, **prima** di abbassare il TTL DNS.
   Atteso: `nginx: configuration file /etc/nginx/nginx.conf test is successful`.
   **A cura di: sviluppatore.**
 
+- [ ] **⚠️ CRITICO — dominio nudo non deve fare redirect su se stesso.**
+  `nginx -t` sopra verifica solo la sintassi, non l'ordine dei blocchi
+  `server`: non basta. Con il container nginx in esecuzione (es. sullo
+  stack di staging su `localhost:8082`), lanciare:
+  ```
+  curl -i -H 'Host: amonenergy.it' http://localhost:8082/
+  ```
+  Atteso: **`200`**. Se risponde **`301`**, il default server di nginx è
+  ricaduto sul blocco `www.amonenergy.it` invece che su quello con
+  `server_name _; listen 80 default_server;`, e il dominio nudo va in loop
+  di redirect infinito su tutto il sito — un incidente totale, non parziale.
+  Questo è **l'unico controllo che lo intercetta**: `nginx -t` passa lo
+  stesso anche con l'ordine sbagliato. **A cura di: sviluppatore.**
+
 - [ ] **Build reale in un container locale.** `docker-compose.yml` rende
   obbligatorie tre variabili sul servizio `cms-auth` (`ALLOWED_ORIGIN`,
   `GITHUB_OAUTH_CLIENT_ID`, `GITHUB_OAUTH_CLIENT_SECRET` — tutte con
