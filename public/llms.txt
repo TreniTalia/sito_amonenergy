@@ -8,12 +8,44 @@ vent'anni di competenza sugli impianti elettrici AT/MT in un'unica realtà. Il
 team conta 20 persone fra ingegneri e operai, con 140+ impianti MT in
 gestione O&M e 50+ clienti in portafoglio. La sede è unica, 5.000 m² a
 Castelluccio dei Sauri (FG), con magazzino ricambi e una Control Room che
-sorveglia gli impianti 24 ore su 24, 365 giorni l'anno.
+sorveglia gli impianti 24 ore su 24, 365 giorni l'anno. Telefono
++39 0881 377590, email info@amonenergy.it.
 
-## Pagine
+Il sito è bilingue: ogni pagina italiana ha una gemella inglese (`/en/...`).
+Le due sezioni seguenti elencano le stesse pagine nelle due lingue.
+
+## Pagine (italiano)
 
 - [Home](https://amonenergy.it/): presentazione dell'azienda, dei servizi e dei numeri operativi (impianti in O&M, clienti, anni di esperienza, monitoraggio continuo).
-- [Servizi](https://amonenergy.it/servizi/): RCS, CCI, ricerca guasti AT/MT, diagnostica su cavi e trasformatori, costruzione e gestione di impianti elettrici AT/MT.
+- [Azienda](https://amonenergy.it/azienda/): storia, sede e numeri di Amon Energy S.r.l., oltre vent'anni di esperienza su impianti elettrici AT/MT e rinnovabili nel Centro-Sud Italia.
+- [Servizi](https://amonenergy.it/servizi/): panoramica di RCS, CCI, ricerca guasti AT/MT, diagnostica su cavi e trasformatori, costruzione e gestione di impianti elettrici AT/MT.
+- [SFRA](https://amonenergy.it/servizi/sfra/): prova SFRA su trasformatori di potenza secondo IEC 60076-18, misura da 20 Hz a 2 MHz e confronto con l'impronta di riferimento.
+- [Misure di scariche parziali](https://amonenergy.it/servizi/misure-scariche-parziali/): misure di scariche parziali su cavi, quadri e trasformatori AT/MT secondo IEC 60270, sensibilità sotto 1 pC.
+- [Verifica protezioni AT/MT](https://amonenergy.it/servizi/verifica-protezioni-at-mt/): verifica delle protezioni AT/MT secondo CEI 0-16, iniezione controllata delle soglie I> e I>> con DRTS/64 e ISA CBA 1000.
+- [Verifiche trasformatori di potenza](https://amonenergy.it/servizi/verifiche-trasformatori-di-potenza/): rapporto di trasformazione, resistenza degli avvolgimenti, tan delta e capacità con ISA T2000 e ISA STS5000 + TD500.
+- [Prove di isolamento](https://amonenergy.it/servizi/prove-isolamento/): prove di isolamento in alta tensione con Megger HV Test 80 kV, personale qualificato CEI 11-27 e CEI EN 50110-1.
+- [RCS - monitoraggio cabina MT](https://amonenergy.it/servizi/rcs-monitoraggio-cabina-mt/): sistema proprietario Amon Energy per il monitoraggio di cabina MT, analisi guasti in tempo reale e Control Room attiva 24/7/365.
+- [CCI - controllore centrale d'impianto](https://amonenergy.it/servizi/cci-controllore-centrale-impianto/): installazione e gestione del Controllore Centrale d'Impianto in partnership con Teamware, conforme a CEI 0-16 V5 e Delibera ARERA 564/2025/R/eel.
+- [Teledistacco A72](https://amonenergy.it/servizi/teledistacco-a72/): verifica e diagnostica dei dispositivi RIGEDI e Modem A72, messa in servizio e integrazione SCADA secondo l'Allegato A72.
+- [Lettura contatori](https://amonenergy.it/servizi/lettura-contatori/): lettura e telelettura dei contatori di produzione e scambio per impianti fotovoltaici ed eolici connessi in MT.
 - [Lavori](https://amonenergy.it/lavori/): archivio delle sottostazioni AT/MT realizzate per parchi eolici e fotovoltaici nel Centro-Sud Italia.
 - [Contatti](https://amonenergy.it/contatti/): telefono, email e sede di Amon Energy S.r.l., senza moduli da compilare.
 - [Privacy Policy](https://amonenergy.it/privacy-policy/): informativa sul trattamento dei dati personali di Amon Energy S.r.l.
+
+## Pages (English)
+
+- [Home](https://amonenergy.it/en/): overview of the company, services and operating figures (plants under O&M, clients, years of experience, continuous monitoring).
+- [Company](https://amonenergy.it/en/company/): history, site and figures of Amon Energy S.r.l., over twenty years of experience in HV/MV and renewable electrical plants across Central-Southern Italy.
+- [Services](https://amonenergy.it/en/services/): overview of RCS, CCI, HV/MV fault-finding, instrumental diagnostics on cables and transformers, construction and day-to-day management of HV/MV electrical plants.
+- [SFRA](https://amonenergy.it/en/services/sfra/): SFRA testing on power transformers to IEC 60076-18, sweep from 20 Hz to 2 MHz and comparison against the reference signature.
+- [Partial discharge measurement](https://amonenergy.it/en/services/partial-discharge-measurement/): partial discharge measurement on HV/MV cables, switchgear and transformers to IEC 60270, sensitivity below 1 pC.
+- [HV/MV protection testing](https://amonenergy.it/en/services/hv-mv-protection-testing/): HV/MV protection relay testing to CEI 0-16, controlled injection of the I> and I>> thresholds with DRTS/64 and ISA CBA 1000.
+- [Power transformer testing](https://amonenergy.it/en/services/power-transformer-testing/): turns ratio, winding resistance, tan delta and capacitance measurements with ISA T2000 and ISA STS5000 + TD500.
+- [Insulation testing](https://amonenergy.it/en/services/insulation-testing/): high-voltage insulation testing with the Megger HV Test 80 kV, personnel qualified to CEI 11-27 and CEI EN 50110-1.
+- [RCS - MV substation monitoring](https://amonenergy.it/en/services/rcs-mv-substation-monitoring/): Amon Energy's proprietary system for MV substation monitoring, real-time fault analysis and a Control Room active 24/7/365.
+- [CCI - central plant controller](https://amonenergy.it/en/services/cci-central-plant-controller/): installation and management of the Central Plant Controller in partnership with Teamware, compliant with CEI 0-16 V5 and ARERA Resolution 564/2025/R/eel.
+- [A72 remote tripping](https://amonenergy.it/en/services/a72-remote-tripping/): testing and diagnostics of RIGEDI devices and A72 modems, commissioning support and SCADA integration under Allegato A72.
+- [Meter reading](https://amonenergy.it/en/services/meter-reading/): reading and remote reading of production and exchange meters for wind and solar plants connected at MV.
+- [Projects](https://amonenergy.it/en/projects/): HV/MV substations built by Amon Energy for wind and solar farms in Central-Southern Italy, a portfolio of completed works.
+- [Contacts](https://amonenergy.it/en/contacts/): phone, email and site of Amon Energy S.r.l., no forms to fill in.
+- [Privacy Policy](https://amonenergy.it/en/privacy-policy/): Amon Energy S.r.l.'s privacy notice on the processing of personal data.
