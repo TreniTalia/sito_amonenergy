@@ -59,4 +59,19 @@ describe('pagine tecniche', { skip }, () => {
       assert.ok(link.length >= 2, `${s}: solo ${link.length} link a pagine sorelle`);
     }
   });
+
+  const NORME = {
+    'misure-scariche-parziali': /IEC 60270/,
+    'verifica-protezioni-at-mt': /CEI 0-16/,
+    'verifiche-trasformatori-di-potenza': /IEC 60076/,
+    'prove-isolamento': /CEI 11-27|CEI EN 50110-1/,
+  };
+
+  test('ogni pagina di diagnostica cita la sua norma', () => {
+    for (const [slug, re] of Object.entries(NORME)) {
+      const f = path.join(DIST, 'servizi', slug, 'index.html');
+      assert.ok(existsSync(f), `manca /servizi/${slug}/`);
+      assert.match(readFileSync(f, 'utf8'), re, `${slug}: norma mancante`);
+    }
+  });
 });

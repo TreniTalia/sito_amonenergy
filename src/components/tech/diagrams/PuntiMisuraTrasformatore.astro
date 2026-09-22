@@ -1,0 +1,264 @@
+---
+/**
+ * Diagramma dei punti di misura sulle verifiche di trasformatori di potenza.
+ *
+ * A differenza degli altri tre disegni non è un grafico ma una sagoma
+ * schematica del trasformatore — cassone, radiatori, terne di isolatori AT e
+ * BT, commutatore e neutro — con i punti dove si aggancia la strumentazione
+ * (ISA T2000 per rapporto e resistenze, ISA STS5000 + TD500 per tan delta e
+ * capacità) numerati e collegati con una linea di richiamo a un elenco
+ * laterale. Stessa lingua grafica delle altre pagine: fondo navy, cornice con
+ * tacche d'angolo, verde come unico accento.
+ */
+const W = 640;
+const H = 320;
+const uid = 'txm';
+
+// Sagoma del cassone: rettangolo centrale con radiatori a lamelle sui due
+// fianchi. Le terne di isolatori sono icone semplificate — dischi impilati
+// su uno stelo — non una geometria realistica: bastano a farsi leggere come
+// "bushing" al primo sguardo.
+const cassone = { x: 130, y: 148, w: 190, h: 104 };
+const radL = { x: cassone.x - 22, y: cassone.y + 12, w: 16, h: cassone.h - 24 };
+const radR = { x: cassone.x + cassone.w + 6, y: cassone.y + 12, w: 16, h: cassone.h - 24 };
+
+function bushing(cx: number, topY: number, baseY: number, dischi: number) {
+  const step = (baseY - topY) / (dischi + 1);
+  const raggi = Array.from({ length: dischi }, (_, i) => ({
+    y: topY + step * (i + 1),
+    r: 9 - i * 0.6,
+  }));
+  return { cx, topY, baseY, raggi };
+}
+
+const bushingAT = bushing(165, 66, cassone.y, 4);
+const bushingBT = bushing(245, 92, cassone.y, 3);
+
+// Collettore verticale comune delle linee di richiamo: ogni punto piega qui
+// prima di raggiungere la propria riga in elenco, così le linee non
+// attraversano la sagoma del trasformatore.
+const collettoreX = 396;
+
+const punti = [
+  { n: 1, mx: 165, my: 60, riga: 0 },
+  { n: 2, mx: 245, my: 86, riga: 1 },
+  { n: 3, mx: 340, my: 176, riga: 2 },
+  { n: 4, mx: 175, my: 268, riga: 3 },
+  { n: 5, mx: 225, my: 210, riga: 4 },
+];
+
+// Descrizioni tenute corte apposta: a 390px la colonna dell'elenco ha circa
+// 190 unità di viewBox, e la cornice del disegno taglia (`overflow: hidden`)
+// tutto ciò che le supera — verificato a video, non dedotto.
+const legenda = [
+  { t: 'Terna isolatori AT', d: 'Rapporto, isolamento' },
+  { t: 'Terna isolatori BT', d: 'Rapporto, avvolgimenti' },
+  { t: 'Commutatore sotto carico', d: 'Resistenza di contatto' },
+  { t: 'Neutro e messa a terra', d: 'Continuità, resistenza' },
+  { t: 'Cassone e nucleo', d: 'Tan delta, eccitazione' },
+];
+
+const legendX = 420;
+const legendY0 = 60;
+const legendStep = 42;
+const n = (v: number) => Math.round(v * 10) / 10;
+---
+
+<figure class="txm-plot">
+  <div class="txm-plot__frame rounded-[var(--radius-card)] border border-navy-100 shadow-[var(--shadow-md)]">
+    <svg
+      viewBox={`0 0 ${W} ${H}`}
+      role="img"
+      aria-label="Sagoma schematica di un trasformatore di potenza con cinque punti di misura numerati: terna isolatori AT, terna isolatori BT, commutatore sotto carico, neutro e messa a terra, cassone e nucleo. Ogni punto è collegato da una linea di richiamo alla voce corrispondente nell'elenco laterale."
+      preserveAspectRatio="xMidYMid meet"
+    >
+      <defs>
+        <linearGradient id={`${uid}-bg`} x1="0" y1="0" x2="0.35" y2="1">
+          <stop offset="0" stop-color="#0c3151"></stop>
+          <stop offset="1" stop-color="#081f36"></stop>
+        </linearGradient>
+        <pattern id={`${uid}-dots`} width="24" height="24" patternUnits="userSpaceOnUse">
+          <circle cx="1.1" cy="1.1" r="1.1" fill="#4f93c4" fill-opacity="0.16"></circle>
+        </pattern>
+      </defs>
+
+      <rect width={W} height={H} fill={`url(#${uid}-bg)`}></rect>
+      <rect width={W} height={H} fill={`url(#${uid}-dots)`}></rect>
+
+      <!-- Linea di base, come un piano d'appoggio da disegno tecnico. -->
+      <line x1="40" y1={cassone.y + cassone.h + 4} x2="380" y2={cassone.y + cassone.h + 4} stroke="#3f7fb0" stroke-opacity="0.35" stroke-width="1"></line>
+
+      <!-- Radiatori: lamelle verticali sui due fianchi del cassone. -->
+      <g stroke="#6ba7d2" stroke-opacity="0.55" stroke-width="1" fill="none">
+        <rect x={radL.x} y={radL.y} width={radL.w} height={radL.h} rx="2"></rect>
+        <rect x={radR.x} y={radR.y} width={radR.w} height={radR.h} rx="2"></rect>
+        {Array.from({ length: 4 }, (_, i) => (
+          <line x1={radL.x + 4 + i * 3} y1={radL.y + 3} x2={radL.x + 4 + i * 3} y2={radL.y + radL.h - 3} stroke-opacity="0.3" />
+        ))}
+        {Array.from({ length: 4 }, (_, i) => (
+          <line x1={radR.x + 4 + i * 3} y1={radR.y + 3} x2={radR.x + 4 + i * 3} y2={radR.y + radR.h - 3} stroke-opacity="0.3" />
+        ))}
+      </g>
+
+      <!-- Cassone. -->
+      <rect x={cassone.x} y={cassone.y} width={cassone.w} height={cassone.h} rx="8" fill="#0e3457" stroke="#6ba7d2" stroke-opacity="0.6" stroke-width="1.4"></rect>
+
+      <!-- Commutatore sotto carico: piccolo corpo agganciato al fianco. -->
+      <rect x={cassone.x + cassone.w + 26} y="160" width="26" height="46" rx="4" fill="#0e3457" stroke="#6ba7d2" stroke-opacity="0.6" stroke-width="1.4"></rect>
+      <line x1={cassone.x + cassone.w + 6} y1="183" x2={cassone.x + cassone.w + 26} y2="183" stroke="#6ba7d2" stroke-opacity="0.6" stroke-width="1.4"></line>
+
+      <!-- Neutro: presa a terra sul fianco basso del cassone. -->
+      <line x1={cassone.x + 30} y1={cassone.y + cassone.h} x2={cassone.x + 30} y2={cassone.y + cassone.h + 22} stroke="#6ba7d2" stroke-opacity="0.6" stroke-width="1.4"></line>
+      <g stroke="#6ba7d2" stroke-opacity="0.6" stroke-width="1.4">
+        <line x1={cassone.x + 18} y1={cassone.y + cassone.h + 22} x2={cassone.x + 42} y2={cassone.y + cassone.h + 22}></line>
+        <line x1={cassone.x + 22} y1={cassone.y + cassone.h + 27} x2={cassone.x + 38} y2={cassone.y + cassone.h + 27}></line>
+        <line x1={cassone.x + 26} y1={cassone.y + cassone.h + 32} x2={cassone.x + 34} y2={cassone.y + cassone.h + 32}></line>
+      </g>
+
+      <!-- Terne di isolatori: stelo con dischi impilati, tre steli ravvicinati
+           per fase ridotti a uno solo con dischi più larghi per leggibilità
+           alla scala del disegno. -->
+      {
+        [bushingAT, bushingBT].map((b) => (
+          <g stroke="#bcd6e8" stroke-opacity="0.7" stroke-width="1.3" fill="none">
+            <line x1={b.cx} y1={b.topY} x2={b.cx} y2={b.baseY} />
+            {b.raggi.map((d) => <line x1={b.cx - d.r} y1={d.y} x2={b.cx + d.r} y2={d.y} />)}
+          </g>
+        ))
+      }
+
+      <!-- Marker numerati e linee di richiamo a gomito verso l'elenco. -->
+      {
+        punti.map((p) => {
+          const rowY = legendY0 + p.riga * legendStep;
+          return (
+            <g>
+              <polyline
+                points={`${n(p.mx)},${n(p.my)} ${n(collettoreX)},${n(p.my)} ${n(collettoreX)},${n(rowY)} ${n(legendX - 14)},${n(rowY)}`}
+                fill="none"
+                stroke="#4fd07f"
+                stroke-opacity="0.5"
+                stroke-width="1"
+                stroke-dasharray="2 3"
+              />
+              <circle cx={n(p.mx)} cy={n(p.my)} r="10" fill="#0a2a44" stroke="#4fd07f" stroke-width="1.6"></circle>
+              <text
+                x={n(p.mx)}
+                y={n(p.my) + 4}
+                text-anchor="middle"
+                font-family="Sora, Inter Variable, Inter, sans-serif"
+                font-size="11"
+                font-weight="700"
+                fill="#8fd9ab"
+              >
+                {p.n}
+              </text>
+            </g>
+          );
+        })
+      }
+
+      <!-- Elenco laterale: numero, titolo, che cosa si misura in quel punto. -->
+      <g font-family="Inter Variable, Inter, sans-serif">
+        {
+          legenda.map((v, i) => {
+            const rowY = legendY0 + i * legendStep;
+            return (
+              <g>
+                <circle cx={legendX} cy={rowY} r="9" fill="none" stroke="#4fd07f" stroke-width="1.4"></circle>
+                <text x={legendX} y={rowY + 3.5} text-anchor="middle" font-size="10.5" font-weight="700" fill="#8fd9ab">
+                  {i + 1}
+                </text>
+                <text x={legendX + 18} y={rowY - 4} font-size="12" font-weight="700" fill="#e7f0f7">
+                  {v.t}
+                </text>
+                <text x={legendX + 18} y={rowY + 12} font-size="10.5" fill="#bcd6e8" fill-opacity="0.85">
+                  {v.d}
+                </text>
+              </g>
+            );
+          })
+        }
+      </g>
+
+      <!-- Cornice con tacche d'angolo. -->
+      <rect x="14" y="14" width={W - 28} height={H - 28} rx="6" fill="none" stroke="#6ba7d2" stroke-opacity="0.26" stroke-width="1"></rect>
+      <g stroke="#8fd9ab" stroke-opacity="0.5" stroke-width="1.4" stroke-linecap="square">
+        <line x1="14" y1="38" x2="14" y2="14"></line>
+        <line x1="14" y1="14" x2="38" y2="14"></line>
+        <line x1={W - 38} y1="14" x2={W - 14} y2="14"></line>
+        <line x1={W - 14} y1="14" x2={W - 14} y2="38"></line>
+        <line x1="14" y1={H - 38} x2="14" y2={H - 14}></line>
+        <line x1="14" y1={H - 14} x2="38" y2={H - 14}></line>
+        <line x1={W - 38} y1={H - 14} x2={W - 14} y2={H - 14}></line>
+        <line x1={W - 14} y1={H - 14} x2={W - 14} y2={H - 38}></line>
+      </g>
+    </svg>
+  </div>
+
+  <figcaption class="txm-plot__caption">
+    <span class="txm-plot__dot" aria-hidden="true"></span>
+    <span>
+      <strong>Cinque punti, cinque misure diverse</strong>
+      <span class="txm-plot__caption-sub">
+        Sagoma esemplificativa · terne AT/BT, commutatore, neutro e cassone
+      </span>
+    </span>
+  </figcaption>
+</figure>
+
+<style>
+  .txm-plot__frame {
+    position: relative;
+    overflow: hidden;
+    aspect-ratio: 2 / 1;
+    background: #0a2a44;
+  }
+
+  .txm-plot__frame svg {
+    display: block;
+    width: 100%;
+    height: 100%;
+  }
+
+  /* Sotto i 768px il riquadro si restringe e il testo dell'elenco, in unità
+     di viewBox, scenderebbe sotto la soglia di leggibilità: stessa strategia
+     delle altre tre diagnostiche, ingrandire nello spazio del disegno. */
+  @media (max-width: 767px) {
+    .txm-plot__frame svg text {
+      font-size: 15px;
+    }
+  }
+
+  .txm-plot__caption {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    margin-top: 0.85rem;
+    padding-left: 0.15rem;
+    color: currentColor;
+    font-size: var(--fs-small);
+    line-height: 1.35;
+  }
+
+  .txm-plot__caption strong {
+    display: block;
+    font-weight: 700;
+    letter-spacing: 0.01em;
+  }
+
+  .txm-plot__caption-sub {
+    display: block;
+    color: color-mix(in srgb, currentColor 62%, transparent);
+    font-size: var(--fs-micro);
+  }
+
+  .txm-plot__dot {
+    width: 0.5rem;
+    height: 0.5rem;
+    flex: none;
+    border-radius: 999px;
+    background: #2fa85f;
+    box-shadow: 0 0 0 4px rgb(79 208 127 / 0.22);
+  }
+</style>
