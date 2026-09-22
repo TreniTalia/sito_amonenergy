@@ -1,0 +1,87 @@
+---
+// Griglia di parametri/voci con icona (es. "cosa misura", "quando serve",
+// "cosa restituisce il report"). Ogni voce è una card di vetro navy — stesso
+// principio di contrasto autonomo di SpecPanel: leggibile a prescindere dal
+// fondo della pagina che la ospita.
+import GlassSvgIcon from '../GlassSvgIcon.astro';
+
+interface Props {
+  voci: { titolo: string; testo: string; icona: string }[];
+}
+
+const { voci } = Astro.props;
+---
+
+<div class="param-grid">
+  {
+    voci.map((v) => (
+      <article class="param-grid__item ds-panel">
+        <span class="param-grid__icon" aria-hidden="true">
+          <GlassSvgIcon name={v.icona} />
+        </span>
+        <h3 class="param-grid__title">{v.titolo}</h3>
+        <p class="param-grid__text">{v.testo}</p>
+      </article>
+    ))
+  }
+</div>
+
+<style>
+  .param-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+
+  @media (min-width: 640px) {
+    .param-grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+
+  @media (min-width: 1024px) {
+    .param-grid {
+      grid-template-columns: repeat(3, 1fr);
+    }
+  }
+
+  .param-grid__item {
+    padding: 24px 22px;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* Badge circolare in vetro chiaro per l'icona — non un riempimento verde:
+     il glifo del pack "glass" è già bianco/grigio translucido, pensato per
+     stare su un fondo scuro (vedi commento in PackIcon.astro). */
+  .param-grid__icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+    flex: none;
+    margin-bottom: 16px;
+    border-radius: 999px;
+    border: 1px solid rgba(255, 255, 255, 0.22);
+    background: rgba(255, 255, 255, 0.08);
+    font-size: 1.35rem;
+    color: var(--color-paper);
+  }
+
+  .param-grid__title {
+    margin: 0 0 8px;
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 1.05rem;
+    line-height: 1.3;
+    color: var(--color-paper);
+  }
+
+  .param-grid__text {
+    margin: 0;
+    font-size: var(--fs-small);
+    line-height: var(--lh-body, 1.65);
+    color: color-mix(in srgb, var(--color-navy-100) 82%, transparent);
+  }
+</style>

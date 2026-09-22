@@ -1,0 +1,113 @@
+---
+// FAQ tecnica. Usa `<details>`/`<summary>` nativi — niente accordion in
+// JavaScript: sono già navigabili da tastiera e il contenuto resta nel DOM
+// anche chiuso, quindi leggibile dai crawler. Non emette JSON-LD: lo fa la
+// pagina che monta questo componente, con accesso a tutte le domande —
+// farlo anche qui duplicherebbe il blocco FAQPage.
+interface Props {
+  domande: { d: string; r: string }[];
+}
+
+const { domande } = Astro.props;
+---
+
+<div class="tech-faq ds-panel">
+  {
+    domande.map((item, i) => (
+      <details class="tech-faq__item" open={i === 0}>
+        <summary class="tech-faq__summary">
+          <span class="tech-faq__q">{item.d}</span>
+          <svg
+            class="tech-faq__chevron"
+            aria-hidden="true"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2.2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <path d="M6 9l6 6 6-6" />
+          </svg>
+        </summary>
+        <div class="tech-faq__answer">
+          <p>{item.r}</p>
+        </div>
+      </details>
+    ))
+  }
+</div>
+
+<style>
+  .tech-faq {
+    padding: 6px 26px;
+  }
+
+  .tech-faq__item {
+    border-bottom: 1px solid color-mix(in srgb, var(--color-paper) 12%, transparent);
+  }
+
+  .tech-faq__item:last-child {
+    border-bottom: none;
+  }
+
+  .tech-faq__summary {
+    list-style: none;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 20px 2px;
+    cursor: pointer;
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: var(--fs-small);
+    color: var(--color-paper);
+  }
+
+  /* Chrome/Safari disegnano un triangolo di default: lo sostituiamo con la
+     freccia SVG, che ruota sull'apertura. */
+  .tech-faq__summary::-webkit-details-marker {
+    display: none;
+  }
+
+  .tech-faq__summary:focus-visible {
+    outline: 2px solid var(--color-green-400);
+    outline-offset: 4px;
+    border-radius: 6px;
+  }
+
+  .tech-faq__q {
+    flex: 1;
+  }
+
+  .tech-faq__chevron {
+    flex: none;
+    width: 20px;
+    height: 20px;
+    color: var(--color-green-400);
+    transition: transform var(--dur-state, 250ms) var(--ease-signature, ease-in-out);
+  }
+
+  .tech-faq__item[open] .tech-faq__chevron {
+    transform: rotate(180deg);
+  }
+
+  .tech-faq__answer {
+    padding: 0 2px 22px;
+  }
+
+  .tech-faq__answer p {
+    margin: 0;
+    font-size: var(--fs-small);
+    line-height: var(--lh-body, 1.65);
+    color: color-mix(in srgb, var(--color-navy-100) 84%, transparent);
+    max-width: 68ch;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .tech-faq__chevron {
+      transition: none;
+    }
+  }
+</style>
