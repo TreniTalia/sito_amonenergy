@@ -4,6 +4,14 @@
  * Castelluccio dei Sauri (FG). Stessa grafica della mappa in /contatti,
  * ma disegnata dalle coordinate reali — nessuna immagine, nessun iframe.
  */
+import type { Lingua } from '../i18n/routes.ts';
+
+interface Props {
+  lingua?: Lingua;
+}
+
+const { lingua = 'it' } = Astro.props;
+
 type LL = [number, number];
 
 const LAT_MID = 40.3;
@@ -173,7 +181,11 @@ const uid = 'cvg';
     <svg
       viewBox={`0 0 ${W} ${H}`}
       role="img"
-      aria-label="Mappa del raggio d'azione di Amon Energy: la sede di Castelluccio dei Sauri (FG) copre l'intero Centro-Sud Italia"
+      aria-label={
+        lingua === 'en'
+          ? "Map of Amon Energy's coverage area: the Castelluccio dei Sauri (FG) site covers all of Central-Southern Italy"
+          : "Mappa del raggio d'azione di Amon Energy: la sede di Castelluccio dei Sauri (FG) copre l'intero Centro-Sud Italia"
+      }
       preserveAspectRatio="xMidYMid meet"
     >
       <defs>
@@ -361,7 +373,9 @@ const uid = 'cvg';
     <span class="coverage-map__dot" aria-hidden="true"></span>
     <span>
       <strong>Castelluccio dei Sauri (FG)</strong>
-      <span class="coverage-map__caption-sub">Sede unica · raggio d'azione 450 km</span>
+      <span class="coverage-map__caption-sub">
+        {lingua === 'en' ? 'Single site · 450 km coverage radius' : "Sede unica · raggio d'azione 450 km"}
+      </span>
     </span>
   </figcaption>
 </figure>

@@ -7,8 +7,8 @@ import ContactMap from '../components/ContactMap.astro';
 import { contatti } from '../data/contatti.ts';
 import heroContatti from '../assets/img/photos/contatti-hero-pylon-notte.jpg';
 
-const pagina = await getEntry('pagine', 'contatti');
-if (!pagina || pagina.data.pagina !== 'contatti') throw new Error('pagine/contatti.yaml missing or malformed');
+const pagina = await getEntry('pagine', 'it/contatti');
+if (!pagina || pagina.data.pagina !== 'contatti') throw new Error('pagine/it/contatti.yaml missing or malformed');
 const { h1, sub, orari } = pagina.data;
 ---
 

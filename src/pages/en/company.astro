@@ -1,57 +1,52 @@
 ---
+// Gemella inglese di src/pages/azienda.astro. Vedi quella pagina per i
+// commenti di dettaglio; qui solo le note sulla traduzione.
 import { getEntry } from 'astro:content';
 import { Image } from 'astro:assets';
-import Base from '../layouts/Base.astro';
-import PageHero from '../components/PageHero.astro';
-import CoverageMap from '../components/CoverageMap.astro';
-import StatBar from '../components/StatBar.astro';
-import ClientMarquee from '../components/ClientMarquee.astro';
-import CtaBand from '../components/CtaBand.astro';
-import storiaImg from '../assets/img/photos/tecnico-fotovoltaico.jpg';
-import vanImg from '../assets/img/photos/van-laboratorio-aperto.jpg';
-// Foto Pexels, Mr Dr3igeteilt (https://www.pexels.com/photo/36137497/) — apparecchiature
-// di una sottostazione AT/MT in controluce, luce dorata: stesso trattamento navy via
-// duotone/scrim di PageHero delle altre pagine (servizi, lavori, contatti). Nessuna
-// persona, nessun marchio di terzi leggibile.
-import heroAzienda from '../assets/img/photos/azienda-hero-substation.jpg';
+import Base from '../../layouts/Base.astro';
+import PageHero from '../../components/PageHero.astro';
+import CoverageMap from '../../components/CoverageMap.astro';
+import StatBar from '../../components/StatBar.astro';
+import ClientMarquee from '../../components/ClientMarquee.astro';
+import CtaBand from '../../components/CtaBand.astro';
+import storiaImg from '../../assets/img/photos/tecnico-fotovoltaico.jpg';
+import vanImg from '../../assets/img/photos/van-laboratorio-aperto.jpg';
+import heroAzienda from '../../assets/img/photos/azienda-hero-substation.jpg';
 
-const azienda = await getEntry('pagine', 'it/azienda');
-if (!azienda || azienda.data.pagina !== 'azienda') throw new Error('pagine/it/azienda.yaml missing or malformed');
+const azienda = await getEntry('pagine', 'en/azienda');
+if (!azienda || azienda.data.pagina !== 'azienda') throw new Error('pagine/en/azienda.yaml missing or malformed');
 const { eyebrow, h1, storia, missione, raggioAzione, strumentazione, marqueeTitolo } = azienda.data;
 
-// Stessi numeri operativi della home (home.yaml → statbar): unica fonte, per
-// non tenere due copie dello stesso dato che potrebbero disallinearsi.
-const home = await getEntry('pagine', 'it/home');
-if (!home || home.data.pagina !== 'home') throw new Error('pagine/home.yaml missing or malformed');
+// Stessi numeri operativi della home inglese, per lo stesso motivo della
+// gemella italiana: unica fonte, niente copie che potrebbero disallinearsi.
+const home = await getEntry('pagine', 'en/home');
+if (!home || home.data.pagina !== 'home') throw new Error('pagine/en/home.yaml missing or malformed');
 const { statbar } = home.data;
 ---
 
 <Base
-  title="Azienda"
-  description="Amon Energy: oltre vent'anni di esperienza su impianti elettrici AT/MT e rinnovabili nel Centro-Sud Italia, da un'unica sede in Puglia."
+  title="Company"
+  description="Amon Energy: over twenty years of experience in HV/MV and renewable electrical plants across Central-Southern Italy, from a single site in Puglia."
 >
   <PageHero
     eyebrow={eyebrow}
     h1={h1}
     image={heroAzienda}
-    imageAlt="Apparecchiature di una sottostazione elettrica AT/MT in controluce, al tramonto"
+    imageAlt="Equipment of an HV/MV electrical substation backlit, at sunset"
   />
 
   <section class="wrap-wide grid items-center gap-12 py-20 lg:grid-cols-2 lg:gap-16 lg:py-28">
     <div data-reveal>
       <div class="ds-eyebrow">
         <span class="ds-eyebrow-dash"></span>
-        <span class="ds-eyebrow-label">La nostra storia</span>
+        <span class="ds-eyebrow-label">Our story</span>
       </div>
       <p class="measure text-lg leading-relaxed text-ink/90">{storia}</p>
-      <!-- NOTA: testo redatto a partire dai soli fatti presenti nello spec (fondazione 2020,
-           soci, Energy System Services, 20+ anni di esperienza, focus rinnovabile Centro-Sud).
-           Da far rivedere/validare dal cliente prima del go-live — non è testo brochure verbatim. -->
     </div>
     <figure class="overflow-hidden rounded-[var(--radius-card)] border border-navy-100 shadow-[var(--shadow-md)]" data-reveal style="--reveal-delay:120ms">
       <Image
         src={storiaImg}
-        alt="Tecnico Amon Energy durante una misura strumentale in un impianto fotovoltaico"
+        alt="Amon Energy technician taking an instrumental measurement on a solar plant"
         class="aspect-[4/5] w-full object-cover"
         widths={[500, 800, 1100]}
         sizes="(min-width: 1024px) 46vw, 100vw"
@@ -63,10 +58,10 @@ const { statbar } = home.data;
     <div class="wrap-wide py-20 lg:py-28">
       <div class="ds-eyebrow" data-reveal>
         <span class="ds-eyebrow-dash"></span>
-        <span class="ds-eyebrow-label">La nostra missione</span>
+        <span class="ds-eyebrow-label">Our mission</span>
       </div>
       <p class="max-w-[24ch] text-control text-paper" data-reveal style="--reveal-delay:80ms">
-        Al fianco di chi produce energia, in ogni fase della vita di un impianto.
+        Alongside energy producers, at every stage of a plant's life.
       </p>
       <p class="measure mt-6 text-lg leading-relaxed text-paper/80" data-reveal style="--reveal-delay:160ms">
         {missione}
@@ -74,18 +69,18 @@ const { statbar } = home.data;
     </div>
   </section>
 
-  <StatBar items={statbar} nota="Numeri dell'operatività Amon Energy" />
+  <StatBar items={statbar} nota="Amon Energy's operational figures" />
 
   <section class="wrap-wide grid items-center gap-12 py-20 lg:grid-cols-2 lg:gap-16 lg:py-28">
     <div data-reveal>
       <div class="ds-eyebrow">
         <span class="ds-eyebrow-dash"></span>
-        <span class="ds-eyebrow-label">Tempestività d'intervento</span>
+        <span class="ds-eyebrow-label">Response time</span>
       </div>
       <p class="measure text-lg leading-relaxed text-ink/90">{raggioAzione}</p>
     </div>
     <div class="relative" data-reveal style="--reveal-delay:120ms">
-      <CoverageMap />
+      <CoverageMap lingua="en" />
     </div>
   </section>
 
@@ -95,12 +90,11 @@ const { statbar } = home.data;
         <div data-reveal>
           <div class="ds-eyebrow">
             <span class="ds-eyebrow-dash ds-eyebrow-dash--leaf"></span>
-            <span class="ds-eyebrow-label ds-eyebrow-label--leaf">Strumentazione</span>
+            <span class="ds-eyebrow-label ds-eyebrow-label--leaf">Instrumentation</span>
           </div>
-          <h2 class="text-headline">La nostra dotazione tecnica.</h2>
+          <h2 class="text-headline">Our technical equipment.</h2>
           <p class="measure mt-4 text-ink/70">
-            Tutti i dispositivi sono certificati e calibrati: la specificità tecnica è il nostro
-            badge di fiducia.
+            Every device is certified and calibrated: technical specificity is our badge of trust.
           </p>
           <div class="mt-8 flex flex-wrap gap-2.5">
             {
@@ -115,7 +109,7 @@ const { statbar } = home.data;
         <figure class="overflow-hidden rounded-[var(--radius-card)] border border-navy-900/10 shadow-[var(--shadow-md)]" data-reveal style="--reveal-delay:120ms">
           <Image
             src={vanImg}
-            alt="Il laboratorio mobile di Amon Energy con la strumentazione di prova a bordo, in campo durante un intervento"
+            alt="Amon Energy's mobile lab with test instrumentation on board, in the field during a call-out"
             class="w-full object-cover"
             widths={[400, 800]}
             sizes="(min-width: 1024px) 46vw, 100vw"
@@ -125,11 +119,11 @@ const { statbar } = home.data;
     </div>
   </section>
 
-  <!-- Roster clienti: destinazione dell'ancora #clienti, il redirect 301 da
-       /i-nostri-clienti/, un URL del vecchio sito con autorità propria. -->
+  <!-- Roster clienti: stesso id="clienti" della gemella italiana, così un
+       eventuale link diretto all'ancora funziona su entrambe le lingue. -->
   <div id="clienti">
     <ClientMarquee titolo={marqueeTitolo} />
   </div>
 
-  <CtaBand headline="Vuoi sapere se possiamo intervenire sul tuo impianto?" />
+  <CtaBand headline="Want to know if we can help with your plant?" lingua="en" />
 </Base>

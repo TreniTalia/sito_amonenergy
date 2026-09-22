@@ -1,0 +1,37 @@
+---
+// Gemella inglese di src/pages/contatti.astro.
+import { getEntry } from 'astro:content';
+import Base from '../../layouts/Base.astro';
+import PageHero from '../../components/PageHero.astro';
+import ContactChannels from '../../components/ContactChannels.astro';
+import ContactMap from '../../components/ContactMap.astro';
+import { contatti } from '../../data/contatti.ts';
+import heroContatti from '../../assets/img/photos/contatti-hero-pylon-notte.jpg';
+
+const pagina = await getEntry('pagine', 'en/contatti');
+if (!pagina || pagina.data.pagina !== 'contatti') throw new Error('pagine/en/contatti.yaml missing or malformed');
+const { h1, sub, orari } = pagina.data;
+---
+
+<Base
+  title="Contacts"
+  description={`Call ${contatti.telefono} or email ${contatti.email}: no forms to fill in, we answer directly.`}
+>
+  <PageHero
+    eyebrow="Contacts"
+    h1={h1}
+    sub={sub}
+    image={heroContatti}
+    imageAlt="High-voltage pylon at night, under a starry sky"
+  />
+
+  <section class="wrap py-20 lg:py-28 grid gap-16 lg:grid-cols-2 lg:gap-20 items-start">
+    <ContactChannels orari={orari} lingua="en" />
+    <div>
+      <ContactMap lingua="en" />
+      <!-- Il NAP resta in italiano: solo ", Italy" in coda per il lettore
+           internazionale, mai una traduzione dell'indirizzo. -->
+      <p class="text-body mt-6 text-ink/75 font-semibold">{contatti.indirizzo}, Italy</p>
+    </div>
+  </section>
+</Base>

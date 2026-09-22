@@ -1,0 +1,108 @@
+---
+// Gemella inglese di src/pages/privacy-policy.astro. Traduzione tecnica del
+// testo legale: nomi propri (Google Ireland Limited, OpenFreeMap, maplibre-gl),
+// nomi di cookie e norme (GDPR, ePrivacy) restano invariati.
+import Base from '../../layouts/Base.astro';
+import { contatti } from '../../data/contatti.ts';
+---
+
+<Base
+  title="Privacy Policy"
+  description="Amon Energy S.r.l.'s privacy notice on the processing of personal data."
+  headerTransparent={false}
+>
+  <section class="wrap py-20 lg:py-28">
+    <div class="max-w-3xl">
+      <h1 class="text-display">Privacy Policy</h1>
+
+      <div class="measure text-body mt-10">
+        <p>
+          {contatti.ragioneSociale}, registered office at {contatti.indirizzo}, Italy, VAT no. {contatti.piva} ("Data
+          Controller"), processes the personal data of this website's users in compliance with
+          Regulation (EU) 2016/679 (GDPR), applicable Italian law and, for cookies, the ePrivacy
+          Directive and the guidelines of the Italian Data Protection Authority (Garante).
+        </p>
+
+        <h2 class="text-subhead mt-10">Data processed</h2>
+        <p class="mt-3">
+          This website does not contain contact forms. The only personal data processed by the
+          Data Controller is the data users provide voluntarily when contacting the company by
+          phone ({contatti.telefono}) or email ({contatti.email}, {contatti.pec}).
+        </p>
+
+        <h2 class="text-subhead mt-10">Cookies and similar technologies</h2>
+        <p class="mt-3">
+          The banner shown on first visit asks for consent before enabling any cookie that is not
+          strictly necessary; you can change your choice at any time from the "Cookie preferences"
+          link in the footer.
+        </p>
+        <div class="mt-5 overflow-x-auto">
+          <table class="text-small w-full border-collapse">
+            <thead>
+              <tr class="border-b border-navy-200 text-left">
+                <th class="py-2 pr-4 font-semibold text-ink">Category</th>
+                <th class="py-2 pr-4 font-semibold text-ink">Purpose</th>
+                <th class="py-2 font-semibold text-ink">Consent</th>
+              </tr>
+            </thead>
+            <tbody class="text-ink/80">
+              <tr class="border-b border-navy-100">
+                <td class="py-3 pr-4 font-medium text-ink">Necessary</td>
+                <td class="py-3 pr-4">
+                  None currently in use: the site works without setting any first-party technical
+                  cookies.
+                </td>
+                <td class="py-3">Not required</td>
+              </tr>
+              <tr>
+                <td class="py-3 pr-4 font-medium text-ink">Statistics</td>
+                <td class="py-3 pr-4">
+                  Google Analytics 4 — statistical measurement of traffic (pages visited, source,
+                  device). The script only loads after choosing "Accept all" in the banner: without
+                  consent it is neither requested nor run. The IP address is anonymised before
+                  being recorded.
+                </td>
+                <td class="py-3">Required, revocable</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <p class="mt-5">
+          The Google Analytics 4 service is provided by Google Ireland Limited (Gordon House,
+          Barrow Street, Dublin 4, Ireland), which processes the data as an independent data
+          controller for its own statistical measurement purposes. The legal basis for processing
+          is the user's consent, revocable at any time from the "Cookie preferences" link in the
+          footer. The cookies set are <code class="text-[0.85em]">_ga</code>
+          {' '}(visitor identifier, 24-month duration) and <code class="text-[0.85em]">_ga_&lt;CONTAINER-ID&gt;</code>
+          {' '}(session status, 24-month duration).
+        </p>
+        <p class="mt-5">
+          The Contacts page includes an interactive map (OpenFreeMap, via the maplibre-gl
+          library): to display it, only the map tile images are requested from the server
+          {' '}<code class="text-[0.85em]">tiles.openfreemap.org</code>, which receives the IP
+          address needed to serve them but sets no cookies or trackers.
+        </p>
+
+        <h2 class="text-subhead mt-10">Purpose and legal basis</h2>
+        <p class="mt-3">
+          Data provided by phone or email is processed solely to respond to the user's request, on
+          the basis of the Data Controller's legitimate interest in managing incoming business
+          contacts or, where applicable, the pre-contractual measures requested by the data
+          subject.
+        </p>
+
+        <h2 class="text-subhead mt-10">Retention</h2>
+        <p class="mt-3">
+          Data is retained for as long as necessary to manage the request and any resulting
+          business relationship, subject to statutory tax and accounting obligations.
+        </p>
+
+        <h2 class="text-subhead mt-10">Data subject rights</h2>
+        <p class="mt-3">
+          Users may request access, rectification, erasure or restriction of processing of their
+          data at any time by writing to {contatti.email} or {contatti.pec}.
+        </p>
+      </div>
+    </div>
+  </section>
+</Base>

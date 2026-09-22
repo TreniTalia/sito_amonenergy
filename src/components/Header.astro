@@ -1,8 +1,11 @@
 ---
 import { Icon } from 'astro-icon/components';
 import { contatti } from '../data/contatti.ts';
+import { gemella } from '../i18n/routes.ts';
+import { t } from '../i18n/ui.ts';
 import Logo from './Logo.astro';
 import GlassSvgIcon from './GlassSvgIcon.astro';
+import LangSwitch from './LangSwitch.astro';
 
 interface Props {
   /** True when this page opens on a dark hero, so the header can start transparent. */
@@ -11,26 +14,39 @@ interface Props {
 
 const { transparent = true } = Astro.props;
 
-const navLinks = [
-  { href: '/', label: 'Home' },
-  { href: '/azienda/', label: 'Azienda' },
-  { href: '/servizi/', label: 'Servizi' },
-  { href: '/lavori/', label: 'Lavori' },
-  { href: '/contatti/', label: 'Contatti' },
-];
+const { lingua } = gemella(Astro.url.pathname);
+const ui = t(lingua);
 
+const navLinks =
+  lingua === 'en'
+    ? [
+        { href: '/en/', label: ui.nav.home },
+        { href: '/en/company/', label: ui.nav.azienda },
+        { href: '/en/services/', label: ui.nav.servizi },
+        { href: '/en/projects/', label: ui.nav.lavori },
+        { href: '/en/contacts/', label: ui.nav.contatti },
+      ]
+    : [
+        { href: '/', label: ui.nav.home },
+        { href: '/azienda/', label: ui.nav.azienda },
+        { href: '/servizi/', label: ui.nav.servizi },
+        { href: '/lavori/', label: ui.nav.lavori },
+        { href: '/contatti/', label: ui.nav.contatti },
+      ];
+
+const homeHref = lingua === 'en' ? '/en/' : '/';
 const currentPath = Astro.url.pathname;
-const isActive = (href: string) => (href === '/' ? currentPath === '/' : currentPath.startsWith(href));
+const isActive = (href: string) => (href === homeHref ? currentPath === href : currentPath.startsWith(href));
 ---
 
 <header class="ds-header fixed inset-x-0 top-0 z-40" data-transparent={transparent ? 'true' : 'false'}>
   <div class="ds-header-wrap wrap-wide pt-3 md:pt-4">
     <div class="ds-navbar flex items-center justify-between gap-4 rounded-[var(--radius-panel)] py-4 pl-5 pr-2.5 md:pl-7 md:pr-3">
-      <a href="/" class="flex shrink-0 items-center text-paper" aria-label="Amon Energy, torna alla home">
+      <a href={homeHref} class="flex shrink-0 items-center text-paper" aria-label={lingua === 'en' ? 'Amon Energy, back to homepage' : 'Amon Energy, torna alla home'}>
         <Logo variant="full" size={34} class="max-[420px]:[--logo-h:28px]" loading="eager" />
       </a>
 
-      <nav class="ds-nav hidden md:flex items-center gap-1" aria-label="Navigazione principale">
+      <nav class="ds-nav hidden md:flex items-center gap-1" aria-label={lingua === 'en' ? 'Main navigation' : 'Navigazione principale'}>
         <span class="ds-nav-pill" aria-hidden="true"></span>
         {
           navLinks.map((link) => (
@@ -42,19 +58,26 @@ const isActive = (href: string) => (href === '/' ? currentPath === '/' : current
       </nav>
 
       <div class="flex items-center gap-2">
-        <a href={contatti.telefonoHref} class="ds-header-cta" aria-label={`Chiama ${contatti.telefono}`}>
+        <!-- Solo da `md` in su: sotto quella soglia il selettore vive nel
+             pannello mobile, non anche qui — altrimenti comparirebbe due
+             volte sullo stesso schermo. -->
+        <div class="hidden md:block">
+          <LangSwitch compact />
+        </div>
+
+        <a href={contatti.telefonoHref} class="ds-header-cta" aria-label={`${ui.header.chiamaAria} ${contatti.telefono}`}>
           <Icon name="fa6-solid:phone" class="shrink-0 text-[0.85rem]" />
           {/* Il numero intero sta nell'isola in due bande: sotto `md`, dove il
               menu è dietro l'hamburger e lo spazio è tutto suo, e da `lg` in su,
               dove la navbar è larga abbastanza per menu e numero insieme. Nella
               banda in mezzo (768–1023) le quattro voci di menu ci sono già e il
-              numero non ci sta: lì diventa "Chiama". Prima era una soglia sola a
-              640px e fra 768 e 1023 il numero si spezzava su tre righe. */}
+              numero non ci sta: lì diventa "Chiama"/"Call". Prima era una soglia
+              sola a 640px e fra 768 e 1023 il numero si spezzava su tre righe. */}
           <span class="hidden sm:inline md:hidden lg:inline">{contatti.telefono}</span>
-          <span class="hidden xs:inline sm:hidden md:inline lg:hidden">Chiama</span>
+          <span class="hidden xs:inline sm:hidden md:inline lg:hidden">{ui.header.chiamaBreve}</span>
         </a>
 
-        <button type="button" id="nav-toggle" class="md:hidden grid h-11 w-11 place-items-center rounded-[var(--radius-sm)] text-paper transition-colors hover:bg-white/10" aria-expanded="false" aria-controls="mobile-nav" aria-label="Apri il menu">
+        <button type="button" id="nav-toggle" class="md:hidden grid h-11 w-11 place-items-center rounded-[var(--radius-sm)] text-paper transition-colors hover:bg-white/10" aria-expanded="false" aria-controls="mobile-nav" aria-label={ui.header.apriMenu}>
           <GlassSvgIcon name="menu" class="text-lg" />
         </button>
       </div>
@@ -74,13 +97,13 @@ const isActive = (href: string) => (href === '/' ? currentPath === '/' : current
            dentro il bordo tondo. Questa è disegnata a tratto, 2px con terminali
            tondi, la stessa mano delle altre icone del sito, dentro la pillola
            in vetro. -->
-      <button type="button" id="nav-close" class="nav-close" aria-label="Chiudi il menu">
+      <button type="button" id="nav-close" class="nav-close" aria-label={ui.header.chiudiMenu}>
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
           <path d="M6 6l12 12M18 6L6 18" />
         </svg>
       </button>
     </div>
-    <nav class="flex flex-col gap-1" aria-label="Navigazione mobile">
+    <nav class="flex flex-col gap-1" aria-label={lingua === 'en' ? 'Mobile navigation' : 'Navigazione mobile'}>
       {
         navLinks.map((link) => (
           <a
@@ -96,9 +119,10 @@ const isActive = (href: string) => (href === '/' ? currentPath === '/' : current
   </div>
 
   <div class="flex flex-col gap-3">
+    <LangSwitch />
     <a href={contatti.telefonoHref} class="ds-btn-on-dark w-full">
       <Icon name="fa6-solid:phone" class="text-[0.85rem]" />
-      Chiamaci: {contatti.telefono}
+      {ui.azioni.chiamaci}: {contatti.telefono}
     </a>
     <a href={`mailto:${contatti.email}`} class="text-paper/80 text-small text-center py-2">{contatti.email}</a>
   </div>

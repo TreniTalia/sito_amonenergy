@@ -2,12 +2,19 @@
 import { Icon } from 'astro-icon/components';
 import { contatti } from '../data/contatti.ts';
 import PackIcon from './PackIcon.astro';
+import type { Lingua } from '../i18n/routes.ts';
 
 interface Props {
   orari: string;
+  lingua?: Lingua;
 }
 
-const { orari } = Astro.props;
+const { orari, lingua = 'it' } = Astro.props;
+const TESTI = {
+  it: { chiamaci: 'Chiamaci', scrivici: 'Scrivici', subject: 'Richiesta%20informazioni' },
+  en: { chiamaci: 'Call us', scrivici: 'Email us', subject: 'Information%20request' },
+} as const;
+const t = TESTI[lingua];
 ---
 
 <div>
@@ -17,18 +24,18 @@ const { orari } = Astro.props;
         <PackIcon name="phone" />
       </span>
       <span class="contact-card-body">
-        <span class="contact-card-label">Chiamaci</span>
+        <span class="contact-card-label">{t.chiamaci}</span>
         <span class="contact-card-value">{contatti.telefono}</span>
         <span class="contact-card-meta">{orari}</span>
       </span>
     </a>
 
-    <a href={`mailto:${contatti.email}?subject=Richiesta%20informazioni`} class="contact-card">
+    <a href={`mailto:${contatti.email}?subject=${t.subject}`} class="contact-card">
       <span class="contact-card-icon">
         <Icon name="fa6-solid:envelope" />
       </span>
       <span class="contact-card-body">
-        <span class="contact-card-label">Scrivici</span>
+        <span class="contact-card-label">{t.scrivici}</span>
         <span class="contact-card-value">{contatti.email}</span>
       </span>
     </a>

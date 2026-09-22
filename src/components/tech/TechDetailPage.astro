@@ -1,0 +1,285 @@
+---
+// Corpo condiviso delle pagine tecniche di dettaglio (SFRA, scariche
+// parziali, RCS...): tutto ciò che in `src/pages/servizi/[slug].astro` non
+// era già delegato a un sotto-componente. Estratto qui perché la gemella
+// inglese (`src/pages/en/services/[slug].astro`) ha la stessa struttura e le
+// stesse regole (niente fotografie, stesso ordine di sezioni): senza questo
+// componente le due route dovrebbero ricopiare lo stesso markup, e sarebbe
+// solo questione di tempo prima che divergessero.
+import type { CollectionEntry } from 'astro:content';
+import Base from '../../layouts/Base.astro';
+import PageHero from '../../components/PageHero.astro';
+import SpecPanel from '../../components/tech/SpecPanel.astro';
+import ProcessSteps from '../../components/tech/ProcessSteps.astro';
+import ParamGrid from '../../components/tech/ParamGrid.astro';
+import TechFaq from '../../components/tech/TechFaq.astro';
+import TechCtaBand from '../../components/tech/TechCtaBand.astro';
+import { DIAGRAMMI } from '../../components/tech/diagrams/index.ts';
+import { contatti } from '../../data/contatti.ts';
+import type { Lingua } from '../../i18n/routes.ts';
+
+interface Correlato {
+  href: string;
+  titolo: string;
+  lead?: string;
+}
+
+interface Props {
+  voce: CollectionEntry<'serviziDettaglio'>;
+  correlati: Correlato[];
+  progetto?: CollectionEntry<'progetti'>;
+  lingua: Lingua;
+  hrefLavori: string;
+}
+
+const TESTI = {
+  it: {
+    eyebrowHero: 'Verifiche strumentali',
+    cheCosaRivela: 'Che cosa rivela',
+    parametriProva: 'Parametri di prova',
+    parametriTitolo: 'I numeri che definiscono la misura.',
+    comeSiSvolge: 'Come si svolge',
+    comeSiSvolgeTitolo: 'Dalla messa in sicurezza al referto.',
+    normaRiferimento: 'Norma di riferimento',
+    strumentazione: 'Strumentazione',
+    assettoMisura: 'Assetto di misura',
+    inCampo: 'In campo',
+    casoRealeFallback: 'Un caso reale',
+    guardaOpere: 'Guarda le opere realizzate',
+    domandeFrequenti: 'Domande frequenti',
+    domandeFrequentiTitolo: 'Quello che ci chiedono prima di chiamarci.',
+    verificheCollegate: 'Verifiche collegate',
+    verificheCollegateTitolo: 'Spesso si eseguono nella stessa campagna.',
+    approfondisci: 'Approfondisci',
+  },
+  en: {
+    eyebrowHero: 'Instrumental testing',
+    cheCosaRivela: 'What it reveals',
+    parametriProva: 'Test parameters',
+    parametriTitolo: 'The numbers that define the measurement.',
+    comeSiSvolge: 'How it works',
+    comeSiSvolgeTitolo: 'From lock-out/tag-out to the report.',
+    normaRiferimento: 'Reference standard',
+    strumentazione: 'Instrumentation',
+    assettoMisura: 'Test setup',
+    inCampo: 'In the field',
+    casoRealeFallback: 'A real case',
+    guardaOpere: 'See our completed projects',
+    domandeFrequenti: 'Frequently asked questions',
+    domandeFrequentiTitolo: "What clients ask us before they call.",
+    verificheCollegate: 'Related tests',
+    verificheCollegateTitolo: 'Often run in the same campaign.',
+    approfondisci: 'Learn more',
+  },
+} as const;
+
+const { voce, correlati, progetto, lingua, hrefLavori } = Astro.props;
+const d = voce.data;
+const t = TESTI[lingua];
+
+const Diagramma = DIAGRAMMI[d.diagramma as keyof typeof DIAGRAMMI];
+if (!Diagramma) throw new Error(`servizi/${voce.id}: diagramma "${d.diagramma}" non in DIAGRAMMI`);
+
+const service = {
+  '@context': 'https://schema.org',
+  '@type': 'Service',
+  name: d.titolo,
+  serviceType: d.titolo,
+  description: d.seoDescription,
+  areaServed: { '@type': 'Place', name: 'Centro-Sud Italia' },
+  provider: { '@type': 'Organization', name: contatti.ragioneSociale, url: Astro.site?.toString() },
+};
+
+const faqPage = {
+  '@context': 'https://schema.org',
+  '@type': 'FAQPage',
+  mainEntity: d.faq.map((f) => ({
+    '@type': 'Question',
+    name: f.d,
+    acceptedAnswer: { '@type': 'Answer', text: f.r },
+  })),
+};
+---
+
+<Base title={d.seoTitle} description={d.seoDescription} structuredData={[service, faqPage]}>
+  <!-- Nessuna fotografia su queste pagine: l'hero resta il navy pieno, e
+       l'unica immagine è il diagramma vettoriale più sotto. -->
+  <PageHero eyebrow={t.eyebrowHero} h1={d.titolo} sub={d.lead} />
+
+  <!-- Il problema, e accanto il diagramma che lo mostra -->
+  <section class="wrap-wide py-20 lg:py-28">
+    <div class="grid gap-12 lg:grid-cols-[1fr_1fr] lg:items-start lg:gap-16">
+      <div>
+        <div class="ds-eyebrow" data-reveal>
+          <span class="ds-eyebrow-dash"></span>
+          <span class="ds-eyebrow-label">{t.cheCosaRivela}</span>
+        </div>
+        <h2 class="sr-only">{t.cheCosaRivela}</h2>
+        <div class="mt-4 flex flex-col gap-5" data-reveal style="--reveal-delay:80ms">
+          {d.problema.map((p) => <p class="measure text-body text-ink/75">{p}</p>)}
+        </div>
+      </div>
+      <div class="lg:sticky lg:top-28" data-reveal style="--reveal-delay:160ms">
+        <Diagramma />
+      </div>
+    </div>
+  </section>
+
+  <!-- Parametri di prova -->
+  <section class="bg-navy-100">
+    <div class="wrap-wide py-20 lg:py-28">
+      <div class="ds-eyebrow" data-reveal>
+        <span class="ds-eyebrow-dash"></span>
+        <span class="ds-eyebrow-label">{t.parametriProva}</span>
+      </div>
+      <h2 class="text-headline max-w-[24ch]" data-reveal style="--reveal-delay:80ms">
+        {t.parametriTitolo}
+      </h2>
+      <div class="mt-10" data-reveal style="--reveal-delay:140ms">
+        <ParamGrid voci={d.parametri} />
+      </div>
+    </div>
+  </section>
+
+  <!-- Come si svolge. ProcessSteps eredita il colore dal contesto: su navy la
+       sezione deve portare `text-paper`, altrimenti il testo sparisce. -->
+  <section class="bg-navy-950 text-paper">
+    <div class="wrap-wide py-20 lg:py-28">
+      <div class="ds-eyebrow" data-reveal>
+        <span class="ds-eyebrow-dash"></span>
+        <span class="ds-eyebrow-label ds-eyebrow-label--signal">{t.comeSiSvolge}</span>
+      </div>
+      <h2 class="text-control max-w-[24ch]" data-reveal style="--reveal-delay:80ms">
+        {t.comeSiSvolgeTitolo}
+      </h2>
+      <div class="mt-12" data-reveal style="--reveal-delay:140ms">
+        <ProcessSteps fasi={d.fasi} />
+      </div>
+    </div>
+  </section>
+
+  <!-- Norma di riferimento e strumentazione -->
+  <section class="wrap-wide py-20 lg:py-28">
+    <div class="grid gap-10 lg:grid-cols-[1.05fr_0.95fr] lg:items-start lg:gap-14">
+      <div>
+        <div class="ds-eyebrow" data-reveal>
+          <span class="ds-eyebrow-dash"></span>
+          <span class="ds-eyebrow-label">{t.normaRiferimento}</span>
+        </div>
+        <h2 class="text-headline mt-1" data-reveal style="--reveal-delay:80ms">{d.norma.codice}</h2>
+        <p class="text-title mt-2 text-ink/70" data-reveal style="--reveal-delay:110ms">{d.norma.titolo}</p>
+        <p class="measure text-body mt-5 text-ink/75" data-reveal style="--reveal-delay:150ms">{d.norma.note}</p>
+      </div>
+      <div class="flex flex-col gap-5" data-reveal style="--reveal-delay:200ms">
+        <SpecPanel
+          titolo={t.strumentazione}
+          voci={d.strumentazione.map((s) => ({ etichetta: s.modello, valore: s.nota }))}
+        />
+        {d.assettoMisura && <SpecPanel titolo={t.assettoMisura} voci={d.assettoMisura} />}
+      </div>
+    </div>
+  </section>
+
+  {
+    d.caso && (
+      <section class="bg-navy-100">
+        <div class="wrap-wide py-20 lg:py-28">
+          <div class="ds-eyebrow" data-reveal>
+            <span class="ds-eyebrow-dash" />
+            <span class="ds-eyebrow-label">{t.inCampo}</span>
+          </div>
+          <h2 class="text-headline max-w-[24ch]" data-reveal style="--reveal-delay:80ms">
+            {progetto?.data.titolo ?? t.casoRealeFallback}
+          </h2>
+          <p class="measure text-lead mt-5 text-ink/75" data-reveal style="--reveal-delay:130ms">
+            {d.caso.testo}
+          </p>
+          <a href={hrefLavori} class="ds-btn-secondary mt-8 inline-flex" data-reveal style="--reveal-delay:180ms">
+            {t.guardaOpere}
+          </a>
+        </div>
+      </section>
+    )
+  }
+
+  <!-- Domande frequenti. Il JSON-LD FAQPage lo emette questa pagina, non il
+       componente: qui ci sono tutte le domande in un posto solo. -->
+  <section class="wrap-wide py-20 lg:py-28">
+    <div class="ds-eyebrow" data-reveal>
+      <span class="ds-eyebrow-dash"></span>
+      <span class="ds-eyebrow-label">{t.domandeFrequenti}</span>
+    </div>
+    <h2 class="text-headline max-w-[24ch]" data-reveal style="--reveal-delay:80ms">
+      {t.domandeFrequentiTitolo}
+    </h2>
+    <div class="mt-10 max-w-[68ch]" data-reveal style="--reveal-delay:140ms">
+      <TechFaq domande={d.faq} />
+    </div>
+  </section>
+
+  <!-- Pagine sorelle: senza questi link ogni pagina tecnica sarebbe un vicolo
+       cieco, per il lettore e per il crawler. -->
+  <section class="bg-navy-100">
+    <div class="wrap-wide py-20 lg:py-28">
+      <div class="ds-eyebrow" data-reveal>
+        <span class="ds-eyebrow-dash"></span>
+        <span class="ds-eyebrow-label">{t.verificheCollegate}</span>
+      </div>
+      <h2 class="text-headline max-w-[24ch]" data-reveal style="--reveal-delay:80ms">
+        {t.verificheCollegateTitolo}
+      </h2>
+      <ul class="mt-10 grid list-none gap-4 p-0 sm:grid-cols-2 lg:grid-cols-3 lg:gap-6">
+        {
+          correlati.map((c, i) => (
+            <li data-reveal style={`--reveal-delay:${i * 90}ms`}>
+              <a href={c.href} class="correlato">
+                <span class="text-title block">{c.titolo}</span>
+                {c.lead && <span class="text-small mt-2 block text-ink/70">{c.lead}</span>}
+                <span class="correlato__cta text-micro mt-4 block">{t.approfondisci}</span>
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+    </div>
+  </section>
+
+  <!-- Fascia di chiamata: stesso componente della gemella, nessuna
+       fotografia (v. TechCtaBand.astro). -->
+  <TechCtaBand lingua={lingua} />
+</Base>
+
+<style>
+  .correlato {
+    display: block;
+    height: 100%;
+    padding: 22px 24px 20px;
+    border-radius: var(--radius-card);
+    border: 1px solid color-mix(in srgb, var(--color-navy-900) 12%, transparent);
+    background: var(--color-paper);
+    text-decoration: none;
+    color: inherit;
+    transition:
+      transform 0.25s var(--ease-signature, ease),
+      box-shadow 0.25s var(--ease-signature, ease);
+  }
+
+  .correlato:hover {
+    transform: translateY(-3px);
+    box-shadow: var(--shadow-md);
+  }
+
+  /* Freccia in tipografia, non un'icona: la riga di chiusura deve pesare meno
+     del titolo, altrimenti la card legge come un pulsante. */
+  .correlato__cta {
+    font-family: var(--font-display);
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--color-green-500);
+  }
+
+  .correlato__cta::after {
+    content: ' →';
+  }
+</style>

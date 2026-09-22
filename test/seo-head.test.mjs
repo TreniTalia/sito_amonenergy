@@ -117,6 +117,24 @@ describe('head SEO', { skip }, () => {
       vistiPerLingua.set(lang, visti);
     }
   });
+
+  // Task 11 (review): `og:locale` era fisso a "it_IT" in Base.astro mentre
+  // `webSite.inLanguage` derivava correttamente da `lang` — nessun test lo
+  // copriva. Ora deriva da `lang` come l'altro, e questo test lo verifica su
+  // ogni pagina delle due lingue, non solo sulla home.
+  test('og:locale segue la lingua della pagina (it_IT / en_GB)', () => {
+    for (const p of pagine()) {
+      const html = readFileSync(path.join(DIST, p), 'utf8');
+      const langMatch = html.match(/<html[^>]*\blang="([^"]*)"/);
+      const lang = langMatch ? langMatch[1] : '';
+      const atteso = lang === 'en' ? 'en_GB' : 'it_IT';
+      assert.match(
+        html,
+        new RegExp(`property="og:locale" content="${atteso}"`),
+        `${p}: og:locale non è "${atteso}" per lang="${lang}"`,
+      );
+    }
+  });
 });
 
 describe('Google Analytics dietro consenso', { skip: skipPlaywright }, () => {

@@ -1,16 +1,21 @@
 ---
+import { gemella } from '../i18n/routes.ts';
+import { t } from '../i18n/ui.ts';
+
+const { lingua } = gemella(Astro.url.pathname);
+const ui = t(lingua);
+const privacyHref = lingua === 'en' ? '/en/privacy-policy/' : '/privacy-policy/';
 ---
 
-<div id="cookie-consent" class="cookie-consent" role="region" aria-label="Preferenze cookie">
+<div id="cookie-consent" class="cookie-consent" role="region" aria-label={ui.footer.preferenzeCookie}>
   <div class="cookie-consent-panel">
     <p class="cookie-consent-text">
-      Nessun cookie di profilazione o marketing. Solo tecnici indispensabili; eventuali cookie
-      statistici partiranno solo con il tuo consenso.
-      {' '}<a href="/privacy-policy/">Privacy Policy</a>
+      {ui.cookie.testo}
+      {' '}<a href={privacyHref}>{ui.footer.privacyPolicy}</a>
     </p>
     <div class="cookie-consent-actions">
-      <button type="button" id="cookie-reject" class="ds-btn-ghost">Rifiuta</button>
-      <button type="button" id="cookie-accept" class="ds-btn-on-dark" data-consenso-accetta>Accetta tutti</button>
+      <button type="button" id="cookie-reject" class="ds-btn-ghost">{ui.cookie.rifiuta}</button>
+      <button type="button" id="cookie-accept" class="ds-btn-on-dark" data-consenso-accetta>{ui.cookie.accettaTutti}</button>
     </div>
   </div>
 </div>

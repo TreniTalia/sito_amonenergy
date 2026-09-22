@@ -1,0 +1,46 @@
+pagina: "home"
+
+hero:
+  eyebrow: "System Integrator for energy"
+  h1: "Connected plants, energy under control."
+  sub: "We design and build HV/MV infrastructure, develop the systems that control it, and step in on site whenever it's needed. For wind and solar plants across Central-Southern Italy."
+  ctaPrimaria: "Call us: +39 0881 377590"
+  ctaSecondaria: "See our services"
+
+# NOTE: story drafted from the facts already in azienda.yaml (founded 2020,
+# partners, PL System / Energy System, BayWa r.e. acquisition 2019, 5,000 sqm
+# site). Same caution as the Italian copy: to be reviewed/validated by the
+# client before go-live.
+chiSiamoBreve:
+  testo: "Amon Energy's experience began in 2000, first as PL System and then as Energy System: over 100 HV/MV substations built and O&M contracts on more than 30 plants across Southern Italy, up to the acquisition by the BayWa r.e. Group in 2019. In 2020 Mario Palumbo and Ludovico Lombardi founded Amon Energy S.r.l., bringing together over twenty years of expertise in HV/MV electrical plants into a single company now serving renewable energy across Central-Southern Italy. One 5,000 m² site in Castelluccio dei Sauri (FG), centrally located, with a spare-parts warehouse and a Control Room active 24/7/365."
+  link: "/en/services/"
+
+controllo:
+  eyebrow: "Remote Control System · CCI"
+  titolo: "The digital heart of your plants, always on."
+  testo: "From our Control Room in Puglia we monitor plants in real time, 24 hours a day. Our proprietary RCS system analyses faults and recloses automatically; the Central Plant Controller (CCI) keeps everything compliant with the standards. When on-site work is needed, the team leaves from base with the mobile lab."
+
+statbar:
+  - valore: "140+"
+    label: "MV plants under O&M management"
+    finto: false
+  - valore: "50+"
+    label: "clients in our portfolio"
+    finto: false
+  - valore: "20+"
+    label: "years of team experience"
+    finto: false
+  - valore: "24/7"
+    label: "continuous monitoring, 365 days a year"
+    finto: false
+
+# Numeri resi in forma compatta come per la versione italiana — v. nota lì.
+percheAmon:
+  - titolo: "Speed"
+    testo: "Centrally located in Puglia: we reach most plants across Central-Southern Italy within hours, with 24-hour on-call cover."
+  - titolo: "Reliability"
+    testo: "Personnel qualified under CEI EN 50110-1 and CEI 11-27, with full responsibility for electrical safety and operation."
+  - titolo: "Technology"
+    testo: "Proprietary RCS and Centrix 2.0 mobile labs with ISA, Megger HV, OTDR and thermal-imaging instrumentation, certified and calibrated."
+
+marqueeTitolo: "Trusted by"

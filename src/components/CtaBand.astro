@@ -4,12 +4,32 @@ import { Image } from 'astro:assets';
 // headline. Proof over adjectives: this is the thing the phone call is about.
 import ctaImg from '../assets/img/photos/guasto-cavo-mt.png';
 import { contatti } from '../data/contatti.ts';
+import type { Lingua } from '../i18n/routes.ts';
 
 interface Props {
   headline?: string;
+  lingua?: Lingua;
 }
 
-const { headline = 'Un guasto non aspetta. Nemmeno noi.' } = Astro.props;
+const TESTI = {
+  it: {
+    headline: 'Un guasto non aspetta. Nemmeno noi.',
+    sub: 'Parla direttamente con chi mette le mani sugli impianti. Niente form, niente attese: una telefonata e siamo operativi.',
+    chiamaci: 'Chiamaci',
+    scriviciEmail: 'Scrivici via email',
+    subject: 'Richiesta%20informazioni',
+  },
+  en: {
+    headline: 'A fault does not wait. Neither do we.',
+    sub: 'Talk directly to the people who put their hands on the plant. No forms, no waiting: one call and we are on it.',
+    chiamaci: 'Call us',
+    scriviciEmail: 'Email us',
+    subject: 'Information%20request',
+  },
+} as const;
+
+const { headline, lingua = 'it' } = Astro.props;
+const t = TESTI[lingua];
 ---
 
 <section class="relative isolate overflow-hidden text-paper cta-band">
@@ -34,20 +54,19 @@ const { headline = 'Un guasto non aspetta. Nemmeno noi.' } = Astro.props;
   <div
     class="wrap relative z-10 flex flex-col items-center justify-center gap-8 py-24 text-center lg:min-h-[44rem] lg:py-32"
   >
-    <p class="text-display max-w-[18ch]" data-reveal>{headline}</p>
+    <p class="text-display max-w-[18ch]" data-reveal>{headline ?? t.headline}</p>
     <p class="text-lead measure-tight text-paper/80" data-reveal style="--reveal-delay:100ms">
-      Parla direttamente con chi mette le mani sugli impianti. Niente form, niente attese: una
-      telefonata e siamo operativi.
+      {t.sub}
     </p>
     <div class="flex w-full flex-col gap-3.5 sm:w-auto sm:flex-row sm:gap-5" data-reveal style="--reveal-delay:200ms">
       <a href={contatti.telefonoHref} class="ds-btn-on-dark justify-center">
-        Chiamaci: {contatti.telefono}
+        {t.chiamaci}: {contatti.telefono}
       </a>
       <a
-        href={`mailto:${contatti.email}?subject=Richiesta%20informazioni`}
+        href={`mailto:${contatti.email}?subject=${t.subject}`}
         class="ds-btn-ghost justify-center"
       >
-        Scrivici via email
+        {t.scriviciEmail}
       </a>
     </div>
   </div>

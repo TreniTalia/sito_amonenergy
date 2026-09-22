@@ -1,0 +1,50 @@
+---
+// Gemella inglese di src/pages/lavori.astro. La collection `progetti` non è
+// tradotta (v. report): sono dati reali di cantiere — nomi di luogo,
+// committenti, kV — non copy di marketing, e biforcarla rischierebbe di far
+// divergere i due elenchi. Restano quindi in italiano anche qui, salvo la
+// `tipologia` mostrata sotto, tradotta a video dove il valore è quello
+// standard "Sottostazione AT/MT".
+import { getCollection } from 'astro:content';
+import Base from '../../layouts/Base.astro';
+import PageHero from '../../components/PageHero.astro';
+import ProjectSlider from '../../components/ProjectSlider.astro';
+import Lightbox from '../../components/Lightbox.astro';
+import CtaBand from '../../components/CtaBand.astro';
+import heroLavori from '../../assets/img/photos/lavori-hero-substation.jpg';
+
+const progetti = (await getCollection('progetti')).sort((a, b) => a.data.ordine - b.data.ordine);
+---
+
+<Base
+  title="Projects"
+  description="HV/MV substations built by Amon Energy for wind and solar farms in Central-Southern Italy: a portfolio of completed works."
+>
+  <PageHero
+    eyebrow="Portfolio of works"
+    h1="What we have built."
+    sub="HV/MV electrical substations for wind and solar farms, presented with the data of each project."
+    image={heroLavori}
+    imageAlt="Aerial view of a completed HV/MV electrical substation, with transformers and switching equipment"
+  />
+
+  <div class="py-16 lg:py-24">
+    <div class="wrap-wide">
+      <div class="ds-eyebrow" data-reveal>
+        <span class="ds-eyebrow-dash"></span>
+        <span class="ds-eyebrow-label">Completed substations</span>
+      </div>
+      <h2 class="text-headline max-w-[22ch]" data-reveal style="--reveal-delay:80ms">This is where Central-Southern Italy's renewable energy enters the grid.</h2>
+      <p class="measure text-body mt-3 text-ink/70" data-reveal style="--reveal-delay:120ms">
+        Every substation is the meeting point between a wind or solar farm and the HV/MV grid — designed, built and commissioned by us.
+      </p>
+    </div>
+    <div class="mt-10">
+      <ProjectSlider entries={progetti} lingua="en" />
+    </div>
+  </div>
+
+  <CtaBand lingua="en" />
+
+  <Lightbox lingua="en" />
+</Base>

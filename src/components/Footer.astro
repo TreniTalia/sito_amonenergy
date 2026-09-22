@@ -1,14 +1,29 @@
 ---
 import { contatti } from '../data/contatti.ts';
+import { gemella } from '../i18n/routes.ts';
+import { t } from '../i18n/ui.ts';
 import Logo from './Logo.astro';
 import PackIcon from './PackIcon.astro';
 
-const quickLinks = [
-  { href: '/azienda/', label: 'Azienda' },
-  { href: '/servizi/', label: 'Servizi' },
-  { href: '/lavori/', label: 'Lavori' },
-  { href: '/contatti/', label: 'Contatti' },
-];
+const { lingua } = gemella(Astro.url.pathname);
+const ui = t(lingua);
+
+const quickLinks =
+  lingua === 'en'
+    ? [
+        { href: '/en/company/', label: ui.nav.azienda },
+        { href: '/en/services/', label: ui.nav.servizi },
+        { href: '/en/projects/', label: ui.nav.lavori },
+        { href: '/en/contacts/', label: ui.nav.contatti },
+      ]
+    : [
+        { href: '/azienda/', label: ui.nav.azienda },
+        { href: '/servizi/', label: ui.nav.servizi },
+        { href: '/lavori/', label: ui.nav.lavori },
+        { href: '/contatti/', label: ui.nav.contatti },
+      ];
+
+const privacyHref = lingua === 'en' ? '/en/privacy-policy/' : '/privacy-policy/';
 
 const year = new Date().getFullYear();
 ---
@@ -17,7 +32,7 @@ const year = new Date().getFullYear();
   <div class="wrap-wide py-16 lg:py-24 grid gap-12 sm:grid-cols-2 lg:grid-cols-3">
     <div>
       <Logo size={32} />
-      <p class="text-small measure mt-4 text-paper/85">Professionisti dell'energia.</p>
+      <p class="text-small measure mt-4 text-paper/85">{ui.footer.claim}</p>
       <a
         href={contatti.linkedin}
         class="text-small inline-flex items-center gap-2.5 mt-6 text-paper/90 hover:text-signal-400 transition-colors"
@@ -32,7 +47,7 @@ const year = new Date().getFullYear();
     </div>
 
     <div>
-      <p class="ds-eyebrow-label" style="color: var(--color-paper); opacity: 0.75;">Naviga</p>
+      <p class="ds-eyebrow-label" style="color: var(--color-paper); opacity: 0.75;">{ui.footer.naviga}</p>
       <ul class="text-small mt-4 flex flex-col gap-3">
         {quickLinks.map((s) => (
           <li><a href={s.href} class="text-paper/90 hover:text-signal-400 transition-colors">{s.label}</a></li>
@@ -41,14 +56,16 @@ const year = new Date().getFullYear();
     </div>
 
     <div>
-      <p class="ds-eyebrow-label" style="color: var(--color-paper); opacity: 0.75;">Contatti</p>
+      <p class="ds-eyebrow-label" style="color: var(--color-paper); opacity: 0.75;">{ui.footer.contatti}</p>
       <ul class="text-small mt-4 flex flex-col gap-3 text-paper/90">
-        <li>{contatti.indirizzo}</li>
+        <!-- Il NAP resta in italiano: solo ", Italy" in coda per il lettore
+             internazionale, mai una traduzione dell'indirizzo. -->
+        <li>{contatti.indirizzo}{lingua === 'en' && ', Italy'}</li>
         <li><a href={contatti.telefonoHref} class="hover:text-signal-400 transition-colors">{contatti.telefono}</a></li>
         <li><a href={`mailto:${contatti.email}`} class="hover:text-signal-400 transition-colors">{contatti.email}</a></li>
         <li><a href={`mailto:${contatti.pec}`} class="hover:text-signal-400 transition-colors">{contatti.pec}</a></li>
-        <li>P.IVA {contatti.piva}</li>
-        <li>Codice FE {contatti.codiceFE}</li>
+        <li>{lingua === 'en' ? 'VAT no.' : 'P.IVA'} {contatti.piva}</li>
+        <li>{lingua === 'en' ? 'Tax code (Codice FE)' : 'Codice FE'} {contatti.codiceFE}</li>
       </ul>
     </div>
   </div>
@@ -61,9 +78,9 @@ const year = new Date().getFullYear();
            le lascia andare a capo per conto loro, senza un breakpoint che
            decida al posto del contenuto. -->
       <div class="flex flex-wrap items-center justify-center gap-x-6 gap-y-2.5 text-center">
-        <a href="/privacy-policy/" class="hover:text-signal-400 transition-colors">Privacy Policy</a>
-        <button type="button" id="footer-cookie-preferences" class="border-0 bg-transparent p-0 cursor-pointer hover:text-signal-400 transition-colors">Preferenze cookie</button>
-        <span>P.IVA {contatti.piva}</span>
+        <a href={privacyHref} class="hover:text-signal-400 transition-colors">{ui.footer.privacyPolicy}</a>
+        <button type="button" id="footer-cookie-preferences" class="border-0 bg-transparent p-0 cursor-pointer hover:text-signal-400 transition-colors">{ui.footer.preferenzeCookie}</button>
+        <span>{lingua === 'en' ? 'VAT no.' : 'P.IVA'} {contatti.piva}</span>
       </div>
     </div>
   </div>

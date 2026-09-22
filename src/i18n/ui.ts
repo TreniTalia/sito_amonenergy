@@ -9,6 +9,7 @@ export const UI = {
   it: {
     nav: {
       home: 'Home',
+      azienda: 'Azienda',
       servizi: 'Servizi',
       lavori: 'Lavori',
       contatti: 'Contatti',
@@ -24,7 +25,7 @@ export const UI = {
       scriviciEmail: 'Scrivici via email',
     },
     footer: {
-      claim: 'Professionisti dell’energia.',
+      claim: "Professionisti dell'energia.",
       linkedin: 'LinkedIn',
       naviga: 'Naviga',
       contatti: 'Contatti',
@@ -41,6 +42,7 @@ export const UI = {
   en: {
     nav: {
       home: 'Home',
+      azienda: 'Company',
       servizi: 'Services',
       lavori: 'Projects',
       contatti: 'Contacts',

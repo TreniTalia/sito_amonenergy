@@ -1,0 +1,52 @@
+---
+// Fascia di chiamata locale delle pagine tecniche di dettaglio: stessa fascia
+// nel testo e nei pulsanti di CtaBand.astro, ma senza fotografia (le pagine
+// tecniche non ne mostrano) e su navy pieno. Estratta da
+// `src/pages/servizi/[slug].astro` per essere condivisa con la gemella
+// inglese `src/pages/en/services/[slug].astro`, invece di ricopiare qui lo
+// stesso markup due volte.
+import type { Lingua } from '../../i18n/routes.ts';
+import { contatti } from '../../data/contatti.ts';
+
+interface Props {
+  headline?: string;
+  lingua?: Lingua;
+}
+
+const TESTI = {
+  it: {
+    headline: 'Una misura vale quanto chi la interpreta.',
+    sub: 'Parla direttamente con chi mette le mani sugli impianti. Niente form, niente attese: una telefonata e siamo operativi.',
+    chiamaci: 'Chiamaci',
+    scriviciEmail: 'Scrivici via email',
+    subject: 'Richiesta%20informazioni',
+  },
+  en: {
+    headline: 'A measurement is only as good as the read on it.',
+    sub: 'Talk directly to the people who put their hands on the plant. No forms, no waiting: one call and we are on it.',
+    chiamaci: 'Call us',
+    scriviciEmail: 'Email us',
+    subject: 'Information%20request',
+  },
+} as const;
+
+const { headline, lingua = 'it' } = Astro.props;
+const t = TESTI[lingua];
+---
+
+<section class="bg-navy-950 text-paper">
+  <div class="wrap flex flex-col items-center justify-center gap-8 py-24 text-center lg:py-28">
+    <p class="text-display max-w-[20ch]" data-reveal>{headline ?? t.headline}</p>
+    <p class="text-lead measure-tight text-paper/80" data-reveal style="--reveal-delay:100ms">
+      {t.sub}
+    </p>
+    <div class="flex w-full flex-col gap-3.5 sm:w-auto sm:flex-row sm:gap-5" data-reveal style="--reveal-delay:200ms">
+      <a href={contatti.telefonoHref} class="ds-btn-on-dark justify-center">
+        {t.chiamaci}: {contatti.telefono}
+      </a>
+      <a href={`mailto:${contatti.email}?subject=${t.subject}`} class="ds-btn-ghost justify-center">
+        {t.scriviciEmail}
+      </a>
+    </div>
+  </div>
+</section>

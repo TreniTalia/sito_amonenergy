@@ -1,30 +1,34 @@
 ---
+// Gemella inglese di src/pages/index.astro: stessi componenti, stesso
+// ordine, contenuto dalla collection `en`. Vedi quella pagina per i
+// commenti di dettaglio sulle scelte di layout — qui restano solo quelli
+// che riguardano la traduzione.
 import { getCollection, getEntry } from 'astro:content';
 import { Image } from 'astro:assets';
 import { Icon } from 'astro-icon/components';
-import Base from '../layouts/Base.astro';
-import Hero from '../components/Hero.astro';
-import ServiceCard from '../components/ServiceCard.astro';
-import ControlPillar from '../components/ControlPillar.astro';
-import StatBar from '../components/StatBar.astro';
-import ClientMarquee from '../components/ClientMarquee.astro';
-import CtaBand from '../components/CtaBand.astro';
-import CoverageMap from '../components/CoverageMap.astro';
-import { contatti } from '../data/contatti.ts';
+import Base from '../../layouts/Base.astro';
+import Hero from '../../components/Hero.astro';
+import ServiceCard from '../../components/ServiceCard.astro';
+import ControlPillar from '../../components/ControlPillar.astro';
+import StatBar from '../../components/StatBar.astro';
+import ClientMarquee from '../../components/ClientMarquee.astro';
+import CtaBand from '../../components/CtaBand.astro';
+import CoverageMap from '../../components/CoverageMap.astro';
+import { contatti } from '../../data/contatti.ts';
 
-const home = await getEntry('pagine', 'it/home');
-if (!home || home.data.pagina !== 'home') throw new Error('pagine/it/home.yaml missing or malformed');
+const home = await getEntry('pagine', 'en/home');
+if (!home || home.data.pagina !== 'home') throw new Error('pagine/en/home.yaml missing or malformed');
 const { hero, chiSiamoBreve, controllo, statbar, percheAmon, marqueeTitolo } = home.data;
 
-const servizi = (await getCollection('servizi', (v) => v.id.startsWith('it/'))).sort(
+const servizi = (await getCollection('servizi', (v) => v.id.startsWith('en/'))).sort(
   (a, b) => a.data.ordine - b.data.ordine,
 );
 const serviziAnchor: Record<string, string> = {
-  'laboratorio-mobile': '/servizi/#ingegneria-elettrica',
-  'verifiche-strumentali': '/servizi/#ingegneria-elettrica',
-  'monitoraggio-e-controllo': '/servizi/#controllo-e-monitoraggio',
-  costruzioni: '/servizi/#costruzione-e-gestione',
-  'gestione-e-manutenzione': '/servizi/#costruzione-e-gestione',
+  'laboratorio-mobile': '/en/services/#ingegneria-elettrica',
+  'verifiche-strumentali': '/en/services/#ingegneria-elettrica',
+  'monitoraggio-e-controllo': '/en/services/#controllo-e-monitoraggio',
+  costruzioni: '/en/services/#costruzione-e-gestione',
+  'gestione-e-manutenzione': '/en/services/#costruzione-e-gestione',
 };
 const progettiPreview = (await getCollection('progetti'))
   .sort((a, b) => a.data.ordine - b.data.ordine)
@@ -32,8 +36,8 @@ const progettiPreview = (await getCollection('progetti'))
 ---
 
 <Base
-  title="Impianti elettrici AT/MT/BT e rinnovabili nel Centro-Sud Italia"
-  description="Amon Energy: costruzione, verifiche strumentali, ricerca guasti e monitoraggio 24/7 di impianti eolici e fotovoltaici in Centro-Sud Italia."
+  title="HV/MV/LV and renewable electrical plants in Central-Southern Italy"
+  description="Amon Energy: construction, instrumental testing, fault-finding and 24/7 monitoring of wind and solar plants in Central-Southern Italy."
 >
   <Hero
     eyebrow={hero.eyebrow}
@@ -42,26 +46,23 @@ const progettiPreview = (await getCollection('progetti'))
     ctaPrimaria={hero.ctaPrimaria}
     ctaPrimariaHref={contatti.telefonoHref}
     ctaSecondaria={hero.ctaSecondaria}
-    ctaSecondariaHref="/servizi/"
+    ctaSecondariaHref="/en/services/"
+    lingua="en"
   />
 
-  <!-- Chi siamo + copertura. La fascia "Perché Amon" (percheAmon) non è più
-       una sezione a sé: i tre punti diventano una riga compatta qui, sotto la
-       storia — la colonna di testo è più larga della mappa apposta, perché è
-       lei il blocco che deve dominare. -->
   <section class="wrap-wide py-20 lg:py-28">
     <div class="grid items-start gap-12 lg:grid-cols-[1.4fr_0.6fr] lg:gap-16">
       <div data-reveal>
         <div class="ds-eyebrow">
           <span class="ds-eyebrow-dash"></span>
-          <span class="ds-eyebrow-label">Chi siamo</span>
+          <span class="ds-eyebrow-label">About us</span>
         </div>
         <p class="measure text-lead text-ink/90">{chiSiamoBreve.testo}</p>
         <a
           href={chiSiamoBreve.link}
           class="group mt-7 inline-flex items-center gap-2 font-semibold text-navy-900 transition-colors hover:text-navy-700"
         >
-          Scopri i servizi
+          See our services
           <Icon name="fa6-solid:arrow-right" class="text-xs transition-transform duration-300 group-hover:translate-x-1" style="transition-timing-function: var(--ease-signature);" />
         </a>
 
@@ -78,34 +79,38 @@ const progettiPreview = (await getCollection('progetti'))
         </div>
       </div>
       <div class="relative lg:sticky lg:top-32" data-reveal style="--reveal-delay:120ms">
-        <CoverageMap />
+        <CoverageMap lingua="en" />
       </div>
     </div>
   </section>
 
-  <!-- Mondo del controllo: RCS + CCI -->
   {
     controllo && (
-      <ControlPillar eyebrow={controllo.eyebrow} titolo={controllo.titolo} testo={controllo.testo} />
+      <ControlPillar
+        eyebrow={controllo.eyebrow}
+        titolo={controllo.titolo}
+        testo={controllo.testo}
+        href="/en/services/#controllo-e-monitoraggio"
+        lingua="en"
+      />
     )
   }
 
-  <!-- Servizi -->
   <section class="wrap-wide py-20 lg:py-28">
     <div class="ds-eyebrow" data-reveal>
       <span class="ds-eyebrow-dash"></span>
-      <span class="ds-eyebrow-label">Cosa facciamo</span>
+      <span class="ds-eyebrow-label">What we do</span>
     </div>
     <div class="mb-12 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between" data-reveal>
       <div>
-        <h2 class="text-headline max-w-[22ch]">Un impianto ha tante fasi. Le conosciamo tutte.</h2>
+        <h2 class="text-headline max-w-[22ch]">A plant has many stages. We know them all.</h2>
         <p class="measure text-body mt-3 text-ink/70">
-          Costruzione, verifiche strumentali, ricerca guasti, monitoraggio e automazione — la stessa
-          squadra segue l'impianto in ogni fase.
+          Construction, instrumental testing, fault-finding, monitoring and automation — the same
+          team follows the plant through every stage.
         </p>
       </div>
-      <a href="/servizi/" class="hidden shrink-0 font-semibold text-navy-900 hover:text-navy-700 sm:inline-flex">
-        Tutti i servizi →
+      <a href="/en/services/" class="hidden shrink-0 font-semibold text-navy-900 hover:text-navy-700 sm:inline-flex">
+        All services →
       </a>
     </div>
     <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 lg:gap-6">
@@ -116,38 +121,38 @@ const progettiPreview = (await getCollection('progetti'))
               titolo={s.data.titolo}
               excerpt={s.data.excerpt}
               icona={s.data.icona}
-              href={serviziAnchor[s.id.slice(3)] ?? '/servizi/'}
+              href={serviziAnchor[s.id.slice(3)] ?? '/en/services/'}
               index={i + 1}
               accent="signal"
               elevated
+              ctaLabel="Learn more"
             />
           </div>
         ))
       }
     </div>
-    <a href="/servizi/" class="mt-8 inline-flex font-semibold text-navy-900 sm:hidden">Tutti i servizi →</a>
+    <a href="/en/services/" class="mt-8 inline-flex font-semibold text-navy-900 sm:hidden">All services →</a>
   </section>
 
-  <StatBar items={statbar} nota="Numeri dell'operatività Amon Energy" />
+  <StatBar items={statbar} nota="Amon Energy's operational figures" />
 
-  <!-- Realizzazioni -->
   <section class="wrap-wide py-20 lg:py-28">
     <div class="mb-10 flex items-end justify-between gap-4">
       <div data-reveal>
         <div class="ds-eyebrow">
           <span class="ds-eyebrow-dash"></span>
-          <span class="ds-eyebrow-label">Realizzazioni</span>
+          <span class="ds-eyebrow-label">Our work</span>
         </div>
-        <h2 class="text-headline max-w-[22ch]">Stazioni elettriche che abbiamo costruito.</h2>
+        <h2 class="text-headline max-w-[22ch]">Electrical substations we have built.</h2>
       </div>
-      <a href="/lavori/" class="hidden shrink-0 font-semibold text-navy-900 hover:text-navy-700 sm:inline-flex">
-        Tutti i progetti →
+      <a href="/en/projects/" class="hidden shrink-0 font-semibold text-navy-900 hover:text-navy-700 sm:inline-flex">
+        All projects →
       </a>
     </div>
     <div class="grid gap-5 sm:grid-cols-2 lg:grid-cols-3 lg:gap-6">
       {
         progettiPreview.map((p, i) => (
-          <a href="/lavori/" class="group block" data-reveal style={`--reveal-delay:${i * 90}ms`}>
+          <a href="/en/projects/" class="group block" data-reveal style={`--reveal-delay:${i * 90}ms`}>
             <div class="relative overflow-hidden rounded-[var(--radius-card)] border border-navy-100 shadow-[var(--shadow-sm)] transition-shadow duration-300 group-hover:shadow-[var(--shadow-lg)]" style="aspect-ratio: 16 / 11;">
               <Image
                 src={p.data.immagine}
@@ -162,16 +167,16 @@ const progettiPreview = (await getCollection('progetti'))
             </div>
             <div class="mt-4">
               <h3 class="text-title text-ink">{p.data.titolo}</h3>
-              <p class="text-small mt-1 text-ink/60">{p.data.tipologia} · prov. {p.data.provincia}</p>
+              <p class="text-small mt-1 text-ink/60">{p.data.tipologia} · {p.data.provincia} province</p>
             </div>
           </a>
         ))
       }
     </div>
-    <a href="/lavori/" class="mt-8 inline-flex font-semibold text-navy-900 sm:hidden">Tutti i progetti →</a>
+    <a href="/en/projects/" class="mt-8 inline-flex font-semibold text-navy-900 sm:hidden">All projects →</a>
   </section>
 
   <ClientMarquee titolo={marqueeTitolo} />
 
-  <CtaBand />
+  <CtaBand lingua="en" />
 </Base>

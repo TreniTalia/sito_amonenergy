@@ -1,5 +1,6 @@
 ---
 import HeroTwin from './HeroTwin.astro';
+import type { Lingua } from '../i18n/routes.ts';
 
 interface Props {
   eyebrow: string;
@@ -9,11 +10,17 @@ interface Props {
   ctaPrimariaHref: string;
   ctaSecondaria: string;
   ctaSecondariaHref: string;
+  lingua?: Lingua;
 }
 
-const { eyebrow, h1, sub, ctaPrimaria, ctaPrimariaHref, ctaSecondaria, ctaSecondariaHref } = Astro.props;
+const { eyebrow, h1, sub, ctaPrimaria, ctaPrimariaHref, ctaSecondaria, ctaSecondariaHref, lingua = 'it' } =
+  Astro.props;
 
-const facts = ['Sistemi di monitoraggio', 'Automazioni', 'Reperibilità 24/7'];
+const FACTS = {
+  it: ['Sistemi di monitoraggio', 'Automazioni', 'Reperibilità 24/7'],
+  en: ['Monitoring systems', 'Automation', '24/7 on-call cover'],
+} as const;
+const facts = FACTS[lingua];
 ---
 
 <!-- Full-viewport by design: l'arco deve chiudere esattamente sulla piega, così

@@ -65,7 +65,7 @@ collections:
     files:
       - name: "laboratorio-mobile"
         label: "Laboratorio mobile ricerca guasti"
-        file: "src/content/servizi/laboratorio-mobile.md"
+        file: "src/content/servizi/it/laboratorio-mobile.md"
         fields: &servizio_fields
           - { label: "Titolo", name: "titolo", widget: "string" }
           - { label: "Testo breve (per la card in home)", name: "excerpt", widget: "text" }
@@ -73,19 +73,19 @@ collections:
           - { label: "Ordine", name: "ordine", widget: "number", value_type: "int" }
       - name: "verifiche-strumentali"
         label: "Verifiche strumentali"
-        file: "src/content/servizi/verifiche-strumentali.md"
+        file: "src/content/servizi/it/verifiche-strumentali.md"
         fields: *servizio_fields
       - name: "monitoraggio-e-controllo"
         label: "Monitoraggio e controllo"
-        file: "src/content/servizi/monitoraggio-e-controllo.md"
+        file: "src/content/servizi/it/monitoraggio-e-controllo.md"
         fields: *servizio_fields
       - name: "costruzioni"
         label: "Costruzioni"
-        file: "src/content/servizi/costruzioni.md"
+        file: "src/content/servizi/it/costruzioni.md"
         fields: *servizio_fields
       - name: "gestione-e-manutenzione"
         label: "Gestione e manutenzione"
-        file: "src/content/servizi/gestione-e-manutenzione.md"
+        file: "src/content/servizi/it/gestione-e-manutenzione.md"
         fields: *servizio_fields
 
   - name: "pagine"
@@ -94,7 +94,7 @@ collections:
     files:
       - name: "home"
         label: "Home"
-        file: "src/content/pagine/home.yaml"
+        file: "src/content/pagine/it/home.yaml"
         fields:
           - { label: "Tipo pagina", name: "pagina", widget: "hidden", default: "home" }
           - label: "Hero (prima schermata)"
@@ -130,7 +130,7 @@ collections:
 
       - name: "contatti"
         label: "Contatti"
-        file: "src/content/pagine/contatti.yaml"
+        file: "src/content/pagine/it/contatti.yaml"
         fields:
           - { label: "Tipo pagina", name: "pagina", widget: "hidden", default: "contatti" }
           - { label: "Titolo grande (H1)", name: "h1", widget: "text" }
@@ -139,7 +139,7 @@ collections:
 
       - name: "servizi-hub"
         label: "Servizi"
-        file: "src/content/pagine/servizi.yaml"
+        file: "src/content/pagine/it/servizi.yaml"
         fields:
           - { label: "Tipo pagina", name: "pagina", widget: "hidden", default: "servizi" }
           - { label: "Eyebrow (etichetta sopra il titolo)", name: "eyebrow", widget: "string" }

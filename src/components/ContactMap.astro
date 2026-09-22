@@ -8,6 +8,13 @@
 // non solo un filtro CSS sopra tile altrui.
 import 'maplibre-gl/dist/maplibre-gl.css';
 import { contatti } from '../data/contatti.ts';
+import type { Lingua } from '../i18n/routes.ts';
+
+interface Props {
+  lingua?: Lingua;
+}
+
+const { lingua = 'it' } = Astro.props;
 
 // Via Roma 105, 71025 Castelluccio dei Sauri (FG)
 const LAT = 41.30579278776618;
@@ -20,7 +27,7 @@ const LON = 15.485469330788758;
 
 <p class="text-small mt-4">
   <a href={contatti.mapsUrl} target="_blank" rel="noopener noreferrer" class="font-semibold text-navy-900 hover:text-navy-700 transition-colors">
-    Ottieni indicazioni →
+    {lingua === 'en' ? 'Get directions →' : 'Ottieni indicazioni →'}
   </a>
 </p>
 

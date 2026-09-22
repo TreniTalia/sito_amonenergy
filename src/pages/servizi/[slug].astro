@@ -1,16 +1,11 @@
 ---
-// Route delle pagine tecniche di dettaglio. Una sola pagina per nove servizi:
-// tutto ciò che cambia sta nel Markdown della collection, così le otto pagine
-// che seguono la SFRA non aggiungono una riga di layout.
+// Route delle pagine tecniche di dettaglio (italiano). Una sola pagina per
+// nove servizi: tutto ciò che cambia sta nel Markdown della collection e nel
+// markup condiviso di TechDetailPage.astro, così le otto pagine che seguono
+// la SFRA non aggiungono una riga di layout — e la gemella inglese
+// (`src/pages/en/services/[slug].astro`) non lo ricopia.
 import { getCollection, getEntry } from 'astro:content';
-import Base from '../../layouts/Base.astro';
-import PageHero from '../../components/PageHero.astro';
-import SpecPanel from '../../components/tech/SpecPanel.astro';
-import ProcessSteps from '../../components/tech/ProcessSteps.astro';
-import ParamGrid from '../../components/tech/ParamGrid.astro';
-import TechFaq from '../../components/tech/TechFaq.astro';
-import { DIAGRAMMI } from '../../components/tech/diagrams/index.ts';
-import { contatti } from '../../data/contatti.ts';
+import TechDetailPage from '../../components/tech/TechDetailPage.astro';
 
 export async function getStaticPaths() {
   // Gli id sono `it/<slug>` e `en/<slug>`: qui passa solo l'italiano, le
@@ -22,8 +17,11 @@ export async function getStaticPaths() {
 const { voce } = Astro.props;
 const d = voce.data;
 
-const Diagramma = DIAGRAMMI[d.diagramma as keyof typeof DIAGRAMMI];
-if (!Diagramma) throw new Error(`servizi/${voce.id}: diagramma "${d.diagramma}" non in DIAGRAMMI`);
+// Una sola lettura della collection invece di un `getEntry` per slug: quello
+// stampa un avviso a build per ogni sorella non ancora scritta, e sono otto.
+const sorelle = new Map(
+  (await getCollection('serviziDettaglio', (v) => v.id.startsWith('it/'))).map((v) => [v.id.slice(3), v.data]),
+);
 
 // Le pagine sorelle arrivano una task alla volta: finché il Markdown di una
 // non esiste, il titolo vero non c'è e si ricostruisce dallo slug. Meglio
@@ -32,19 +30,8 @@ const ACRONIMI = new Set(['sfra', 'rcs', 'cci', 'at', 'mt', 'a72', 'iec']);
 const daSlug = (slug: string) =>
   slug
     .split('-')
-    .map((p, i) =>
-      ACRONIMI.has(p) ? p.toUpperCase() : i === 0 ? p[0].toUpperCase() + p.slice(1) : p,
-    )
+    .map((p, i) => (ACRONIMI.has(p) ? p.toUpperCase() : i === 0 ? p[0].toUpperCase() + p.slice(1) : p))
     .join(' ');
-
-// Una sola lettura della collection invece di un `getEntry` per slug: quello
-// stampa un avviso a build per ogni sorella non ancora scritta, e sono otto.
-const sorelle = new Map(
-  (await getCollection('serviziDettaglio', (v) => v.id.startsWith('it/'))).map((v) => [
-    v.id.slice(3),
-    v.data,
-  ]),
-);
 
 const correlati = d.correlati.map((slug) => {
   const sorella = sorelle.get(slug);
@@ -56,238 +43,6 @@ const correlati = d.correlati.map((slug) => {
 });
 
 const progetto = d.caso ? await getEntry('progetti', d.caso.progetto) : undefined;
-
-const service = {
-  '@context': 'https://schema.org',
-  '@type': 'Service',
-  name: d.titolo,
-  serviceType: d.titolo,
-  description: d.seoDescription,
-  areaServed: { '@type': 'Place', name: 'Centro-Sud Italia' },
-  provider: { '@type': 'Organization', name: contatti.ragioneSociale, url: Astro.site?.toString() },
-};
-
-const faqPage = {
-  '@context': 'https://schema.org',
-  '@type': 'FAQPage',
-  mainEntity: d.faq.map((f) => ({
-    '@type': 'Question',
-    name: f.d,
-    acceptedAnswer: { '@type': 'Answer', text: f.r },
-  })),
-};
 ---
 
-<Base title={d.seoTitle} description={d.seoDescription} structuredData={[service, faqPage]}>
-  <!-- Nessuna fotografia su queste pagine: l'hero resta il navy pieno, e
-       l'unica immagine è il diagramma vettoriale più sotto. -->
-  <PageHero eyebrow="Verifiche strumentali" h1={d.titolo} sub={d.lead} />
-
-  <!-- Il problema, e accanto il diagramma che lo mostra -->
-  <section class="wrap-wide py-20 lg:py-28">
-    <div class="grid gap-12 lg:grid-cols-[1fr_1fr] lg:items-start lg:gap-16">
-      <div>
-        <div class="ds-eyebrow" data-reveal>
-          <span class="ds-eyebrow-dash"></span>
-          <span class="ds-eyebrow-label">Che cosa rivela</span>
-        </div>
-        <h2 class="sr-only">Che cosa rivela</h2>
-        <div class="mt-4 flex flex-col gap-5" data-reveal style="--reveal-delay:80ms">
-          {d.problema.map((p) => <p class="measure text-body text-ink/75">{p}</p>)}
-        </div>
-      </div>
-      <div class="lg:sticky lg:top-28" data-reveal style="--reveal-delay:160ms">
-        <Diagramma />
-      </div>
-    </div>
-  </section>
-
-  <!-- Parametri di prova -->
-  <section class="bg-navy-100">
-    <div class="wrap-wide py-20 lg:py-28">
-      <div class="ds-eyebrow" data-reveal>
-        <span class="ds-eyebrow-dash"></span>
-        <span class="ds-eyebrow-label">Parametri di prova</span>
-      </div>
-      <h2 class="text-headline max-w-[24ch]" data-reveal style="--reveal-delay:80ms">
-        I numeri che definiscono la misura.
-      </h2>
-      <div class="mt-10" data-reveal style="--reveal-delay:140ms">
-        <ParamGrid voci={d.parametri} />
-      </div>
-    </div>
-  </section>
-
-  <!-- Come si svolge. ProcessSteps eredita il colore dal contesto: su navy la
-       sezione deve portare `text-paper`, altrimenti il testo sparisce. -->
-  <section class="bg-navy-950 text-paper">
-    <div class="wrap-wide py-20 lg:py-28">
-      <div class="ds-eyebrow" data-reveal>
-        <span class="ds-eyebrow-dash"></span>
-        <span class="ds-eyebrow-label ds-eyebrow-label--signal">Come si svolge</span>
-      </div>
-      <h2 class="text-control max-w-[24ch]" data-reveal style="--reveal-delay:80ms">
-        Dalla messa in sicurezza al referto.
-      </h2>
-      <div class="mt-12" data-reveal style="--reveal-delay:140ms">
-        <ProcessSteps fasi={d.fasi} />
-      </div>
-    </div>
-  </section>
-
-  <!-- Norma di riferimento e strumentazione -->
-  <section class="wrap-wide py-20 lg:py-28">
-    <div class="grid gap-10 lg:grid-cols-[1.05fr_0.95fr] lg:items-start lg:gap-14">
-      <div>
-        <div class="ds-eyebrow" data-reveal>
-          <span class="ds-eyebrow-dash"></span>
-          <span class="ds-eyebrow-label">Norma di riferimento</span>
-        </div>
-        <h2 class="text-headline mt-1" data-reveal style="--reveal-delay:80ms">{d.norma.codice}</h2>
-        <p class="text-title mt-2 text-ink/70" data-reveal style="--reveal-delay:110ms">{d.norma.titolo}</p>
-        <p class="measure text-body mt-5 text-ink/75" data-reveal style="--reveal-delay:150ms">{d.norma.note}</p>
-      </div>
-      <!-- Due pannelli, non uno: con che cosa si misura e come si misura sono
-           dati diversi. Il primo è un elenco di apparecchi, incrociabile con
-           quello di pagine/azienda.yaml; il secondo sono i parametri della
-           prova, e non tutte le pagine ne hanno (RCS, CCI, teledistacco e
-           lettura contatori sono sistemi, non prove strumentali). -->
-      <div class="flex flex-col gap-5" data-reveal style="--reveal-delay:200ms">
-        <!-- A sinistra l'apparecchio, a destra il ruolo che ha nella prova. Il
-             verso opposto (ruolo a sinistra) si legge meglio in astratto, ma la
-             colonna dei valori di SpecPanel è `flex: none`: a 390px un nome
-             lungo come "Cavi coassiali a doppia schermatura" usciva dal
-             pannello. La colonna delle etichette invece va a capo. Verificato a
-             video, non dedotto. -->
-        <SpecPanel
-          titolo="Strumentazione"
-          voci={d.strumentazione.map((s) => ({ etichetta: s.modello, valore: s.nota }))}
-        />
-        {d.assettoMisura && <SpecPanel titolo="Assetto di misura" voci={d.assettoMisura} />}
-      </div>
-    </div>
-  </section>
-
-  {
-    d.caso && (
-      <section class="bg-navy-100">
-        <div class="wrap-wide py-20 lg:py-28">
-          <div class="ds-eyebrow" data-reveal>
-            <span class="ds-eyebrow-dash" />
-            <span class="ds-eyebrow-label">In campo</span>
-          </div>
-          <h2 class="text-headline max-w-[24ch]" data-reveal style="--reveal-delay:80ms">
-            {progetto?.data.titolo ?? 'Un caso reale'}
-          </h2>
-          <p class="measure text-lead mt-5 text-ink/75" data-reveal style="--reveal-delay:130ms">
-            {d.caso.testo}
-          </p>
-          <a href="/lavori/" class="ds-btn-secondary mt-8 inline-flex" data-reveal style="--reveal-delay:180ms">
-            Guarda le opere realizzate
-          </a>
-        </div>
-      </section>
-    )
-  }
-
-  <!-- Domande frequenti. Il JSON-LD FAQPage lo emette questa pagina, non il
-       componente: qui ci sono tutte le domande in un posto solo. -->
-  <section class="wrap-wide py-20 lg:py-28">
-    <div class="ds-eyebrow" data-reveal>
-      <span class="ds-eyebrow-dash"></span>
-      <span class="ds-eyebrow-label">Domande frequenti</span>
-    </div>
-    <h2 class="text-headline max-w-[24ch]" data-reveal style="--reveal-delay:80ms">
-      Quello che ci chiedono prima di chiamarci.
-    </h2>
-    <div class="mt-10 max-w-[68ch]" data-reveal style="--reveal-delay:140ms">
-      <TechFaq domande={d.faq} />
-    </div>
-  </section>
-
-  <!-- Pagine sorelle: senza questi link ogni pagina tecnica sarebbe un vicolo
-       cieco, per il lettore e per il crawler. -->
-  <section class="bg-navy-100">
-    <div class="wrap-wide py-20 lg:py-28">
-      <div class="ds-eyebrow" data-reveal>
-        <span class="ds-eyebrow-dash"></span>
-        <span class="ds-eyebrow-label">Verifiche collegate</span>
-      </div>
-      <h2 class="text-headline max-w-[24ch]" data-reveal style="--reveal-delay:80ms">
-        Spesso si eseguono nella stessa campagna.
-      </h2>
-      <ul class="mt-10 grid list-none gap-4 p-0 sm:grid-cols-2 lg:grid-cols-3 lg:gap-6">
-        {
-          correlati.map((c, i) => (
-            <li data-reveal style={`--reveal-delay:${i * 90}ms`}>
-              <a href={c.href} class="correlato">
-                <span class="text-title block">{c.titolo}</span>
-                {c.lead && <span class="text-small mt-2 block text-ink/70">{c.lead}</span>}
-                <span class="correlato__cta text-micro mt-4 block">Approfondisci</span>
-              </a>
-            </li>
-          ))
-        }
-      </ul>
-    </div>
-  </section>
-
-  <!-- Fascia di chiamata. CtaBand monta una fotografia a tutta larghezza: qui
-       le foto sono escluse, quindi la fascia è la stessa nel testo e nei
-       pulsanti ma su navy pieno. -->
-  <section class="bg-navy-950 text-paper">
-    <div class="wrap flex flex-col items-center justify-center gap-8 py-24 text-center lg:py-28">
-      <p class="text-display max-w-[20ch]" data-reveal>Una misura vale quanto chi la interpreta.</p>
-      <p class="text-lead measure-tight text-paper/80" data-reveal style="--reveal-delay:100ms">
-        Parla direttamente con chi mette le mani sugli impianti. Niente form, niente attese: una
-        telefonata e siamo operativi.
-      </p>
-      <div class="flex w-full flex-col gap-3.5 sm:w-auto sm:flex-row sm:gap-5" data-reveal style="--reveal-delay:200ms">
-        <a href={contatti.telefonoHref} class="ds-btn-on-dark justify-center">
-          Chiamaci: {contatti.telefono}
-        </a>
-        <a
-          href={`mailto:${contatti.email}?subject=Richiesta%20informazioni`}
-          class="ds-btn-ghost justify-center"
-        >
-          Scrivici via email
-        </a>
-      </div>
-    </div>
-  </section>
-</Base>
-
-<style>
-  .correlato {
-    display: block;
-    height: 100%;
-    padding: 22px 24px 20px;
-    border-radius: var(--radius-card);
-    border: 1px solid color-mix(in srgb, var(--color-navy-900) 12%, transparent);
-    background: var(--color-paper);
-    text-decoration: none;
-    color: inherit;
-    transition:
-      transform 0.25s var(--ease-signature, ease),
-      box-shadow 0.25s var(--ease-signature, ease);
-  }
-
-  .correlato:hover {
-    transform: translateY(-3px);
-    box-shadow: var(--shadow-md);
-  }
-
-  /* Freccia in tipografia, non un'icona: la riga di chiusura deve pesare meno
-     del titolo, altrimenti la card legge come un pulsante. */
-  .correlato__cta {
-    font-family: var(--font-display);
-    font-weight: 600;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    color: var(--color-green-500);
-  }
-
-  .correlato__cta::after {
-    content: ' →';
-  }
-</style>
+<TechDetailPage voce={voce} correlati={correlati} progetto={progetto} lingua="it" hrefLavori="/lavori/" />

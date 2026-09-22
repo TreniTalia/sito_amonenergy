@@ -15,19 +15,17 @@ const { ROTTE } = await import('../src/i18n/routes.ts').catch(() => ({ ROTTE: nu
 // `readFileSync`, che li accettano entrambi (stessa nota di test/seo-head.test.mjs).
 const fileDi = (rotta) => path.join(DIST, rotta.replace(/^\//, ''), 'index.html');
 
-// La Task 5 costruisce solo l'impalcatura: oggi in `dist` esistono ancora solo
-// le pagine italiane di partenza, nessuna pagina inglese. Un test che
-// pretendesse tutte e 15 le coppie it/en (come nel brief originale)
-// chiuderebbe questa task in rosso per definizione — le pagine arrivano nelle
-// task successive — quindi qui non lo si scrive: lo aggiungerà la task che
-// crea le pagine inglesi.
+// Il mirror inglese (Task 11) ha creato le 15 coppie it/en: i tre test sotto
+// non si auto-saltano più (`paginheIt`/`paginheEn`/`coppieComplete` valgono
+// tutti 15 su un `dist` completo), e il quarto test, aggiunto da questa
+// task, verifica in modo stretto che siano *esattamente* 15 coppie, non solo
+// "più di zero" — un conteggio esplicito, non un test verde per vacuità.
 //
 // I controlli sotto girano solo su ciò che esiste già in `dist`, filtrando
-// con `existsSync`. Dove oggi non esiste ancora nulla da controllare (nessuna
-// pagina inglese, nessuna coppia completa), il test relativo è marcato
-// `skip` con un motivo esplicito — non lasciato "verde" senza aver guardato
-// niente, che sarebbe peggio di un rosso perché nasconderebbe l'assenza di
-// verifica.
+// con `existsSync`. Se in futuro `dist` fosse parziale (una sola lingua
+// buildata), il test relativo tornerebbe a saltarsi con un motivo esplicito
+// — non lasciato "verde" senza aver guardato niente, che sarebbe peggio di
+// un rosso perché nasconderebbe l'assenza di verifica.
 describe('rotte bilingui', { skip }, () => {
   test('ROTTE è importabile e non vuoto', () => {
     assert.ok(ROTTE, 'src/i18n/routes.ts non importabile');
@@ -38,6 +36,15 @@ describe('rotte bilingui', { skip }, () => {
   const paginheIt = ROTTE ? ROTTE.filter(paginaEsiste('it')) : [];
   const paginheEn = ROTTE ? ROTTE.filter(paginaEsiste('en')) : [];
   const coppieComplete = ROTTE ? ROTTE.filter((r) => existsSync(fileDi(r.it)) && existsSync(fileDi(r.en))) : [];
+
+  test('tutte e 15 le rotte esistono in entrambe le lingue', () => {
+    assert.equal(ROTTE.length, 15, `src/i18n/routes.ts: attese 15 coppie, trovate ${ROTTE.length}`);
+    for (const r of ROTTE) {
+      assert.ok(existsSync(fileDi(r.it)), `manca la pagina italiana ${r.it}`);
+      assert.ok(existsSync(fileDi(r.en)), `manca la pagina inglese ${r.en}`);
+    }
+    assert.equal(coppieComplete.length, 15, `attese 15 coppie it/en complete, trovate ${coppieComplete.length}`);
+  });
 
   test(
     'le pagine italiane già costruite dichiarano hreflang="it" e x-default',

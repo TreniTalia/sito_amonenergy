@@ -1,0 +1,39 @@
+---
+// Gemella inglese di src/pages/servizi/[slug].astro: stessa struttura,
+// delegata allo stesso componente condiviso TechDetailPage.astro (v. quel
+// file per il markup). Qui cambia solo la lingua e il prefisso degli slug.
+import { getCollection, getEntry } from 'astro:content';
+import TechDetailPage from '../../../components/tech/TechDetailPage.astro';
+
+export async function getStaticPaths() {
+  const voci = await getCollection('serviziDettaglio', (v) => v.id.startsWith('en/'));
+  return voci.map((voce) => ({ params: { slug: voce.id.slice(3) }, props: { voce } }));
+}
+
+const { voce } = Astro.props;
+const d = voce.data;
+
+const sorelle = new Map(
+  (await getCollection('serviziDettaglio', (v) => v.id.startsWith('en/'))).map((v) => [v.id.slice(3), v.data]),
+);
+
+const ACRONIMI = new Set(['sfra', 'rcs', 'cci', 'hv', 'mv', 'a72']);
+const daSlug = (slug: string) =>
+  slug
+    .split('-')
+    .map((p, i) => (ACRONIMI.has(p) ? p.toUpperCase() : i === 0 ? p[0].toUpperCase() + p.slice(1) : p))
+    .join(' ');
+
+const correlati = d.correlati.map((slug) => {
+  const sorella = sorelle.get(slug);
+  return {
+    href: `/en/services/${slug}/`,
+    titolo: sorella?.titolo ?? daSlug(slug),
+    lead: sorella?.lead,
+  };
+});
+
+const progetto = d.caso ? await getEntry('progetti', d.caso.progetto) : undefined;
+---
+
+<TechDetailPage voce={voce} correlati={correlati} progetto={progetto} lingua="en" hrefLavori="/en/projects/" />

@@ -7,6 +7,7 @@ import controlRoom from '../assets/img/rcs/rcs-dashboard.png';
 // `servizi-controllo-pattern.jpg` in servizi/index.astro: desaturato +
 // tinta navy in `mix-blend-mode: color`, non un'illustrazione a sé.
 import pattern from '../assets/img/rcs/pattern-grid-twilight.jpg';
+import type { Lingua } from '../i18n/routes.ts';
 
 interface Props {
   eyebrow: string;
@@ -14,33 +15,66 @@ interface Props {
   testo: string;
   /** Link target for the section CTA. */
   href?: string;
+  lingua?: Lingua;
 }
 
-const { eyebrow, titolo, testo, href = '/servizi/#controllo-e-monitoraggio' } = Astro.props;
+const SISTEMI = {
+  it: [
+    {
+      tag: 'Control Room',
+      titolo: 'Sorveglianza 24/7/365',
+      testo:
+        '5 tecnici e 1 supervisore dedicati. Tripla ridondanza internet e infrastruttura su cloud AWS: gli impianti restano sorvegliati anche in caso di doppio guasto.',
+      specs: ['24/7/365', '3 linee internet', 'Cloud AWS'],
+    },
+    {
+      tag: 'RCS',
+      titolo: 'Remote Control System',
+      testo:
+        'Sistema proprietario di monitoraggio e controllo: analisi guasti in tempo reale, richiusura automatica, reset protezioni da remoto, storicizzazione dati e sistema ticket integrato.',
+      specs: ['Richiusura automatica', 'Web App', 'Integrazione SCADA'],
+    },
+    {
+      tag: 'CCI',
+      titolo: "Controllore Centrale d'Impianto",
+      testo:
+        'Conforme a CEI 0-16 V5 e alla Delibera ARERA 564/2025/R/eel. Lettura contatori e gestione del teledistacco A72 inclusi.',
+      specs: ['CEI 0-16 V5', 'ARERA 564/2025', 'Teledistacco A72'],
+    },
+  ],
+  en: [
+    {
+      tag: 'Control Room',
+      titolo: '24/7/365 surveillance',
+      testo:
+        '5 technicians and 1 dedicated supervisor. Triple internet redundancy and AWS cloud infrastructure: plants stay supervised even in the event of a double failure.',
+      specs: ['24/7/365', '3 internet lines', 'AWS cloud'],
+    },
+    {
+      tag: 'RCS',
+      titolo: 'Remote Control System',
+      testo:
+        'Our proprietary monitoring and control system: real-time fault analysis, automatic reclosing, remote protection reset, data logging and an integrated ticketing system.',
+      specs: ['Automatic reclosing', 'Web App', 'SCADA integration'],
+    },
+    {
+      tag: 'CCI',
+      titolo: 'Central Plant Controller',
+      testo:
+        'Compliant with CEI 0-16 V5 and ARERA Resolution 564/2025/R/eel. Meter reading and A72 remote-tripping management included.',
+      specs: ['CEI 0-16 V5', 'ARERA 564/2025', 'A72 remote tripping'],
+    },
+  ],
+} as const;
 
-const sistemi = [
-  {
-    tag: 'Control Room',
-    titolo: 'Sorveglianza 24/7/365',
-    testo:
-      '5 tecnici e 1 supervisore dedicati. Tripla ridondanza internet e infrastruttura su cloud AWS: gli impianti restano sorvegliati anche in caso di doppio guasto.',
-    specs: ['24/7/365', '3 linee internet', 'Cloud AWS'],
-  },
-  {
-    tag: 'RCS',
-    titolo: 'Remote Control System',
-    testo:
-      'Sistema proprietario di monitoraggio e controllo: analisi guasti in tempo reale, richiusura automatica, reset protezioni da remoto, storicizzazione dati e sistema ticket integrato.',
-    specs: ['Richiusura automatica', 'Web App', 'Integrazione SCADA'],
-  },
-  {
-    tag: 'CCI',
-    titolo: "Controllore Centrale d'Impianto",
-    testo:
-      'Conforme a CEI 0-16 V5 e alla Delibera ARERA 564/2025/R/eel. Lettura contatori e gestione del teledistacco A72 inclusi.',
-    specs: ['CEI 0-16 V5', 'ARERA 564/2025', 'Teledistacco A72'],
-  },
-];
+const CTA_LABEL = {
+  it: 'Scopri monitoraggio e controllo',
+  en: 'Discover control and monitoring',
+} as const;
+
+const { eyebrow, titolo, testo, href = '/servizi/#controllo-e-monitoraggio', lingua = 'it' } = Astro.props;
+const sistemi = SISTEMI[lingua];
+const ctaLabel = CTA_LABEL[lingua];
 ---
 
 <section class="control relative isolate overflow-hidden bg-navy-950 text-paper">
@@ -73,7 +107,7 @@ const sistemi = [
           data-reveal
           style="--reveal-delay:240ms"
         >
-          Scopri monitoraggio e controllo
+          {ctaLabel}
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6" /></svg>
         </a>
       </div>
@@ -94,7 +128,11 @@ const sistemi = [
         </div>
         <Image
           src={controlRoom}
-          alt="La dashboard RCS di Amon Energy: 55 impianti sorvegliati, 51 online, 2 offline, 8 allarmi attivi, 1.253 MW di potenza istantanea, con mappa degli impianti e allarmi recenti"
+          alt={
+            lingua === 'en'
+              ? "Amon Energy's RCS dashboard: 55 plants monitored, 51 online, 2 offline, 8 active alarms, 1,253 MW of instantaneous power, with a plant map and recent alarms"
+              : 'La dashboard RCS di Amon Energy: 55 impianti sorvegliati, 51 online, 2 offline, 8 allarmi attivi, 1.253 MW di potenza istantanea, con mappa degli impianti e allarmi recenti'
+          }
           class="aspect-[16/9] w-full object-cover"
           widths={[600, 900, 1200, 1672]}
           sizes="(min-width: 1024px) 46vw, 100vw"

@@ -1,0 +1,28 @@
+pagina: "azienda"
+
+eyebrow: "About us"
+h1: "Energy professionals, since 2020."
+
+storia: "Amon Energy's experience is rooted in 2000: founded as PL System, then Energy System, with over 100 HV/MV substations built and O&M contracts on more than 30 substations across Southern Italy, up to the acquisition by the BayWa r.e. Group in 2019. In 2020 Mario Palumbo and Ludovico Lombardi founded Amon Energy S.r.l., bringing together over twenty years of expertise in HV/MV electrical plants into a single company, now serving renewable energy across Central-Southern Italy."
+
+# NOTE: text drafted from the facts stated in the spec alone (founded 2020,
+# partners, Energy System Services, 20+ years of experience, renewables focus
+# in Central-Southern Italy). To be reviewed/validated by the client before
+# go-live — not verbatim brochure copy.
+missione: "Amon Energy's mission is to stand alongside energy-sector operators at every stage of a plant's life — from construction to testing, through to day-to-day management — with the same technical expertise built over more than twenty years in civil, industrial and HV/MV electrical plants, now serving renewable energy across Central-Southern Italy."
+
+raggioAzione: "One 5,000 m² site in Castelluccio dei Sauri (FG), with a strategic spare-parts warehouse and a Control Room active 24/7/365. Centrally located relative to Central-Southern Italy, it lets us reach most plants in the area within hours — a decisive factor when a fault cannot wait."
+
+marqueeTitolo: "Our clients"
+
+strumentazione:
+  - "Centrix 2.0 mobile labs"
+  - "Megger HV Test 80 kV"
+  - "b2 HVA68TD+PD"
+  - "DRTS/64"
+  - "ISA CBA 1000"
+  - "ISA T2000"
+  - "ISA STS5000 + TD500"
+  - "OTDR 8000MAX-Q1"
+  - "INNO View 7"
+  - "HT VEGA 74 thermal cameras"

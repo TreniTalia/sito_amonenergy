@@ -1,0 +1,83 @@
+pagina: "servizi"
+
+eyebrow: "Services portfolio"
+h1: "A system integrator for every stage of the plant."
+sub: "From remote control to instrumental diagnostics, through to construction and day-to-day management: the expertise we put to work on your electrical plants."
+
+controllo:
+  eyebrow: "Control and monitoring"
+  titolo: "RCS and CCI, in-house and in the field."
+  testo: "Two distinct systems, both of which we run ourselves: our proprietary RCS for remote supervision, and the CCI, which we install, configure and manage on behalf of our clients."
+  rcs:
+    titolo: "Remote Control System"
+    testo: "Our proprietary supervision system: real-time fault analysis, automatic reclosing, remote protection reset and data logging, with SCADA integration."
+    specs: ["Automatic reclosing", "Web App", "SCADA integration"]
+  cci:
+    titolo: "Central Plant Controller"
+    testo: "We install, configure and manage the CCI in partnership with Teamware, enabling the PF1 (plant status observability) and PF2 (active power limitation on the distributor's command) functions, compliant with CEI 0-16 V5 and ARERA Resolution 564/2025/R/eel."
+    specs: ["CEI 0-16 V5", "PF1 · PF2", "ARERA 564/2025"]
+    partnerNome: "Teamware"
+    partnerUrl: "https://www.teamware.it/"
+
+ingegneriaElettrica:
+  eyebrow: "Electrical engineering"
+  titolo: "Instrumental diagnostics on cables and transformers."
+  sub: "Among the services our clients request most: state-of-the-art instrumentation and qualified technicians for every field test."
+  voci:
+    - titolo: "HV and MV cable fault-finding"
+      testo: "Fast fault location on high- and medium-voltage cables with the Centrix 2.0 mobile lab, on call 24 hours a day, 365 days a year."
+      icona: "glass-png:delivery-time"
+    - titolo: "Tan delta and partial discharge"
+      testo: "Advanced diagnostics of the insulation condition of cables and electrical machines, with tan delta and partial discharge measurements."
+      icona: "glass-png:conflict"
+    - titolo: "Transformer testing and commissioning"
+      testo: "Primary injection tests, SFRA and functional checks on HV/MV and MV/LV, power and measurement transformers."
+      icona: "glass-png:total-sales"
+
+costruzioneGestione:
+  eyebrow: "Construction and management"
+  titolo: "From installation to day-to-day management."
+
+tecnologie:
+  eyebrow: "Technologies"
+  titolo: "Software that speaks the plant's language."
+  sub: "Industrial protocols and standards, field platforms and hardware, development stacks: what we integrate into our systems."
+  voci:
+    - nome: "Modbus TCP/RTU"
+      logo: "modbus"
+    - nome: "OPC UA"
+      logo: "opcua"
+    - nome: "MQTT"
+      logo: "mqtt"
+    - nome: "Sparkplug B"
+      logo: "sparkplugb"
+    - nome: "IEC 61850 · 101"
+      logo: "iec"
+    - nome: "Zigbee"
+      logo: "zigbee"
+    - nome: "Phoenix Contact"
+      logo: "phoenixcontact"
+    - nome: "Ignition (Inductive Automation)"
+      logo: "inductiveautomation"
+    - nome: "Teltonika"
+      logo: "teltonika"
+    - nome: "Python"
+      logo: "python"
+    - nome: "C++"
+      logo: "cplusplus"
+    - nome: "Git"
+      logo: "git"
+    - nome: "GitHub"
+      logo: "github"
+    - nome: "JavaScript"
+      logo: "javascript"
+    - nome: "HTML5"
+      logo: "html5"
+    - nome: "MySQL"
+      logo: "mysql"
+    - nome: "Docker"
+      logo: "docker"
+    - nome: "Google Cloud"
+      logo: "googlecloud"
+    - nome: "Amazon Web Services"
+      logo: "awsservices"
