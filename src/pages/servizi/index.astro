@@ -82,20 +82,11 @@ const tecnologieIcons = tecnologie.voci
     sizeBoost: techSizeBoost[v.logo as string],
   }));
 
-const breadcrumb = {
-  '@context': 'https://schema.org',
-  '@type': 'BreadcrumbList',
-  itemListElement: [
-    { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://amonenergy.it/' },
-    { '@type': 'ListItem', position: 2, name: 'Servizi', item: 'https://amonenergy.it/servizi/' },
-  ],
-};
 ---
 
 <Base
   title="Servizi"
   description="RCS, CCI, ricerca guasti AT/MT, diagnostica su cavi e trasformatori, costruzione e gestione di impianti elettrici AT/MT."
-  structuredData={[breadcrumb]}
 >
   <PageHero
     eyebrow={eyebrow}

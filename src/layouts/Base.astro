@@ -14,14 +14,23 @@ import interLatinWoff from '@fontsource-variable/inter/files/inter-latin-wght-no
 interface Props {
   title: string;
   description: string;
-  /** Extra JSON-LD objects for this page (Service, BreadcrumbList, ...). Organization/LocalBusiness is always injected. */
+  /** Extra JSON-LD objects for this page (Service, ...). Organization/LocalBusiness/WebSite/BreadcrumbList sono sempre iniettati. */
   structuredData?: Record<string, unknown>[];
   ogImage?: string;
   /** False for pages with no dark hero at the top (e.g. Contatti), so the header starts solid. */
   headerTransparent?: boolean;
+  /** Lingua della pagina. Oggi solo 'it' è servita; l'inglese arriva con il mirror /en/ di una task successiva, che la calcolerà dal path. */
+  lang?: 'it' | 'en';
 }
 
-const { title, description, structuredData = [], ogImage = '/og-image.jpg', headerTransparent = true } = Astro.props;
+const {
+  title,
+  description,
+  structuredData = [],
+  ogImage = '/og-image.jpg',
+  headerTransparent = true,
+  lang = 'it',
+} = Astro.props;
 
 const canonicalURL = new URL(Astro.url.pathname, Astro.site);
 
@@ -49,13 +58,50 @@ const organization = {
   },
   areaServed: 'Centro-Sud Italia',
   sameAs: [contatti.linkedin],
+  logo: {
+    '@type': 'ImageObject',
+    url: new URL('/favicon.png', Astro.site).toString(),
+  },
+  // 2020 è la data di costituzione della persona giuridica. Il 2000 è
+  // l'origine dell'esperienza professionale e si racconta solo in prosa:
+  // metterlo qui sarebbe un dato falso e verificabile in visura camerale.
+  foundingDate: '2020',
+  numberOfEmployees: { '@type': 'QuantitativeValue', value: 20 },
 };
 
-const jsonLdBlocks = [organization, ...structuredData];
+// Il sito come entità a sé, distinta dall'azienda: è il blocco che lega
+// dominio e lingua, e serve ai motori per capire che /en/ è lo stesso sito.
+const webSite = {
+  '@context': 'https://schema.org',
+  '@type': 'WebSite',
+  name: 'Amon Energy',
+  url: Astro.site?.toString(),
+  inLanguage: lang === 'en' ? 'en-GB' : 'it-IT',
+  publisher: { '@type': 'Organization', name: contatti.ragioneSociale },
+};
+
+// Briciole calcolate dal path, così nessuna pagina può dimenticarsele: prima
+// erano passate a mano da ogni pagina e la home non le aveva affatto.
+const segmenti = Astro.url.pathname.split('/').filter(Boolean);
+const breadcrumb = {
+  '@context': 'https://schema.org',
+  '@type': 'BreadcrumbList',
+  itemListElement: [
+    { '@type': 'ListItem', position: 1, name: 'Home', item: new URL('/', Astro.site).toString() },
+    ...segmenti.map((s, i) => ({
+      '@type': 'ListItem',
+      position: i + 2,
+      name: s.replace(/-/g, ' '),
+      item: new URL(`/${segmenti.slice(0, i + 1).join('/')}/`, Astro.site).toString(),
+    })),
+  ],
+};
+
+const jsonLdBlocks = [organization, webSite, breadcrumb, ...structuredData];
 ---
 
 <!doctype html>
-<html lang="it" class="no-js">
+<html lang={lang} class="no-js">
   <head>
     <script is:inline>
       document.documentElement.classList.remove('no-js');
@@ -77,6 +123,9 @@ const jsonLdBlocks = [organization, ...structuredData];
     <meta property="og:description" content={description} />
     <meta property="og:url" content={canonicalURL} />
     <meta property="og:image" content={new URL(ogImage, Astro.site)} />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content={`${title} — Amon Energy`} />
     <meta property="og:locale" content="it_IT" />
 
     <meta name="twitter:card" content="summary_large_image" />

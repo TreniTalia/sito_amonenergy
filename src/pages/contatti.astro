@@ -10,21 +10,11 @@ import heroContatti from '../assets/img/photos/contatti-hero-pylon-notte.jpg';
 const pagina = await getEntry('pagine', 'contatti');
 if (!pagina || pagina.data.pagina !== 'contatti') throw new Error('pagine/contatti.yaml missing or malformed');
 const { h1, sub, orari } = pagina.data;
-
-const breadcrumb = {
-  '@context': 'https://schema.org',
-  '@type': 'BreadcrumbList',
-  itemListElement: [
-    { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://amonenergy.it/' },
-    { '@type': 'ListItem', position: 2, name: 'Contatti', item: 'https://amonenergy.it/contatti/' },
-  ],
-};
 ---
 
 <Base
   title="Contatti"
   description={`Chiama ${contatti.telefono} o scrivi a ${contatti.email}: nessun modulo da compilare, rispondiamo direttamente.`}
-  structuredData={[breadcrumb]}
 >
   <PageHero
     eyebrow="Contatti"
