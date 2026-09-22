@@ -37,7 +37,15 @@ describe('nginx: dominio canonico e residui WordPress', () => {
 
   test('gli endpoint WordPress rispondono 410, non 404', () => {
     for (const p of ['wp-admin', 'wp-login\\.php', 'xmlrpc\\.php']) {
-      assert.match(CONF, new RegExp(`${p}[\\s\\S]{0,120}return\\s+410`), `manca il 410 per ${p}`);
+      // Confronto su sottostringa letterale: `p` contiene già il punto
+      // escapato come appare nel sorgente nginx (`wp-login\.php`), e va
+      // cercato così com'è. Costruire una RegExp da questa stringa
+      // interpreterebbe `\.` come "punto letterale" nel pattern, e non
+      // combacerebbe mai con un backslash reale nel testo sorgente.
+      const indice = CONF.indexOf(p);
+      assert.notEqual(indice, -1, `manca il pattern ${p} in docker/nginx.conf`);
+      const dintorni = CONF.slice(indice, indice + p.length + 120);
+      assert.match(dintorni, /return\s+410/, `manca il 410 per ${p}`);
     }
   });
 
