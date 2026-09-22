@@ -9,6 +9,11 @@ import ClientMarquee from '../components/ClientMarquee.astro';
 import CtaBand from '../components/CtaBand.astro';
 import storiaImg from '../assets/img/photos/tecnico-fotovoltaico.jpg';
 import vanImg from '../assets/img/photos/van-laboratorio-aperto.jpg';
+// Foto Pexels, Mr Dr3igeteilt (https://www.pexels.com/photo/36137497/) — apparecchiature
+// di una sottostazione AT/MT in controluce, luce dorata: stesso trattamento navy via
+// duotone/scrim di PageHero delle altre pagine (servizi, lavori, contatti). Nessuna
+// persona, nessun marchio di terzi leggibile.
+import heroAzienda from '../assets/img/photos/azienda-hero-substation.jpg';
 
 const azienda = await getEntry('pagine', 'azienda');
 if (!azienda || azienda.data.pagina !== 'azienda') throw new Error('pagine/azienda.yaml missing or malformed');
@@ -25,7 +30,12 @@ const { statbar } = home.data;
   title="Azienda"
   description="Amon Energy: oltre vent'anni di esperienza su impianti elettrici AT/MT e rinnovabili nel Centro-Sud Italia, da un'unica sede in Puglia."
 >
-  <PageHero eyebrow={eyebrow} h1={h1} />
+  <PageHero
+    eyebrow={eyebrow}
+    h1={h1}
+    image={heroAzienda}
+    imageAlt="Apparecchiature di una sottostazione elettrica AT/MT in controluce, al tramonto"
+  />
 
   <section class="wrap-wide grid items-center gap-12 py-20 lg:grid-cols-2 lg:gap-16 lg:py-28">
     <div data-reveal>
@@ -89,7 +99,7 @@ const { statbar } = home.data;
           </div>
           <h2 class="text-headline">La nostra dotazione tecnica.</h2>
           <p class="measure mt-4 text-ink/70">
-            Tutti i dispositivi sono calibrati periodicamente: la specificità tecnica è il nostro
+            Tutti i dispositivi sono certificati e calibrati: la specificità tecnica è il nostro
             badge di fiducia.
           </p>
           <div class="mt-8 flex flex-wrap gap-2.5">
