@@ -1,16 +1,20 @@
 ---
 import { clienti } from '../data/clienti.ts';
+import { t as testiUi } from '../i18n/ui.ts';
+import type { Lingua } from '../i18n/routes.ts';
 
 interface Props {
   titolo: string;
+  lingua?: Lingua;
 }
 
-const { titolo } = Astro.props;
+const { titolo, lingua = 'it' } = Astro.props;
+const prefissoAria = testiUi(lingua).a11y.clientiAriaPrefisso;
 ---
 
 <section class="bg-paper border-y border-navy-100 py-12 lg:py-16 overflow-hidden">
   <p class="wrap ds-eyebrow-label" style="color: var(--color-navy-700); margin-bottom: 1.5rem;">{titolo}</p>
-  <div class="marquee-track flex items-center gap-16" aria-label={`Clienti: ${clienti.join(', ')}`}>
+  <div class="marquee-track flex items-center gap-16" aria-label={`${prefissoAria}: ${clienti.join(', ')}`}>
     {
       [0, 1].map((rep) => (
         <div class="flex items-center gap-16 shrink-0" aria-hidden={rep === 1}>

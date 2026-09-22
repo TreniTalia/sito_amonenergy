@@ -20,6 +20,10 @@ export const UI = {
       apriMenu: 'Apri il menu',
       chiudiMenu: 'Chiudi il menu',
     },
+    a11y: {
+      vaiAlContenuto: 'Vai al contenuto',
+      clientiAriaPrefisso: 'Clienti',
+    },
     azioni: {
       chiamaci: 'Chiamaci',
       scriviciEmail: 'Scrivici via email',
@@ -52,6 +56,10 @@ export const UI = {
       chiamaBreve: 'Call',
       apriMenu: 'Open menu',
       chiudiMenu: 'Close menu',
+    },
+    a11y: {
+      vaiAlContenuto: 'Skip to content',
+      clientiAriaPrefisso: 'Clients',
     },
     azioni: {
       chiamaci: 'Call us',

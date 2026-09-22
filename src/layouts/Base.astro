@@ -211,7 +211,7 @@ const jsonLdBlocks = [organization, webSite, breadcrumb, ...structuredData];
       </filter>
     </svg>
 
-    <a href="#main" class="skip-link">Vai al contenuto</a>
+    <a href="#main" class="skip-link">{testiUi(lang).a11y.vaiAlContenuto}</a>
     <Header transparent={headerTransparent} />
     <main id="main" class:list={[{ 'pt-28 lg:pt-32': !headerTransparent }]}>
       <slot />
