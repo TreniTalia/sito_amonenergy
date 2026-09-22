@@ -6,6 +6,7 @@ import CookieConsent from '../components/CookieConsent.astro';
 import Analytics from '../components/Analytics.astro';
 import { contatti } from '../data/contatti.ts';
 import { gemella } from '../i18n/routes.ts';
+import { t as testiUi } from '../i18n/ui.ts';
 // Preload the exact woff2 the `@font-face` unicode-range picks for Italian
 // text (the "latin" subset, U+0000-00FF, covers à/è/é/ì/ò/ù): starts the font
 // fetch before the parser reaches global.css's @font-face rule, instead of
@@ -87,17 +88,41 @@ const webSite = {
 
 // Briciole calcolate dal path, così nessuna pagina può dimenticarsele: prima
 // erano passate a mano da ogni pagina e la home non le aveva affatto.
-const segmenti = Astro.url.pathname.split('/').filter(Boolean);
+//
+// Su /en/* la radice deve essere /en/ (non il dominio nudo, che è italiano),
+// il segmento di lingua "en" non è una pagina di navigazione e va saltato, e
+// i segmenti noti (azienda/company, servizi/services, ecc.) si mappano sulle
+// etichette di src/i18n/ui.ts invece di uscire minuscoli e non tradotti.
+const navUi = testiUi(lang).nav;
+const SEGMENTO_A_CHIAVE_NAV: Record<string, keyof typeof navUi> = {
+  azienda: 'azienda',
+  servizi: 'servizi',
+  lavori: 'lavori',
+  contatti: 'contatti',
+  company: 'azienda',
+  services: 'servizi',
+  projects: 'lavori',
+  contacts: 'contatti',
+};
+// Segmenti senza voce in ui.ts (slug di pagine tecniche, progetti...): almeno
+// il maiuscolo per parola, invece del testo grezzo minuscolo di prima.
+const titleCase = (s: string) => s.split('-').map((w) => (w ? w[0].toUpperCase() + w.slice(1) : w)).join(' ');
+
+const segmentiGrezzi = Astro.url.pathname.split('/').filter(Boolean);
+const offsetLingua = lang === 'en' ? 1 : 0; // salta il segmento "en"
+const segmenti = segmentiGrezzi.slice(offsetLingua);
+const radiceHome = lang === 'en' ? '/en/' : '/';
+
 const breadcrumb = {
   '@context': 'https://schema.org',
   '@type': 'BreadcrumbList',
   itemListElement: [
-    { '@type': 'ListItem', position: 1, name: 'Home', item: new URL('/', Astro.site).toString() },
+    { '@type': 'ListItem', position: 1, name: navUi.home, item: new URL(radiceHome, Astro.site).toString() },
     ...segmenti.map((s, i) => ({
       '@type': 'ListItem',
       position: i + 2,
-      name: s.replace(/-/g, ' '),
-      item: new URL(`/${segmenti.slice(0, i + 1).join('/')}/`, Astro.site).toString(),
+      name: SEGMENTO_A_CHIAVE_NAV[s] ? navUi[SEGMENTO_A_CHIAVE_NAV[s]] : titleCase(s),
+      item: new URL(`/${segmentiGrezzi.slice(0, offsetLingua + i + 1).join('/')}/`, Astro.site).toString(),
     })),
   ],
 };
