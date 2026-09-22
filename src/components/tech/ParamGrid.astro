@@ -3,6 +3,16 @@
 // "cosa restituisce il report"). Ogni voce è una card di vetro navy — stesso
 // principio di contrasto autonomo di SpecPanel: leggibile a prescindere dal
 // fondo della pagina che la ospita.
+//
+// `icona` usa la stessa dispatch a prefisso già documentata al cliente in
+// public/admin/config.yml e già implementata in ServiceCard.astro: senza
+// prefisso va a `astro-icon` (Font Awesome 6 / Lucide, le uniche vere per un
+// vocabolario di diagnostica elettrica — vedi GlassSvgIcon.astro, che ha solo
+// 3 chiavi cablate a mano e nessuna pertinente). I prefissi `glass-svg:`/
+// `glass-png:` restano disponibili per coerenza col resto del sito, ma non
+// sono pensati per queste pagine tecniche.
+import { Icon } from 'astro-icon/components';
+import PackIcon from '../PackIcon.astro';
 import GlassSvgIcon from '../GlassSvgIcon.astro';
 
 interface Props {
@@ -17,7 +27,13 @@ const { voci } = Astro.props;
     voci.map((v) => (
       <article class="param-grid__item ds-panel">
         <span class="param-grid__icon" aria-hidden="true">
-          <GlassSvgIcon name={v.icona} />
+          {v.icona.startsWith('glass-png:') ? (
+            <PackIcon name={v.icona.replace('glass-png:', '')} />
+          ) : v.icona.startsWith('glass-svg:') ? (
+            <GlassSvgIcon name={v.icona.replace('glass-svg:', '')} />
+          ) : (
+            <Icon name={v.icona} />
+          )}
         </span>
         <h3 class="param-grid__title">{v.titolo}</h3>
         <p class="param-grid__text">{v.testo}</p>
