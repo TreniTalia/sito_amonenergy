@@ -32,7 +32,13 @@ publish_mode: simple
 media_folder: "src/assets/img/progetti"
 public_folder: "/src/assets/img/progetti"
 
-i18n: false
+# I contenuti bilingue vivono in due cartelle sorelle (it/ e en/), stesso nome
+# di file nelle due lingue tranne per la collection `servizi-dettaglio`, dove
+# lo slug del file segue la lingua (vedi il commento sulla collection stessa).
+i18n:
+  structure: multiple_folders
+  locales: [it, en]
+  default_locale: it
 
 collections:
   - name: "progetti"
@@ -62,142 +68,296 @@ collections:
   - name: "servizi"
     label: "Servizi"
     description: "Le 5 card servizio mostrate in home — non corrispondono più a pagine di dettaglio proprie: l'approfondimento vive tutto su /servizi/."
+    i18n: true
     files:
       - name: "laboratorio-mobile"
         label: "Laboratorio mobile ricerca guasti"
-        file: "src/content/servizi/it/laboratorio-mobile.md"
+        file: "src/content/servizi/{{locale}}/laboratorio-mobile.md"
+        i18n: true
         fields: &servizio_fields
-          - { label: "Titolo", name: "titolo", widget: "string" }
-          - { label: "Testo breve (per la card in home)", name: "excerpt", widget: "text" }
-          - { label: "Icona (es. \"fa6-solid:truck-fast\" Font Awesome, \"glass-svg:settings\" SVG del pack, \"glass-png:safety-hat\" PNG del pack)", name: "icona", widget: "string" }
-          - { label: "Ordine", name: "ordine", widget: "number", value_type: "int" }
+          - { label: "Titolo", name: "titolo", widget: "string", i18n: true }
+          - { label: "Testo breve (per la card in home)", name: "excerpt", widget: "text", i18n: true }
+          - { label: "Icona (es. \"fa6-solid:truck-fast\" Font Awesome, \"glass-svg:settings\" SVG del pack, \"glass-png:safety-hat\" PNG del pack)", name: "icona", widget: "string", i18n: "duplicate", hint: "Uguale in italiano e inglese: non tradurre la chiave dell'icona." }
+          - { label: "Ordine", name: "ordine", widget: "number", value_type: "int", i18n: "duplicate", hint: "Stesso numero in italiano e inglese, altrimenti le card si ordinano in modo diverso nelle due lingue." }
       - name: "verifiche-strumentali"
         label: "Verifiche strumentali"
-        file: "src/content/servizi/it/verifiche-strumentali.md"
+        file: "src/content/servizi/{{locale}}/verifiche-strumentali.md"
+        i18n: true
         fields: *servizio_fields
       - name: "monitoraggio-e-controllo"
         label: "Monitoraggio e controllo"
-        file: "src/content/servizi/it/monitoraggio-e-controllo.md"
+        file: "src/content/servizi/{{locale}}/monitoraggio-e-controllo.md"
+        i18n: true
         fields: *servizio_fields
       - name: "costruzioni"
         label: "Costruzioni"
-        file: "src/content/servizi/it/costruzioni.md"
+        file: "src/content/servizi/{{locale}}/costruzioni.md"
+        i18n: true
         fields: *servizio_fields
       - name: "gestione-e-manutenzione"
         label: "Gestione e manutenzione"
-        file: "src/content/servizi/it/gestione-e-manutenzione.md"
+        file: "src/content/servizi/{{locale}}/gestione-e-manutenzione.md"
+        i18n: true
         fields: *servizio_fields
 
   - name: "pagine"
     label: "Pagine"
     description: "Testi editabili delle pagine fisse del sito."
+    i18n: true
     files:
       - name: "home"
         label: "Home"
-        file: "src/content/pagine/it/home.yaml"
+        file: "src/content/pagine/{{locale}}/home.yaml"
+        i18n: true
         fields:
-          - { label: "Tipo pagina", name: "pagina", widget: "hidden", default: "home" }
+          - { label: "Tipo pagina", name: "pagina", widget: "hidden", default: "home", i18n: "duplicate" }
           - label: "Hero (prima schermata)"
             name: "hero"
             widget: "object"
+            i18n: true
             fields:
-              - { label: "Eyebrow (etichetta sopra il titolo)", name: "eyebrow", widget: "string" }
-              - { label: "Titolo grande (H1)", name: "h1", widget: "text", hint: "Questa è la frase grande nella prima schermata della home." }
-              - { label: "Sottotitolo", name: "sub", widget: "text" }
-              - { label: "Testo bottone Chiama", name: "ctaPrimaria", widget: "string" }
-              - { label: "Testo bottone Servizi", name: "ctaSecondaria", widget: "string" }
+              - { label: "Eyebrow (etichetta sopra il titolo)", name: "eyebrow", widget: "string", i18n: true }
+              - { label: "Titolo grande (H1)", name: "h1", widget: "text", i18n: true, hint: "Questa è la frase grande nella prima schermata della home." }
+              - { label: "Sottotitolo", name: "sub", widget: "text", i18n: true }
+              - { label: "Testo bottone Chiama", name: "ctaPrimaria", widget: "string", i18n: true }
+              - { label: "Testo bottone Servizi", name: "ctaSecondaria", widget: "string", i18n: true }
           - label: "Chi siamo in breve"
             name: "chiSiamoBreve"
             widget: "object"
+            i18n: true
             fields:
-              - { label: "Testo", name: "testo", widget: "text" }
-              - { label: "Link", name: "link", widget: "string" }
+              - { label: "Testo", name: "testo", widget: "text", i18n: true }
+              - { label: "Link", name: "link", widget: "string", i18n: true, hint: "Il percorso della pagina a cui rimanda, es. \"/servizi/\" in italiano e \"/en/services/\" in inglese: cambia da una lingua all'altra." }
           - label: "Numeri (StatBar)"
             name: "statbar"
             widget: "list"
+            i18n: true
             hint: "4 numeri mostrati in home. Quelli segnati come \"dato finto\" vanno sostituiti con i valori reali prima del go-live."
             fields:
-              - { label: "Valore (es. \"120+\" o \"850 MW\")", name: "valore", widget: "string" }
-              - { label: "Etichetta", name: "label", widget: "string" }
-              - { label: "È un dato finto/segnaposto?", name: "finto", widget: "boolean", default: true }
+              - { label: "Valore (es. \"120+\" o \"850 MW\")", name: "valore", widget: "string", i18n: "duplicate", hint: "Stesso valore in italiano e inglese." }
+              - { label: "Etichetta", name: "label", widget: "string", i18n: true }
+              - { label: "È un dato finto/segnaposto?", name: "finto", widget: "boolean", default: true, i18n: "duplicate" }
           - label: "Perché Amon Energy (3 punti)"
             name: "percheAmon"
             widget: "list"
+            i18n: true
             fields:
-              - { label: "Titolo", name: "titolo", widget: "string" }
-              - { label: "Testo", name: "testo", widget: "text" }
-          - { label: "Titolo sezione clienti", name: "marqueeTitolo", widget: "string" }
+              - { label: "Titolo", name: "titolo", widget: "string", i18n: true }
+              - { label: "Testo", name: "testo", widget: "text", i18n: true }
+          - { label: "Titolo sezione clienti", name: "marqueeTitolo", widget: "string", i18n: true }
 
       - name: "contatti"
         label: "Contatti"
-        file: "src/content/pagine/it/contatti.yaml"
+        file: "src/content/pagine/{{locale}}/contatti.yaml"
+        i18n: true
         fields:
-          - { label: "Tipo pagina", name: "pagina", widget: "hidden", default: "contatti" }
-          - { label: "Titolo grande (H1)", name: "h1", widget: "text" }
-          - { label: "Sottotitolo", name: "sub", widget: "text" }
-          - { label: "Orari", name: "orari", widget: "string" }
+          - { label: "Tipo pagina", name: "pagina", widget: "hidden", default: "contatti", i18n: "duplicate" }
+          - { label: "Titolo grande (H1)", name: "h1", widget: "text", i18n: true }
+          - { label: "Sottotitolo", name: "sub", widget: "text", i18n: true }
+          - { label: "Orari", name: "orari", widget: "string", i18n: true }
 
       - name: "servizi-hub"
         label: "Servizi"
-        file: "src/content/pagine/it/servizi.yaml"
+        file: "src/content/pagine/{{locale}}/servizi.yaml"
+        i18n: true
         fields:
-          - { label: "Tipo pagina", name: "pagina", widget: "hidden", default: "servizi" }
-          - { label: "Eyebrow (etichetta sopra il titolo)", name: "eyebrow", widget: "string" }
-          - { label: "Titolo grande (H1)", name: "h1", widget: "text" }
-          - { label: "Sottotitolo", name: "sub", widget: "text" }
+          - { label: "Tipo pagina", name: "pagina", widget: "hidden", default: "servizi", i18n: "duplicate" }
+          - { label: "Eyebrow (etichetta sopra il titolo)", name: "eyebrow", widget: "string", i18n: true }
+          - { label: "Titolo grande (H1)", name: "h1", widget: "text", i18n: true }
+          - { label: "Sottotitolo", name: "sub", widget: "text", i18n: true }
           - label: "Controllo e monitoraggio"
             name: "controllo"
             widget: "object"
+            i18n: true
             fields:
-              - { label: "Eyebrow", name: "eyebrow", widget: "string" }
-              - { label: "Titolo", name: "titolo", widget: "text" }
-              - { label: "Testo introduttivo", name: "testo", widget: "text" }
+              - { label: "Eyebrow", name: "eyebrow", widget: "string", i18n: true }
+              - { label: "Titolo", name: "titolo", widget: "text", i18n: true }
+              - { label: "Testo introduttivo", name: "testo", widget: "text", i18n: true }
               - label: "RCS"
                 name: "rcs"
                 widget: "object"
+                i18n: true
                 fields:
-                  - { label: "Titolo", name: "titolo", widget: "string" }
-                  - { label: "Testo", name: "testo", widget: "text" }
-                  - { label: "Specifiche (chip)", name: "specs", widget: "list", field: { label: "Voce", name: "item", widget: "string" } }
+                  - { label: "Titolo", name: "titolo", widget: "string", i18n: true }
+                  - { label: "Testo", name: "testo", widget: "text", i18n: true }
+                  - { label: "Specifiche (chip)", name: "specs", widget: "list", i18n: true, field: { label: "Voce", name: "item", widget: "string", i18n: true } }
               - label: "CCI"
                 name: "cci"
                 widget: "object"
+                i18n: true
                 fields:
-                  - { label: "Titolo", name: "titolo", widget: "string" }
-                  - { label: "Testo", name: "testo", widget: "text" }
-                  - { label: "Specifiche (chip)", name: "specs", widget: "list", field: { label: "Voce", name: "item", widget: "string" } }
-                  - { label: "Nome partner", name: "partnerNome", widget: "string" }
-                  - { label: "Sito partner", name: "partnerUrl", widget: "string" }
+                  - { label: "Titolo", name: "titolo", widget: "string", i18n: true }
+                  - { label: "Testo", name: "testo", widget: "text", i18n: true }
+                  - { label: "Specifiche (chip)", name: "specs", widget: "list", i18n: true, field: { label: "Voce", name: "item", widget: "string", i18n: true } }
+                  - { label: "Nome partner", name: "partnerNome", widget: "string", i18n: "duplicate", hint: "Nome dell'azienda partner: uguale in italiano e inglese." }
+                  - { label: "Sito partner", name: "partnerUrl", widget: "string", i18n: "duplicate", hint: "Indirizzo del sito del partner: uguale in italiano e inglese." }
           - label: "Ingegneria elettrica"
             name: "ingegneriaElettrica"
             widget: "object"
+            i18n: true
             fields:
-              - { label: "Eyebrow", name: "eyebrow", widget: "string" }
-              - { label: "Titolo", name: "titolo", widget: "text" }
-              - { label: "Sottotitolo", name: "sub", widget: "text" }
+              - { label: "Eyebrow", name: "eyebrow", widget: "string", i18n: true }
+              - { label: "Titolo", name: "titolo", widget: "text", i18n: true }
+              - { label: "Sottotitolo", name: "sub", widget: "text", i18n: true }
               - label: "Voci (3 card)"
                 name: "voci"
                 widget: "list"
+                i18n: true
                 fields:
-                  - { label: "Titolo", name: "titolo", widget: "string" }
-                  - { label: "Testo", name: "testo", widget: "text" }
-                  - { label: "Icona (es. \"fa6-solid:truck-fast\" Font Awesome, \"glass-svg:settings\" SVG del pack, \"glass-png:safety-hat\" PNG del pack)", name: "icona", widget: "string" }
+                  - { label: "Titolo", name: "titolo", widget: "string", i18n: true }
+                  - { label: "Testo", name: "testo", widget: "text", i18n: true }
+                  - { label: "Icona (es. \"fa6-solid:truck-fast\" Font Awesome, \"glass-svg:settings\" SVG del pack, \"glass-png:safety-hat\" PNG del pack)", name: "icona", widget: "string", i18n: "duplicate", hint: "Uguale in italiano e inglese: non tradurre la chiave dell'icona." }
           - label: "Costruzione e gestione"
             name: "costruzioneGestione"
             widget: "object"
+            i18n: true
             fields:
-              - { label: "Eyebrow", name: "eyebrow", widget: "string" }
-              - { label: "Titolo", name: "titolo", widget: "text" }
+              - { label: "Eyebrow", name: "eyebrow", widget: "string", i18n: true }
+              - { label: "Titolo", name: "titolo", widget: "text", i18n: true }
           - label: "Tecnologie"
             name: "tecnologie"
             widget: "object"
+            i18n: true
             fields:
-              - { label: "Eyebrow", name: "eyebrow", widget: "string" }
-              - { label: "Titolo", name: "titolo", widget: "text" }
-              - { label: "Sottotitolo", name: "sub", widget: "text" }
+              - { label: "Eyebrow", name: "eyebrow", widget: "string", i18n: true }
+              - { label: "Titolo", name: "titolo", widget: "text", i18n: true }
+              - { label: "Sottotitolo", name: "sub", widget: "text", i18n: true }
               - label: "Voci (chip)"
                 name: "voci"
                 widget: "list"
+                i18n: "duplicate"
+                hint: "Nomi di protocolli, standard e strumenti tecnici: non si traducono, restano uguali in italiano e inglese."
                 fields:
                   - { label: "Nome", name: "nome", widget: "string" }
                   - { label: "Logo (modbus / mqtt / zigbee — lasciare vuoto per un chip di solo testo)", name: "logo", widget: "string", required: false }
+
+      - name: "azienda"
+        label: "Azienda"
+        file: "src/content/pagine/{{locale}}/azienda.yaml"
+        i18n: true
+        fields:
+          - { label: "Tipo pagina", name: "pagina", widget: "hidden", default: "azienda", i18n: "duplicate" }
+          - { label: "Eyebrow (etichetta sopra il titolo)", name: "eyebrow", widget: "string", i18n: true }
+          - { label: "Titolo grande (H1)", name: "h1", widget: "text", i18n: true }
+          - { label: "Storia", name: "storia", widget: "text", i18n: true }
+          - { label: "Missione", name: "missione", widget: "text", i18n: true, hint: "Testo redatto dai soli fatti noti — da far validare dal cliente." }
+          - { label: "Tempestività d'intervento (testo raggio d'azione)", name: "raggioAzione", widget: "text", i18n: true }
+          - { label: "Titolo sezione clienti", name: "marqueeTitolo", widget: "string", i18n: true }
+          - label: "Strumentazione (elenco tag)"
+            name: "strumentazione"
+            widget: "list"
+            i18n: true
+            hint: "Gli strumenti reali del laboratorio mobile, uno per riga: la maggior parte sono modelli commerciali e restano identici nella versione inglese, tranne le poche voci scritte per esteso (es. \"Laboratori mobili Centrix 2.0\"), da tradurre."
+            field: { label: "Strumento", name: "item", widget: "string" }
+
+  # Le nove pagine tecniche di dettaglio (una per prova/servizio diagnostico).
+  # ATTENZIONE: lo slug del file segue la lingua del contenuto (es.
+  # "sfra.md" in entrambe, ma "cci-controllore-centrale-impianto.md" in
+  # italiano contro "cci-central-plant-controller.md" in inglese) — nomi già
+  # diversi in origine per via delle rispettive URL SEO. Il pannello associa
+  # le due lingue di una pagina per SLUG, non per titolo: se lo slug non
+  # coincide fra le cartelle it/ ed en/, l'editor può mostrare la scheda di
+  # una lingua come vuota anche se il file esiste dall'altra parte. Da
+  # verificare alla prima apertura reale del pannello.
+  - name: "servizi-dettaglio"
+    label: "Pagine tecniche (servizi di dettaglio)"
+    label_singular: "Pagina tecnica"
+    description: "Le nove pagine di approfondimento su prove e sistemi diagnostici, una per servizio."
+    folder: "src/content/servizi-dettaglio"
+    i18n: true
+    create: true
+    delete: true
+    slug: "{{slug}}"
+    identifier_field: "titolo"
+    summary: "{{titolo}}"
+    fields:
+      - { label: "Titolo", name: "titolo", widget: "string", i18n: true, hint: "Il titolo della pagina, es. \"Prova SFRA sui trasformatori di potenza\"." }
+      - { label: "Testo introduttivo (lead)", name: "lead", widget: "text", i18n: true, hint: "2-3 righe subito sotto il titolo: che cos'è la prova e perché serve." }
+      - { label: "Titolo SEO", name: "seoTitle", widget: "string", i18n: true, hint: "Il titolo che compare su Google, diverso dal titolo grande della pagina." }
+      - { label: "Descrizione SEO", name: "seoDescription", widget: "text", i18n: true, hint: "1-2 righe che compaiono sotto il link nei risultati Google." }
+      - { label: "Ordine", name: "ordine", widget: "number", value_type: "int", i18n: "duplicate", hint: "Stesso numero in italiano e inglese, altrimenti le pagine si ordinano in modo diverso nelle due lingue." }
+      - label: "Disegno tecnico"
+        name: "diagramma"
+        widget: "select"
+        i18n: "duplicate"
+        hint: "Il disegno mostrato nella pagina. La scelta è uguale in italiano e inglese: un valore fuori da questo elenco lascerebbe la pagina senza disegno."
+        options:
+          - { label: "Grafico risposta in frequenza (SFRA)", value: "risposta-frequenza" }
+          - { label: "Schema misura scariche parziali", value: "scariche-parziali" }
+          - { label: "Curva tempo-corrente (protezioni)", value: "curva-tempo-corrente" }
+          - { label: "Punti di misura sul trasformatore", value: "punti-misura-trasformatore" }
+          - { label: "Rampa di prova isolamento", value: "rampa-isolamento" }
+          - { label: "Catena di controllo RCS", value: "catena-rcs" }
+          - { label: "Schema osservabilità e controllabilità (CCI)", value: "osservabilita-controllabilita" }
+          - { label: "Catena teledistacco A72", value: "catena-a72" }
+          - { label: "Catena lettura contatori", value: "catena-contatori" }
+      - label: "Il problema (2-3 paragrafi)"
+        name: "problema"
+        widget: "list"
+        i18n: true
+        hint: "Il corpo centrale della pagina: perché questa prova serve e che cosa rischia chi non la fa. Almeno 2 paragrafi, uno per riga dell'elenco."
+        field: { label: "Paragrafo", name: "item", widget: "text" }
+      - label: "Parametri della prova (almeno 4 card)"
+        name: "parametri"
+        widget: "list"
+        i18n: true
+        hint: "Le card con i numeri e le caratteristiche della prova (banda, tensione, durata...). Almeno 4."
+        fields:
+          - { label: "Titolo", name: "titolo", widget: "string", i18n: true }
+          - { label: "Testo", name: "testo", widget: "text", i18n: true }
+          - { label: "Icona (es. \"fa6-solid:bolt\")", name: "icona", widget: "string", i18n: "duplicate", hint: "Uguale in italiano e inglese: non tradurre la chiave dell'icona." }
+      - label: "Fasi dell'intervento (almeno 3)"
+        name: "fasi"
+        widget: "list"
+        i18n: true
+        hint: "I passi con cui si svolge la prova sul campo, in ordine cronologico."
+        fields:
+          - { label: "Titolo", name: "titolo", widget: "string", i18n: true }
+          - { label: "Testo", name: "testo", widget: "text", i18n: true }
+      - label: "Strumentazione impiegata (almeno 1)"
+        name: "strumentazione"
+        widget: "list"
+        i18n: true
+        hint: "Gli apparecchi usati in questa prova specifica."
+        fields:
+          - { label: "Modello", name: "modello", widget: "string", i18n: "duplicate", hint: "Il nome dell'apparecchio: uguale in italiano e inglese, non si traduce." }
+          - { label: "Ruolo nella prova", name: "nota", widget: "string", i18n: true, hint: "Una parola o due, es. \"Misura\" o \"Messa a terra\": va tradotta." }
+      - label: "Assetto di misura (facoltativo)"
+        name: "assettoMisura"
+        widget: "list"
+        i18n: true
+        required: false
+        hint: "Come si misura — tensione di prova, banda, cablaggio, messa a terra. Non tutte le pagine ce l'hanno: i sistemi (RCS, CCI, teledistacco, lettura contatori) non sono prove strumentali e questo campo va lasciato vuoto."
+        fields:
+          - { label: "Etichetta", name: "etichetta", widget: "string", i18n: true }
+          - { label: "Valore", name: "valore", widget: "string", i18n: true }
+      - label: "Norma di riferimento"
+        name: "norma"
+        widget: "object"
+        i18n: true
+        fields:
+          - { label: "Codice (es. \"IEC 60076-18\")", name: "codice", widget: "string", i18n: "duplicate", hint: "Uguale in italiano e inglese: non si traduce un codice di norma." }
+          - { label: "Titolo della norma", name: "titolo", widget: "text", i18n: true }
+          - { label: "Nota esplicativa", name: "note", widget: "text", i18n: true }
+      - label: "Caso reale (facoltativo)"
+        name: "caso"
+        widget: "object"
+        i18n: true
+        required: false
+        hint: "Un riferimento a un progetto reale dell'archivio Progetti in cui è stata eseguita questa prova. Lasciare vuoto se non c'è ancora un caso da raccontare."
+        fields:
+          - { label: "Progetto collegato (slug, es. \"banzi-montemilone\")", name: "progetto", widget: "string", i18n: "duplicate", hint: "Lo slug del progetto nell'archivio Progetti: uguale in italiano e inglese, perché i progetti non hanno una versione inglese propria." }
+          - { label: "Testo del caso", name: "testo", widget: "text", i18n: true }
+      - label: "Domande frequenti (almeno 3)"
+        name: "faq"
+        widget: "list"
+        i18n: true
+        fields:
+          - { label: "Domanda", name: "d", widget: "string", i18n: true }
+          - { label: "Risposta", name: "r", widget: "text", i18n: true }
+      - label: "Pagine correlate (almeno 2)"
+        name: "correlati"
+        widget: "list"
+        i18n: true
+        hint: "Gli slug di altre pagine tecniche da proporre in fondo alla pagina — nella lingua corrispondente, perché lo slug della stessa pagina tecnica cambia fra italiano e inglese."
+        field: { label: "Slug pagina", name: "item", widget: "string" }
