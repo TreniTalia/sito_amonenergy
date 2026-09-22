@@ -86,4 +86,40 @@ describe('rotte bilingui', { skip }, () => {
       }
     },
   );
+
+  // Regressione: astro.config.mjs generava hreflang="it-IT"/"en-GB" nella
+  // sitemap (senza x-default) mentre Base.astro scrive hreflang="it"/"en"/
+  // "x-default" nell'HTML — due annotazioni divergenti per la stessa coppia
+  // di URL, che possono far scartare da Google l'intero cluster hreflang.
+  // Questo test confronta direttamente le due sorgenti così che non possano
+  // ridivergere in silenzio.
+  const sitemapPath = path.join(DIST, 'sitemap-0.xml');
+  test(
+    "gli hreflang della sitemap combaciano con quelli dell'HTML, coppia per coppia",
+    { skip: !existsSync(sitemapPath) && 'sitemap-0.xml assente in dist' },
+    () => {
+      const sitemap = readFileSync(sitemapPath, 'utf8');
+      // Un blocco <url>...</url> per pagina, con i suoi <xhtml:link>.
+      const blocchi = new Map();
+      for (const m of sitemap.matchAll(/<url>(.*?)<\/url>/gs)) {
+        const loc = m[1].match(/<loc>([^<]+)<\/loc>/)?.[1];
+        if (loc) blocchi.set(new URL(loc).pathname, m[1]);
+      }
+      assert.ok(blocchi.size > 0, 'nessun blocco <url> trovato in sitemap-0.xml');
+
+      const codiciDi = (blocco) => [...blocco.matchAll(/hreflang="([^"]+)"/g)].map((m) => m[1]).sort();
+
+      for (const r of ROTTE) {
+        for (const path_ of [r.it, r.en]) {
+          const blocco = blocchi.get(path_);
+          if (!blocco) continue; // pagina non ancora in sitemap: coperto da altri test
+          assert.deepEqual(
+            codiciDi(blocco),
+            ['en', 'it', 'x-default'],
+            `${path_}: la sitemap dichiara hreflang ${JSON.stringify(codiciDi(blocco))}, l'HTML dichiara it/en/x-default`,
+          );
+        }
+      }
+    },
+  );
 });

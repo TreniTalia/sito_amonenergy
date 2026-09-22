@@ -17,7 +17,14 @@ const SITE = 'https://amonenergy.it';
 // nella sitemap: verificato ispezionando `dist/sitemap-0.xml` dopo il primo
 // build del mirror inglese. `serialize` sostituisce quell'euristica con la
 // stessa fonte di verità del resto del sito, `ROTTE` in `src/i18n/routes.ts`.
-const HREFLANG = { it: 'it-IT', en: 'en-GB' };
+//
+// I codici qui devono combaciare esattamente con quelli che Base.astro
+// scrive nell'head (`hreflang={lang}`, cioè "it"/"en", più "x-default"): un
+// tempo qui c'erano "it-IT"/"en-GB" senza x-default, mentre l'HTML diceva
+// "it"/"en"/"x-default" — due annotazioni divergenti per la stessa coppia di
+// URL, che possono far scartare l'intero cluster hreflang da Google. Vedi
+// test/hreflang-coerenza.test.mjs, che confronta le due sorgenti.
+const HREFLANG = { it: 'it', en: 'en' };
 
 /** @param {{url: string}} item */
 function serialize(item) {
@@ -29,6 +36,7 @@ function serialize(item) {
     links: [
       { lang: HREFLANG.it, url: `${SITE}${rotta.it}` },
       { lang: HREFLANG.en, url: `${SITE}${rotta.en}` },
+      { lang: 'x-default', url: `${SITE}${rotta.it}` },
     ],
   };
 }
