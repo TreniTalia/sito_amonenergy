@@ -32,7 +32,19 @@ const serviziAnchor: Record<string, string> = {
 };
 const progettiPreview = (await getCollection('progetti'))
   .sort((a, b) => a.data.ordine - b.data.ordine)
-  .slice(0, 3);
+  .slice(0, 3)
+  // Traduzioni con fallback all'italiano, stessa regola di ProjectSlider.astro:
+  // i campi *En sono opzionali, e queste card della home inglese leggevano
+  // finora sempre e solo i campi italiani (titolo, tipologia, immagineAlt).
+  .map((p) => ({
+    ...p,
+    data: {
+      ...p.data,
+      titolo: p.data.titoloEn ?? p.data.titolo,
+      tipologia: p.data.tipologiaEn ?? p.data.tipologia,
+      immagineAlt: p.data.immagineAltEn ?? p.data.immagineAlt,
+    },
+  }));
 ---
 
 <Base

@@ -23,10 +23,34 @@ const t = TESTI[lingua];
 
 const slides = await Promise.all(
   entries.map(async (entry, i) => {
-    const { titolo, kv, potenza, committente, provincia, tipologia, immagine, immagineAlt } = entry.data;
+    const {
+      titolo,
+      titoloEn,
+      kv,
+      potenza,
+      committente,
+      provincia,
+      tipologia,
+      tipologiaEn,
+      immagine,
+      immagineAlt,
+      immagineAltEn,
+      descrizioneEn,
+    } = entry.data;
+
+    // Traduzioni con fallback all'italiano: i cantieri più vecchi non hanno
+    // ancora i campi *En compilati dal pannello, e la pagina inglese non
+    // deve restare senza testo in attesa che qualcuno li aggiunga.
+    const titoloLocale = lingua === 'en' ? (titoloEn ?? titolo) : titolo;
+    const tipologiaLocale = lingua === 'en' ? (tipologiaEn ?? tipologia) : tipologia;
+    const immagineAltLocale = lingua === 'en' ? (immagineAltEn ?? immagineAlt) : immagineAlt;
+
+    // La descrizione (corpo Markdown) esiste solo in italiano nel file: se
+    // manca `descrizioneEn`, si rende comunque il Markdown italiano invece
+    // di lasciare la card vuota — stesso fallback degli altri campi.
     const { Content } = await render(entry);
     const indexLabel = String(i + 1).padStart(2, '0');
-    const meta = [committente, provincia, tipologia].filter((v) => v && !/da confermare/i.test(v)).join(' · ');
+    const meta = [committente, provincia, tipologiaLocale].filter((v) => v && !/da confermare/i.test(v)).join(' · ');
 
     // `fullPhotos` stays an array (not just the single `immagine`) so the
     // modal in Lightbox.astro is already built to page through more than
@@ -37,9 +61,24 @@ const slides = await Promise.all(
     // component in the template — it does its own optimization. Feeding it
     // a `getImage()` result instead (a different, already-processed shape)
     // is what threw "unsupported format undefined" here.
-    const fullPhotos = immagine ? [{ src: (await getImage({ src: immagine, width: 1920 })).src, alt: immagineAlt }] : [];
+    const fullPhotos = immagine
+      ? [{ src: (await getImage({ src: immagine, width: 1920 })).src, alt: immagineAltLocale }]
+      : [];
 
-    return { entry, indexLabel, titolo, kv, potenza, meta, Content, immagine, fullPhotos, hasPhoto: !!immagine };
+    return {
+      entry,
+      indexLabel,
+      titolo: titoloLocale,
+      kv,
+      potenza,
+      meta,
+      Content,
+      descrizioneEn,
+      immagine,
+      immagineAlt: immagineAltLocale,
+      fullPhotos,
+      hasPhoto: !!immagine,
+    };
   }),
 );
 ---
@@ -64,7 +103,7 @@ const slides = await Promise.all(
             >
               <Image
                 src={s.immagine}
-                alt={s.entry.data.immagineAlt}
+                alt={s.immagineAlt}
                 class="ps-photo"
                 data-parallax
                 widths={[480, 720, 900]}
@@ -72,7 +111,7 @@ const slides = await Promise.all(
               />
               <span class="ps-scrim" aria-hidden="true" />
               <ProjectCardOverlay indexLabel={s.indexLabel} titolo={s.titolo} potenza={s.potenza} meta={s.meta}>
-                <Content />
+                {lingua === 'en' && s.descrizioneEn ? <p>{s.descrizioneEn}</p> : <Content />}
               </ProjectCardOverlay>
               <span class="ps-expand" aria-hidden="true">
                 <Icon name="fa6-solid:expand" />
@@ -85,7 +124,7 @@ const slides = await Promise.all(
                 <span>{t.fotoInArrivoLabel}</span>
               </div>
               <ProjectCardOverlay indexLabel={s.indexLabel} titolo={s.titolo} potenza={s.potenza} meta={s.meta}>
-                <Content />
+                {lingua === 'en' && s.descrizioneEn ? <p>{s.descrizioneEn}</p> : <Content />}
               </ProjectCardOverlay>
             </div>
           )}

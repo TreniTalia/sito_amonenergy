@@ -64,6 +64,10 @@ collections:
       - { label: "Foto a tutta larghezza (full-bleed)", name: "full", widget: "boolean", default: false, hint: "Attivare solo su una foto ogni 3 per mantenere il ritmo della griglia — se non sei sicuro, lascia disattivato." }
       - { label: "Ordine", name: "ordine", widget: "number", value_type: "int", hint: "Ordine di comparsa nella galleria (1, 2, 3…)." }
       - { label: "Descrizione", name: "body", widget: "markdown", hint: "2-3 righe: cosa è stato costruito e per cosa." }
+      - { label: "Titolo (EN, opzionale)", name: "titoloEn", widget: "string", required: false, hint: "Mostrato su /en/projects/ e nelle card della home inglese. Se vuoto, la pagina inglese mostra il Titolo italiano." }
+      - { label: "Tipologia (EN, opzionale)", name: "tipologiaEn", widget: "string", required: false, hint: "Es. \"HV/MV substation\". Se vuoto, resta la Tipologia italiana." }
+      - { label: "Testo alternativo immagine (EN, opzionale)", name: "immagineAltEn", widget: "string", required: false, hint: "Se vuoto, resta il Testo alternativo italiano." }
+      - { label: "Descrizione (EN, opzionale)", name: "descrizioneEn", widget: "text", required: false, hint: "2-3 righe in inglese, equivalenti alla Descrizione italiana. Se vuoto, la pagina inglese mostra la Descrizione italiana. Non tradurre committente, provincia, tensione e potenza: restano identici in entrambe le lingue." }
 
   - name: "servizi"
     label: "Servizi"

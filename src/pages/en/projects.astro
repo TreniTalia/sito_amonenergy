@@ -1,10 +1,11 @@
 ---
-// Gemella inglese di src/pages/lavori.astro. La collection `progetti` non è
-// tradotta (v. report): sono dati reali di cantiere — nomi di luogo,
-// committenti, kV — non copy di marketing, e biforcarla rischierebbe di far
-// divergere i due elenchi. Restano quindi in italiano anche qui, salvo la
-// `tipologia` mostrata sotto, tradotta a video dove il valore è quello
-// standard "Sottostazione AT/MT".
+// Gemella inglese di src/pages/lavori.astro. La collection `progetti` non si
+// biforca in due cartelle: i dati di cantiere (committente, provincia, kV,
+// potenza) sono comuni alle due lingue e per richiesta del cliente non vanno
+// tradotti. Il testo di marketing (titolo, tipologia, alt, descrizione) ha
+// invece i campi opzionali *En nello schema (src/content.config.ts), con
+// fallback all'italiano quando mancano: `ProjectSlider.astro` li risolve
+// prima di renderizzare, questa pagina passa solo `lingua="en"`.
 import { getCollection } from 'astro:content';
 import Base from '../../layouts/Base.astro';
 import PageHero from '../../components/PageHero.astro';

@@ -22,6 +22,16 @@ const progetti = defineCollection({
       immagine: image().optional(),
       immagineAlt: z.string(),
       ordine: z.number(),
+      // Traduzioni inglesi, tutte opzionali con fallback all'italiano nei
+      // componenti che le leggono (getTesto* in ProjectSlider.astro): la
+      // collection non si biforca in due cartelle perché i dati di cantiere
+      // sotto — committente, provincia, kv, potenza — sono comuni alle due
+      // lingue e per richiesta del cliente non vanno tradotti. Solo il testo
+      // di marketing (titolo, tipologia, alt, descrizione) si traduce qui.
+      titoloEn: z.string().optional(),
+      tipologiaEn: z.string().optional(),
+      immagineAltEn: z.string().optional(),
+      descrizioneEn: z.string().optional(),
     }),
 });
 

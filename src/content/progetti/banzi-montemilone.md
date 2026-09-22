@@ -8,5 +8,9 @@ tipologia: "Sottostazione AT/MT"
 immagine: "../../assets/img/photos/substation-banzi-dusk.jpg"
 immagineAlt: "Sottostazione elettrica 150/20 kV tra Banzi e Montemilone, vista d'insieme"
 ordine: 2
+titoloEn: "Banzi–Montemilone electrical substation"
+tipologiaEn: "HV/MV substation"
+immagineAltEn: "150/20 kV electrical substation between Banzi and Montemilone, overall view"
+descrizioneEn: "150/20 kV transformation station serving a wind farm between the municipalities of Banzi and Montemilone (PZ)."
 ---
 Stazione di trasformazione 150/20 kV a servizio di un parco eolico tra i comuni di Banzi e Montemilone (PZ).
