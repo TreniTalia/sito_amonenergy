@@ -26,7 +26,7 @@ Le due sezioni seguenti elencano le stesse pagine nelle due lingue.
 - [Prove di isolamento](https://amonenergy.it/servizi/prove-isolamento/): prove di isolamento in alta tensione con Megger HV Test 80 kV, personale qualificato CEI 11-27 e CEI EN 50110-1.
 - [RCS - monitoraggio cabina MT](https://amonenergy.it/servizi/rcs-monitoraggio-cabina-mt/): sistema proprietario Amon Energy per il monitoraggio di cabina MT, analisi guasti in tempo reale e Control Room attiva 24/7/365.
 - [CCI - controllore centrale d'impianto](https://amonenergy.it/servizi/cci-controllore-centrale-impianto/): installazione e gestione del Controllore Centrale d'Impianto in partnership con Teamware, conforme a CEI 0-16 V5 e Delibera ARERA 564/2025/R/eel.
-- [Teledistacco A72](https://amonenergy.it/servizi/teledistacco-a72/): verifica e diagnostica dei dispositivi RIGEDI e Modem A72, messa in servizio e integrazione SCADA secondo l'Allegato A72.
+- [Teledistacco A72](https://amonenergy.it/servizi/teledistacco-a72/): verifica e diagnostica dei dispositivi RIGEDI e Modem A72, messa in servizio e integrazione SCADA secondo l'Allegato A.72.
 - [Lettura contatori](https://amonenergy.it/servizi/lettura-contatori/): lettura e telelettura dei contatori di produzione e scambio per impianti fotovoltaici ed eolici connessi in MT.
 - [Lavori](https://amonenergy.it/lavori/): archivio delle sottostazioni AT/MT realizzate per parchi eolici e fotovoltaici nel Centro-Sud Italia.
 - [Contatti](https://amonenergy.it/contatti/): telefono, email e sede di Amon Energy S.r.l., senza moduli da compilare.
@@ -44,7 +44,7 @@ Le due sezioni seguenti elencano le stesse pagine nelle due lingue.
 - [Insulation testing](https://amonenergy.it/en/services/insulation-testing/): high-voltage insulation testing with the Megger HV Test 80 kV, personnel qualified to CEI 11-27 and CEI EN 50110-1.
 - [RCS - MV substation monitoring](https://amonenergy.it/en/services/rcs-mv-substation-monitoring/): Amon Energy's proprietary system for MV substation monitoring, real-time fault analysis and a Control Room active 24/7/365.
 - [CCI - central plant controller](https://amonenergy.it/en/services/cci-central-plant-controller/): installation and management of the Central Plant Controller in partnership with Teamware, compliant with CEI 0-16 V5 and ARERA Resolution 564/2025/R/eel.
-- [A72 remote tripping](https://amonenergy.it/en/services/a72-remote-tripping/): testing and diagnostics of RIGEDI devices and A72 modems, commissioning support and SCADA integration under Allegato A72.
+- [A72 remote tripping](https://amonenergy.it/en/services/a72-remote-tripping/): testing and diagnostics of RIGEDI devices and A72 modems, commissioning support and SCADA integration under Allegato A.72.
 - [Meter reading](https://amonenergy.it/en/services/meter-reading/): reading and remote reading of production and exchange meters for wind and solar plants connected at MV.
 - [Projects](https://amonenergy.it/en/projects/): HV/MV substations built by Amon Energy for wind and solar farms in Central-Southern Italy, a portfolio of completed works.
 - [Contacts](https://amonenergy.it/en/contacts/): phone, email and site of Amon Energy S.r.l., no forms to fill in.
