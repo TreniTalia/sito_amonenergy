@@ -11,8 +11,8 @@ interface Props {
 
 const { orari, lingua = 'it' } = Astro.props;
 const TESTI = {
-  it: { chiamaci: 'Chiamaci', scrivici: 'Scrivici', subject: 'Richiesta%20informazioni' },
-  en: { chiamaci: 'Call us', scrivici: 'Email us', subject: 'Information%20request' },
+  it: { chiamaci: 'Chiamaci', scrivici: 'Scrivici', subject: 'Richiesta%20informazioni', piva: 'P.IVA', codiceFE: 'Codice FE' },
+  en: { chiamaci: 'Call us', scrivici: 'Email us', subject: 'Information%20request', piva: 'VAT no.', codiceFE: 'E-invoicing code' },
 } as const;
 const t = TESTI[lingua];
 ---
@@ -47,7 +47,7 @@ const t = TESTI[lingua];
   </div>
 
   <p class="text-micro mt-6 text-ink/50">
-    P.IVA {contatti.piva} · Codice FE {contatti.codiceFE}
+    {t.piva} {contatti.piva} · {t.codiceFE} {contatti.codiceFE}
   </p>
 </div>
 

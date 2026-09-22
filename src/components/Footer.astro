@@ -65,7 +65,7 @@ const year = new Date().getFullYear();
         <li><a href={`mailto:${contatti.email}`} class="hover:text-signal-400 transition-colors">{contatti.email}</a></li>
         <li><a href={`mailto:${contatti.pec}`} class="hover:text-signal-400 transition-colors">{contatti.pec}</a></li>
         <li>{lingua === 'en' ? 'VAT no.' : 'P.IVA'} {contatti.piva}</li>
-        <li>{lingua === 'en' ? 'Tax code (Codice FE)' : 'Codice FE'} {contatti.codiceFE}</li>
+        <li>{lingua === 'en' ? 'E-invoicing code' : 'Codice FE'} {contatti.codiceFE}</li>
       </ul>
     </div>
   </div>
