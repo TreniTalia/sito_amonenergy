@@ -76,19 +76,45 @@ questa sezione con Docker attivo, **prima** di abbassare il TTL DNS.
   saltato un secondo, o uno fallisce, **non procedere**: indagare prima.
   **A cura di: sviluppatore.**
 
-- [ ] **`nginx -t` sulla configurazione reale.**
+- [ ] **`nginx -t` sulla configurazione reale.** `docker/nginx.conf` fa
+  quattro volte `include /etc/nginx/snippets/security-headers.conf`
+  (righe 204, 276, 292, 324): senza montare anche quel file, `nginx -t`
+  non fallisce per un errore di sintassi ma per un file mancante, un esito
+  fuorviante da non scambiare per un problema di configurazione. Il
+  prefisso `MSYS_NO_PATHCONV=1` serve solo su Windows con Git Bash: senza
+  quello, MSYS riscrive i due punti nei percorsi `-v host:container` e i
+  mount falliscono (su macOS/Linux è innocuo ometterlo, ma anche lasciarlo
+  non fa danno).
   ```
-  docker run --rm -v "$(pwd)/docker/nginx.conf:/etc/nginx/conf.d/site.conf:ro" nginx:1.27-alpine nginx -t
+  MSYS_NO_PATHCONV=1 docker run --rm \
+    -v "$(pwd)/docker/nginx.conf:/etc/nginx/conf.d/site.conf:ro" \
+    -v "$(pwd)/docker/snippets/security-headers.conf:/etc/nginx/snippets/security-headers.conf:ro" \
+    nginx:1.27-alpine nginx -t
   ```
   Atteso: `nginx: configuration file /etc/nginx/nginx.conf test is successful`.
   **A cura di: sviluppatore.**
 
-- [ ] **Build reale in un container locale.**
+- [ ] **Build reale in un container locale.** `docker-compose.yml` rende
+  obbligatorie tre variabili sul servizio `cms-auth` (`ALLOWED_ORIGIN`,
+  `GITHUB_OAUTH_CLIENT_ID`, `GITHUB_OAUTH_CLIENT_SECRET` — tutte con
+  `:?` nel file, quindi senza un `.env` `docker compose up` si rifiuta di
+  partire, con o senza `-d web`: compose valida l'intero file, non solo il
+  servizio richiesto). Per le sole verifiche di questa sezione (redirect,
+  header, non il login del pannello) bastano valori qualsiasi purché non
+  vuoti:
+  (comandi singoli, non un heredoc: incollati da un elenco puntato,
+  l'indentazione del blocco non deve finire dentro il file)
   ```
+  echo "HTTP_PORT=8080" > .env
+  echo "ALLOWED_ORIGIN=http://localhost:8080" >> .env
+  echo "GITHUB_OAUTH_CLIENT_ID=verifica-locale" >> .env
+  echo "GITHUB_OAUTH_CLIENT_SECRET=verifica-locale" >> .env
   docker compose -f docker-compose.yml -f docker-compose.build.yml up --build -d web
   ```
   Atteso: il container `web` parte e resta `Up` (non riavvia in loop —
-  verificare con `docker compose ps` qualche minuto dopo).
+  verificare con `docker compose ps` qualche minuto dopo). **Non
+  riutilizzare** questo `.env` per il login reale del pannello: le
+  credenziali OAuth sono finte, servono solo a far partire lo stack.
   **A cura di: sviluppatore.**
 
 - [ ] **Crawl completo dei 28 vecchi URL WordPress.** Scrivere uno script
@@ -164,12 +190,18 @@ questa sezione con Docker attivo, **prima** di abbassare il TTL DNS.
   TTL attuale (spesso 3600-86400s). **A cura di: cliente** (è lui che
   controlla il pannello DNS — nessuno sviluppatore ha accesso).
 
-  Verifica del TTL attuale, eseguibile da chiunque:
+  Verifica del TTL attuale, eseguibile da chiunque. `dig` non è installato
+  di default su Windows (nemmeno dentro Git Bash): il comando universale
+  è `nslookup` con `-debug`, che su Windows è un eseguibile di sistema
+  (`C:\Windows\System32\nslookup.exe`) e funziona identico da Git Bash,
+  da `cmd` o da PowerShell; su macOS/Linux, se disponibile, `dig
+  amonenergy.it +noall +answer` dà la stessa informazione in un formato
+  più compatto.
   ```
-  dig amonenergy.it +noall +answer
+  nslookup -debug amonenergy.it
   ```
-  Atteso: la colonna del TTL (il numero prima di `IN A`) è già bassa
-  (≤300) almeno 24 ore prima dello switch.
+  Atteso: fra le righe `ANSWERS`, una voce `ttl = ...` già bassa (≤300
+  secondi) almeno 24 ore prima dello switch.
 
 ---
 
@@ -204,9 +236,10 @@ Eseguire nell'ordine. Non saltare voci.
   accesso sia a Search Console sia al DNS; nessuno sviluppatore può farlo
   al posto suo.
 
-  Verifica di propagazione, eseguibile da chiunque dopo la pubblicazione:
+  Verifica di propagazione, eseguibile da chiunque dopo la pubblicazione
+  (`nslookup`, non `dig` — vedi nota sulla sezione 2 sul perché):
   ```
-  dig TXT amonenergy.it +noall +answer
+  nslookup -type=TXT amonenergy.it
   ```
   Atteso: il record TXT fornito da Search Console compare nell'output.
   Poi, in Search Console, cliccare "Verifica": esito atteso "Proprietà
@@ -218,24 +251,34 @@ Eseguire nell'ordine. Non saltare voci.
   pannello DNS.
 
 - [ ] **6. Verifica del nuovo sito prima ancora che il DNS sia propagato
-  ovunque**, puntando `curl` direttamente al nuovo IP con l'header `Host`
-  (bypassa il DNS, utile nei primi minuti quando alcuni resolver
-  restituiscono ancora il vecchio IP):
+  ovunque**, puntando alla nuova macchina prima che il DNS pubblico la
+  restituisca. **Non** usare `curl -H 'Host: ...' https://<IP>/`: su
+  HTTPS l'header `Host` non basta, perché l'handshake TLS (SNI) e la
+  verifica del certificato avvengono contro l'IP letterale, non contro il
+  nome che si vuole testare — il certificato è per `amonenergy.it`, non
+  per un IP, e la richiesta fallisce per un errore di certificato che non
+  c'entra nulla con il sito. Il modo corretto è `--resolve`, che dice a
+  curl di usare quell'IP per quel nome mantenendo SNI e verifica del
+  certificato coerenti:
   ```
-  curl -sI -H 'Host: amonenergy.it' https://<NUOVO_IP>/ | head -5
+  curl -sI --resolve amonenergy.it:443:<NUOVO_IP> https://amonenergy.it/ | head -5
   ```
   Atteso: `HTTP/2 200`, nessun `x-robots-tag` nella risposta.
   **A cura di: sviluppatore.**
 
-- [ ] **7. Verifica di propagazione DNS globale.**
+- [ ] **7. Verifica di propagazione DNS globale.** `dig` non è installato
+  di default su Windows: usare `nslookup`, indicando il server DNS da
+  interrogare come secondo argomento (equivalente di `dig @host`).
   ```
-  dig amonenergy.it +noall +answer
+  nslookup amonenergy.it
+  nslookup amonenergy.it 8.8.8.8
+  nslookup amonenergy.it 1.1.1.1
   ```
-  (ripetere da reti/DNS diversi se possibile — es. `dig @8.8.8.8
-  amonenergy.it`, `dig @1.1.1.1 amonenergy.it`) Atteso: tutti i resolver
-  interrogati restituiscono il nuovo IP. Con TTL basso (sezione 2), la
-  propagazione dovrebbe essere quasi completa entro 15-30 minuti dal
-  cambio.
+  (su macOS/Linux, se disponibile, `dig amonenergy.it +noall +answer` e
+  `dig @8.8.8.8 amonenergy.it` danno la stessa informazione). Atteso:
+  tutti i resolver interrogati restituiscono il nuovo IP. Con TTL basso
+  (sezione 2), la propagazione dovrebbe essere quasi completa entro 15-30
+  minuti dal cambio.
   **A cura di: sviluppatore o cliente.**
 
 - [ ] **8. Verifica finale via dominio pubblico, una volta propagato.**
@@ -259,8 +302,14 @@ Eseguire nell'ordine. Non saltare voci.
   un altro accesso). **A cura di: cliente.**
 
 - [ ] **11. Monitorare i log di errore del container per la prima ora.**
+  Il nome esatto del container dipende dal nome dato allo stack in
+  Portainer (il progetto compose si chiama `amonenergy`, quindi in un
+  `docker compose up` locale il container è di norma `amonenergy-web-1`,
+  ma in Portainer può differire): trovarlo prima con un filtro invece di
+  indovinarlo.
   ```
-  docker logs -f --tail 200 <nome-container-web>
+  docker ps --filter "name=web" --format "{{.Names}}"
+  docker logs -f --tail 200 <nome-restituito-sopra>
   ```
   Atteso: nessun errore 5xx ricorrente, nessun crash-loop.
   **A cura di: sviluppatore.**
