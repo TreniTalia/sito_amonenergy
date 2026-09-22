@@ -36,6 +36,32 @@ const servizi = defineCollection({
     }),
 });
 
+// Pagine tecniche di dettaglio (una per servizio diagnostico). Sostituiscono
+// le vecchie /verifiche-strumentali/* di WordPress, verso cui puntano i 301:
+// ogni campo esiste perché una di quelle pagine perdeva qualcosa a non averlo.
+const serviziDettaglio = defineCollection({
+  // Un livello di cartella per lingua: il glob prende entrambe, la route
+  // filtra per prefisso dell'id.
+  loader: glob({ pattern: '**/*.md', base: './src/content/servizi-dettaglio' }),
+  schema: () =>
+    z.object({
+      titolo: z.string(),
+      lead: z.string(),
+      seoTitle: z.string(),
+      seoDescription: z.string(),
+      ordine: z.number(),
+      diagramma: z.string(),
+      problema: z.array(z.string()).min(2),
+      parametri: z.array(z.object({ titolo: z.string(), testo: z.string(), icona: z.string() })).min(4),
+      fasi: z.array(z.object({ titolo: z.string(), testo: z.string() })).min(3),
+      strumentazione: z.array(z.object({ modello: z.string(), nota: z.string() })).min(1),
+      norma: z.object({ codice: z.string(), titolo: z.string(), note: z.string() }),
+      caso: z.object({ progetto: z.string(), testo: z.string() }).optional(),
+      faq: z.array(z.object({ d: z.string(), r: z.string() })).min(3),
+      correlati: z.array(z.string()).min(2),
+    }),
+});
+
 const homeSchema = z.object({
   pagina: z.literal('home'),
   hero: z.object({
@@ -151,4 +177,4 @@ const pagine = defineCollection({
   ]),
 });
 
-export const collections = { progetti, servizi, pagine };
+export const collections = { progetti, servizi, serviziDettaglio, pagine };

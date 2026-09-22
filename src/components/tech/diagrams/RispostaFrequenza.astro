@@ -1,0 +1,336 @@
+---
+/**
+ * Diagramma della risposta in frequenza di un avvolgimento (SFRA).
+ *
+ * Primo dei nove disegni tecnici delle pagine servizio, e quindi il modello
+ * per gli altri: stessa lingua grafica di CoverageMap.astro — fondo navy,
+ * reticolo sottilissimo che dà scala senza farsi guardare, verde solo come
+ * micro-accento, cornice con tacche d'angolo da strumento. Nessuna
+ * fotografia, nessuna illustrazione: è un grafico, e i due tracciati escono
+ * da una funzione, non da una curva disegnata a mano.
+ *
+ * Il contenuto è quello che la IEC 60076-18 misura davvero: ampiezza in dB
+ * su scala logaritmica da 20 Hz a 2 MHz. Il tracciato di riferimento e
+ * quello misurato coincidono in bassa frequenza — dove risponde il nucleo,
+ * insensibile alla geometria degli avvolgimenti — e divergono sopra i
+ * 100 kHz, la regione in cui una deformazione dell'avvolgimento sposta le
+ * risonanze. È l'unico punto del disegno che deve leggersi al primo sguardo.
+ */
+const W = 640;
+const H = 320;
+
+// Riquadro del grafico.
+const X0 = 78;
+const X1 = 608;
+const Y0 = 48;
+const Y1 = 252;
+
+const F_MIN = 20;
+const F_MAX = 2_000_000;
+const U_MIN = Math.log10(F_MIN);
+const U_MAX = Math.log10(F_MAX);
+
+const DB_MIN = -100;
+const DB_MAX = 0;
+
+const x = (f: number) => X0 + ((Math.log10(f) - U_MIN) / (U_MAX - U_MIN)) * (X1 - X0);
+const xu = (u: number) => X0 + ((u - U_MIN) / (U_MAX - U_MIN)) * (X1 - X0);
+const y = (db: number) => Y1 - ((db - DB_MIN) / (DB_MAX - DB_MIN)) * (Y1 - Y0);
+const n = (v: number) => Math.round(v * 10) / 10;
+
+// --- la curva ------------------------------------------------------------
+// Sagoma tipica di una misura end-to-end open circuit: fondo profondo nella
+// regione del nucleo, risalita verso il plateau capacitivo, risonanze
+// sempre più fitte salendo in frequenza.
+const gauss = (u: number, mu: number, s: number) => Math.exp(-((u - mu) ** 2) / (2 * s * s));
+const sig = (t: number) => 1 / (1 + Math.exp(-t));
+
+function riferimento(u: number): number {
+  let v = -90 + 62 * sig((u - 2.75) / 0.42);
+  v -= 15 * gauss(u, 2.12, 0.17); // risonanza del nucleo, ~130 Hz
+  v -= 11 * gauss(u, 3.4, 0.13); // ~2,5 kHz
+  v += 6 * gauss(u, 4.15, 0.26);
+  v -= 13 * gauss(u, 4.78, 0.12); // ~60 kHz
+  v -= 7 * gauss(u, 5.36, 0.1);
+  v += 5 * gauss(u, 5.68, 0.11);
+  v -= 10 * gauss(u, 6.02, 0.09);
+  v -= 7 * Math.max(0, u - 5.2); // decadimento capacitivo in coda
+  return v;
+}
+
+// Peso dello scostamento: nullo fino a 100 kHz (u = 5), poi cresce. La
+// deformazione si manifesta come spostamento delle risonanze in frequenza
+// (il termine sull'ascissa) più un cambio di ampiezza: è così che si legge
+// una misura reale, non come un semplice offset verticale.
+const peso = (u: number) => Math.min(1, Math.max(0, (u - 5.0) / 0.85) ** 1.4);
+
+function misurato(u: number): number {
+  const w = peso(u);
+  return riferimento(u + 0.075 * w) + 7 * w * Math.sin((u - 5.0) * 4.6) - 3.5 * w;
+}
+
+const PASSI = 360;
+const serie = (fn: (u: number) => number) => {
+  const p: string[] = [];
+  for (let i = 0; i <= PASSI; i++) {
+    const u = U_MIN + ((U_MAX - U_MIN) * i) / PASSI;
+    p.push(`${n(xu(u))},${n(y(Math.min(DB_MAX, Math.max(DB_MIN, fn(u)))))}`);
+  }
+  return p.join(' ');
+};
+
+const dRif = serie(riferimento);
+const dMis = serie(misurato);
+
+// --- assi ----------------------------------------------------------------
+// Tacche a ogni decade, etichette solo sulle quattro che contano: gli
+// estremi dell'intervallo di norma e i due riferimenti in mezzo.
+const decadi = [20, 100, 1_000, 10_000, 100_000, 1_000_000, 2_000_000];
+const etichetteX = [
+  { f: 20, t: '20 Hz' },
+  { f: 1_000, t: '1 kHz' },
+  { f: 100_000, t: '100 kHz' },
+  { f: 2_000_000, t: '2 MHz' },
+];
+const etichetteY = [0, -20, -40, -60, -80, -100];
+
+const xDiv = x(100_000);
+const uid = 'rfq';
+---
+
+<figure class="freq-plot">
+  <div class="freq-plot__frame rounded-[var(--radius-card)] border border-navy-100 shadow-[var(--shadow-md)]">
+    <svg
+      viewBox={`0 0 ${W} ${H}`}
+      role="img"
+      aria-label="Grafico della risposta in frequenza di un avvolgimento di trasformatore: ampiezza in decibel su scala logaritmica da 20 Hz a 2 MHz. Il tracciato di riferimento e quello misurato coincidono fino a circa 100 kHz; sopra i 100 kHz le risonanze del tracciato misurato si spostano in frequenza e cambiano ampiezza, lo scostamento che segnala una deformazione dell'avvolgimento."
+      preserveAspectRatio="xMidYMid meet"
+    >
+      <defs>
+        <linearGradient id={`${uid}-bg`} x1="0" y1="0" x2="0.35" y2="1">
+          <stop offset="0" stop-color="#0c3151"></stop>
+          <stop offset="1" stop-color="#081f36"></stop>
+        </linearGradient>
+        <!-- Stessa trama a passo fisso della carta nautica di CoverageMap: dà
+             materia al fondo senza aggiungere un dato che non esiste. -->
+        <pattern id={`${uid}-dots`} width="24" height="24" patternUnits="userSpaceOnUse">
+          <circle cx="1.1" cy="1.1" r="1.1" fill="#4f93c4" fill-opacity="0.16"></circle>
+        </pattern>
+        <clipPath id={`${uid}-clip`}>
+          <rect x={X0} y={Y0} width={X1 - X0} height={Y1 - Y0}></rect>
+        </clipPath>
+      </defs>
+
+      <rect width={W} height={H} fill={`url(#${uid}-bg)`}></rect>
+      <rect width={W} height={H} fill={`url(#${uid}-dots)`}></rect>
+
+      <!-- Banda dello scostamento: sotto i tracciati, non sopra. Marca la
+           regione, non la copre. -->
+      <g>
+        <rect
+          x={n(xDiv)}
+          y={Y0}
+          width={n(X1 - xDiv)}
+          height={Y1 - Y0}
+          fill="#4fd07f"
+          fill-opacity="0.07"></rect>
+        <line x1={n(xDiv)} y1={Y0} x2={n(xDiv)} y2={Y1} stroke="#4fd07f" stroke-opacity="0.45" stroke-width="1" stroke-dasharray="3 4"></line>
+      </g>
+
+      <!-- Reticolo: decadi in verticale, 20 dB in orizzontale. -->
+      <g stroke="#3f7fb0" stroke-width="0.8" opacity="0.22">
+        {decadi.map((f) => <line x1={n(x(f))} y1={Y0} x2={n(x(f))} y2={Y1} />)}
+        {etichetteY.map((d) => <line x1={X0} y1={n(y(d))} x2={X1} y2={n(y(d))} />)}
+      </g>
+
+      <!-- Assi e tacche da strumento: fuori dal riquadro, verso l'esterno. -->
+      <g stroke="#6ba7d2" stroke-opacity="0.55" stroke-width="1">
+        <line x1={X0} y1={Y0} x2={X0} y2={Y1}></line>
+        <line x1={X0} y1={Y1} x2={X1} y2={Y1}></line>
+        {decadi.map((f) => <line x1={n(x(f))} y1={Y1} x2={n(x(f))} y2={Y1 + 6} />)}
+        {etichetteY.map((d) => <line x1={X0 - 6} y1={n(y(d))} x2={X0} y2={n(y(d))} />)}
+      </g>
+
+      <g clip-path={`url(#${uid}-clip)`} fill="none" stroke-linejoin="round" stroke-linecap="round">
+        <!-- Ordine voluto: il misurato sotto, il riferimento sopra. Dove le due
+             tracce coincidono si vede una linea sola — che è esattamente il
+             messaggio — e il verde emerge solo dove si stacca. Con il verde
+             sopra, il riferimento spariva per tutta la metà sinistra e il
+             grafico sembrava avere un tracciato solo. -->
+        <polyline points={dMis} stroke="#4fd07f" stroke-width="1.8"></polyline>
+        <polyline points={dRif} stroke="#bcd6e8" stroke-width="1.6"></polyline>
+      </g>
+
+      <!-- Etichette degli assi. Il filo scuro sotto il testo (`paint-order`)
+           è ciò che le tiene leggibili sopra il reticolo. -->
+      <g
+        class="plot-label"
+        font-family="Inter Variable, Inter, sans-serif"
+        font-size="12"
+        font-weight="600"
+        letter-spacing="0.08em"
+        fill="#bcd6e8"
+        paint-order="stroke"
+        stroke="#081f36"
+        stroke-width="3.5"
+        stroke-opacity="0.85"
+      >
+        {
+          etichetteX.map((e, i) => (
+            <text
+              x={n(x(e.f))}
+              y={Y1 + 22}
+              text-anchor={i === 0 ? 'start' : i === etichetteX.length - 1 ? 'end' : 'middle'}
+            >
+              {e.t}
+            </text>
+          ))
+        }
+        {etichetteY.map((d) => <text x={X0 - 12} y={n(y(d) + 4)} text-anchor="end">{d}</text>)}
+        <text x={X0 - 12} y={Y0 - 16} text-anchor="end">dB</text>
+      </g>
+
+      <!-- Etichetta della zona di divergenza, allineata al bordo destro del
+           riquadro: ingrandendosi su mobile non esce mai dalla tela. -->
+      <g
+        class="plot-label plot-label--band"
+        font-family="Inter Variable, Inter, sans-serif"
+        font-size="11"
+        font-weight="600"
+        letter-spacing="0.12em"
+        fill="#8fd9ab"
+        paint-order="stroke"
+        stroke="#081f36"
+        stroke-width="3.5"
+        stroke-opacity="0.85"
+      >
+        <text x={X1 - 8} y={Y0 + 17} text-anchor="end">SCOSTAMENTO</text>
+      </g>
+
+      <!-- Legenda: due segmenti e due parole, in alto a sinistra dove la curva
+           sta in basso e lo spazio è libero. -->
+      <g transform={`translate(${X0 + 16} ${Y0 + 12})`}>
+        <line x1="0" y1="0" x2="22" y2="0" stroke="#bcd6e8" stroke-width="1.8"></line>
+        <line class="plot-legend-rule" x1="0" y1="22" x2="22" y2="22" stroke="#4fd07f" stroke-width="1.8"></line>
+        <g
+          class="plot-label plot-legend"
+          font-family="Inter Variable, Inter, sans-serif"
+          font-size="11"
+          font-weight="600"
+          letter-spacing="0.06em"
+          fill="#bcd6e8"
+          paint-order="stroke"
+          stroke="#081f36"
+          stroke-width="3.5"
+          stroke-opacity="0.85"
+        >
+          <text x="30" y="4">Impronta di riferimento</text>
+          <text class="plot-legend-2" x="30" y="26" fill="#8fd9ab">Misura in campo</text>
+        </g>
+      </g>
+
+      <!-- Cornice interna con tacche d'angolo: chiude il riquadro come uno
+           strumento, esattamente come la mappa di copertura. -->
+      <rect
+        x="14"
+        y="14"
+        width={W - 28}
+        height={H - 28}
+        rx="6"
+        fill="none"
+        stroke="#6ba7d2"
+        stroke-opacity="0.26"
+        stroke-width="1"></rect>
+      <g stroke="#8fd9ab" stroke-opacity="0.5" stroke-width="1.4" stroke-linecap="square">
+        <line x1="14" y1="38" x2="14" y2="14"></line>
+        <line x1="14" y1="14" x2="38" y2="14"></line>
+        <line x1={W - 38} y1="14" x2={W - 14} y2="14"></line>
+        <line x1={W - 14} y1="14" x2={W - 14} y2="38"></line>
+        <line x1="14" y1={H - 38} x2="14" y2={H - 14}></line>
+        <line x1="14" y1={H - 14} x2="38" y2={H - 14}></line>
+        <line x1={W - 38} y1={H - 14} x2={W - 14} y2={H - 14}></line>
+        <line x1={W - 14} y1={H - 14} x2={W - 14} y2={H - 38}></line>
+      </g>
+    </svg>
+  </div>
+
+  <figcaption class="freq-plot__caption">
+    <span class="freq-plot__dot" aria-hidden="true"></span>
+    <span>
+      <strong>Confronto con l'impronta di riferimento</strong>
+      <span class="freq-plot__caption-sub">
+        Curva esemplificativa · intervallo di misura 20 Hz – 2 MHz secondo IEC 60076-18
+      </span>
+    </span>
+  </figcaption>
+</figure>
+
+<style>
+  .freq-plot__frame {
+    position: relative;
+    overflow: hidden;
+    aspect-ratio: 2 / 1;
+    background: #0a2a44;
+  }
+
+  .freq-plot__frame svg {
+    display: block;
+    width: 100%;
+    height: 100%;
+  }
+
+  /* Il testo dentro l'SVG è in unità di viewBox: su un riquadro largo 350px
+     invece di 632, un `font-size` di 12 unità atterra a poco più di 6px reali
+     — sotto il pavimento di leggibilità. Sotto i 768px le etichette crescono
+     nello spazio del disegno, e con loro la spaziatura della legenda, che
+     altrimenti si accavallerebbe. */
+  @media (max-width: 767px) {
+    .plot-label {
+      font-size: 20px;
+    }
+
+    .plot-label--band {
+      font-size: 18px;
+    }
+
+    .plot-legend-2 {
+      transform: translateY(6px);
+    }
+
+    .plot-legend-rule {
+      transform: translateY(6px);
+    }
+  }
+
+  .freq-plot__caption {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    margin-top: 0.85rem;
+    padding-left: 0.15rem;
+    color: currentColor;
+    font-size: var(--fs-small);
+    line-height: 1.35;
+  }
+
+  .freq-plot__caption strong {
+    display: block;
+    font-weight: 700;
+    letter-spacing: 0.01em;
+  }
+
+  .freq-plot__caption-sub {
+    display: block;
+    color: color-mix(in srgb, currentColor 62%, transparent);
+    font-size: var(--fs-micro);
+  }
+
+  .freq-plot__dot {
+    width: 0.5rem;
+    height: 0.5rem;
+    flex: none;
+    border-radius: 999px;
+    background: #2fa85f;
+    box-shadow: 0 0 0 4px rgb(79 208 127 / 0.22);
+  }
+</style>
