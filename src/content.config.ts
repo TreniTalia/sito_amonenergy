@@ -72,6 +72,17 @@ const homeSchema = z.object({
   marqueeTitolo: z.string(),
 });
 
+const aziendaSchema = z.object({
+  pagina: z.literal('azienda'),
+  eyebrow: z.string(),
+  h1: z.string(),
+  storia: z.string(),
+  missione: z.string(),
+  raggioAzione: z.string(),
+  strumentazione: z.array(z.string()),
+  marqueeTitolo: z.string(),
+});
+
 const contattiSchema = z.object({
   pagina: z.literal('contatti'),
   h1: z.string(),
@@ -134,6 +145,7 @@ const pagine = defineCollection({
   loader: glob({ pattern: '**/*.yaml', base: './src/content/pagine' }),
   schema: z.discriminatedUnion('pagina', [
     homeSchema,
+    aziendaSchema,
     contattiSchema,
     serviziSchema,
   ]),

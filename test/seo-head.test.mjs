@@ -96,6 +96,14 @@ describe('head SEO', { skip }, () => {
   // globale darebbe un falso positivo su quella coppia; qui si raggruppa
   // per l'attributo `lang` di ciascuna pagina e si verifica l'unicità solo
   // dentro ogni gruppo.
+  test('la pagina azienda espone l ancora clienti e non cita certificazioni', () => {
+    const html = readFileSync(path.join(DIST, 'azienda', 'index.html'), 'utf8');
+    assert.match(html, /id="clienti"/, 'manca id="clienti", destinazione di /i-nostri-clienti/');
+    assert.ok(!/certificazion/i.test(html), 'la pagina cita certificazioni: vietato');
+    assert.ok(!/Troia/.test(html), 'la pagina cita Troia: la sede è unica, a Castelluccio dei Sauri');
+    assert.match(html, /"foundingDate":"2020"/, 'foundingDate deve valere 2020');
+  });
+
   test('titoli e descrizioni sono unici fra le pagine della stessa lingua', () => {
     const vistiPerLingua = new Map();
     for (const p of pagine()) {

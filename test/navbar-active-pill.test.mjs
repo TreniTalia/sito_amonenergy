@@ -76,6 +76,7 @@ describe('pill attiva della navbar desktop', { skip }, () => {
 
   const PAGES = [
     ['', 'Home'],
+    ['azienda/', 'Azienda'],
     ['servizi/', 'Servizi'],
     ['lavori/', 'Lavori'],
     ['contatti/', 'Contatti'],
