@@ -2,7 +2,7 @@
 titolo: "Partial discharge measurement on cables, switchgear and transformers"
 lead: "Partial discharge diagnostics to IEC 60270: apparent charge in picocoulombs reveals an insulation defect before it becomes a full breakdown."
 seoTitle: "Partial discharge testing HV/MV: pC diagnostics"
-seoDescription: "Partial discharge measurement on HV/MV cables, switchgear and transformers to IEC 60270: apparent charge in pC, sensitivity below 1 pC, location with non-conventional methods."
+seoDescription: "Partial discharge measurement on HV/MV cables, switchgear and transformers to IEC 60270: apparent charge in pC, location with non-conventional methods."
 ordine: 2
 diagramma: "scariche-parziali"
 
@@ -15,11 +15,11 @@ parametri:
   - titolo: "Apparent charge in picocoulombs"
     testo: "The conventional method in IEC 60270 measures the apparent charge in pC: not the discharge's real energy, which stays inside the dielectric, but its measurable electrical footprint at the terminals of the test circuit."
     icona: "fa6-solid:wave-square"
-  - titolo: "Sensitivity below 1 pC"
-    testo: "With good shielding of the measurement circuit, the detection threshold drops below one picocoulomb: pulses that would stay in the noise floor of a less sensitive instrument are read here."
+  - titolo: "Shielded measurement circuit"
+    testo: "Good shielding of the measurement circuit lowers the detection threshold: pulses that would stay in the noise floor of a less carefully shielded circuit are read here."
     icona: "fa6-solid:magnifying-glass-chart"
   - titolo: "AC voltage measurement"
-    testo: "The conventional method applies to AC tests. The 2025 revision of the standard extended the scope up to 500 Hz and added DC voltage, broadening the cases covered."
+    testo: "The conventional method in IEC 60270 applies to partial discharge measurements in high voltage, with the test run under AC voltage."
     icona: "fa6-solid:bolt"
   - titolo: "Non-conventional location"
     testo: "Where the plant's geometry requires it, we combine conventional pC methods with UHF and acoustic techniques: they can't be calibrated in charge, but they pinpoint the exact location of the defect."
@@ -50,15 +50,13 @@ assettoMisura:
     valore: "Conventional, pC charge"
   - etichetta: "Unit of measurement"
     valore: "Picocoulomb (pC)"
-  - etichetta: "Sensitivity"
-    valore: "Below 1 pC"
   - etichetta: "Test voltage"
     valore: "Alternating (AC)"
 
 norma:
   codice: "IEC 60270 / CEI EN 60270"
   titolo: "High-voltage test techniques – Partial discharge measurements"
-  note: "Applies to measurements under AC voltage: the conventional method measures the apparent charge in picocoulombs (pC), with sensitivity below 1 pC when the test circuit is well shielded. Non-conventional methods also exist — UHF, acoustic — which can't be calibrated in charge but are useful for locating the ignition point. A 2025 revision extended the scope up to 500 Hz in AC and added DC."
+  note: "Applies to partial discharge measurements in high voltage: the conventional method measures the apparent charge in picocoulombs (pC). Non-conventional methods also exist — UHF, acoustic — which can't be calibrated in charge but are useful for locating the ignition point."
 
 faq:
   - d: "What exactly does a partial discharge test measure?"

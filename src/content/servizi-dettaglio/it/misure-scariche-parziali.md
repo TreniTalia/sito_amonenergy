@@ -2,7 +2,7 @@
 titolo: "Misure di scariche parziali su cavi, quadri e trasformatori"
 lead: "Diagnosi delle scariche parziali secondo IEC 60270: la carica apparente in picocoulomb rivela un difetto di isolamento prima che diventi un guasto franco."
 seoTitle: "Misure scariche parziali AT/MT: diagnosi in pC"
-seoDescription: "Misure di scariche parziali su cavi, quadri e trasformatori AT/MT secondo IEC 60270: carica apparente in pC, sensibilità sotto 1 pC, localizzazione con metodi non convenzionali."
+seoDescription: "Misure di scariche parziali su cavi, quadri e trasformatori AT/MT secondo IEC 60270: carica apparente in pC, localizzazione con metodi non convenzionali."
 ordine: 2
 diagramma: "scariche-parziali"
 
@@ -15,11 +15,11 @@ parametri:
   - titolo: "Carica apparente in picocoulomb"
     testo: "Il metodo convenzionale della IEC 60270 misura la carica apparente in pC: non l'energia reale della scarica, che resta interna al dielettrico, ma la sua impronta elettrica misurabile ai capi del circuito di prova."
     icona: "fa6-solid:wave-square"
-  - titolo: "Sensibilità sotto 1 pC"
-    testo: "Con una buona schermatura del circuito di misura la soglia di rilevazione scende sotto il picocoulomb: gli impulsi che restano nel rumore di fondo di uno strumento meno sensibile qui si leggono."
+  - titolo: "Circuito di misura schermato"
+    testo: "Una buona schermatura del circuito di misura abbassa la soglia di rilevazione: gli impulsi che restano nel rumore di fondo di un circuito meno curato qui si leggono."
     icona: "fa6-solid:magnifying-glass-chart"
   - titolo: "Misura in tensione alternata"
-    testo: "Il metodo convenzionale si applica alle prove in tensione alternata. La revisione 2025 della norma ha esteso il campo di applicazione fino a 500 Hz e ha aggiunto la corrente continua, ampliando i casi coperti."
+    testo: "Il metodo convenzionale della IEC 60270 si applica alle misure di scariche parziali in alta tensione, con prova condotta in tensione alternata."
     icona: "fa6-solid:bolt"
   - titolo: "Localizzazione non convenzionale"
     testo: "Dove la geometria dell'impianto lo richiede, ai metodi convenzionali in pC affianchiamo tecniche UHF e acustiche: non sono calibrabili in carica, ma individuano il punto esatto del difetto."
@@ -50,15 +50,13 @@ assettoMisura:
     valore: "Convenzionale, carica pC"
   - etichetta: "Unità di misura"
     valore: "Picocoulomb (pC)"
-  - etichetta: "Sensibilità"
-    valore: "Sotto 1 pC"
   - etichetta: "Tensione di prova"
     valore: "Alternata (AC)"
 
 norma:
   codice: "IEC 60270 / CEI EN 60270"
   titolo: "High-voltage test techniques – Partial discharge measurements"
-  note: "Si applica alle misure con tensione alternata: il metodo convenzionale misura la carica apparente in picocoulomb (pC), con una sensibilità sotto 1 pC quando il circuito di prova è ben schermato. Esistono anche metodi non convenzionali — UHF, acustici — che non sono calibrabili in carica ma sono utili alla localizzazione del punto di innesco. Una revisione del 2025 ha esteso il campo di applicazione fino a 500 Hz in alternata e ha aggiunto la corrente continua."
+  note: "Si applica alle misure di scariche parziali in alta tensione: il metodo convenzionale misura la carica apparente in picocoulomb (pC). Esistono anche metodi non convenzionali — UHF, acustici — che non sono calibrabili in carica ma sono utili alla localizzazione del punto di innesco."
 
 faq:
   - d: "Che cosa misura esattamente una prova di scariche parziali?"
