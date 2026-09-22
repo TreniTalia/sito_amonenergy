@@ -146,15 +146,23 @@ const faqPage = {
         <p class="text-title mt-2 text-ink/70" data-reveal style="--reveal-delay:110ms">{d.norma.titolo}</p>
         <p class="measure text-body mt-5 text-ink/75" data-reveal style="--reveal-delay:150ms">{d.norma.note}</p>
       </div>
-      <div data-reveal style="--reveal-delay:200ms">
-        <!-- SpecPanel è una scheda tecnica: a sinistra la voce, a destra il
-             dato. `nota` sta quindi nella colonna dei valori e resta corta —
-             il perché di ogni scelta è già nei parametri di prova e nella nota
-             della norma, qui servono le grandezze. -->
+      <!-- Due pannelli, non uno: con che cosa si misura e come si misura sono
+           dati diversi. Il primo è un elenco di apparecchi, incrociabile con
+           quello di pagine/azienda.yaml; il secondo sono i parametri della
+           prova, e non tutte le pagine ne hanno (RCS, CCI, teledistacco e
+           lettura contatori sono sistemi, non prove strumentali). -->
+      <div class="flex flex-col gap-5" data-reveal style="--reveal-delay:200ms">
+        <!-- A sinistra l'apparecchio, a destra il ruolo che ha nella prova. Il
+             verso opposto (ruolo a sinistra) si legge meglio in astratto, ma la
+             colonna dei valori di SpecPanel è `flex: none`: a 390px un nome
+             lungo come "Cavi coassiali a doppia schermatura" usciva dal
+             pannello. La colonna delle etichette invece va a capo. Verificato a
+             video, non dedotto. -->
         <SpecPanel
-          titolo="Assetto di misura"
+          titolo="Strumentazione"
           voci={d.strumentazione.map((s) => ({ etichetta: s.modello, valore: s.nota }))}
         />
+        {d.assettoMisura && <SpecPanel titolo="Assetto di misura" voci={d.assettoMisura} />}
       </div>
     </div>
   </section>

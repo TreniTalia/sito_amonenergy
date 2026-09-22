@@ -54,7 +54,16 @@ const serviziDettaglio = defineCollection({
       problema: z.array(z.string()).min(2),
       parametri: z.array(z.object({ titolo: z.string(), testo: z.string(), icona: z.string() })).min(4),
       fasi: z.array(z.object({ titolo: z.string(), testo: z.string() })).min(3),
+      // Gli strumenti veri, e solo quelli: lo stesso dato vive anche in
+      // `pagine/azienda.yaml`, e prima o poi i due elenchi andranno incrociati.
+      // Mescolarci dentro i parametri di prova renderebbe l'incrocio impossibile.
       strumentazione: z.array(z.object({ modello: z.string(), nota: z.string() })).min(1),
+      // Come si misura, non con che cosa: tensione di prova, banda, cablaggio,
+      // messa a terra. Opzionale perché RCS, CCI, teledistacco e lettura
+      // contatori sono sistemi, non prove strumentali, e un assetto di misura
+      // non ce l'hanno. Stessa forma delle `voci` di SpecPanel, così ci si
+      // passa direttamente.
+      assettoMisura: z.array(z.object({ etichetta: z.string(), valore: z.string() })).optional(),
       norma: z.object({ codice: z.string(), titolo: z.string(), note: z.string() }),
       caso: z.object({ progetto: z.string(), testo: z.string() }).optional(),
       faq: z.array(z.object({ d: z.string(), r: z.string() })).min(3),

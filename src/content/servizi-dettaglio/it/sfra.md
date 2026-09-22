@@ -41,17 +41,31 @@ fasi:
   - titolo: "Referto e impronta archiviata"
     testo: "Relazione con tracciati, confronti e diagnosi, più l'archiviazione dell'impronta e delle condizioni di prova: senza quelle, la campagna successiva non è confrontabile con questa."
 
+# Gli strumenti: `modello` è il nome dell'apparecchio — lo stesso formato con
+# cui compaiono in pagine/azienda.yaml — e `nota` il ruolo che ha nella prova.
+# Il giorno in cui il cliente conferma il modello dell'analizzatore, cambia una
+# stringa sola e il ruolo resta dov'è. La nota va tenuta corta: nel pannello sta
+# nella colonna dei valori, che a 390px non si restringe.
 strumentazione:
   - modello: "Analizzatore di risposta in frequenza"
-    nota: "20 Hz – 2 MHz"
-  - modello: "Tensione del segnale iniettato"
-    nota: "< 10 V RMS"
-  - modello: "Cavi di misura"
-    nota: "Coassiali a doppia schermatura"
-  - modello: "Collegamento di massa"
-    nota: "Treccia piatta e larga"
-  - modello: "Esportazione dei tracciati"
-    nota: "Formato aperto, archiviato"
+    nota: "Misura"
+  - modello: "Cavi coassiali a doppia schermatura"
+    nota: "Segnale"
+  - modello: "Trecce di massa piatte e larghe"
+    nota: "Messa a terra"
+
+# Come si misura, non con che cosa.
+assettoMisura:
+  - etichetta: "Intervallo di misura"
+    valore: "20 Hz – 2 MHz"
+  - etichetta: "Segnale iniettato"
+    valore: "Sinusoidale, < 10 V RMS"
+  - etichetta: "Stato della macchina"
+    valore: "Fuori servizio, a terra"
+  - etichetta: "Ripetizione"
+    valore: "Ogni avvolgimento, ogni fase"
+  - etichetta: "Tracciati"
+    valore: "Formato aperto, archiviati"
 
 norma:
   codice: "IEC 60076-18"
