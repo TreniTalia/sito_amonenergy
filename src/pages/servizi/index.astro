@@ -8,7 +8,12 @@ import CtaBand from '../../components/CtaBand.astro';
 import IconCloud from '../../components/IconCloud.astro';
 import teamwareLogo from '../../assets/img/brand/partners/teamware-logo.png';
 import heroServizi from '../../assets/img/photos/servizi-hero-substation.jpg';
-import controlloPattern from '../../assets/img/photos/servizi-controllo-pattern.jpg';
+// Stanza buia, monitor accesi con grafici in serie: la sezione parla di
+// supervisione continua e analisi dati, e questo è quel mestiere visto da
+// dietro le spalle di nessuno. Niente persone al computer — il soggetto è il
+// dato, non chi lo guarda. Sotto il duotone navy le candele del grafico
+// leggono come tracciati di telemetria. Foto Pexels, Rafael Minguet Delgado.
+import controlloPattern from '../../assets/img/photos/servizi-controllo-telemetria.jpg';
 import modbusSvg from '../../assets/img/tech/modbus.svg?raw';
 import opcuaSvg from '../../assets/img/tech/opcua.svg?raw';
 import mqttSvg from '../../assets/img/tech/mqtt.svg?raw';
@@ -143,6 +148,7 @@ const breadcrumb = {
       />
       <div class="control-pattern-tint" aria-hidden="true"></div>
     </div>
+    <div class="control-weave" aria-hidden="true"></div>
     <div class="control-glow" aria-hidden="true"></div>
     <div class="wrap-wide relative z-10 py-20 lg:py-28">
       <div class="ds-eyebrow" data-reveal>
@@ -152,7 +158,7 @@ const breadcrumb = {
       <h2 class="text-control max-w-[22ch]" data-reveal style="--reveal-delay:80ms">{controllo.titolo}</h2>
       <p class="measure text-lead mt-6 text-navy-100" data-reveal style="--reveal-delay:160ms">{controllo.testo}</p>
 
-      <div class="mt-14 grid gap-5 md:grid-cols-2 lg:gap-6">
+      <div class="control-cards mt-14 grid gap-5 md:grid-cols-2 lg:gap-6">
         <article class="ds-panel flex flex-col p-7 lg:p-8" data-reveal>
           <span class="ds-pill self-start">RCS</span>
           <h3 class="text-title mt-5">{controllo.rcs.titolo}</h3>
@@ -179,7 +185,17 @@ const breadcrumb = {
           </ul>
           <div class="mt-6 flex items-center gap-3 border-t border-white/12 pt-5">
             <span class="text-micro font-medium uppercase tracking-wide text-navy-100/60">In partnership con</span>
-            <a href={controllo.cci.partnerUrl} target="_blank" rel="noopener noreferrer" aria-label={controllo.cci.partnerNome}>
+            <!-- Il logo Teamware è blu istituzionale su trasparente: sul navy
+                 del pannello non si vedeva affatto. Invece di schiarirlo e
+                 perderne il colore, sta su una piastrina chiara — è così che un
+                 marchio di terzi va ospitato su fondo scuro. -->
+            <a
+              href={controllo.cci.partnerUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label={controllo.cci.partnerNome}
+              class="partner-chip"
+            >
               <Image src={teamwareLogo} alt={controllo.cci.partnerNome} width={90} style="height: auto; width: 90px;" />
             </a>
           </div>
@@ -290,11 +306,45 @@ const breadcrumb = {
     max-width: none;
     object-fit: cover;
     object-position: center 30%;
-    filter: grayscale(1) brightness(0.92) contrast(1.15);
-    opacity: 0.9;
+    /* La control room è già scura, ma i monitor accesi sono le uniche zone
+       chiare della foto e finivano proprio dietro ai pannelli: 0,78 di
+       luminosità li riporta al rango di fondale. */
+    filter: grayscale(1) brightness(0.78) contrast(1.12);
+    opacity: 0.88;
     transform: translate3d(0, 0, 0);
     will-change: transform;
   }
+  /* Su telefono la fascia è alta quanto tre schermi e larga 390px: con `cover`
+     la foto viene ingrandita quasi cinque volte e di tutto il monitor resta una
+     fetta sfocata. Qui smette di fare da fondale a tutta la sezione e diventa
+     una banda in cima, alta quanto basta perché il grafico si legga per intero
+     (540px su 390 di larghezza: la finestra prende metà della foto, il monitor
+     grande per intero), che sfuma nel navy prima dei pannelli. I pannelli
+     guadagnano il fondo pieno, e con esso il contrasto che su una foto sgranata
+     non avevano.
+
+     Il parallasse qui va spento: trasla di ±15% dell'altezza della sezione, che
+     su mobile vale più della banda intera e la porterebbe fuori posto. */
+  @media (max-width: 767px) {
+    .control-pattern-img {
+      /* Scesa di 124px: l'occhiello e il titolo tornano su navy pieno, dove si
+         leggono senza dover combattere con il reticolo del grafico. */
+      top: 124px;
+      height: 520px;
+      object-position: 60% 46%;
+      filter: grayscale(1) brightness(0.9) contrast(1.12);
+      opacity: 0.95;
+      transform: translate3d(0, 0, 0) !important;
+      -webkit-mask-image: linear-gradient(180deg, transparent 0%, #000 16%, #000 60%, transparent 100%);
+      mask-image: linear-gradient(180deg, transparent 0%, #000 16%, #000 60%, transparent 100%);
+    }
+    /* La sfumatura in basso la fa già la maschera: il velo pieno qui sotto
+       raddoppierebbe lo scuro proprio dove la foto sta finendo. */
+    .control-pattern::after {
+      background: linear-gradient(180deg, var(--color-navy-950) 0%, transparent 14%);
+    }
+  }
+
   @media (prefers-reduced-motion: reduce) {
     .control-pattern-img {
       transform: translate3d(0, 0, 0) !important;
@@ -319,6 +369,47 @@ const breadcrumb = {
     );
   }
 
+  /* Le due card hanno testi di lunghezza diversa, quindi le righe di tag
+     partivano ad altezze diverse e la fascia leggeva storta. Con `subgrid` le
+     righe sono le stesse per tutte e due — pill, titolo, testo elastico, tag,
+     partner — e i tag si allineano da soli qualunque cosa ci sia scritta sopra.
+     La quinta riga in RCS resta vuota: è il posto della riga partner della CCI.
+     Dove `subgrid` non c'è, restano le card a flex di prima: disallineate, ma
+     integre. */
+  @supports (grid-template-rows: subgrid) {
+    @media (min-width: 768px) {
+      .control-cards {
+        grid-template-rows: auto auto 1fr auto auto;
+      }
+      .control-cards > article {
+        display: grid;
+        grid-row: span 5;
+        grid-template-rows: subgrid;
+        /* Una subgrid eredita gli spazi del genitore: senza questo, il `gap-5`
+           fra le due card si infilava anche fra le righe dentro ciascuna. Le
+           distanze le fanno i margini di riga, come prima. */
+        row-gap: 0;
+      }
+      /* In flex la pill stava a `self-start`; in griglia ogni cella si allarga
+         per default e la pill diventava una barra da un bordo all'altro. */
+      .control-cards > article > .ds-pill {
+        justify-self: start;
+      }
+    }
+  }
+
+  .partner-chip {
+    display: inline-flex;
+    align-items: center;
+    border-radius: 999px;
+    background: color-mix(in srgb, var(--color-paper) 92%, transparent);
+    padding: 0.4rem 0.7rem;
+    transition: background-color 0.25s var(--ease-signature, ease);
+  }
+  .partner-chip:hover {
+    background: var(--color-paper);
+  }
+
   .control-glow {
     position: absolute;
     inset: 0;
@@ -326,6 +417,38 @@ const breadcrumb = {
       radial-gradient(60% 55% at 78% 8%, color-mix(in srgb, var(--color-navy-700) 55%, transparent), transparent 70%),
       radial-gradient(50% 60% at 0% 100%, color-mix(in srgb, var(--color-navy-800) 60%, transparent), transparent 70%);
     z-index: 1;
+  }
+
+  /* Sotto la banda fotografica, su mobile, restavano due terzi di navy piatto.
+     Qui ci va la stessa lingua grafica della mappa di copertura: un reticolo
+     fine a passo fisso e due aloni navy che lo attraversano — la carta tecnica
+     su cui i pannelli si appoggiano, non un colore di riempimento. Il reticolo
+     entra solo dove la foto è finita (maschera sfumata) e sta sotto i pannelli,
+     che sono in vetro e lo lasciano intravedere. */
+  .control-weave {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    display: none;
+    pointer-events: none;
+  }
+
+  @media (max-width: 767px) {
+    .control-weave {
+      display: block;
+      background-image:
+        radial-gradient(70% 38% at 82% 34%, color-mix(in srgb, var(--color-navy-700) 62%, transparent), transparent 72%),
+        radial-gradient(60% 34% at 6% 74%, color-mix(in srgb, var(--color-navy-800) 58%, transparent), transparent 70%),
+        linear-gradient(to right, color-mix(in srgb, #5aa3d4 10%, transparent) 1px, transparent 1px),
+        linear-gradient(to bottom, color-mix(in srgb, #5aa3d4 10%, transparent) 1px, transparent 1px);
+      background-size:
+        100% 100%,
+        100% 100%,
+        48px 48px,
+        48px 48px;
+      -webkit-mask-image: linear-gradient(180deg, transparent 0%, transparent 18%, #000 34%, #000 100%);
+      mask-image: linear-gradient(180deg, transparent 0%, transparent 18%, #000 34%, #000 100%);
+    }
   }
 
   #controllo-e-monitoraggio,

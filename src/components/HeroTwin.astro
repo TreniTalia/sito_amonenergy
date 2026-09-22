@@ -6,6 +6,13 @@
 // (Leaf Rarity Rule, DESIGN.md §"Do keep green-500/green-400 to micro-accents").
 ---
 
+<!-- Sotto 768px il fondale non è il canvas ma questa foto: elemento proprio e
+     non `background` del canvas, perché un canvas è un elemento sostituito e
+     non accetta pseudo-elementi né si lascia trasformare senza ricampionare. Un
+     div separato si può scalare sul compositor, ed è ciò che regge la deriva
+     lenta qui sotto. -->
+<div class="hero-photo absolute inset-0" aria-hidden="true"></div>
+
 <canvas class="hero-twin absolute inset-0 h-full w-full" aria-hidden="true"></canvas>
 
 <style>
@@ -27,20 +34,62 @@
      fondale sotto, ed è proprio quello che non si deve mai vedere. */
 
   /* Sotto 768px niente WebGL: `three` non viene nemmeno scaricato (vedi lo
-     script, import dinamico condizionato). Il canvas resta nel DOM ma senza
-     contesto GL non disegna nulla, quindi qui gli si dà lo stesso fermo-
-     immagine della scena come sfondo CSS — stesso inquadramento del digital
-     twin, zero JS aggiuntivo da eseguire sul thread principale del telefono. */
+     script, import dinamico condizionato). Il canvas non serve più a nulla lì —
+     senza contesto GL resterebbe un rettangolo navy davanti alla foto — quindi
+     esce dal flusso e il fondale passa a `.hero-photo`.
+
+     La foto è una posa lunga su un parco eolico: le scie stellari sono un fondale
+     fotografico vero, non una trama sintetica, e dicono la stessa cosa del digital
+     twin del desktop — moto misurato nel tempo. Il fermo-immagine della scena che
+     stava qui prima era troppo scuro: sotto il velo dell'hero il telefono non
+     mostrava più niente. */
+  .hero-photo {
+    display: none;
+  }
+
   @media (max-width: 767px) {
     .hero-twin {
-      opacity: 1;
-      background-image: url('../assets/img/photos/hero-twin-mobile-still.webp');
+      display: none;
+    }
+    .hero-photo {
+      display: block;
+      overflow: hidden;
+    }
+    /* L'immagine sta sul pseudo-elemento e non sul div: il congedo dell'hero
+       anima già la `transform` di `.hero-photo`, e le due animazioni sulla
+       stessa proprietà si annullerebbero a vicenda. Due livelli, una
+       trasformazione per ciascuno. */
+    .hero-photo::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background-image: url('../assets/img/photos/hero-mobile-startrail.webp');
       background-image: image-set(
-        url('../assets/img/photos/hero-twin-mobile-still.avif') type('image/avif'),
-        url('../assets/img/photos/hero-twin-mobile-still.webp') type('image/webp')
+        url('../assets/img/photos/hero-mobile-startrail.avif') type('image/avif'),
+        url('../assets/img/photos/hero-mobile-startrail.webp') type('image/webp')
       );
       background-size: cover;
-      background-position: center 38%;
+      background-position: center 40%;
+    }
+  }
+
+  /* Deriva lenta, non un effetto: 28 secondi per un 6% di scala e mezzo punto di
+     traslazione, cioè sotto la soglia a cui si legge come movimento — la scena
+     smette solo di sembrare un fermo-immagine. `transform` e basta, così resta
+     sul compositor e non ridipinge nulla mentre si scorre. */
+  @media (max-width: 767px) and (prefers-reduced-motion: no-preference) {
+    .hero-photo::before {
+      animation: hero-photo-drift 28s ease-in-out infinite alternate;
+      will-change: transform;
+    }
+  }
+
+  @keyframes hero-photo-drift {
+    from {
+      transform: scale(1.06) translate3d(-0.6%, -0.4%, 0);
+    }
+    to {
+      transform: scale(1.12) translate3d(0.6%, 0.5%, 0);
     }
   }
 </style>

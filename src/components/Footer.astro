@@ -55,7 +55,11 @@ const year = new Date().getFullYear();
   <div class="border-t border-navy-700">
     <div class="text-small wrap-wide pt-6 pb-6 flex flex-col sm:flex-row items-center justify-between gap-3 text-paper/75">
       <p>© {year} {contatti.ragioneSociale}</p>
-      <div class="flex items-center gap-6">
+      <!-- Su telefono le tre voci non stanno su una riga: a 360px "Preferenze
+           cookie" e la partita IVA finivano una addosso all'altra. `flex-wrap`
+           le lascia andare a capo per conto loro, senza un breakpoint che
+           decida al posto del contenuto. -->
+      <div class="flex flex-wrap items-center justify-center gap-x-6 gap-y-2.5 text-center">
         <a href="/privacy-policy/" class="hover:text-signal-400 transition-colors">Privacy Policy</a>
         <button type="button" id="footer-cookie-preferences" class="border-0 bg-transparent p-0 cursor-pointer hover:text-signal-400 transition-colors">Preferenze cookie</button>
         <span>P.IVA {contatti.piva}</span>

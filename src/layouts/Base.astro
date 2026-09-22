@@ -143,6 +143,29 @@ const jsonLdBlocks = [organization, ...structuredData];
       // just adds the entrance. Staggered per-container via --reveal-delay.
       const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
       const els = Array.from(document.querySelectorAll<HTMLElement>('[data-reveal]'));
+
+      // Il congedo (`animation-timeline: view()`, in global.css) si risolve
+      // sempre contro il *più vicino* antenato scorrevole, e qualunque
+      // `overflow: hidden` lo è. Dentro una sezione così la timeline misura uno
+      // scroll che non avviene mai: il progress si inchioda a metà e l'elemento
+      // resta sfocato per sempre — è quello che succedeva alla fascia RCS/CCI
+      // della pagina servizi. Finora la cura era una regola `animation: none`
+      // scritta a mano in ogni sezione che tagliava (hero, ControlPillar,
+      // CtaBand), e bastava dimenticarne una. Qui l'antenato si cerca una volta
+      // sola, a freddo, e chi non ha il documento come contenitore di scroll
+      // rinuncia al congedo e tiene il solo ingresso.
+      const hasClippingAncestor = (el: HTMLElement) => {
+        for (let p = el.parentElement; p && p !== document.body; p = p.parentElement) {
+          const { overflowX, overflowY } = getComputedStyle(p);
+          if (overflowX !== 'visible' || overflowY !== 'visible') return true;
+        }
+        return false;
+      };
+      if (!prefersReduced) {
+        els.forEach((el) => {
+          if (hasClippingAncestor(el)) el.classList.add('reveal-no-depart');
+        });
+      }
       const reveal = (el: Element) => el.classList.add('is-visible');
       const revealAll = () => els.forEach(reveal);
 

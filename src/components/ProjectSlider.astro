@@ -106,6 +106,77 @@ const slides = await Promise.all(
     const step = () => Math.min(track.clientWidth * 0.86, 560);
     prev.addEventListener('click', () => track.scrollBy({ left: -step(), behavior: 'smooth' }));
     next.addEventListener('click', () => track.scrollBy({ left: step(), behavior: 'smooth' }));
+
+    // Le frecce dicono anche dove si è: a fondo corsa si spengono, invece di
+    // restare accese su un click che non sposta niente.
+    const syncNav = () => {
+      const max = track.scrollWidth - track.clientWidth - 1;
+      prev.toggleAttribute('disabled', track.scrollLeft <= 0);
+      next.toggleAttribute('disabled', track.scrollLeft >= max);
+    };
+    track.addEventListener('scroll', syncNav, { passive: true });
+    window.addEventListener('resize', syncNav);
+    syncNav();
+
+    // Trascinamento col mouse. Su touch non serve — lì il dito scorre già da
+    // solo — e infatti si aggancia ai soli puntatori fini: intercettare anche
+    // il touch significherebbe rifare a mano un'inerzia che il browser fa
+    // meglio. `scroll-snap` va sospeso durante il trascinamento, altrimenti
+    // riaggancia la slide a ogni pixel e il movimento si impunta.
+    const finePointer = window.matchMedia('(hover: hover) and (pointer: fine)');
+    let dragging = false;
+    let moved = 0;
+    let startX = 0;
+    let startScroll = 0;
+
+    const onDown = (e: PointerEvent) => {
+      if (!finePointer.matches || e.button !== 0) return;
+      dragging = true;
+      moved = 0;
+      startX = e.clientX;
+      startScroll = track.scrollLeft;
+    };
+
+    const onMove = (e: PointerEvent) => {
+      if (!dragging) return;
+      const dx = e.clientX - startX;
+      moved = Math.max(moved, Math.abs(dx));
+      // Il puntatore viene catturato solo quando il gesto è chiaramente una
+      // trascinata: sotto i 4px resta un click, e le card sono pulsanti che
+      // aprono la galleria.
+      if (moved > 4) {
+        // La classe entra qui e non sul `pointerdown`: porta con sé
+        // `pointer-events: none` sulle card, e applicarla al primo contatto
+        // toglieva il bersaglio al click prima ancora che ci fosse un gesto —
+        // le card smettevano di aprire la galleria.
+        track.classList.add('is-dragging');
+        if (track.hasPointerCapture?.(e.pointerId) !== true) track.setPointerCapture?.(e.pointerId);
+        e.preventDefault();
+        track.scrollLeft = startScroll - dx;
+      }
+    };
+
+    const onUp = (e: PointerEvent) => {
+      if (!dragging) return;
+      dragging = false;
+      track.classList.remove('is-dragging');
+      track.releasePointerCapture?.(e.pointerId);
+      // Dopo una trascinata il `pointerup` genera comunque un click sulla card
+      // sotto il cursore: questo lo mangia, una volta sola.
+      if (moved > 4) {
+        const swallow = (ev: Event) => {
+          ev.stopPropagation();
+          ev.preventDefault();
+        };
+        track.addEventListener('click', swallow, { capture: true, once: true });
+        window.setTimeout(() => track.removeEventListener('click', swallow, { capture: true }), 0);
+      }
+    };
+
+    track.addEventListener('pointerdown', onDown);
+    track.addEventListener('pointermove', onMove);
+    track.addEventListener('pointerup', onUp);
+    track.addEventListener('pointercancel', onUp);
   }
 
   // Same transform-based parallax as CtaBand/ControlPillar (never
@@ -174,6 +245,23 @@ const slides = await Promise.all(
   }
   .ps-track::-webkit-scrollbar {
     display: none;
+  }
+  /* Il cursore dice che la striscia si trascina, prima ancora di provarci. */
+  @media (hover: hover) and (pointer: fine) {
+    .ps-track {
+      cursor: grab;
+    }
+    .ps-track.is-dragging {
+      cursor: grabbing;
+      /* Con lo snap attivo ogni pixel di trascinamento veniva riagganciato
+         alla slide più vicina e il gesto si impuntava. */
+      scroll-snap-type: none;
+      scroll-behavior: auto;
+      user-select: none;
+    }
+    .ps-track.is-dragging .ps-card {
+      pointer-events: none;
+    }
   }
 
   .ps-slide {
@@ -289,6 +377,38 @@ const slides = await Promise.all(
     font-size: 2.25rem;
   }
 
+  /* --- Mobile -----------------------------------------------------------
+     La foto resta un fondo `cover` e il pannello in vetro ci sta sopra, come su
+     desktop: è quel sovrapporsi a fare l'effetto. A non funzionare era il
+     rapporto — a 4:3 la card è alta 250px su un telefono da 390 e il pannello,
+     che di contenuto ne ha 230, sbordava dal lato alto. Qui la card diventa
+     verticale (3:4) e il pannello torna dentro, con il margine di foto scoperta
+     sopra. Prima avevo provato a impilarli, foto sopra e pannello sotto: il
+     testo ci stava ma il vetro si staccava dalla foto e restava un blocco blu
+     appeso. */
+  @media (max-width: 767px) {
+    .ps-slide {
+      width: min(560px, 86vw);
+    }
+    .ps-card {
+      aspect-ratio: 3 / 4;
+    }
+    /* Nella card senza foto il segnaposto è centrato sull'intera altezza, e in
+       formato verticale finiva sotto al pannello: si vedeva spuntare mezza
+       icona. Qui si centra sulla sola fascia scoperta. */
+    .ps-placeholder-art {
+      padding-bottom: 46%;
+    }
+    /* `:global`: `.pco` è la classe di ProjectCardOverlay, quindi porta il
+       marcatore di scope di quel componente, non di questo. */
+    .ps-card :global(.pco) {
+      left: 0.75rem;
+      right: 0.75rem;
+      bottom: 0.75rem;
+      padding: 1rem 1.05rem 1.1rem;
+    }
+  }
+
   .ps-controls {
     display: flex;
     gap: 0.75rem;
@@ -296,24 +416,40 @@ const slides = await Promise.all(
     padding-inline: clamp(1.25rem, 5vw, 3rem);
     margin-top: 1.5rem;
   }
+  /* Prima erano due pillole bianche su fondo bianco, con un bordo navy-100:
+     si vedevano solo cercandole. Ora sono piene, del navy dei pulsanti
+     primari, e grandi 52px — un comando, non un dettaglio. */
   .ps-nav {
     display: grid;
     place-items: center;
-    width: 48px;
-    height: 48px;
+    width: 52px;
+    height: 52px;
     border-radius: var(--radius-pill);
-    color: var(--color-navy-900);
-    background: var(--color-paper);
-    border: 1px solid var(--color-navy-100);
-    box-shadow: var(--shadow-sm);
+    color: var(--color-paper);
+    background: var(--color-navy-900);
+    border: 1px solid var(--color-navy-800);
+    box-shadow: var(--shadow-md);
     transition:
       background-color 0.2s var(--ease-signature),
       box-shadow 0.2s var(--ease-signature),
+      opacity 0.2s var(--ease-signature),
       transform 0.2s var(--ease-signature);
   }
   .ps-nav:hover {
-    background: var(--color-navy-100);
-    box-shadow: var(--shadow-md);
+    background: var(--color-navy-800);
+    box-shadow: var(--shadow-lg);
     transform: translateY(-2px);
+  }
+  .ps-nav:active {
+    transform: translateY(0);
+  }
+  .ps-nav[disabled] {
+    opacity: 0.32;
+    box-shadow: var(--shadow-sm);
+    pointer-events: none;
+  }
+  .ps-nav :global(svg) {
+    width: 22px;
+    height: 22px;
   }
 </style>

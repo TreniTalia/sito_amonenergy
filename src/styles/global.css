@@ -218,12 +218,12 @@
      è 12px: sotto non si scende, WCAG 2.2 AA è un requisito dichiarato in
      PRODUCT.md. */
   :root {
-    --fs-hero: clamp(2.5rem, 1.855rem + 2.645vw, 4.5rem); /* 40 → 72 */
+    --fs-hero: clamp(2.125rem, 1.453rem + 2.868vw, 4.5rem); /* 34 → 72 — il pavimento scende da 40 a 34: a 375px un H1 da 40px mangiava tre righe del primo schermo */
     --fs-display: clamp(2.125rem, 1.6rem + 2.15vw, 3.75rem); /* 34 → 60 */
     --fs-headline: clamp(1.75rem, 1.428rem + 1.32vw, 2.75rem); /* 28 → 44 */
     --fs-subhead: clamp(1.375rem, 1.254rem + 0.5vw, 1.75rem); /* 22 → 28 */
     --fs-title: clamp(1.125rem, 1.044rem + 0.33vw, 1.375rem); /* 18 → 22 */
-    --fs-lead: clamp(1.125rem, 1.085rem + 0.165vw, 1.25rem); /* 18 → 20 */
+    --fs-lead: clamp(1.0625rem, 0.998rem + 0.276vw, 1.25rem); /* 17 → 20 */
     --fs-body: clamp(1rem, 0.96rem + 0.165vw, 1.125rem); /* 16 → 18 */
     --fs-small: clamp(0.875rem, 0.835rem + 0.165vw, 1rem); /* 14 → 16 */
     --fs-button: 0.95rem; /* 15,2 — un filo sotto il corpo: un pulsante è un comando, non una frase (DESIGN.md §3) */
@@ -814,7 +814,16 @@
 @media (prefers-reduced-motion: no-preference) {
   @supports (animation-timeline: view()) {
     [data-reveal] {
-      animation: reveal-depart linear forwards;
+      /* Longhand e non `animation: reveal-depart linear forwards`: il
+         minificatore univa quella scorciatoia con `animation-timeline` in un
+         solo `animation: linear forwards reveal-depart view()`, che non è
+         valido — la scorciatoia `animation` azzera la timeline, non la
+         accetta — e il browser buttava via l'intera dichiarazione. Risultato:
+         in produzione il congedo non partiva affatto. */
+      animation-name: reveal-depart;
+      animation-timing-function: linear;
+      animation-fill-mode: forwards;
+      animation-duration: auto;
       animation-timeline: view();
       /* `cover` e non `exit`, ed è il punto della faccenda. La fase `exit` dura
          quanto l'altezza dell'elemento: su un blocco da 48px il congedo si
@@ -823,21 +832,34 @@
          `cover` invece dura viewport + altezza, quindi non collassa sugli
          elementi bassi, e prendendone la coda il movimento cade nella parte
          alta dell'inquadratura, dove si vede. */
-      animation-range: cover 70% cover 92%;
+      /* La coda si stringe e arriva più tardi: fra 70% e 92% il congedo
+         partiva quando l'elemento stava ancora a metà schermo. Ora comincia
+         quando è quasi fuori. */
+      animation-range: cover 82% cover 97%;
+    }
+    /* Marcato da Base.astro sugli elementi dentro un antenato che taglia: lì la
+       `view()` si risolve contro quel contenitore e il progress non torna. */
+    [data-reveal].reveal-no-depart {
+      animation: none;
     }
   }
 }
 
+/* Congedo leggero: 5px di sfocatura e 30px di risalita facevano del commiato un
+   effetto a sé, che si notava più dell'ingresso. 2px e 14px si leggono come
+   profondità di campo — l'elemento esce di fuoco mentre lascia il quadro — e
+   l'opacità si ferma a 0,15 invece di annullarsi, così niente sparisce prima di
+   essere uscito. */
 @keyframes reveal-depart {
   from {
     opacity: 1;
     transform: none;
-    filter: blur(0);
+    filter: blur(0px);
   }
   to {
-    opacity: 0;
-    transform: translateY(-30px) scale(0.985);
-    filter: blur(5px);
+    opacity: 0.15;
+    transform: translateY(-14px) scale(0.994);
+    filter: blur(2px);
   }
 }
 

@@ -106,8 +106,10 @@ const xy = (p: LL): [number, number] => {
 const km = (v: number) => (v / KM_PER_DEG) * SCALE;
 const n = (v: number) => Math.round(v * 10) / 10;
 
-/** Catmull-Rom → Bézier: coste morbide senza sbavare i promontori. */
-const TENSION = 0.28;
+/** Catmull-Rom → Bézier. Tensione bassa: a 0.28 le coste si gonfiavano fra un
+ * vertice e l'altro e il profilo leggeva come un disegno a mano invece che come
+ * un rilievo. */
+const TENSION = 0.16;
 function smoothClosed(coords: LL[]): string {
   const p = coords.map(xy);
   const len = p.length;
@@ -138,7 +140,20 @@ const citta: { nome: string; ll: LL; dx?: number; dy?: number; anchor?: 'start' 
   { nome: 'Cosenza', ll: [16.25, 39.3], dx: 11, dy: 4 },
 ];
 
-const anelli = [150, 300, 450].map((r) => ({ km: r, labelY: sy - km(r) + 22 }));
+// Ogni quota corre sulla propria radiale, scelta per cadere su mare libero: a
+// 150 e 300 km il settore di nord-est è vuoto, a 450 no — l'anello esce dal
+// riquadro da quel lato, e l'etichetta finiva fuori tela. Quella scende a
+// sud-ovest, nel Tirreno.
+const anelli = [
+  { km: 150, deg: -52 },
+  { km: 300, deg: -52 },
+  { km: 450, deg: 143 },
+];
+
+const radial = (kmDist: number, deg: number): [number, number] => [
+  sx + Math.cos((deg * Math.PI) / 180) * km(kmDist),
+  sy + Math.sin((deg * Math.PI) / 180) * km(kmDist),
+];
 
 // Sfumatura sul taglio settentrionale: il bordo dritto non deve leggersi come costa.
 const yCut = xy([0, LAT_CUT])[1];
@@ -162,21 +177,26 @@ const uid = 'cvg';
       preserveAspectRatio="xMidYMid meet"
     >
       <defs>
-        <linearGradient id={`${uid}-sea`} x1="0" y1="0" x2="1" y2="1">
-          <stop offset="0" stop-color="#103b5f"></stop>
-          <stop offset="1" stop-color="#0a2a44"></stop>
+        <linearGradient id={`${uid}-sea`} x1="0" y1="0" x2="0.35" y2="1">
+          <stop offset="0" stop-color="#0c3151"></stop>
+          <stop offset="1" stop-color="#081f36"></stop>
         </linearGradient>
-        <linearGradient id={`${uid}-land`} x1="0.1" y1="0" x2="0.9" y2="1">
-          <stop offset="0" stop-color="#1c5680"></stop>
-          <stop offset="1" stop-color="#123f61"></stop>
+        <!-- Terra appena più chiara del mare: a staccarla è il profilo di costa,
+             non un salto di tono. Il gradiente di prima (#1c5680 → #123f61)
+             faceva leggere la penisola come un oggetto lucido appoggiato sopra
+             la carta invece che come la carta stessa. -->
+        <linearGradient id={`${uid}-land`} x1="0.2" y1="0" x2="0.8" y2="1">
+          <stop offset="0" stop-color="#15405f"></stop>
+          <stop offset="1" stop-color="#0f3350"></stop>
         </linearGradient>
-        <radialGradient id={`${uid}-glow`} cx="0.5" cy="0.5" r="0.5">
-          <stop offset="0" stop-color="#4fb3d9" stop-opacity="0.26"></stop>
-          <stop offset="0.5" stop-color="#4fb3d9" stop-opacity="0.09"></stop>
-          <stop offset="1" stop-color="#4fb3d9" stop-opacity="0"></stop>
-        </radialGradient>
-        <filter id={`${uid}-pin-shadow`} x="-60%" y="-60%" width="220%" height="220%">
-          <feDropShadow dx="0" dy="4" stdDeviation="5" flood-color="#04182a" flood-opacity="0.55"></feDropShadow>
+        <!-- Trama del mare a passo fisso, il fondo di una carta nautica. Prende
+             il posto dell'alone radiale ciano, che era l'unica cosa nel riquadro
+             a non venire da un dato. -->
+        <pattern id={`${uid}-dots`} width="24" height="24" patternUnits="userSpaceOnUse">
+          <circle cx="1.1" cy="1.1" r="1.1" fill="#4f93c4" fill-opacity="0.16"></circle>
+        </pattern>
+        <filter id={`${uid}-shelf`} x="-20%" y="-20%" width="140%" height="140%">
+          <feGaussianBlur stdDeviation="6"></feGaussianBlur>
         </filter>
         <linearGradient id={`${uid}-fade`} gradientUnits="userSpaceOnUse" x1="0" y1={n(yCut)} x2="0" y2={n(yFade)}>
           <stop offset="0" stop-color="#000"></stop>
@@ -185,57 +205,106 @@ const uid = 'cvg';
         <mask id={`${uid}-cut`}>
           <rect width={W} height={H} fill={`url(#${uid}-fade)`}></rect>
         </mask>
+        <!-- L'area servita non è un bagliore appoggiato sopra il mare: è la
+             stessa terra, schiarita dentro il raggio. Si legge "fin qui
+             arriviamo" senza che nulla galleggi. -->
+        <clipPath id={`${uid}-reach`}>
+          <circle cx={n(sx)} cy={n(sy)} r={n(km(450))}></circle>
+        </clipPath>
+        <radialGradient id={`${uid}-reach-fill`} gradientUnits="userSpaceOnUse" cx={n(sx)} cy={n(sy)} r={n(km(450))}>
+          <stop offset="0" stop-color="#8fe6b3" stop-opacity="0.14"></stop>
+          <stop offset="0.62" stop-color="#8fe6b3" stop-opacity="0.07"></stop>
+          <stop offset="1" stop-color="#8fe6b3" stop-opacity="0.02"></stop>
+        </radialGradient>
       </defs>
 
       <rect width={W} height={H} fill={`url(#${uid}-sea)`}></rect>
+      <rect width={W} height={H} fill={`url(#${uid}-dots)`}></rect>
 
-      <!-- graticola -->
-      <g stroke="#1d5585" stroke-width="1" opacity="0.3">
+      <!-- Graticola a 2°, sotto il pixel pieno: dà scala allo sguardo, non si fa
+           guardare. -->
+      <g stroke="#3f7fb0" stroke-width="0.8" opacity="0.22">
         {lonLines.map((l) => <line x1={n(xy([l, 0])[0])} y1="0" x2={n(xy([l, 0])[0])} y2={H} />)}
         {latLines.map((l) => <line x1="0" y1={n(xy([0, l])[1])} x2={W} y2={n(xy([0, l])[1])} />)}
       </g>
 
-      <!-- terraferma -->
-      <g
-        fill={`url(#${uid}-land)`}
-        stroke="#3f80b8"
-        stroke-width="1.5"
-        stroke-linejoin="round"
-        opacity="0.95"
-        mask={`url(#${uid}-cut)`}
-      >
-        {forme.map((f) => <path d={smoothClosed(f)} />)}
+      <g mask={`url(#${uid}-cut)`}>
+        <!-- Piattaforma continentale: la stessa sagoma, sfocata, sotto la costa.
+             È così che una carta nautica stacca la terra dal mare; un contorno
+             solo lasciava il profilo piatto. -->
+        <g fill="none" stroke="#5aa3d4" stroke-width="9" opacity="0.2" filter={`url(#${uid}-shelf)`}>
+          {forme.map((f) => <path d={smoothClosed(f)} />)}
+        </g>
+        <g fill={`url(#${uid}-land)`} stroke="#5e9cc6" stroke-width="1.1" stroke-linejoin="round">
+          {forme.map((f) => <path d={smoothClosed(f)} />)}
+        </g>
+        <g clip-path={`url(#${uid}-reach)`} fill={`url(#${uid}-reach-fill)`} stroke="none">
+          {forme.map((f) => <path d={smoothClosed(f)} />)}
+        </g>
       </g>
 
-      <!-- alone di copertura -->
-      <circle cx={n(sx)} cy={n(sy)} r={n(km(470))} fill={`url(#${uid}-glow)`}></circle>
-
-      <!-- anelli di raggio -->
-      <g fill="none" stroke="#4fd07f" stroke-opacity="0.45" stroke-width="1.5" stroke-dasharray="7 9">
+      <!-- Anelli di raggio: linea piena e sottile al posto del tratteggio verde
+           spesso. Le quote stanno su una sola radiale a nord-est, ognuna con la
+           sua tacca: incolonnate sopra il perno com'erano prima leggevano come
+           tre bolle sospese. -->
+      <g fill="none" stroke="#4fd07f" stroke-opacity="0.34" stroke-width="1">
         {anelli.map((a) => <circle class="ring" cx={n(sx)} cy={n(sy)} r={n(km(a.km))} />)}
       </g>
-      <g font-family="Inter Variable, Inter, sans-serif" font-size="15" fill="#4fd07f" fill-opacity="0.75" text-anchor="middle">
+      <g stroke="#4fd07f" stroke-opacity="0.34" stroke-width="1">
         {
-          anelli
-            .filter((a) => a.labelY > 24)
-            .map((a) => <text x={n(sx)} y={n(a.labelY)}>{a.km} km</text>)
+          anelli.map((a) => {
+            const [tx, ty] = radial(a.km + 16, a.deg);
+            const [ix, iy] = radial(a.km - 16, a.deg);
+            return <line x1={n(ix)} y1={n(iy)} x2={n(tx)} y2={n(ty)} />;
+          })
+        }
+      </g>
+      <g
+        font-family="Inter Variable, Inter, sans-serif"
+        font-size="13"
+        font-weight="600"
+        letter-spacing="0.08em"
+        fill="#8fd9ab"
+        text-anchor="middle"
+        paint-order="stroke"
+        stroke="#081f36"
+        stroke-width="3.5"
+        stroke-opacity="0.85"
+      >
+        {
+          anelli.map((a) => {
+            const [lx, ly] = radial(a.km + 46, a.deg);
+            return <text x={n(lx)} y={n(ly + 4)}>{a.km} KM</text>;
+          })
         }
       </g>
 
-      <!-- città -->
-      <g font-family="Inter Variable, Inter, sans-serif" font-size="17" fill="#9dc0d9">
+      <!-- Città: maiuscoletto spaziato e punto piccolo — etichette di carta, non
+           segnaposti. Il filo scuro sotto il testo (`paint-order`) è ciò che le
+           tiene leggibili sopra la costa senza doverle ingrandire. -->
+      <g
+        font-family="Inter Variable, Inter, sans-serif"
+        font-size="13"
+        font-weight="600"
+        letter-spacing="0.09em"
+        fill="#bcd6e8"
+        paint-order="stroke"
+        stroke="#081f36"
+        stroke-width="3.5"
+        stroke-opacity="0.8"
+      >
         {
           citta.map((c) => {
             const [cx, cy] = xy(c.ll);
             return (
               <>
-                <circle cx={n(cx)} cy={n(cy)} r="3.5" fill="#9dc0d9" fill-opacity="0.8" />
+                <circle cx={n(cx)} cy={n(cy)} r="2.6" fill="#bcd6e8" fill-opacity="0.85" stroke="none" />
                 <text
                   x={n(cx + (c.dx ?? 0))}
                   y={n(cy + (c.dy ?? 0))}
                   text-anchor={c.anchor ?? 'start'}
                 >
-                  {c.nome}
+                  {c.nome.toUpperCase()}
                 </text>
               </>
             );
@@ -243,27 +312,58 @@ const uid = 'cvg';
         }
       </g>
 
-      <!-- sede -->
+      <!-- Sede: mira topografica, non la goccia delle app di mappe. Anello fine,
+           quattro tacche cardinali, punto pieno al centro — il verde torna a
+           essere il micro-accento che DESIGN.md prescrive. -->
       <g transform={`translate(${n(sx)} ${n(sy)})`}>
-        <circle class="pulse" r={n(km(60))} fill="#4fd07f" fill-opacity="0.2"></circle>
-        <g filter={`url(#${uid}-pin-shadow)`} transform="scale(0.85)">
-          <path
-            d="M0 -34 C 20 -34 34 -20 34 0 C 34 22 0 44 0 44 C 0 44 -34 22 -34 0 C -34 -20 -20 -34 0 -34 Z"
-            fill="#4fd07f"></path>
-          <circle cy="-2" r="11" fill="#0a2a44"></circle>
+        <circle class="pulse" r={n(km(58))} fill="none" stroke="#4fd07f" stroke-opacity="0.5" stroke-width="1.2"></circle>
+        <g fill="none" stroke="#4fd07f" stroke-width="1.6" stroke-linecap="round">
+          <circle r="11"></circle>
+          <line x1="0" y1="-21" x2="0" y2="-15"></line>
+          <line x1="0" y1="15" x2="0" y2="21"></line>
+          <line x1="-21" y1="0" x2="-15" y2="0"></line>
+          <line x1="15" y1="0" x2="21" y2="0"></line>
         </g>
+        <circle r="4.2" fill="#4fd07f"></circle>
       </g>
 
+      <!-- Cornice interna con tacche d'angolo: chiude il riquadro come uno
+           strumento, non come una figura ritagliata. -->
+      <rect
+        x="14"
+        y="14"
+        width={W - 28}
+        height={H - 28}
+        rx="6"
+        fill="none"
+        stroke="#6ba7d2"
+        stroke-opacity="0.26"
+        stroke-width="1"></rect>
+      <g stroke="#8fd9ab" stroke-opacity="0.5" stroke-width="1.4" stroke-linecap="square">
+        <line x1="14" y1="38" x2="14" y2="14"></line>
+        <line x1="14" y1="14" x2="38" y2="14"></line>
+        <line x1={W - 38} y1="14" x2={W - 14} y2="14"></line>
+        <line x1={W - 14} y1="14" x2={W - 14} y2="38"></line>
+        <line x1="14" y1={H - 38} x2="14" y2={H - 14}></line>
+        <line x1="14" y1={H - 14} x2="38" y2={H - 14}></line>
+        <line x1={W - 38} y1={H - 14} x2={W - 14} y2={H - 14}></line>
+        <line x1={W - 14} y1={H - 14} x2={W - 14} y2={H - 38}></line>
+      </g>
     </svg>
 
-    <div class="coverage-map__legend">
-      <span class="coverage-map__dot" aria-hidden="true"></span>
-      <span>
-        <strong>Castelluccio dei Sauri</strong>
-        <span class="coverage-map__legend-sub">Sede unica · Foggia, Puglia</span>
-      </span>
-    </div>
   </div>
+
+  <!-- La targhetta sta sotto la carta, non sopra: in basso a sinistra, unico
+       angolo di mare libero, la pill arrivava comunque sulla Sicilia e se la
+       mangiava. Fuori dal riquadro non copre nulla e non deve scendere sotto i
+       12px del pavimento tipografico. -->
+  <figcaption class="coverage-map__caption">
+    <span class="coverage-map__dot" aria-hidden="true"></span>
+    <span>
+      <strong>Castelluccio dei Sauri (FG)</strong>
+      <span class="coverage-map__caption-sub">Sede unica · raggio d'azione 450 km</span>
+    </span>
+  </figcaption>
 </figure>
 
 <style>
@@ -274,66 +374,26 @@ const uid = 'cvg';
     background: #0a2a44;
   }
 
-  /* Vetro reale, stessa ricetta dei pulsanti "vetro" del sito (rifrazione
-     SVG `#liquid-glass-btn`, definito una volta in Base.astro) invece del
-     blur piatto di prima — più scuro (82% invece di 62%) per un testo che
-     stacca di più sul mare della mappa, più sfocato, con lo sheen radiale
-     in alto a sinistra che fa leggere "vetro" e non solo "trasparenza". */
-  .coverage-map__legend {
-    position: absolute;
-    isolation: isolate;
-    overflow: hidden;
-    left: 1rem;
-    bottom: 1rem;
+  .coverage-map__caption {
     display: flex;
     align-items: center;
-    gap: 0.625rem;
-    padding: 0.625rem 0.9rem;
-    border-radius: 999px;
-    background:
-      radial-gradient(120% 180% at 14% -25%, rgba(255, 255, 255, 0.22), transparent 55%),
-      var(--glass-sheen),
-      rgb(10 42 68 / 0.82);
-    backdrop-filter: blur(16px) saturate(200%);
-    -webkit-backdrop-filter: blur(16px) saturate(200%);
-    backdrop-filter: url(#liquid-glass-btn) blur(11px) saturate(200%);
-    border: 1px solid rgba(255, 255, 255, 0.28);
-    box-shadow: var(--shadow-glass);
-    color: #e8eff5;
+    gap: 0.6rem;
+    margin-top: 0.85rem;
+    padding-left: 0.15rem;
+    color: var(--color-ink, #0f1b24);
     font-size: var(--fs-small);
-    line-height: 1.25;
-  }
-  .coverage-map__legend::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    z-index: 1;
-    border-radius: inherit;
-    pointer-events: none;
-    background: linear-gradient(
-      115deg,
-      transparent 32%,
-      rgba(255, 255, 255, 0.1) 45%,
-      rgba(255, 255, 255, 0.16) 50%,
-      rgba(255, 255, 255, 0.1) 55%,
-      transparent 68%
-    );
-    mix-blend-mode: screen;
-  }
-  .coverage-map__legend > * {
-    position: relative;
-    z-index: 2;
+    line-height: 1.35;
   }
 
-  .coverage-map__legend strong {
+  .coverage-map__caption strong {
     display: block;
     font-weight: 700;
     letter-spacing: 0.01em;
   }
 
-  .coverage-map__legend-sub {
+  .coverage-map__caption-sub {
     display: block;
-    color: #9dc0d9;
+    color: color-mix(in srgb, var(--color-ink, #0f1b24) 62%, transparent);
     font-size: var(--fs-micro);
   }
 
@@ -342,7 +402,7 @@ const uid = 'cvg';
     height: 0.5rem;
     flex: none;
     border-radius: 999px;
-    background: #4fd07f;
+    background: #2fa85f;
     box-shadow: 0 0 0 4px rgb(79 208 127 / 0.22);
   }
 

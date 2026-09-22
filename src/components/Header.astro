@@ -65,8 +65,18 @@ const isActive = (href: string) => (href === '/' ? currentPath === '/' : current
   <div>
     <div class="flex items-center justify-between mb-10">
       <span class="text-paper"><Logo size={32} /></span>
-      <button type="button" id="nav-close" class="grid h-11 w-11 place-items-center rounded-[var(--radius-sm)] text-paper transition-colors hover:bg-white/10" aria-label="Chiudi il menu">
-        <GlassSvgIcon name="close" class="text-xl" />
+      <!-- La chiusura di un pannello a tutto schermo è una X: una freccia
+           verso destra, che avevo provato prima, nelle convenzioni significa
+           "avanti", non "chiudi", e un chevron verso sinistra significa
+           "indietro". Quella di partenza non piaceva perché era il glifo del
+           pack glass — una X dentro un quadrato smerigliato, un secondo bordo
+           dentro il bordo tondo. Questa è disegnata a tratto, 2px con terminali
+           tondi, la stessa mano delle altre icone del sito, dentro la pillola
+           in vetro. -->
+      <button type="button" id="nav-close" class="nav-close" aria-label="Chiudi il menu">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
+          <path d="M6 6l12 12M18 6L6 18" />
+        </svg>
       </button>
     </div>
     <nav class="flex flex-col gap-1" aria-label="Navigazione mobile">
@@ -123,18 +133,56 @@ const isActive = (href: string) => (href === '/' ? currentPath === '/' : current
     else window.addEventListener('resize', publishHeight);
   }
 
+  // Blocco dello scorrimento a menu aperto. `overflow: hidden` sul body da solo
+  // non basta: su iOS Safari il documento continua a scorrere sotto il pannello,
+  // ed è il caso in cui si vedeva la pagina muoversi dietro il vetro. Il corpo
+  // va tolto dal flusso (`position: fixed`) tenendo memoria di dove stava, e
+  // rimesso dov'era alla chiusura — senza il `top` negativo la pagina
+  // ripartirebbe da cima.
+  let lockedAt = 0;
+  const lockScroll = () => {
+    lockedAt = window.scrollY;
+    document.body.style.position = 'fixed';
+    document.body.style.top = `-${lockedAt}px`;
+    document.body.style.left = '0';
+    document.body.style.right = '0';
+    document.body.style.width = '100%';
+    document.body.style.overflow = 'hidden';
+  };
+  const unlockScroll = () => {
+    document.body.style.position = '';
+    document.body.style.top = '';
+    document.body.style.left = '';
+    document.body.style.right = '';
+    document.body.style.width = '';
+    document.body.style.overflow = '';
+    window.scrollTo(0, lockedAt);
+  };
+
   const openNav = () => {
     panel?.classList.remove('translate-x-full');
     toggle?.setAttribute('aria-expanded', 'true');
-    document.body.style.overflow = 'hidden';
+    lockScroll();
   };
   const closeNav = () => {
     panel?.classList.add('translate-x-full');
     toggle?.setAttribute('aria-expanded', 'false');
-    document.body.style.overflow = '';
+    unlockScroll();
   };
   toggle?.addEventListener('click', openNav);
   close?.addEventListener('click', closeNav);
+  // Chiusure di sicurezza: il corpo resta bloccato finché qualcuno non lo
+  // sblocca, quindi ogni via d'uscita dal pannello deve passare da `closeNav` —
+  // un link ad ancora sulla stessa pagina non ricarica il documento, e tornando
+  // a viewport larga il pannello sparisce ma il blocco resterebbe.
+  panel?.querySelectorAll('a').forEach((a) => a.addEventListener('click', closeNav));
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && toggle?.getAttribute('aria-expanded') === 'true') closeNav();
+  });
+  const wide = window.matchMedia('(min-width: 768px)');
+  wide.addEventListener('change', (e) => {
+    if (e.matches && toggle?.getAttribute('aria-expanded') === 'true') closeNav();
+  });
 
   // Pill dell'indicatore di pagina attiva: misura il link corrente e vi
   // sposta sopra la pill invece di usare posizioni fisse (le etichette non
@@ -351,5 +399,31 @@ const isActive = (href: string) => (href === '/' ? currentPath === '/' : current
     background: var(--glass-sheen), color-mix(in srgb, var(--color-navy-950) 88%, transparent);
     backdrop-filter: blur(24px) saturate(160%);
     -webkit-backdrop-filter: blur(24px) saturate(160%);
+    /* Se il pannello è più alto del suo contenuto scorre da sé, e `contain`
+       impedisce che il gesto arrivato in fondo passi al documento sotto. */
+    overflow-y: auto;
+    overscroll-behavior: contain;
+  }
+
+  .nav-close {
+    display: grid;
+    place-items: center;
+    width: 2.75rem;
+    height: 2.75rem;
+    border-radius: var(--radius-pill);
+    color: var(--color-paper);
+    background: rgb(255 255 255 / 0.1);
+    border: 1px solid rgb(255 255 255 / 0.22);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    transition:
+      background-color 0.2s var(--ease-signature),
+      transform 0.2s var(--ease-signature);
+  }
+  .nav-close:hover {
+    background: rgb(255 255 255 / 0.18);
+  }
+  .nav-close:active {
+    transform: scale(0.94);
   }
 </style>
