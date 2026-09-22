@@ -188,6 +188,9 @@ const tecnologieIcons = tecnologie.voci
               </li>
             ))}
           </ul>
+          <a href="/servizi/rcs-monitoraggio-cabina-mt/" class="dettaglio-link dettaglio-link--on-dark mt-6 self-start">
+            Come funziona RCS
+          </a>
         </article>
 
         <article class="ds-panel flex flex-col p-7 lg:p-8" data-reveal style="--reveal-delay:100ms">
@@ -217,6 +220,9 @@ const tecnologieIcons = tecnologie.voci
               <Image src={teamwareLogo} alt={controllo.cci.partnerNome} width={90} style="height: auto; width: 90px;" />
             </a>
           </div>
+          <a href="/servizi/cci-controllore-centrale-impianto/" class="dettaglio-link dettaglio-link--on-dark mt-6 self-start">
+            Come funziona il CCI
+          </a>
         </article>
       </div>
     </div>
@@ -321,6 +327,18 @@ const tecnologieIcons = tecnologie.voci
   .dettaglio-link:hover {
     border-color: color-mix(in srgb, var(--color-green-500) 55%, transparent);
     box-shadow: var(--shadow-md);
+  }
+
+  /* Stessa pillola, letta sul navy delle card RCS/CCI: bordo chiaro invece
+     che scuro, sfondo trasparente invece che carta. */
+  .dettaglio-link--on-dark {
+    border-color: color-mix(in srgb, var(--color-paper) 22%, transparent);
+    background: color-mix(in srgb, var(--color-paper) 8%, transparent);
+    color: var(--color-paper);
+  }
+
+  .dettaglio-link--on-dark:hover {
+    border-color: color-mix(in srgb, var(--color-green-400, var(--color-green-500)) 65%, transparent);
   }
 
   /* Quadro elettrico / switchgear reale (Pexels) come pattern astratto —

@@ -74,4 +74,15 @@ describe('pagine tecniche', { skip }, () => {
       assert.match(readFileSync(f, 'utf8'), re, `${slug}: norma mancante`);
     }
   });
+
+  test('tutte e nove le pagine tecniche esistono e hanno Service e FAQPage', () => {
+    for (const s of SLUG) {
+      const f = path.join(DIST, 'servizi', s, 'index.html');
+      assert.ok(existsSync(f), `manca /servizi/${s}/`);
+      const html = readFileSync(f, 'utf8');
+      assert.match(html, /"@type":"Service"/, `${s}: manca Service`);
+      assert.match(html, /"@type":"FAQPage"/, `${s}: manca FAQPage`);
+      assert.ok(!/certificazion/i.test(html), `${s}: cita certificazioni`);
+    }
+  });
 });

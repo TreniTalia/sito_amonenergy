@@ -76,4 +76,5 @@ correlati:
   - "misure-scariche-parziali"
   - "verifiche-trasformatori-di-potenza"
   - "prove-isolamento"
+  - "teledistacco-a72"
 ---

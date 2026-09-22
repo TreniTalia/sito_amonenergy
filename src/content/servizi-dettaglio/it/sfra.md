@@ -93,5 +93,5 @@ faq:
 correlati:
   - "verifiche-trasformatori-di-potenza"
   - "misure-scariche-parziali"
-  - "prove-isolamento"
+  - "rcs-monitoraggio-cabina-mt"
 ---

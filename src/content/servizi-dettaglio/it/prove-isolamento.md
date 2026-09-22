@@ -73,5 +73,5 @@ faq:
 correlati:
   - "sfra"
   - "verifica-protezioni-at-mt"
-  - "misure-scariche-parziali"
+  - "rcs-monitoraggio-cabina-mt"
 ---

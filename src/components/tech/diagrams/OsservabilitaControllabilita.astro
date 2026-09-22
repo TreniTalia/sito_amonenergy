@@ -1,0 +1,183 @@
+---
+/**
+ * Diagramma a due colonne per il Controllore Centrale d'Impianto (CCI).
+ *
+ * Non una misura, un confronto fra due funzioni: PF1 osservabilità (il CCI
+ * legge lo stato dell'impianto) e PF2 controllabilità (limitazione della
+ * potenza attiva su comando del distributore). Ogni colonna è un blocco
+ * verticale — sorgente del dato o del comando, il CCI al centro, l'impianto —
+ * con il verso della freccia che distingue lettura da comando. In basso il
+ * riferimento normativo comune, confermato dal cliente: CEI 0-16 V5 e la
+ * Delibera ARERA 564/2025/R/eel. Stessa lingua grafica delle altre pagine.
+ */
+const W = 640;
+const H = 320;
+const uid = 'occ';
+
+const colX1 = 190; // centro colonna PF1
+const colX2 = 450; // centro colonna PF2
+const rowTop = 84;
+const rowMid = 160;
+const rowBot = 236;
+const boxW = 176;
+const boxH = 54;
+const n = (v: number) => Math.round(v * 10) / 10;
+---
+
+<figure class="occ-plot">
+  <div class="occ-plot__frame rounded-[var(--radius-card)] border border-navy-100 shadow-[var(--shadow-md)]">
+    <svg
+      viewBox={`0 0 ${W} ${H}`}
+      role="img"
+      aria-label="Due colonne verticali. A sinistra PF1, osservabilità: lo stato dell'impianto sale dall'impianto al CCI, che lo rende leggibile al distributore. A destra PF2, controllabilità: il comando di limitazione della potenza attiva scende dal distributore, passa per il CCI e raggiunge l'impianto. In basso il riferimento comune, CEI 0-16 V5 e Delibera ARERA 564/2025/R/eel."
+      preserveAspectRatio="xMidYMid meet"
+    >
+      <defs>
+        <linearGradient id={`${uid}-bg`} x1="0" y1="0" x2="0.35" y2="1">
+          <stop offset="0" stop-color="#0c3151"></stop>
+          <stop offset="1" stop-color="#081f36"></stop>
+        </linearGradient>
+        <pattern id={`${uid}-dots`} width="24" height="24" patternUnits="userSpaceOnUse">
+          <circle cx="1.1" cy="1.1" r="1.1" fill="#4f93c4" fill-opacity="0.16"></circle>
+        </pattern>
+        <marker id={`${uid}-arrow-blue`} viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6.5" markerHeight="6.5" orient="auto-start-reverse">
+          <path d="M0,0 L10,5 L0,10 Z" fill="#6ba7d2"></path>
+        </marker>
+        <marker id={`${uid}-arrow-green`} viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6.5" markerHeight="6.5" orient="auto-start-reverse">
+          <path d="M0,0 L10,5 L0,10 Z" fill="#4fd07f"></path>
+        </marker>
+      </defs>
+
+      <rect width={W} height={H} fill={`url(#${uid}-bg)`}></rect>
+      <rect width={W} height={H} fill={`url(#${uid}-dots)`}></rect>
+
+      <!-- Separatore centrale fra le due colonne. -->
+      <line x1={W / 2} y1="40" x2={W / 2} y2="264" stroke="#3f7fb0" stroke-opacity="0.3" stroke-width="1" stroke-dasharray="2 4"></line>
+
+      <!-- Colonna PF1 — osservabilità: lo stato risale, dal basso in alto. -->
+      <g>
+        <text x={colX1} y="42" text-anchor="middle" font-family="Sora, Inter Variable, Inter, sans-serif" font-size="14" font-weight="700" fill="#8fbfe0">
+          PF1 · Osservabilità
+        </text>
+        <line x1={colX1} y1={n(rowBot - boxH / 2)} x2={colX1} y2={n(rowMid + boxH / 2)} stroke="#6ba7d2" stroke-width="1.8" marker-end={`url(#${uid}-arrow-blue)`}></line>
+        <line x1={colX1} y1={n(rowMid - boxH / 2)} x2={colX1} y2={n(rowTop + boxH / 2)} stroke="#6ba7d2" stroke-width="1.8" marker-end={`url(#${uid}-arrow-blue)`}></line>
+
+        <g>
+          <rect x={n(colX1 - boxW / 2)} y={n(rowTop - boxH / 2)} width={boxW} height={boxH} rx="8" fill="#0e3457" stroke="#6ba7d2" stroke-opacity="0.6" stroke-width="1.4"></rect>
+          <text x={colX1} y={rowTop + 4} text-anchor="middle" font-family="Inter Variable, Inter, sans-serif" font-size="12" font-weight="700" fill="#e7f0f7">Distributore</text>
+        </g>
+        <g>
+          <rect x={n(colX1 - boxW / 2)} y={n(rowMid - boxH / 2)} width={boxW} height={boxH} rx="8" fill="#123a5e" stroke="#8fd9ab" stroke-opacity="0.7" stroke-width="1.6"></rect>
+          <text x={colX1} y={rowMid + 4} text-anchor="middle" font-family="Sora, Inter Variable, Inter, sans-serif" font-size="12.5" font-weight="700" fill="#8fd9ab">CCI</text>
+        </g>
+        <g>
+          <rect x={n(colX1 - boxW / 2)} y={n(rowBot - boxH / 2)} width={boxW} height={boxH} rx="8" fill="#0e3457" stroke="#6ba7d2" stroke-opacity="0.6" stroke-width="1.4"></rect>
+          <text x={colX1} y={rowBot + 4} text-anchor="middle" font-family="Inter Variable, Inter, sans-serif" font-size="12" font-weight="700" fill="#e7f0f7">Impianto</text>
+        </g>
+      </g>
+
+      <!-- Colonna PF2 — controllabilità: il comando scende, dall'alto in basso. -->
+      <g>
+        <text x={colX2} y="42" text-anchor="middle" font-family="Sora, Inter Variable, Inter, sans-serif" font-size="14" font-weight="700" fill="#8fd9ab">
+          PF2 · Controllabilità
+        </text>
+        <line x1={colX2} y1={n(rowTop + boxH / 2)} x2={colX2} y2={n(rowMid - boxH / 2)} stroke="#4fd07f" stroke-width="1.8" marker-end={`url(#${uid}-arrow-green)`}></line>
+        <line x1={colX2} y1={n(rowMid + boxH / 2)} x2={colX2} y2={n(rowBot - boxH / 2)} stroke="#4fd07f" stroke-width="1.8" marker-end={`url(#${uid}-arrow-green)`}></line>
+
+        <g>
+          <rect x={n(colX2 - boxW / 2)} y={n(rowTop - boxH / 2)} width={boxW} height={boxH} rx="8" fill="#0e3457" stroke="#6ba7d2" stroke-opacity="0.6" stroke-width="1.4"></rect>
+          <text x={colX2} y={rowTop + 4} text-anchor="middle" font-family="Inter Variable, Inter, sans-serif" font-size="12" font-weight="700" fill="#e7f0f7">Distributore</text>
+        </g>
+        <g>
+          <rect x={n(colX2 - boxW / 2)} y={n(rowMid - boxH / 2)} width={boxW} height={boxH} rx="8" fill="#123a5e" stroke="#8fd9ab" stroke-opacity="0.7" stroke-width="1.6"></rect>
+          <text x={colX2} y={rowMid + 4} text-anchor="middle" font-family="Sora, Inter Variable, Inter, sans-serif" font-size="12.5" font-weight="700" fill="#8fd9ab">CCI</text>
+        </g>
+        <g>
+          <rect x={n(colX2 - boxW / 2)} y={n(rowBot - boxH / 2)} width={boxW} height={boxH} rx="8" fill="#0e3457" stroke="#6ba7d2" stroke-opacity="0.6" stroke-width="1.4"></rect>
+          <text x={colX2} y={rowBot + 4} text-anchor="middle" font-family="Inter Variable, Inter, sans-serif" font-size="12" font-weight="700" fill="#e7f0f7">Impianto</text>
+        </g>
+      </g>
+
+      <!-- Riferimento normativo comune. -->
+      <g font-family="Inter Variable, Inter, sans-serif" font-size="11" font-weight="600" letter-spacing="0.04em" fill="#bcd6e8" fill-opacity="0.85">
+        <text x={W / 2} y="288" text-anchor="middle">CEI 0-16 V5 · Delibera ARERA 564/2025/R/eel</text>
+      </g>
+
+      <!-- Cornice con tacche d'angolo. -->
+      <rect x="14" y="14" width={W - 28} height={H - 28} rx="6" fill="none" stroke="#6ba7d2" stroke-opacity="0.26" stroke-width="1"></rect>
+      <g stroke="#8fd9ab" stroke-opacity="0.5" stroke-width="1.4" stroke-linecap="square">
+        <line x1="14" y1="38" x2="14" y2="14"></line>
+        <line x1="14" y1="14" x2="38" y2="14"></line>
+        <line x1={W - 38} y1="14" x2={W - 14} y2="14"></line>
+        <line x1={W - 14} y1="14" x2={W - 14} y2="38"></line>
+        <line x1="14" y1={H - 38} x2="14" y2={H - 14}></line>
+        <line x1="14" y1={H - 14} x2="38" y2={H - 14}></line>
+        <line x1={W - 38} y1={H - 14} x2={W - 14} y2={H - 14}></line>
+        <line x1={W - 14} y1={H - 14} x2={W - 14} y2={H - 38}></line>
+      </g>
+    </svg>
+  </div>
+
+  <figcaption class="occ-plot__caption">
+    <span class="occ-plot__dot" aria-hidden="true"></span>
+    <span>
+      <strong>Due funzioni, due versi opposti</strong>
+      <span class="occ-plot__caption-sub">
+        Schema esemplificativo · PF1 osservabilità e PF2 controllabilità secondo CEI 0-16 V5
+      </span>
+    </span>
+  </figcaption>
+</figure>
+
+<style>
+  .occ-plot__frame {
+    position: relative;
+    overflow: hidden;
+    aspect-ratio: 2 / 1;
+    background: #0a2a44;
+  }
+
+  .occ-plot__frame svg {
+    display: block;
+    width: 100%;
+    height: 100%;
+  }
+
+  @media (max-width: 767px) {
+    .occ-plot__frame svg text {
+      font-size: 15px;
+    }
+  }
+
+  .occ-plot__caption {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    margin-top: 0.85rem;
+    padding-left: 0.15rem;
+    color: currentColor;
+    font-size: var(--fs-small);
+    line-height: 1.35;
+  }
+
+  .occ-plot__caption strong {
+    display: block;
+    font-weight: 700;
+    letter-spacing: 0.01em;
+  }
+
+  .occ-plot__caption-sub {
+    display: block;
+    color: color-mix(in srgb, currentColor 62%, transparent);
+    font-size: var(--fs-micro);
+  }
+
+  .occ-plot__dot {
+    width: 0.5rem;
+    height: 0.5rem;
+    flex: none;
+    border-radius: 999px;
+    background: #2fa85f;
+    box-shadow: 0 0 0 4px rgb(79 208 127 / 0.22);
+  }
+</style>
