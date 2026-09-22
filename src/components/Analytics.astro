@@ -1,0 +1,29 @@
+---
+import { GA4_ID, analyticsAttivo } from '../data/analytics.ts';
+---
+
+{
+  analyticsAttivo && (
+    <script is:inline define:vars={{ GA4_ID }}>
+      // Caricamento differito fino al consenso esplicito: il tag non deve
+      // esistere nella pagina prima che l'utente abbia accettato, altrimenti
+      // il banner è decorativo e l'informativa è falsa.
+      let caricato = false;
+      const carica = () => {
+        if (caricato) return;
+        caricato = true;
+        const s = document.createElement('script');
+        s.async = true;
+        s.src = `https://www.googletagmanager.com/gtag/js?id=${GA4_ID}`;
+        document.head.appendChild(s);
+        window.dataLayer = window.dataLayer || [];
+        window.gtag = function () { window.dataLayer.push(arguments); };
+        window.gtag('js', new Date());
+        window.gtag('config', GA4_ID, { anonymize_ip: true });
+      };
+      document.addEventListener('amon:consenso', (e) => {
+        if (e.detail?.analytics) carica();
+      });
+    </script>
+  )
+}

@@ -1,14 +1,50 @@
-import { readFileSync, existsSync } from 'node:fs';
-import { test, describe } from 'node:test';
+import { readFileSync, existsSync, statSync } from 'node:fs';
+import { test, describe, before, after } from 'node:test';
 import assert from 'node:assert/strict';
 import { fileURLToPath } from 'node:url';
 import path from 'node:path';
 import { globSync } from 'node:fs';
+import { createServer } from 'node:http';
 
 const DIST = fileURLToPath(new URL('../dist', import.meta.url));
 const skip = existsSync(path.join(DIST, 'index.html'))
   ? false
   : 'dist assente: esegui `npm run build` prima di questo test';
+
+// Stesso preambolo Playwright degli altri test del repo (hero-mobile-layout,
+// navbar-active-pill): `dist` serve staticamente via HTTP locale, il browser
+// è un `chromium` headless. Qui in più leggiamo `analytics.ts` per sapere se
+// il Measurement ID è ancora il segnaposto: in quel caso lo script GA4 non
+// viene nemmeno iniettato in pagina, quindi il test che verifica il
+// caricamento *dopo* il consenso non ha nulla da osservare e va saltato.
+let playwright = null;
+try {
+  playwright = await import('playwright');
+} catch {
+  /* devDependency assente: i test si saltano */
+}
+
+const skipPlaywright = skip
+  ? skip
+  : !playwright
+    ? 'playwright non installato'
+    : false;
+
+const analyticsSrc = readFileSync(
+  fileURLToPath(new URL('../src/data/analytics.ts', import.meta.url)),
+  'utf8',
+);
+const ga4Segnaposto = /GA4_ID\s*=\s*'G-XXXXXXXXXX'/.test(analyticsSrc);
+
+const MIME = {
+  '.html': 'text/html',
+  '.js': 'text/javascript',
+  '.css': 'text/css',
+  '.svg': 'image/svg+xml',
+  '.png': 'image/png',
+  '.webp': 'image/webp',
+  '.woff2': 'font/woff2',
+};
 
 // `globSync` restituisce separatori nativi (backslash su Windows): si
 // normalizza a `/` solo per il confronto del prefisso, i path restano
@@ -73,4 +109,75 @@ describe('head SEO', { skip }, () => {
       vistiPerLingua.set(lang, visti);
     }
   });
+});
+
+describe('Google Analytics dietro consenso', { skip: skipPlaywright }, () => {
+  let server;
+  let browser;
+  let origin;
+
+  before(async () => {
+    server = createServer((q, s) => {
+      let f = path.join(DIST, decodeURIComponent(q.url.split('?')[0]));
+      try {
+        if (statSync(f).isDirectory()) f = path.join(f, 'index.html');
+      } catch {
+        f += '.html';
+      }
+      try {
+        const body = readFileSync(f);
+        s.setHeader('content-type', MIME[path.extname(f)] ?? 'application/octet-stream');
+        s.end(body);
+      } catch {
+        s.statusCode = 404;
+        s.end('404');
+      }
+    });
+    await new Promise((r) => server.listen(0, '127.0.0.1', r));
+    origin = `http://127.0.0.1:${server.address().port}`;
+    browser = await playwright.chromium.launch();
+  });
+
+  after(async () => {
+    await browser?.close();
+    server?.close();
+  });
+
+  // Non dipende dal segnaposto: che GA4 sia attivo o no, prima del consenso
+  // non deve partire nessuna richiesta verso googletagmanager.com. È questo
+  // il test che protegge davvero dalla violazione: deve passare sempre.
+  test('gtag non parte senza consenso', async () => {
+    const page = await browser.newPage();
+    const richieste = [];
+    page.on('request', (r) => {
+      if (r.url().includes('googletagmanager.com')) richieste.push(r.url());
+    });
+
+    await page.goto(`${origin}/`, { waitUntil: 'networkidle' });
+    await page.waitForTimeout(500);
+    assert.equal(richieste.length, 0, 'gtag caricato prima del consenso');
+
+    await page.close();
+  });
+
+  test(
+    'gtag non parte senza consenso, parte dopo il consenso',
+    { skip: ga4Segnaposto && 'GA4_ID è ancora il segnaposto' },
+    async () => {
+      const page = await browser.newPage();
+      const richieste = [];
+      page.on('request', (r) => {
+        if (r.url().includes('googletagmanager.com')) richieste.push(r.url());
+      });
+
+      await page.goto(`${origin}/`, { waitUntil: 'networkidle' });
+      assert.equal(richieste.length, 0, 'gtag caricato prima del consenso');
+
+      await page.click('[data-consenso-accetta]');
+      await page.waitForTimeout(500);
+      assert.ok(richieste.length > 0, 'gtag non caricato dopo il consenso');
+
+      await page.close();
+    },
+  );
 });

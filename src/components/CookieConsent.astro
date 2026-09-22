@@ -10,7 +10,7 @@
     </p>
     <div class="cookie-consent-actions">
       <button type="button" id="cookie-reject" class="ds-btn-ghost">Rifiuta</button>
-      <button type="button" id="cookie-accept" class="ds-btn-on-dark">Accetta tutti</button>
+      <button type="button" id="cookie-accept" class="ds-btn-on-dark" data-consenso-accetta>Accetta tutti</button>
     </div>
   </div>
 </div>
@@ -25,14 +25,33 @@
   const show = () => panel?.classList.add('is-visible');
   const hide = () => panel?.classList.remove('is-visible');
 
-  if (!getConsent()) show();
+  // Il banner ha una sola accettazione cumulativa ("Accetta tutti" /
+  // "Rifiuta"), non categorie distinte (tecnici/analitici/marketing): la
+  // scelta reale dell'utente sulla categoria statistica coincide quindi con
+  // l'aver accettato. `Analytics.astro` ascolta questo evento su `document`.
+  const notificaConsenso = (accettato: boolean) => {
+    document.dispatchEvent(new CustomEvent('amon:consenso', { detail: { analytics: accettato } }));
+  };
+
+  const consenso = getConsent();
+  if (!consenso) {
+    show();
+  } else {
+    // Preferenza già salvata da una visita precedente: il banner non torna a
+    // comparire, ma senza rilanciare l'evento qui nessuno script se ne
+    // accorgerebbe mai al ricaricamento — Analytics non partirebbe più dal
+    // secondo caricamento di pagina in poi per chi aveva già accettato.
+    notificaConsenso(consenso.choice === 'accepted');
+  }
 
   accept?.addEventListener('click', () => {
     setConsent('accepted');
+    notificaConsenso(true);
     hide();
   });
   reject?.addEventListener('click', () => {
     setConsent('rejected');
+    notificaConsenso(false);
     hide();
   });
 

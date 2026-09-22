@@ -53,14 +53,25 @@ import { contatti } from '../data/contatti.ts';
               <tr>
                 <td class="py-3 pr-4 font-medium text-ink">Statistiche</td>
                 <td class="py-3 pr-4">
-                  Google Analytics — non ancora attivo su questo sito. Se e quando verrà introdotto,
-                  si avvierà solo dopo aver scelto "Accetta tutti" nel banner.
+                  Google Analytics 4 — misurazione statistica del traffico (pagine visitate,
+                  provenienza, dispositivo). Lo script si carica solo dopo aver scelto "Accetta
+                  tutti" nel banner: senza consenso non viene richiesto né eseguito. L'indirizzo IP
+                  è anonimizzato prima della registrazione.
                 </td>
                 <td class="py-3">Richiesto, revocabile</td>
               </tr>
             </tbody>
           </table>
         </div>
+        <p class="mt-5">
+          Il servizio Google Analytics 4 è fornito da Google Ireland Limited (Gordon House,
+          Barrow Street, Dublino 4, Irlanda), che tratta i dati come titolare autonomo del
+          trattamento nell'ambito delle proprie finalità di misurazione statistica. La base
+          giuridica del trattamento è il consenso dell'utente, revocabile in ogni momento dal
+          link "Preferenze cookie" nel piè di pagina. I cookie impostati sono <code class="text-[0.85em]">_ga</code>
+          {' '}(identificativo del visitatore, durata 24 mesi) e <code class="text-[0.85em]">_ga_&lt;ID-CONTENITORE&gt;</code>
+          {' '}(stato della sessione, durata 24 mesi).
+        </p>
         <p class="mt-5">
           La pagina Contatti include una mappa interattiva (OpenFreeMap, tramite la libreria
           maplibre-gl): per mostrarla vengono richieste le sole immagini della mappa al server
