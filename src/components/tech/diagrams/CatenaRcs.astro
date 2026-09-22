@@ -11,16 +11,59 @@
  * altre pagine tecniche: fondo navy, reticolo a puntini, cornice con tacche
  * d'angolo, verde come unico accento.
  */
+import type { Lingua } from '../../../i18n/routes.ts';
+
+interface Props {
+  lingua: Lingua;
+}
+
+const { lingua } = Astro.props;
+
+const TESTI = {
+  it: {
+    ariaLabel:
+      "Catena a quattro blocchi: cabina MT, unità RCS in campo, collegamento dati, Control Room. Una freccia superiore porta lo stato dell'impianto dalla cabina alla Control Room, una freccia inferiore riporta il comando dalla Control Room alla cabina. La richiusura automatica dopo un guasto estinto, decisa dall'unità RCS senza attesa dell'operatore, è evidenziata in verde sulla corsia di comando.",
+    blocchi: [
+      { t1: 'Cabina MT', t2: 'Interruttore, sensori' },
+      { t1: 'Unità RCS', t2: 'Analisi guasto in campo' },
+      { t1: 'Collegamento dati', t2: 'Rete cellulare' },
+      { t1: 'Control Room', t2: 'Amon Energy, 24/7' },
+    ],
+    stato: 'STATO',
+    comando: 'COMANDO',
+    richiusura: 'RICHIUSURA AUTOMATICA',
+    caption: 'Stato che risale, comando che ridiscende',
+    captionSub: 'Catena esemplificativa · cabina MT, unità RCS, collegamento dati, Control Room',
+  },
+  en: {
+    ariaLabel:
+      'Four-block chain: MV substation, field RCS unit, data link, Control Room. An upper arrow carries the plant status from the substation up to the Control Room, a lower arrow carries the command from the Control Room down to the substation. The automatic reclosing after a cleared fault, decided by the RCS unit without waiting for an operator, is highlighted in green on the command lane.',
+    blocchi: [
+      { t1: 'MV substation', t2: 'Breaker, sensors' },
+      { t1: 'RCS unit', t2: 'On-site fault analysis' },
+      { t1: 'Data link', t2: 'Cellular network' },
+      { t1: 'Control Room', t2: 'Amon Energy, 24/7' },
+    ],
+    stato: 'STATUS',
+    comando: 'COMMAND',
+    richiusura: 'AUTOMATIC RECLOSING',
+    caption: 'Status goes up, command comes down',
+    captionSub: 'Sample chain · MV substation, RCS unit, data link, Control Room',
+  },
+} as const;
+
+const t = TESTI[lingua];
+
 const W = 640;
 const H = 320;
 const uid = 'rcs';
 
 // Quattro blocchi in fila, centrati sull'asse orizzontale della catena.
 const blocchi = [
-  { cx: 108, t1: 'Cabina MT', t2: 'Interruttore, sensori' },
-  { cx: 268, t1: 'Unità RCS', t2: 'Analisi guasto in campo' },
-  { cx: 428, t1: 'Collegamento dati', t2: 'Rete cellulare' },
-  { cx: 555, t1: 'Control Room', t2: 'Amon Energy, 24/7' },
+  { cx: 108, t1: t.blocchi[0].t1, t2: t.blocchi[0].t2 },
+  { cx: 268, t1: t.blocchi[1].t1, t2: t.blocchi[1].t2 },
+  { cx: 428, t1: t.blocchi[2].t1, t2: t.blocchi[2].t2 },
+  { cx: 555, t1: t.blocchi[3].t1, t2: t.blocchi[3].t2 },
 ];
 const boxW = 128;
 const boxH = 76;
@@ -35,7 +78,7 @@ const n = (v: number) => Math.round(v * 10) / 10;
     <svg
       viewBox={`0 0 ${W} ${H}`}
       role="img"
-      aria-label="Catena a quattro blocchi: cabina MT, unità RCS in campo, collegamento dati, Control Room. Una freccia superiore porta lo stato dell'impianto dalla cabina alla Control Room, una freccia inferiore riporta il comando dalla Control Room alla cabina. La richiusura automatica dopo un guasto estinto, decisa dall'unità RCS senza attesa dell'operatore, è evidenziata in verde sulla corsia di comando."
+      aria-label={t.ariaLabel}
       preserveAspectRatio="xMidYMid meet"
     >
       <defs>
@@ -130,10 +173,10 @@ const n = (v: number) => Math.round(v * 10) / 10;
 
       <!-- Etichette delle due corsie. -->
       <g font-family="Inter Variable, Inter, sans-serif" font-size="10.5" font-weight="700" letter-spacing="0.06em">
-        <text x={blocchi[0].cx} y={laneY1 - 12} fill="#8fbfe0">STATO</text>
-        <text x={blocchi[3].cx} y={laneY2 + 22} text-anchor="end" fill="#8fd9ab">COMANDO</text>
+        <text x={blocchi[0].cx} y={laneY1 - 12} fill="#8fbfe0">{t.stato}</text>
+        <text x={blocchi[3].cx} y={laneY2 + 22} text-anchor="end" fill="#8fd9ab">{t.comando}</text>
         <text x={n((blocchi[0].cx + blocchi[1].cx) / 2)} y={laneY2 + 22} text-anchor="middle" fill="#8fd9ab">
-          RICHIUSURA AUTOMATICA
+          {t.richiusura}
         </text>
       </g>
 
@@ -155,9 +198,9 @@ const n = (v: number) => Math.round(v * 10) / 10;
   <figcaption class="rcs-plot__caption">
     <span class="rcs-plot__dot" aria-hidden="true"></span>
     <span>
-      <strong>Stato che risale, comando che ridiscende</strong>
+      <strong>{t.caption}</strong>
       <span class="rcs-plot__caption-sub">
-        Catena esemplificativa · cabina MT, unità RCS, collegamento dati, Control Room
+        {t.captionSub}
       </span>
     </span>
   </figcaption>

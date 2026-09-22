@@ -10,6 +10,45 @@
  * laterale. Stessa lingua grafica delle altre pagine: fondo navy, cornice con
  * tacche d'angolo, verde come unico accento.
  */
+import type { Lingua } from '../../../i18n/routes.ts';
+
+interface Props {
+  lingua: Lingua;
+}
+
+const { lingua } = Astro.props;
+
+const TESTI = {
+  it: {
+    ariaLabel:
+      'Sagoma schematica di un trasformatore di potenza con cinque punti di misura numerati: terna isolatori AT, terna isolatori BT, commutatore sotto carico, neutro e messa a terra, cassone e nucleo. Ogni punto è collegato da una linea di richiamo alla voce corrispondente nell\'elenco laterale.',
+    legenda: [
+      { t: 'Terna isolatori AT', d: 'Rapporto, isolamento' },
+      { t: 'Terna isolatori BT', d: 'Rapporto, avvolgimenti' },
+      { t: 'Commutatore sotto carico', d: 'Resistenza di contatto' },
+      { t: 'Neutro e messa a terra', d: 'Continuità, resistenza' },
+      { t: 'Cassone e nucleo', d: 'Tan delta, eccitazione' },
+    ],
+    caption: 'Cinque punti, cinque misure diverse',
+    captionSub: 'Sagoma esemplificativa · terne AT/BT, commutatore, neutro e cassone',
+  },
+  en: {
+    ariaLabel:
+      "Schematic outline of a power transformer with five numbered measurement points: HV bushing set, MV/LV bushing set, on-load tap changer, neutral and earthing, tank and core. Each point is linked by a lead line to the matching entry in the side list.",
+    legenda: [
+      { t: 'HV bushing set', d: 'Ratio, insulation' },
+      { t: 'LV bushing set', d: 'Ratio, windings' },
+      { t: 'On-load tap changer', d: 'Contact resistance' },
+      { t: 'Neutral and earthing', d: 'Continuity, resistance' },
+      { t: 'Tank and core', d: 'Tan delta, excitation' },
+    ],
+    caption: 'Five points, five different measurements',
+    captionSub: 'Sample outline · HV/LV bushing sets, tap changer, neutral and tank',
+  },
+} as const;
+
+const t = TESTI[lingua];
+
 const W = 640;
 const H = 320;
 const uid = 'txm';
@@ -50,13 +89,7 @@ const punti = [
 // Descrizioni tenute corte apposta: a 390px la colonna dell'elenco ha circa
 // 190 unità di viewBox, e la cornice del disegno taglia (`overflow: hidden`)
 // tutto ciò che le supera — verificato a video, non dedotto.
-const legenda = [
-  { t: 'Terna isolatori AT', d: 'Rapporto, isolamento' },
-  { t: 'Terna isolatori BT', d: 'Rapporto, avvolgimenti' },
-  { t: 'Commutatore sotto carico', d: 'Resistenza di contatto' },
-  { t: 'Neutro e messa a terra', d: 'Continuità, resistenza' },
-  { t: 'Cassone e nucleo', d: 'Tan delta, eccitazione' },
-];
+const legenda = t.legenda;
 
 const legendX = 420;
 const legendY0 = 60;
@@ -69,7 +102,7 @@ const n = (v: number) => Math.round(v * 10) / 10;
     <svg
       viewBox={`0 0 ${W} ${H}`}
       role="img"
-      aria-label="Sagoma schematica di un trasformatore di potenza con cinque punti di misura numerati: terna isolatori AT, terna isolatori BT, commutatore sotto carico, neutro e messa a terra, cassone e nucleo. Ogni punto è collegato da una linea di richiamo alla voce corrispondente nell'elenco laterale."
+      aria-label={t.ariaLabel}
       preserveAspectRatio="xMidYMid meet"
     >
       <defs>
@@ -199,9 +232,9 @@ const n = (v: number) => Math.round(v * 10) / 10;
   <figcaption class="txm-plot__caption">
     <span class="txm-plot__dot" aria-hidden="true"></span>
     <span>
-      <strong>Cinque punti, cinque misure diverse</strong>
+      <strong>{t.caption}</strong>
       <span class="txm-plot__caption-sub">
-        Sagoma esemplificativa · terne AT/BT, commutatore, neutro e cassone
+        {t.captionSub}
       </span>
     </span>
   </figcaption>

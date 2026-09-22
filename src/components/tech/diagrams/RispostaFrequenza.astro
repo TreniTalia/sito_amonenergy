@@ -16,6 +16,37 @@
  * 100 kHz, la regione in cui una deformazione dell'avvolgimento sposta le
  * risonanze. È l'unico punto del disegno che deve leggersi al primo sguardo.
  */
+import type { Lingua } from '../../../i18n/routes.ts';
+
+interface Props {
+  lingua: Lingua;
+}
+
+const { lingua } = Astro.props;
+
+const TESTI = {
+  it: {
+    ariaLabel:
+      'Grafico della risposta in frequenza di un avvolgimento di trasformatore: ampiezza in decibel su scala logaritmica da 20 Hz a 2 MHz. Il tracciato di riferimento e quello misurato coincidono fino a circa 100 kHz; sopra i 100 kHz le risonanze del tracciato misurato si spostano in frequenza e cambiano ampiezza, lo scostamento che segnala una deformazione dell\'avvolgimento.',
+    scostamento: 'SCOSTAMENTO',
+    impronta: 'Impronta di riferimento',
+    misuraInCampo: 'Misura in campo',
+    caption: "Confronto con l'impronta di riferimento",
+    captionSub: 'Curva esemplificativa · intervallo di misura 20 Hz – 2 MHz secondo IEC 60076-18',
+  },
+  en: {
+    ariaLabel:
+      'Frequency response chart of a transformer winding: amplitude in decibels on a logarithmic scale from 20 Hz to 2 MHz. The reference and measured traces coincide up to about 100 kHz; above 100 kHz the resonances of the measured trace shift in frequency and change in amplitude, the deviation that signals a winding deformation.',
+    scostamento: 'DEVIATION',
+    impronta: 'Reference fingerprint',
+    misuraInCampo: 'Field measurement',
+    caption: 'Comparison with the reference fingerprint',
+    captionSub: 'Sample curve · 20 Hz – 2 MHz measurement range under IEC 60076-18',
+  },
+} as const;
+
+const t = TESTI[lingua];
+
 const W = 640;
 const H = 320;
 
@@ -103,7 +134,7 @@ const uid = 'rfq';
     <svg
       viewBox={`0 0 ${W} ${H}`}
       role="img"
-      aria-label="Grafico della risposta in frequenza di un avvolgimento di trasformatore: ampiezza in decibel su scala logaritmica da 20 Hz a 2 MHz. Il tracciato di riferimento e quello misurato coincidono fino a circa 100 kHz; sopra i 100 kHz le risonanze del tracciato misurato si spostano in frequenza e cambiano ampiezza, lo scostamento che segnala una deformazione dell'avvolgimento."
+      aria-label={t.ariaLabel}
       preserveAspectRatio="xMidYMid meet"
     >
       <defs>
@@ -204,7 +235,7 @@ const uid = 'rfq';
         stroke-width="3.5"
         stroke-opacity="0.85"
       >
-        <text x={X1 - 8} y={Y0 + 17} text-anchor="end">SCOSTAMENTO</text>
+        <text x={X1 - 8} y={Y0 + 17} text-anchor="end">{t.scostamento}</text>
       </g>
 
       <!-- Legenda: due segmenti e due parole, in alto a sinistra dove la curva
@@ -224,8 +255,8 @@ const uid = 'rfq';
           stroke-width="3.5"
           stroke-opacity="0.85"
         >
-          <text x="30" y="4">Impronta di riferimento</text>
-          <text class="plot-legend-2" x="30" y="26" fill="#8fd9ab">Misura in campo</text>
+          <text x="30" y="4">{t.impronta}</text>
+          <text class="plot-legend-2" x="30" y="26" fill="#8fd9ab">{t.misuraInCampo}</text>
         </g>
       </g>
 
@@ -257,9 +288,9 @@ const uid = 'rfq';
   <figcaption class="freq-plot__caption">
     <span class="freq-plot__dot" aria-hidden="true"></span>
     <span>
-      <strong>Confronto con l'impronta di riferimento</strong>
+      <strong>{t.caption}</strong>
       <span class="freq-plot__caption-sub">
-        Curva esemplificativa · intervallo di misura 20 Hz – 2 MHz secondo IEC 60076-18
+        {t.captionSub}
       </span>
     </span>
   </figcaption>

@@ -9,6 +9,35 @@
  * il relè scatti dove la taratura dice che deve scattare — è quello che fanno
  * il DRTS/64 e l'ISA CBA 1000 iniettando corrente secondaria o primaria.
  */
+import type { Lingua } from '../../../i18n/routes.ts';
+
+interface Props {
+  lingua: Lingua;
+}
+
+const { lingua } = Astro.props;
+
+const TESTI = {
+  it: {
+    ariaLabel:
+      'Diagramma tempo-corrente su assi logaritmici: due gradini di intervento, la soglia selettiva I> con tempo di intervento più lungo e la soglia di massima corrente I>> quasi istantanea. Un punto verde segna la corrente di prova iniettata e il tempo di intervento misurato, sovrapposto al gradino I>>.',
+    caption: 'Verifica della curva di intervento',
+    captionSub: 'Caratteristica esemplificativa · assi log-log, gradini I> e I>> a tempo indipendente',
+    legendaI1: 'Soglia selettiva I>',
+    legendaI2: 'Soglia di massima corrente I>>',
+  },
+  en: {
+    ariaLabel:
+      'Time-current diagram on logarithmic axes: two tripping steps, the selective threshold I> with a longer tripping time and the overcurrent threshold I>> which is near-instantaneous. A green point marks the injected test current and the measured tripping time, overlaid on the I>> step.',
+    caption: 'Tripping curve verification',
+    captionSub: 'Sample characteristic · log-log axes, definite-time I> and I>> steps',
+    legendaI1: 'Selective threshold I>',
+    legendaI2: 'Overcurrent threshold I>>',
+  },
+} as const;
+
+const t = TESTI[lingua];
+
 const W = 640;
 const H = 320;
 
@@ -66,7 +95,7 @@ const uid = 'tcc';
     <svg
       viewBox={`0 0 ${W} ${H}`}
       role="img"
-      aria-label="Diagramma tempo-corrente su assi logaritmici: due gradini di intervento, la soglia selettiva I> con tempo di intervento più lungo e la soglia di massima corrente I>> quasi istantanea. Un punto verde segna la corrente di prova iniettata e il tempo di intervento misurato, sovrapposto al gradino I>>."
+      aria-label={t.ariaLabel}
       preserveAspectRatio="xMidYMid meet"
     >
       <defs>
@@ -165,8 +194,8 @@ const uid = 'tcc';
           stroke-width="3.5"
           stroke-opacity="0.85"
         >
-          <text x="30" y="4">Soglia selettiva I&gt;</text>
-          <text class="tcc-legend-2" x="30" y="26" fill="#8fd9ab">Soglia di massima corrente I&gt;&gt;</text>
+          <text x="30" y="4">{t.legendaI1}</text>
+          <text class="tcc-legend-2" x="30" y="26" fill="#8fd9ab">{t.legendaI2}</text>
         </g>
       </g>
 
@@ -188,9 +217,9 @@ const uid = 'tcc';
   <figcaption class="tcc-plot__caption">
     <span class="tcc-plot__dot" aria-hidden="true"></span>
     <span>
-      <strong>Verifica della curva di intervento</strong>
+      <strong>{t.caption}</strong>
       <span class="tcc-plot__caption-sub">
-        Caratteristica esemplificativa · assi log-log, gradini I&gt; e I&gt;&gt; a tempo indipendente
+        {t.captionSub}
       </span>
     </span>
   </figcaption>

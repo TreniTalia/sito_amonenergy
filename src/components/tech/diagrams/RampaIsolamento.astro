@@ -9,6 +9,37 @@
  * si impenna prima di raggiungere il valore di prova — è quella la zona
  * marcata come anomalia.
  */
+import type { Lingua } from '../../../i18n/routes.ts';
+
+interface Props {
+  lingua: Lingua;
+}
+
+const { lingua } = Astro.props;
+
+const TESTI = {
+  it: {
+    ariaLabel:
+      "Grafico della prova di isolamento: rampa di tensione da 0 a 80 kV nel tempo e corrente di fuga sovrapposta. La corrente resta bassa e quasi piatta per la maggior parte della prova, poi si impenna bruscamente prima di raggiungere il valore di prova: quella zona è marcata come anomalia, il segno di un isolamento compromesso.",
+    anomalia: 'ANOMALIA',
+    tensioneDiProva: 'Tensione di prova',
+    correnteDiFuga: 'Corrente di fuga',
+    caption: 'Rampa di tensione e corrente di fuga',
+    captionSub: 'Curva esemplificativa · isolamento compromesso: corrente in impennata prima del valore di prova',
+  },
+  en: {
+    ariaLabel:
+      'Insulation test chart: voltage ramp from 0 to 80 kV over time with the leakage current overlaid. The current stays low and nearly flat for most of the test, then rises sharply before reaching the test value: that zone is marked as an anomaly, the sign of compromised insulation.',
+    anomalia: 'ANOMALY',
+    tensioneDiProva: 'Test voltage',
+    correnteDiFuga: 'Leakage current',
+    caption: 'Voltage ramp and leakage current',
+    captionSub: 'Sample curve · compromised insulation: current spikes before the test value',
+  },
+} as const;
+
+const t = TESTI[lingua];
+
 const W = 640;
 const H = 320;
 
@@ -71,7 +102,7 @@ const uid = 'ins';
     <svg
       viewBox={`0 0 ${W} ${H}`}
       role="img"
-      aria-label="Grafico della prova di isolamento: rampa di tensione da 0 a 80 kV nel tempo e corrente di fuga sovrapposta. La corrente resta bassa e quasi piatta per la maggior parte della prova, poi si impenna bruscamente prima di raggiungere il valore di prova: quella zona è marcata come anomalia, il segno di un isolamento compromesso."
+      aria-label={t.ariaLabel}
       preserveAspectRatio="xMidYMid meet"
     >
       <defs>
@@ -150,7 +181,7 @@ const uid = 'ins';
         stroke-width="3.5"
         stroke-opacity="0.85"
       >
-        <text x={X1 - 8} y={Y0 + 17} text-anchor="end">ANOMALIA</text>
+        <text x={X1 - 8} y={Y0 + 17} text-anchor="end">{t.anomalia}</text>
       </g>
 
       <!-- Legenda. -->
@@ -169,8 +200,8 @@ const uid = 'ins';
           stroke-width="3.5"
           stroke-opacity="0.85"
         >
-          <text x="30" y="4">Tensione di prova</text>
-          <text class="ins-legend-2" x="30" y="26" fill="#f0a3a9">Corrente di fuga</text>
+          <text x="30" y="4">{t.tensioneDiProva}</text>
+          <text class="ins-legend-2" x="30" y="26" fill="#f0a3a9">{t.correnteDiFuga}</text>
         </g>
       </g>
 
@@ -192,9 +223,9 @@ const uid = 'ins';
   <figcaption class="ins-plot__caption">
     <span class="ins-plot__dot" aria-hidden="true"></span>
     <span>
-      <strong>Rampa di tensione e corrente di fuga</strong>
+      <strong>{t.caption}</strong>
       <span class="ins-plot__caption-sub">
-        Curva esemplificativa · isolamento compromesso: corrente in impennata prima del valore di prova
+        {t.captionSub}
       </span>
     </span>
   </figcaption>

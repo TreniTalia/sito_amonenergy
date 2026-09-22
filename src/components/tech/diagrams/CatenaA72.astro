@@ -10,15 +10,56 @@
  * indietro attraverso lo SCADA — la stessa struttura a due corsie delle altre
  * pagine di controllo, qui applicata a una catena di sicurezza di rete.
  */
+import type { Lingua } from '../../../i18n/routes.ts';
+
+interface Props {
+  lingua: Lingua;
+}
+
+const { lingua } = Astro.props;
+
+const TESTI = {
+  it: {
+    ariaLabel:
+      "Catena a quattro blocchi: protezione di interfaccia con dispositivo RIGEDI, modem, integrazione SCADA, distributore. Una freccia superiore porta lo stato della protezione fino allo SCADA, una freccia inferiore riporta il comando di distacco o riconnessione dal distributore fino alla protezione di interfaccia.",
+    blocchi: [
+      { t1: 'Protezione di interfaccia', t2: 'Dispositivo RIGEDI' },
+      { t1: 'Modem', t2: 'Ricezione comando' },
+      { t1: 'Integrazione SCADA', t2: 'Stato e storicizzazione' },
+      { t1: 'Distributore', t2: 'Ordine di distacco' },
+    ],
+    stato: 'STATO',
+    comando: 'COMANDO DI DISTACCO',
+    caption: 'Il comando arriva, lo stato torna indietro',
+    captionSub: 'Catena esemplificativa · protezione RIGEDI, modem, SCADA, distributore',
+  },
+  en: {
+    ariaLabel:
+      "Four-block chain: interface protection with the RIGEDI device, modem, SCADA integration, distributor. An upper arrow carries the protection's status up to the SCADA, a lower arrow carries the disconnection or reconnection command from the distributor down to the interface protection.",
+    blocchi: [
+      { t1: 'Interface protection', t2: 'RIGEDI device' },
+      { t1: 'Modem', t2: 'Command reception' },
+      { t1: 'SCADA integration', t2: 'Status and history' },
+      { t1: 'Distributor', t2: 'Disconnection order' },
+    ],
+    stato: 'STATUS',
+    comando: 'DISCONNECTION COMMAND',
+    caption: 'The command arrives, the status comes back',
+    captionSub: 'Sample chain · RIGEDI protection, modem, SCADA, distributor',
+  },
+} as const;
+
+const t = TESTI[lingua];
+
 const W = 640;
 const H = 320;
 const uid = 'a72';
 
 const blocchi = [
-  { cx: 108, t1: 'Protezione di interfaccia', t2: 'Dispositivo RIGEDI' },
-  { cx: 268, t1: 'Modem', t2: 'Ricezione comando' },
-  { cx: 428, t1: 'Integrazione SCADA', t2: 'Stato e storicizzazione' },
-  { cx: 555, t1: 'Distributore', t2: 'Ordine di distacco' },
+  { cx: 108, t1: t.blocchi[0].t1, t2: t.blocchi[0].t2 },
+  { cx: 268, t1: t.blocchi[1].t1, t2: t.blocchi[1].t2 },
+  { cx: 428, t1: t.blocchi[2].t1, t2: t.blocchi[2].t2 },
+  { cx: 555, t1: t.blocchi[3].t1, t2: t.blocchi[3].t2 },
 ];
 const boxW = 128;
 const boxH = 76;
@@ -33,7 +74,7 @@ const n = (v: number) => Math.round(v * 10) / 10;
     <svg
       viewBox={`0 0 ${W} ${H}`}
       role="img"
-      aria-label="Catena a quattro blocchi: protezione di interfaccia con dispositivo RIGEDI, modem, integrazione SCADA, distributore. Una freccia superiore porta lo stato della protezione fino allo SCADA, una freccia inferiore riporta il comando di distacco o riconnessione dal distributore fino alla protezione di interfaccia."
+      aria-label={t.ariaLabel}
       preserveAspectRatio="xMidYMid meet"
     >
       <defs>
@@ -126,8 +167,8 @@ const n = (v: number) => Math.round(v * 10) / 10;
 
       <!-- Etichette delle due corsie. -->
       <g font-family="Inter Variable, Inter, sans-serif" font-size="10.5" font-weight="700" letter-spacing="0.06em">
-        <text x={blocchi[0].cx} y={laneY1 - 12} fill="#8fbfe0">STATO</text>
-        <text x={blocchi[3].cx} y={laneY2 + 22} text-anchor="end" fill="#8fd9ab">COMANDO DI DISTACCO</text>
+        <text x={blocchi[0].cx} y={laneY1 - 12} fill="#8fbfe0">{t.stato}</text>
+        <text x={blocchi[3].cx} y={laneY2 + 22} text-anchor="end" fill="#8fd9ab">{t.comando}</text>
       </g>
 
       <!-- Cornice con tacche d'angolo. -->
@@ -148,9 +189,9 @@ const n = (v: number) => Math.round(v * 10) / 10;
   <figcaption class="a72-plot__caption">
     <span class="a72-plot__dot" aria-hidden="true"></span>
     <span>
-      <strong>Il comando arriva, lo stato torna indietro</strong>
+      <strong>{t.caption}</strong>
       <span class="a72-plot__caption-sub">
-        Catena esemplificativa · protezione RIGEDI, modem, SCADA, distributore
+        {t.captionSub}
       </span>
     </span>
   </figcaption>

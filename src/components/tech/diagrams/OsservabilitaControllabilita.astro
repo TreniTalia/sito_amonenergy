@@ -10,6 +10,41 @@
  * riferimento normativo comune, confermato dal cliente: CEI 0-16 V5 e la
  * Delibera ARERA 564/2025/R/eel. Stessa lingua grafica delle altre pagine.
  */
+import type { Lingua } from '../../../i18n/routes.ts';
+
+interface Props {
+  lingua: Lingua;
+}
+
+const { lingua } = Astro.props;
+
+const TESTI = {
+  it: {
+    ariaLabel:
+      'Due colonne verticali. A sinistra PF1, osservabilità: lo stato dell\'impianto sale dall\'impianto al CCI, che lo rende leggibile al distributore. A destra PF2, controllabilità: il comando di limitazione della potenza attiva scende dal distributore, passa per il CCI e raggiunge l\'impianto. In basso il riferimento comune, CEI 0-16 V5 e Delibera ARERA 564/2025/R/eel.',
+    pf1: 'PF1 · Osservabilità',
+    pf2: 'PF2 · Controllabilità',
+    distributore: 'Distributore',
+    impianto: 'Impianto',
+    riferimento: 'CEI 0-16 V5 · Delibera ARERA 564/2025/R/eel',
+    caption: 'Due funzioni, due versi opposti',
+    captionSub: 'Schema esemplificativo · PF1 osservabilità e PF2 controllabilità secondo CEI 0-16 V5',
+  },
+  en: {
+    ariaLabel:
+      "Two vertical columns. On the left, PF1, observability: the plant's status rises from the plant to the CCI, which makes it readable to the distributor. On the right, PF2, controllability: the active power curtailment command comes down from the distributor, passes through the CCI and reaches the plant. At the bottom, the shared reference, CEI 0-16 V5 and Delibera ARERA 564/2025/R/eel.",
+    pf1: 'PF1 · Observability',
+    pf2: 'PF2 · Controllability',
+    distributore: 'Distributor',
+    impianto: 'Plant',
+    riferimento: 'CEI 0-16 V5 · Delibera ARERA 564/2025/R/eel',
+    caption: 'Two functions, two opposite directions',
+    captionSub: 'Sample diagram · PF1 observability and PF2 controllability under CEI 0-16 V5',
+  },
+} as const;
+
+const t = TESTI[lingua];
+
 const W = 640;
 const H = 320;
 const uid = 'occ';
@@ -29,7 +64,7 @@ const n = (v: number) => Math.round(v * 10) / 10;
     <svg
       viewBox={`0 0 ${W} ${H}`}
       role="img"
-      aria-label="Due colonne verticali. A sinistra PF1, osservabilità: lo stato dell'impianto sale dall'impianto al CCI, che lo rende leggibile al distributore. A destra PF2, controllabilità: il comando di limitazione della potenza attiva scende dal distributore, passa per il CCI e raggiunge l'impianto. In basso il riferimento comune, CEI 0-16 V5 e Delibera ARERA 564/2025/R/eel."
+      aria-label={t.ariaLabel}
       preserveAspectRatio="xMidYMid meet"
     >
       <defs>
@@ -57,14 +92,14 @@ const n = (v: number) => Math.round(v * 10) / 10;
       <!-- Colonna PF1 — osservabilità: lo stato risale, dal basso in alto. -->
       <g>
         <text x={colX1} y="42" text-anchor="middle" font-family="Sora, Inter Variable, Inter, sans-serif" font-size="14" font-weight="700" fill="#8fbfe0">
-          PF1 · Osservabilità
+          {t.pf1}
         </text>
         <line x1={colX1} y1={n(rowBot - boxH / 2)} x2={colX1} y2={n(rowMid + boxH / 2)} stroke="#6ba7d2" stroke-width="1.8" marker-end={`url(#${uid}-arrow-blue)`}></line>
         <line x1={colX1} y1={n(rowMid - boxH / 2)} x2={colX1} y2={n(rowTop + boxH / 2)} stroke="#6ba7d2" stroke-width="1.8" marker-end={`url(#${uid}-arrow-blue)`}></line>
 
         <g>
           <rect x={n(colX1 - boxW / 2)} y={n(rowTop - boxH / 2)} width={boxW} height={boxH} rx="8" fill="#0e3457" stroke="#6ba7d2" stroke-opacity="0.6" stroke-width="1.4"></rect>
-          <text x={colX1} y={rowTop + 4} text-anchor="middle" font-family="Inter Variable, Inter, sans-serif" font-size="12" font-weight="700" fill="#e7f0f7">Distributore</text>
+          <text x={colX1} y={rowTop + 4} text-anchor="middle" font-family="Inter Variable, Inter, sans-serif" font-size="12" font-weight="700" fill="#e7f0f7">{t.distributore}</text>
         </g>
         <g>
           <rect x={n(colX1 - boxW / 2)} y={n(rowMid - boxH / 2)} width={boxW} height={boxH} rx="8" fill="#123a5e" stroke="#8fd9ab" stroke-opacity="0.7" stroke-width="1.6"></rect>
@@ -72,21 +107,21 @@ const n = (v: number) => Math.round(v * 10) / 10;
         </g>
         <g>
           <rect x={n(colX1 - boxW / 2)} y={n(rowBot - boxH / 2)} width={boxW} height={boxH} rx="8" fill="#0e3457" stroke="#6ba7d2" stroke-opacity="0.6" stroke-width="1.4"></rect>
-          <text x={colX1} y={rowBot + 4} text-anchor="middle" font-family="Inter Variable, Inter, sans-serif" font-size="12" font-weight="700" fill="#e7f0f7">Impianto</text>
+          <text x={colX1} y={rowBot + 4} text-anchor="middle" font-family="Inter Variable, Inter, sans-serif" font-size="12" font-weight="700" fill="#e7f0f7">{t.impianto}</text>
         </g>
       </g>
 
       <!-- Colonna PF2 — controllabilità: il comando scende, dall'alto in basso. -->
       <g>
         <text x={colX2} y="42" text-anchor="middle" font-family="Sora, Inter Variable, Inter, sans-serif" font-size="14" font-weight="700" fill="#8fd9ab">
-          PF2 · Controllabilità
+          {t.pf2}
         </text>
         <line x1={colX2} y1={n(rowTop + boxH / 2)} x2={colX2} y2={n(rowMid - boxH / 2)} stroke="#4fd07f" stroke-width="1.8" marker-end={`url(#${uid}-arrow-green)`}></line>
         <line x1={colX2} y1={n(rowMid + boxH / 2)} x2={colX2} y2={n(rowBot - boxH / 2)} stroke="#4fd07f" stroke-width="1.8" marker-end={`url(#${uid}-arrow-green)`}></line>
 
         <g>
           <rect x={n(colX2 - boxW / 2)} y={n(rowTop - boxH / 2)} width={boxW} height={boxH} rx="8" fill="#0e3457" stroke="#6ba7d2" stroke-opacity="0.6" stroke-width="1.4"></rect>
-          <text x={colX2} y={rowTop + 4} text-anchor="middle" font-family="Inter Variable, Inter, sans-serif" font-size="12" font-weight="700" fill="#e7f0f7">Distributore</text>
+          <text x={colX2} y={rowTop + 4} text-anchor="middle" font-family="Inter Variable, Inter, sans-serif" font-size="12" font-weight="700" fill="#e7f0f7">{t.distributore}</text>
         </g>
         <g>
           <rect x={n(colX2 - boxW / 2)} y={n(rowMid - boxH / 2)} width={boxW} height={boxH} rx="8" fill="#123a5e" stroke="#8fd9ab" stroke-opacity="0.7" stroke-width="1.6"></rect>
@@ -94,13 +129,13 @@ const n = (v: number) => Math.round(v * 10) / 10;
         </g>
         <g>
           <rect x={n(colX2 - boxW / 2)} y={n(rowBot - boxH / 2)} width={boxW} height={boxH} rx="8" fill="#0e3457" stroke="#6ba7d2" stroke-opacity="0.6" stroke-width="1.4"></rect>
-          <text x={colX2} y={rowBot + 4} text-anchor="middle" font-family="Inter Variable, Inter, sans-serif" font-size="12" font-weight="700" fill="#e7f0f7">Impianto</text>
+          <text x={colX2} y={rowBot + 4} text-anchor="middle" font-family="Inter Variable, Inter, sans-serif" font-size="12" font-weight="700" fill="#e7f0f7">{t.impianto}</text>
         </g>
       </g>
 
       <!-- Riferimento normativo comune. -->
       <g font-family="Inter Variable, Inter, sans-serif" font-size="11" font-weight="600" letter-spacing="0.04em" fill="#bcd6e8" fill-opacity="0.85">
-        <text x={W / 2} y="288" text-anchor="middle">CEI 0-16 V5 · Delibera ARERA 564/2025/R/eel</text>
+        <text x={W / 2} y="288" text-anchor="middle">{t.riferimento}</text>
       </g>
 
       <!-- Cornice con tacche d'angolo. -->
@@ -121,9 +156,9 @@ const n = (v: number) => Math.round(v * 10) / 10;
   <figcaption class="occ-plot__caption">
     <span class="occ-plot__dot" aria-hidden="true"></span>
     <span>
-      <strong>Due funzioni, due versi opposti</strong>
+      <strong>{t.caption}</strong>
       <span class="occ-plot__caption-sub">
-        Schema esemplificativo · PF1 osservabilità e PF2 controllabilità secondo CEI 0-16 V5
+        {t.captionSub}
       </span>
     </span>
   </figcaption>

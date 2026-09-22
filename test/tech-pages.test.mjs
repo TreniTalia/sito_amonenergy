@@ -1,4 +1,4 @@
-import { existsSync, readFileSync } from 'node:fs';
+import { existsSync, readFileSync, readdirSync } from 'node:fs';
 import { test, describe } from 'node:test';
 import assert from 'node:assert/strict';
 import { fileURLToPath } from 'node:url';
@@ -124,6 +124,74 @@ describe('pagine tecniche', { skip }, () => {
         assert.ok(
           !/<img[^>]+\.(jpe?g|png|webp|avif)/.test(contenuto(html)),
           `${lato}/${slug}: la pagina contiene una fotografia`,
+        );
+      }
+    }
+  });
+
+  // Regressione del rilievo "nove diagrammi in italiano sulle pagine
+  // inglesi": ciascuno di questi frammenti compariva solo (o principalmente)
+  // dentro i componenti src/components/tech/diagrams/*.astro prima che la
+  // prop `lingua` venisse propagata. Se una qualunque di queste stringhe
+  // ricompare su una pagina /en/, un diagramma è tornato a essere cablato in
+  // italiano — a prescindere da quale dei nove sia.
+  const STRINGHE_ITALIANE_DIAGRAMMI = [
+    "Confronto con l'impronta di riferimento",
+    'Impronta di riferimento',
+    'Misura in campo',
+    'Soglia selettiva I>',
+    'Soglia di massima corrente I>>',
+    'Verifica della curva di intervento',
+    'Tensione di prova',
+    'Corrente di fuga',
+    'Rampa di tensione e corrente di fuga',
+    'SOGLIA DI SENSIBILITÀ',
+    'Tensione a frequenza di rete',
+    'Impulso di scarica rilevato',
+    'Impulsi di scarica in picocoulomb',
+    'Cinque punti, cinque misure diverse',
+    'Terna isolatori AT',
+    'Terna isolatori BT',
+    'Commutatore sotto carico',
+    'Neutro e messa a terra',
+    'Cassone e nucleo',
+    'PF1 · Osservabilità',
+    'PF2 · Controllabilità',
+    'Due funzioni, due versi opposti',
+    'Il comando arriva, lo stato torna indietro',
+    'COMANDO DI DISTACCO',
+    'Stato che risale, comando che ridiscende',
+    'RICHIUSURA AUTOMATICA',
+    'Dal contatore al dato consultabile',
+    'DATO DI MISURA',
+  ];
+
+  test('nessuna pagina /en/ contiene stringhe italiane note provenienti dai diagrammi', () => {
+    const enDir = path.join(DIST, 'en');
+    if (!existsSync(enDir)) return; // coperto dallo skip generale sopra
+    const filesToCheck = [];
+    const camminaDentro = (dir) => {
+      for (const voce of readdirSync(dir, { withFileTypes: true })) {
+        const p = path.join(dir, voce.name);
+        if (voce.isDirectory()) camminaDentro(p);
+        else if (voce.name.endsWith('.html')) filesToCheck.push(p);
+      }
+    };
+    camminaDentro(enDir);
+    assert.ok(filesToCheck.length > 0, 'nessuna pagina trovata sotto dist/en/');
+
+    for (const f of filesToCheck) {
+      // I commenti HTML dei diagrammi (`<!-- Blocchi. -->` e simili) sono
+      // note per chi legge il codice sorgente, non contenuto della pagina:
+      // finiscono nell'HTML compilato ma nessun utente né motore di ricerca
+      // li legge come testo. Il test riguarda le stringhe *visibili* — testo
+      // e attributi come aria-label — quindi i commenti si tolgono prima del
+      // confronto.
+      const html = readFileSync(f, 'utf8').replace(/<!--[\s\S]*?-->/g, '');
+      for (const stringa of STRINGHE_ITALIANE_DIAGRAMMI) {
+        assert.ok(
+          !html.includes(stringa),
+          `${path.relative(DIST, f)}: contiene la stringa italiana "${stringa}" di un diagramma`,
         );
       }
     }
