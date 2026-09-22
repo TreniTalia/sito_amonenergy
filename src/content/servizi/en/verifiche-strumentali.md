@@ -1,6 +1,6 @@
 ---
 titolo: "Instrumental testing"
-excerpt: "HV/MV protections (CEI 0-16/0-21), circuit breakers, transformers, thermography, SFRA, partial discharge."
+excerpt: "HV/MV protections (CEI 0-16), circuit breakers, transformers, thermography, SFRA, partial discharge."
 icona: "glass-png:tasks"
 ordine: 2
 ---

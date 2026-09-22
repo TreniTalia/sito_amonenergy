@@ -1,6 +1,6 @@
 ---
 titolo: "Verifiche strumentali"
-excerpt: "Protezioni AT/MT (CEI 0-16/0-21), interruttori, trasformatori, termografia, SFRA, scariche parziali."
+excerpt: "Protezioni AT/MT (CEI 0-16), interruttori, trasformatori, termografia, SFRA, scariche parziali."
 icona: "glass-png:tasks"
 ordine: 2
 ---

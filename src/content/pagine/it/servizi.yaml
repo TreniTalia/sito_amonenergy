@@ -51,7 +51,7 @@ tecnologie:
       logo: "mqtt"
     - nome: "Sparkplug B"
       logo: "sparkplugb"
-    - nome: "IEC 61850 · 101"
+    - nome: "IEC 61850 / IEC 60870-5-101"
       logo: "iec"
     - nome: "Zigbee"
       logo: "zigbee"
