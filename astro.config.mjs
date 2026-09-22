@@ -8,7 +8,22 @@ import icon from 'astro-icon';
 // https://astro.build/config
 export default defineConfig({
   site: 'https://amonenergy.it',
-  integrations: [sitemap(), icon()],
+  // Italiano senza prefisso (gli URL già indicizzati non si spostano),
+  // inglese sotto /en/.
+  i18n: {
+    locales: ['it', 'en'],
+    defaultLocale: 'it',
+    routing: { prefixDefaultLocale: false },
+  },
+  integrations: [
+    sitemap({
+      i18n: {
+        defaultLocale: 'it',
+        locales: { it: 'it-IT', en: 'en-GB' },
+      },
+    }),
+    icon(),
+  ],
   vite: {
     plugins: [tailwindcss()],
     // maplibre-gl spawns a Web Worker for tile decoding; Vite's dev-time
