@@ -1,0 +1,286 @@
+---
+// Stile e script condivisi della fascia "Controllo e monitoraggio" di
+// src/pages/servizi/index.astro e src/pages/en/services/index.astro: le due
+// pagine sono quasi mille righe duplicate (v. report finale), e non si
+// rifà l'architettura in questo giro. Ma questo pezzo — l'unico che non
+// segnala in nessun modo quando diverge fra le due copie — merita di
+// uscirne: uno stile o uno script cambiato in una lingua e dimenticato
+// nell'altra qui non darebbe nessun errore di build, solo un look diverso
+// silenzioso fra /servizi/ e /en/services/.
+//
+// Nessun markup: solo <style is:global> (serve global perché il componente
+// non renderizza gli elementi a cui le regole si applicano — sono nel
+// markup delle due pagine chiamanti) e uno <script> che lavora sulle stesse
+// classi. Le classi (control-pattern, control-cards, dettaglio-link, ecc.)
+// non sono usate da altri componenti importati in queste due pagine
+// (verificato: né servizi/index.astro né en/services/index.astro importano
+// ControlPillar.astro, che userebbe nomi simili in un contesto diverso).
+---
+
+<style is:global>
+  /* Pill di rimando alle pagine tecniche: lo stesso vocabolario dei tag di
+     sezione (bordo sottile, maiuscoletto no — qui il titolo è lungo), non un
+     pulsante: il peso resta sulle card sopra. */
+  .dettaglio-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    border-radius: 999px;
+    border: 1px solid color-mix(in srgb, var(--color-navy-900) 18%, transparent);
+    background: var(--color-paper);
+    padding: 0.6rem 1.05rem;
+    font-family: var(--font-display);
+    font-size: var(--fs-small);
+    font-weight: 600;
+    color: var(--color-navy-900);
+    text-decoration: none;
+    transition:
+      border-color 0.25s var(--ease-signature, ease),
+      box-shadow 0.25s var(--ease-signature, ease);
+  }
+
+  .dettaglio-link::after {
+    content: '→';
+    color: var(--color-green-500);
+  }
+
+  .dettaglio-link:hover {
+    border-color: color-mix(in srgb, var(--color-green-500) 55%, transparent);
+    box-shadow: var(--shadow-md);
+  }
+
+  /* Stessa pillola, letta sul navy delle card RCS/CCI: bordo chiaro invece
+     che scuro, sfondo trasparente invece che carta. */
+  .dettaglio-link--on-dark {
+    border-color: color-mix(in srgb, var(--color-paper) 22%, transparent);
+    background: color-mix(in srgb, var(--color-paper) 8%, transparent);
+    color: var(--color-paper);
+  }
+
+  .dettaglio-link--on-dark:hover {
+    border-color: color-mix(in srgb, var(--color-green-400, var(--color-green-500)) 65%, transparent);
+  }
+
+  /* Quadro elettrico / switchgear reale (Pexels) come pattern astratto —
+     stesso trattamento di `.control-pattern` in ControlPillar.astro
+     (pattern-rcs): texture atmosferica, non un'illustrazione in mostra.
+     Desaturata e scurita, poi un layer navy in `mix-blend-mode: color` le
+     impone la tinta del sistema (tono/saturazione dal layer navy, luminosità
+     dal quadro sottostante — il trucco duotone).
+
+     Niente maschera pesante sopra il testo: due tentativi con un velo
+     artificiale (radiale, poi lineare a percentuale/pixel) o rendevano il
+     pattern invisibile o lo lasciavano trasparire dietro le lettere. La foto
+     scelta è già scura sul lato sinistro per composizione naturale — verificato
+     che lì il contrasto testo-su-pattern è forte quanto testo-su-navy-piatto,
+     senza alcun velo. Resta solo una sfumatura leggerissima ai due bordi, per
+     il raccordo con l'header sopra e la sezione chiara sotto. */
+  .control-pattern {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    overflow: hidden;
+  }
+  .control-pattern-img {
+    /* Extra height + negative top, same margin CtaBand's `.cta-bg-img` gives
+       itself: room for the parallax translate to travel through scroll
+       without ever uncovering an empty edge top or bottom. */
+    position: absolute;
+    left: 0;
+    top: -18%;
+    width: 100%;
+    height: 136%;
+    max-width: none;
+    object-fit: cover;
+    object-position: center 30%;
+    /* La control room è già scura, ma i monitor accesi sono le uniche zone
+       chiare della foto e finivano proprio dietro ai pannelli: 0,78 di
+       luminosità li riporta al rango di fondale. */
+    filter: grayscale(1) brightness(0.78) contrast(1.12);
+    opacity: 0.88;
+    transform: translate3d(0, 0, 0);
+    will-change: transform;
+  }
+  /* Su telefono la fascia è alta quanto tre schermi e larga 390px: con `cover`
+     la foto viene ingrandita quasi cinque volte e di tutto il monitor resta una
+     fetta sfocata. Qui smette di fare da fondale a tutta la sezione e diventa
+     una banda in cima, alta quanto basta perché il grafico si legga per intero
+     (540px su 390 di larghezza: la finestra prende metà della foto, il monitor
+     grande per intero), che sfuma nel navy prima dei pannelli. I pannelli
+     guadagnano il fondo pieno, e con esso il contrasto che su una foto sgranata
+     non avevano.
+
+     Il parallasse qui va spento: trasla di ±15% dell'altezza della sezione, che
+     su mobile vale più della banda intera e la porterebbe fuori posto. */
+  @media (max-width: 767px) {
+    .control-pattern-img {
+      /* Scesa di 124px: l'occhiello e il titolo tornano su navy pieno, dove si
+         leggono senza dover combattere con il reticolo del grafico. */
+      top: 124px;
+      height: 520px;
+      object-position: 60% 46%;
+      filter: grayscale(1) brightness(0.9) contrast(1.12);
+      opacity: 0.95;
+      transform: translate3d(0, 0, 0) !important;
+      -webkit-mask-image: linear-gradient(180deg, transparent 0%, #000 16%, #000 60%, transparent 100%);
+      mask-image: linear-gradient(180deg, transparent 0%, #000 16%, #000 60%, transparent 100%);
+    }
+    /* La sfumatura in basso la fa già la maschera: il velo pieno qui sotto
+       raddoppierebbe lo scuro proprio dove la foto sta finendo. */
+    .control-pattern::after {
+      background: linear-gradient(180deg, var(--color-navy-950) 0%, transparent 14%);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .control-pattern-img {
+      transform: translate3d(0, 0, 0) !important;
+    }
+  }
+  .control-pattern-tint {
+    position: absolute;
+    inset: 0;
+    background: var(--color-navy-700);
+    mix-blend-mode: color;
+  }
+  .control-pattern::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      180deg,
+      var(--color-navy-950) 0%,
+      transparent 10%,
+      transparent 92%,
+      var(--color-navy-950) 100%
+    );
+  }
+
+  /* Le due card hanno testi di lunghezza diversa, quindi le righe di tag
+     partivano ad altezze diverse e la fascia leggeva storta. Con `subgrid` le
+     righe sono le stesse per tutte e due — pill, titolo, testo elastico, tag,
+     partner — e i tag si allineano da soli qualunque cosa ci sia scritta sopra.
+     La quinta riga in RCS resta vuota: è il posto della riga partner della CCI.
+     Dove `subgrid` non c'è, restano le card a flex di prima: disallineate, ma
+     integre. */
+  @supports (grid-template-rows: subgrid) {
+    @media (min-width: 768px) {
+      .control-cards {
+        grid-template-rows: auto auto 1fr auto auto;
+      }
+      .control-cards > article {
+        display: grid;
+        grid-row: span 5;
+        grid-template-rows: subgrid;
+        /* Una subgrid eredita gli spazi del genitore: senza questo, il `gap-5`
+           fra le due card si infilava anche fra le righe dentro ciascuna. Le
+           distanze le fanno i margini di riga, come prima. */
+        row-gap: 0;
+      }
+      /* In flex la pill stava a `self-start`; in griglia ogni cella si allarga
+         per default e la pill diventava una barra da un bordo all'altro. */
+      .control-cards > article > .ds-pill {
+        justify-self: start;
+      }
+    }
+  }
+
+  .partner-chip {
+    display: inline-flex;
+    align-items: center;
+    border-radius: 999px;
+    background: color-mix(in srgb, var(--color-paper) 92%, transparent);
+    padding: 0.4rem 0.7rem;
+    transition: background-color 0.25s var(--ease-signature, ease);
+  }
+  .partner-chip:hover {
+    background: var(--color-paper);
+  }
+
+  .control-glow {
+    position: absolute;
+    inset: 0;
+    background:
+      radial-gradient(60% 55% at 78% 8%, color-mix(in srgb, var(--color-navy-700) 55%, transparent), transparent 70%),
+      radial-gradient(50% 60% at 0% 100%, color-mix(in srgb, var(--color-navy-800) 60%, transparent), transparent 70%);
+    z-index: 1;
+  }
+
+  /* Sotto la banda fotografica, su mobile, restavano due terzi di navy piatto.
+     Qui ci va la stessa lingua grafica della mappa di copertura: un reticolo
+     fine a passo fisso e due aloni navy che lo attraversano — la carta tecnica
+     su cui i pannelli si appoggiano, non un colore di riempimento. Il reticolo
+     entra solo dove la foto è finita (maschera sfumata) e sta sotto i pannelli,
+     che sono in vetro e lo lasciano intravedere. */
+  .control-weave {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    display: none;
+    pointer-events: none;
+  }
+
+  @media (max-width: 767px) {
+    .control-weave {
+      display: block;
+      background-image:
+        radial-gradient(70% 38% at 82% 34%, color-mix(in srgb, var(--color-navy-700) 62%, transparent), transparent 72%),
+        radial-gradient(60% 34% at 6% 74%, color-mix(in srgb, var(--color-navy-800) 58%, transparent), transparent 70%),
+        linear-gradient(to right, color-mix(in srgb, #5aa3d4 10%, transparent) 1px, transparent 1px),
+        linear-gradient(to bottom, color-mix(in srgb, #5aa3d4 10%, transparent) 1px, transparent 1px);
+      background-size:
+        100% 100%,
+        100% 100%,
+        48px 48px,
+        48px 48px;
+      -webkit-mask-image: linear-gradient(180deg, transparent 0%, transparent 18%, #000 34%, #000 100%);
+      mask-image: linear-gradient(180deg, transparent 0%, transparent 18%, #000 34%, #000 100%);
+    }
+  }
+
+  #controllo-e-monitoraggio,
+  #ingegneria-elettrica,
+  #costruzione-e-gestione,
+  #tecnologie {
+    scroll-margin-top: var(--header-h, 4.875rem);
+  }
+</style>
+
+<script>
+  // Stesso parallasse (via transform, mai `background-attachment: fixed`)
+  // e stessa struttura di CtaBand.astro, sulla fascia Controllo e monitoraggio.
+  const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const section = document.querySelector<HTMLElement>('.control');
+  const layer = section?.querySelector<HTMLElement>('[data-parallax]');
+
+  if (section && layer && !prefersReduced) {
+    let inView = false;
+    let ticking = false;
+    const depth = 0.3;
+
+    const apply = () => {
+      ticking = false;
+      const rect = section.getBoundingClientRect();
+      const vh = window.innerHeight || document.documentElement.clientHeight;
+      const progress = (vh - rect.top) / (vh + rect.height);
+      const offset = (progress - 0.5) * rect.height * depth;
+      layer.style.transform = `translate3d(0, ${offset.toFixed(1)}px, 0)`;
+    };
+
+    const onScroll = () => {
+      if (!inView || ticking) return;
+      ticking = true;
+      requestAnimationFrame(apply);
+    };
+
+    const io = new IntersectionObserver(
+      (entries) => {
+        inView = entries[0]?.isIntersecting ?? false;
+        if (inView) onScroll();
+      },
+      { rootMargin: '20% 0px' },
+    );
+    io.observe(section);
+    window.addEventListener('scroll', onScroll, { passive: true });
+  }
+</script>
