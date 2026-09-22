@@ -1,0 +1,19 @@
+# Amon Energy
+
+Amon Energy S.r.l. è un system integrator per impianti elettrici AT/MT/BT e
+per le energie rinnovabili nel Centro-Sud Italia. L'esperienza del team
+comincia nel 2000, prima come PL System e poi come Energy System; nel 2020
+Mario Palumbo e Ludovico Lombardi fondano Amon Energy S.r.l., riunendo oltre
+vent'anni di competenza sugli impianti elettrici AT/MT in un'unica realtà. Il
+team conta 20 persone fra ingegneri e operai, con 140+ impianti MT in
+gestione O&M e 50+ clienti in portafoglio. La sede è unica, 5.000 m² a
+Castelluccio dei Sauri (FG), con magazzino ricambi e una Control Room che
+sorveglia gli impianti 24 ore su 24, 365 giorni l'anno.
+
+## Pagine
+
+- [Home](https://amonenergy.it/): presentazione dell'azienda, dei servizi e dei numeri operativi (impianti in O&M, clienti, anni di esperienza, monitoraggio continuo).
+- [Servizi](https://amonenergy.it/servizi/): RCS, CCI, ricerca guasti AT/MT, diagnostica su cavi e trasformatori, costruzione e gestione di impianti elettrici AT/MT.
+- [Lavori](https://amonenergy.it/lavori/): archivio delle sottostazioni AT/MT realizzate per parchi eolici e fotovoltaici nel Centro-Sud Italia.
+- [Contatti](https://amonenergy.it/contatti/): telefono, email e sede di Amon Energy S.r.l., senza moduli da compilare.
+- [Privacy Policy](https://amonenergy.it/privacy-policy/): informativa sul trattamento dei dati personali di Amon Energy S.r.l.

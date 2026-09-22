@@ -1,4 +1,19 @@
 User-agent: *
 Allow: /
 
+# Crawler dei modelli linguistici, dichiarati per nome. `User-agent: *` li
+# coprirebbe già: la riga esplicita è il segnale che questi crawler leggono,
+# e l'accesso è consentito di proposito — senza accesso non ci citano.
+User-agent: GPTBot
+Allow: /
+
+User-agent: ClaudeBot
+Allow: /
+
+User-agent: PerplexityBot
+Allow: /
+
+User-agent: Google-Extended
+Allow: /
+
 Sitemap: https://amonenergy.it/sitemap-index.xml
