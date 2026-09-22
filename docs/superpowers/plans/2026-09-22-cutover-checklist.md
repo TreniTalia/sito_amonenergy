@@ -58,6 +58,19 @@ richiedono un'informazione che solo il cliente ha.
   **sviluppatore** (l'eventuale correzione in `src/components/ContactMap.astro`,
   nei blocchi JSON-LD e in `src/content/pagine/*/azienda.yaml`).
 
+- [ ] **Tre affermazioni aziendali da validare per iscritto col cliente.**
+  `src/content/pagine/{it,en}/azienda.yaml` e `{it,en}/home.yaml` affermano
+  «oltre 100 stazioni AT/MT realizzate», «contratti O&M su più di 30
+  impianti» e «acquisizione da parte del Gruppo BayWa r.e. nel 2019». I
+  commenti sopra quei campi nel contenuto dicono già che vanno validati
+  prima del go-live: qui si formalizza. In particolare il riferimento a
+  **BayWa r.e.** nomina un terzo per nome — un'affermazione pubblica errata
+  su un'acquisizione societaria è un rischio reputazionale e potenzialmente
+  legale che va oltre la SEO. Non pubblicare senza conferma scritta del
+  cliente su tutti e tre i fatti. **A cura di: cliente** (la conferma),
+  **sviluppatore** (l'eventuale correzione dei quattro file se il cliente
+  smentisce qualcosa).
+
 ---
 
 ## 1. Verifiche da fare con il vecchio sito ancora online
