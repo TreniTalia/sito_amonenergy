@@ -1,4 +1,5 @@
-import { readFileSync } from 'node:fs';
+import { readFileSync, existsSync } from 'node:fs';
+import path from 'node:path';
 import { test, describe } from 'node:test';
 import assert from 'node:assert/strict';
 import { fileURLToPath } from 'node:url';
@@ -55,5 +56,75 @@ describe('nginx: dominio canonico e residui WordPress', () => {
     assert.equal(legacy.get('~^/page-sitemap\\.xml$'), '/sitemap-index.xml');
     assert.equal(legacy.get('~^/feed/?$'), '/');
     assert.equal(legacy.get('~^/comments/feed/?$'), '/');
+  });
+});
+
+// Inventario reale del sito WordPress, letto dal suo page-sitemap.xml il
+// 2026-09-22. È la lista che i redirect devono coprire per intero: se domani
+// ne salta fuori un altro, si aggiunge qui e il test dice subito che manca.
+const VECCHI_URL = [
+  '/progetti/', '/i-nostri-clienti/', '/lavora-con-noi/', '/consulenza/', '/foto-video/',
+  '/laboratorio-mobile/', '/centrix/', '/verifiche-strumentali/', '/monitoraggio-controllo/',
+  '/gestione-e-manutenzione/', '/repowering-e-revamping-eolico/', '/prove-isolamento/',
+  '/verifiche-strumentali/sfra/', '/verifiche-strumentali/misure-scariche-parziali/',
+  '/verifiche-strumentali/verifica-protezioni-at-mt/',
+  '/verifiche-strumentali/verifiche-trasformatori-potenza-misure/',
+  '/monitoraggio-controllo/rcs-monitoraggio-e-controllo-cabina-mt/',
+  '/monitoraggio-controllo/cci-controllore-centrale-dimpianto/',
+  '/monitoraggio-controllo/teledistacco-a72/', '/monitoraggio-controllo/lettura-contatori/',
+  '/company/', '/our-job/', '/our-clients/', '/rcs/', '/centrix-2-0/', '/contacts/',
+  '/repowering-eolic-revamping/',
+];
+
+// Restano identici: devono rispondere 200, non redirigere.
+const INVARIATI = ['/', '/azienda/', '/contatti/', '/privacy-policy/'];
+
+const combacia = (mappa, url) => {
+  for (const [pattern, dest] of mappa) {
+    if (!pattern.startsWith('~')) continue;
+    if (new RegExp(pattern.slice(1)).test(url)) return dest;
+  }
+  return null;
+};
+
+describe('mappa redirect completa', () => {
+  const legacy = leggiMappa('legacy_redirect');
+
+  test('ogni vecchio URL ha una destinazione', () => {
+    for (const u of VECCHI_URL) {
+      assert.ok(combacia(legacy, u), `nessun redirect per ${u}`);
+    }
+  });
+
+  test('nessun URL invariato viene rediretto', () => {
+    for (const u of INVARIATI) {
+      assert.equal(combacia(legacy, u), null, `${u} non deve redirigere: resta identico`);
+    }
+  });
+
+  test('ogni destinazione esiste in dist (nessuna catena, nessun 404)', () => {
+    const DIST = fileURLToPath(new URL('../dist', import.meta.url));
+    for (const u of VECCHI_URL) {
+      const dest = combacia(legacy, u);
+      const percorso = dest.split('#')[0];
+      const f = path.join(DIST, percorso.replace(/^\//, ''), 'index.html');
+      const diretto = path.join(DIST, percorso.replace(/^\//, ''));
+      assert.ok(
+        existsSync(f) || existsSync(diretto),
+        `${u} punta a ${dest}, che non esiste in dist`,
+      );
+      assert.equal(combacia(legacy, percorso), null, `catena di redirect: ${u} → ${dest} → …`);
+    }
+  });
+
+  test('le ancore usate come destinazione esistono nella pagina', () => {
+    const DIST = fileURLToPath(new URL('../dist', import.meta.url));
+    for (const u of VECCHI_URL) {
+      const dest = combacia(legacy, u);
+      const [percorso, ancora] = dest.split('#');
+      if (!ancora) continue;
+      const html = readFileSync(path.join(DIST, percorso.replace(/^\//, ''), 'index.html'), 'utf8');
+      assert.match(html, new RegExp(`id="${ancora}"`), `${dest}: l'ancora #${ancora} non esiste`);
+    }
   });
 });
