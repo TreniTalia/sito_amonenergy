@@ -13,18 +13,26 @@
  * quello sì ha una dimensione fissa, e un box o un testo che lo superano
  * sono un difetto reale, che la tela tagli visivamente il resto o no.
  *
- * Il test verifica, per ciascuno schema, a 1440, 390 e 320px:
+ * Il test verifica, per ciascuno schema, a 1440, 1280, 1024, 390 e 320px:
  * 1. ogni box e ogni elemento del contenuto restano dentro il bordo interno
- *    del telaio (niente scroll orizzontale di pagina);
+ *    del telaio, e la figura stessa resta dentro la viewport e dentro
+ *    `<main>` (niente scroll orizzontale di pagina). Il confronto con il
+ *    solo telaio non basta: se il contenuto ha una larghezza minima maggiore
+ *    della colonna, è il telaio a crescere con lui, e `overflow-x: hidden`
+ *    sull'`<html>` nasconde lo scroll che lo rivelerebbe;
  * 2. l'inchiostro di ogni testo (via Range) resta dentro il proprio box;
  * 3. nessun box si sovrappone a un altro box della stessa pagina;
  * 4. il titolo di colonna del CCI non si sovrappone ai suoi box;
  * 5. la sagoma del trasformatore non si sovrappone al suo elenco;
- * 6. il titolo del box resta leggibile (≥ 12px calcolati a 390px, ≥ 13px a
- *    1440px: `--fs-small` clampa 14→16px, lo soddisfa per costruzione) e i
+ * 6. il titolo del box resta leggibile (≥ 12px calcolati sotto i 1024px,
+ *    ≥ 13px da 1024px: `--fs-small` clampa 14→16px, lo soddisfa per
+ *    costruzione) e i
  *    numeri dei marker sulla sagoma restano ≥ 11px effettivi (il "px reale"
  *    dopo lo scarto viewBox → viewport, la stessa soglia di ogni testo
- *    tecnico del sito).
+ *    tecnico del sito);
+ * 7. nessuna parola del disegno è spezzata su due righe (i rettangoli di
+ *    una stessa parola, via Range, stanno tutti sulla stessa riga) e ogni
+ *    titolo di box sta in al massimo due righe.
  *
  * Un ultimo test prova che la misura sa fallire davvero: forza in pagina un
  * titolo di box senza spazi e senza `word-wrap`, e verifica che il
@@ -78,11 +86,11 @@ function paginePerSchema() {
 const SCHEMA_ROUTES = paginePerSchema();
 const PAGINE = SCHEMA_ROUTES.flatMap((r) => [r.it.replace(/^\//, ''), r.en.replace(/^\//, '')]);
 
-// 320px è il caso più stretto: il marker della sagoma del trasformatore ci
-// resta sopra gli 11px effettivi per il margine più risicato di ogni altra
-// larghezza (misurato, non stimato) — merita una guardia propria, non solo
-// 1440/390.
-const LARGHEZZE = [1440, 390, 320];
+// Da 1024px la figura sta nella colonna stretta accanto al testo (0.95fr,
+// circa 400px a 1024 e 520px a 1280): larga meno che su un telefono in
+// verticale a 800px, quindi il caso da guardare non è solo 1440/390. 320px
+// è il caso più stretto in assoluto.
+const LARGHEZZE = [1440, 1280, 1024, 390, 320];
 
 // Eseguita dentro `page.evaluate`: deve bastare a se stessa, senza chiusure
 // sul modulo Node (un realm JS diverso non le vede).
@@ -124,7 +132,31 @@ function misuraSchema() {
   const frameRect = box(frame);
   const interna = { left: frameRect.left + 14, right: frameRect.right - 14, top: frameRect.top + 14, bottom: frameRect.bottom - 14 };
 
-  const risultato = { fuoriDalTelaio: [], fuoriDalBox: [], sovrapposizioni: [], titoloCciSuBox: [], outlineSuLegenda: false, scrollOrizzontale: false };
+  const risultato = {
+    fuoriDalTelaio: [],
+    fuoriDallaPagina: [],
+    fuoriDalBox: [],
+    sovrapposizioni: [],
+    titoloCciSuBox: [],
+    paroleSpezzate: [],
+    titoliOltreDueRighe: [],
+    outlineSuLegenda: false,
+    scrollOrizzontale: false,
+  };
+
+  // 0) la figura e tutto il suo contenuto restano dentro la viewport e
+  //    dentro `<main>`: è l'unico riferimento che non cresce insieme al
+  //    contenuto.
+  const main = document.querySelector('main');
+  const limiteDestro = Math.min(document.documentElement.clientWidth, main ? box(main).right : Infinity);
+  const figura = frame.closest('figure');
+  for (const el of [figura, ...figura.querySelectorAll('*')]) {
+    const r = box(el);
+    if (r.right - r.left <= 0 || r.bottom - r.top <= 0) continue;
+    if (r.left < -0.5 || r.right > limiteDestro + 0.5) {
+      risultato.fuoriDallaPagina.push(`${el.tagName.toLowerCase()}.${[...el.classList].join('.') || '(senza classe)'}`);
+    }
+  }
 
   // 1) ogni box e ogni elemento del contenuto restano dentro il bordo
   //    interno del telaio: un box allargato da una parola senza spazi
@@ -192,6 +224,34 @@ function misuraSchema() {
     risultato.fontMarkerMinimo = null;
   }
 
+  // 7a) nessuna parola spezzata su due righe: per ogni parola di ogni nodo
+  //     di testo del disegno, i rettangoli del suo Range devono avere tutti
+  //     la stessa quota. Un a capo a metà parola (o una sillabazione) li
+  //     distribuisce su due righe.
+  const walker = document.createTreeWalker(contenuto, NodeFilter.SHOW_TEXT);
+  for (let tn = walker.nextNode(); tn; tn = walker.nextNode()) {
+    const re = /\S+/g;
+    for (let m = re.exec(tn.textContent); m; m = re.exec(tn.textContent)) {
+      const r = document.createRange();
+      r.setStart(tn, m.index);
+      r.setEnd(tn, m.index + m[0].length);
+      const quote = [...r.getClientRects()].filter((x) => x.width > 0).map((x) => x.top);
+      if (quote.length && Math.max(...quote) - Math.min(...quote) > 2) risultato.paroleSpezzate.push(m[0]);
+    }
+  }
+
+  // 7b) ogni titolo di box sta in al massimo due righe: le righe sono le
+  //     quote distinte (a meno di 2px) dei rettangoli del suo testo.
+  for (const el of titoli) {
+    const r = document.createRange();
+    r.selectNodeContents(el);
+    const righe = [];
+    for (const x of r.getClientRects()) {
+      if (x.width > 0 && !righe.some((q) => Math.abs(q - x.top) <= 2)) righe.push(x.top);
+    }
+    if (righe.length > 2) risultato.titoliOltreDueRighe.push(`${el.textContent.trim()} (${righe.length} righe)`);
+  }
+
   // niente scroll orizzontale di pagina.
   risultato.scrollOrizzontale = document.documentElement.scrollWidth > document.documentElement.clientWidth + 1;
 
@@ -231,13 +291,16 @@ describe('schemi a blocchi (SchemaFrame/BlockChain)', { skip }, () => {
         if (!m) return; // pagina senza schema a blocchi: non pertinente
         assert.ok(m.count >= 3, `${pagina}: attesi almeno 3 box, trovati ${m.count}`);
         assert.deepEqual(m.fuoriDalTelaio, [], `${pagina} @ ${width}px: elementi fuori dal telaio: ${m.fuoriDalTelaio.join(', ')}`);
+        assert.deepEqual(m.fuoriDallaPagina, [], `${pagina} @ ${width}px: elementi oltre la viewport o oltre <main>: ${m.fuoriDallaPagina.join(', ')}`);
+        assert.deepEqual(m.paroleSpezzate, [], `${pagina} @ ${width}px: parole spezzate su due righe: ${m.paroleSpezzate.join(', ')}`);
+        assert.deepEqual(m.titoliOltreDueRighe, [], `${pagina} @ ${width}px: titoli di box oltre le due righe: ${m.titoliOltreDueRighe.join(', ')}`);
         assert.deepEqual(m.fuoriDalBox, [], `${pagina} @ ${width}px: testo fuori dal box: ${m.fuoriDalBox.join(', ')}`);
         assert.deepEqual(m.sovrapposizioni, [], `${pagina} @ ${width}px: box sovrapposti: ${m.sovrapposizioni.join(' | ')}`);
         assert.deepEqual(m.titoloCciSuBox, [], `${pagina} @ ${width}px: titolo di colonna sopra un box: ${m.titoloCciSuBox.join(', ')}`);
         assert.equal(m.outlineSuLegenda, false, `${pagina} @ ${width}px: la sagoma del trasformatore si sovrappone al suo elenco`);
         assert.equal(m.scrollOrizzontale, false, `${pagina} @ ${width}px: la pagina ha uno scroll orizzontale`);
         if (m.fontTitoloMinimo !== null) {
-          const soglia = width >= 1440 ? 13 : 12;
+          const soglia = width >= 1024 ? 13 : 12;
           assert.ok(m.fontTitoloMinimo >= soglia, `${pagina} @ ${width}px: titolo di box a ${m.fontTitoloMinimo}px, attesi almeno ${soglia}px`);
         }
         if (m.fontMarkerMinimo !== null) {
@@ -281,5 +344,28 @@ describe('schemi a blocchi (SchemaFrame/BlockChain)', { skip }, () => {
 
     const segnalato = mutato.fuoriDalBox.length > 0 || mutato.fuoriDalTelaio.length > 0;
     assert.ok(segnalato, `${pagina}: il controllo non ha segnalato un titolo di 80 caratteri senza spazi forzato a una riga sola`);
+  });
+
+  test('il controllo sa fallire: una parola spezzata a metà viene segnalata', async () => {
+    const pagina = PAGINE[0];
+    const page = await browser.newPage({ viewport: { width: 1024, height: 900 }, reducedMotion: 'reduce' });
+    await senzaMedia(page);
+    await page.goto(origin + pagina, { waitUntil: 'load' });
+
+    const pulito = await page.evaluate(misuraSchema);
+    assert.deepEqual(pulito.paroleSpezzate, [], `${pagina}: attesa una pagina pulita prima della mutazione`);
+
+    // Restringe il primo titolo a tre caratteri con `overflow-wrap: anywhere`:
+    // le parole più lunghe finiscono per forza su più righe, lo stesso
+    // difetto che una colonna troppo stretta produce senza mutazioni.
+    await page.evaluate(() => {
+      const titolo = document.querySelector('.chain__box-title, .occ__box-title, .txm__legend-title');
+      titolo.textContent = 'Collegamento';
+      titolo.style.width = '3ch';
+      titolo.style.overflowWrap = 'anywhere';
+    });
+    const mutato = await page.evaluate(misuraSchema);
+    await page.close();
+    assert.ok(mutato.paroleSpezzate.includes('Collegamento'), `${pagina}: il controllo non ha segnalato una parola spezzata su più righe`);
   });
 });

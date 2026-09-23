@@ -1,13 +1,21 @@
 ---
 /**
  * Griglia HTML/CSS per gli schemi a catena orizzontale (RCS, A.72, lettura
- * contatori): fino a 4 box, quattro colonne da 768px in su, una sola colonna
- * (impilati) sotto i 768px, con le frecce che passano da orizzontali a
- * verticali. I box sono elementi HTML reali: il testo va a capo secondo le
- * regole normali del flusso e non può mai uscire dal proprio riquadro,
- * perché è il riquadro a crescere con lui. Le dimensioni dei testi sono
- * quelle del sistema di design (`--fs-small`/`--fs-micro`), le stesse a
- * qualunque larghezza e in qualunque lingua.
+ * contatori): 4 box. La disposizione dipende dalla larghezza della figura,
+ * non della finestra (container query sul contenitore `telaio` di
+ * `FrameChrome`): da 1024px la figura sta in una colonna stretta accanto al
+ * testo, larga meno che su un tablet in verticale, e una regola sulla
+ * viewport vi metterebbe quattro colonne da 80px. Quattro colonne quando la
+ * figura è larga almeno 46rem; sotto, le catene a due corsie vanno su due
+ * righe da due box (la corsia sopra e quella sotto restano ai due lati della
+ * griglia) e la catena a corsia unica si impila in verticale, con le frecce
+ * ruotate. Sotto i 24rem anche le catene a due corsie si impilano.
+ *
+ * I box sono elementi HTML reali: il testo va a capo secondo le regole
+ * normali del flusso e non può mai uscire dal proprio riquadro, perché è il
+ * riquadro a crescere con lui. Le dimensioni dei testi sono quelle del
+ * sistema di design (`--fs-small`/`--fs-micro`), le stesse a qualunque
+ * larghezza e in qualunque lingua.
  */
 interface Blocco {
   t1: string;
@@ -70,18 +78,12 @@ const { blocchi, sopra, sotto, unica } = Astro.props;
     color: #e7f0f7;
   }
 
-  /* Griglia: 4 colonne da 768px, una sola sotto. Con `unica` (contatori) le
-     colonne aggiuntive "auto" ospitano le frecce fra un box e l'altro, senza
-     bisogno di misurarne la posizione via JS: sono semplicemente altre
-     colonne della stessa griglia. */
+  /* Griglia a una colonna di partenza: i box si impilano nell'ordine della
+     catena. Le soglie più larghe sono in fondo al file. */
   .chain__boxes {
     display: grid;
-    grid-template-columns: repeat(4, 1fr);
+    grid-template-columns: 1fr;
     gap: 0.85rem;
-  }
-  .chain__boxes--unica {
-    grid-template-columns: 1fr auto 1fr auto 1fr auto 1fr;
-    align-items: center;
   }
 
   .chain__box {
@@ -107,7 +109,11 @@ const { blocchi, sopra, sotto, unica } = Astro.props;
     font-weight: 700;
     font-size: var(--fs-small);
     line-height: 1.25;
-    overflow-wrap: anywhere;
+    /* `break-word`, non `anywhere`: spezza una parola solo se da sola non
+       sta nella riga, e non riduce la larghezza minima del box fino a una
+       lettera (con `anywhere` la griglia stringeva le colonne e i titoli si
+       spezzavano a metà parola anche dove c'era spazio). */
+    overflow-wrap: break-word;
   }
   .chain__box--accento .chain__box-title {
     color: #8fd9ab;
@@ -118,24 +124,30 @@ const { blocchi, sopra, sotto, unica } = Astro.props;
     line-height: 1.35;
     color: #bcd6e8;
     opacity: 0.85;
-    overflow-wrap: anywhere;
+    overflow-wrap: break-word;
   }
 
+  /* Le etichette di corsia possono andare a capo: in una figura stretta
+     «RICHIUSURA AUTOMATICA» più «COMANDO» su una sola riga sono più larghi
+     del telaio, e un'etichetta che non si piega allarga la figura oltre la
+     pagina. */
   .chain__lane {
     display: flex;
+    flex-wrap: wrap;
     align-items: center;
-    gap: 0.6rem;
+    gap: 0.4rem 0.6rem;
   }
   .chain__lane-label,
   .chain__lane-evidenza {
-    flex: none;
+    flex: 0 1 auto;
+    min-width: 0;
     font-family: var(--font-body);
     font-weight: 700;
     font-size: 0.6875rem;
     line-height: 1.2;
     letter-spacing: 0.06em;
     text-transform: uppercase;
-    white-space: nowrap;
+    overflow-wrap: break-word;
   }
   .chain__lane--sopra .chain__lane-label {
     color: #8fbfe0;
@@ -197,15 +209,45 @@ const { blocchi, sopra, sotto, unica } = Astro.props;
     height: 100%;
   }
 
-  /* Sotto i 768px la griglia diventa una sola colonna: i box si impilano
-     nell'ordine della catena, e la freccia fra un box e l'altro (solo per
-     `unica`) ruota di 90° per restare coerente col nuovo verso verticale. */
-  @media (max-width: 767px) {
-    .chain__boxes {
-      grid-template-columns: 1fr;
+  /* Nella griglia impilata la freccia fra un box e l'altro (solo per
+     `unica`) ruota di 90° per seguire il verso verticale della catena. */
+  .chain__connector {
+    transform: rotate(90deg);
+  }
+
+  /* Figura stretta: l'evidenza della corsia di comando passa su una riga
+     sua, sopra la linea e l'etichetta, invece di contendere loro lo spazio. */
+  @container telaio (width < 24rem) {
+    .chain__lane-evidenza {
+      flex-basis: 100%;
+    }
+  }
+
+  /* Da 24rem le catene a due corsie vanno su due righe da due box: ogni box
+     ha così almeno 160px, abbastanza per le parole più lunghe dei titoli
+     («Collegamento», «Integrazione») in una riga sola. La catena a corsia
+     unica resta impilata: su due righe le sue frecce non avrebbero più un
+     verso leggibile. */
+  @container telaio (min-width: 24rem) {
+    .chain__boxes:not(.chain__boxes--unica) {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+
+  /* Da 46rem la catena sta su una riga sola, quattro box affiancati. Con
+     `unica` (contatori) le colonne aggiuntive "auto" ospitano le frecce fra
+     un box e l'altro, senza bisogno di misurarne la posizione via JS: sono
+     semplicemente altre colonne della stessa griglia. */
+  @container telaio (min-width: 46rem) {
+    .chain__boxes:not(.chain__boxes--unica) {
+      grid-template-columns: repeat(4, 1fr);
+    }
+    .chain__boxes--unica {
+      grid-template-columns: 1fr auto 1fr auto 1fr auto 1fr;
+      align-items: center;
     }
     .chain__connector {
-      transform: rotate(90deg);
+      transform: none;
     }
   }
 </style>

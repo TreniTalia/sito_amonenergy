@@ -34,7 +34,7 @@ const W = 640;
 const H = 440;
 ---
 
-<figure class={figureClass}>
+<figure class={`${figureClass} fc-figure`}>
   {mode === 'html' ? (
     <div
       class={`${figureClass}__frame fc-frame fc-frame--html rounded-[var(--radius-card)] border border-navy-100 shadow-[var(--shadow-md)]`}
@@ -92,6 +92,16 @@ const H = 440;
 </figure>
 
 <style>
+  /* La figura è il contenitore di riferimento (`telaio`) per le regole di
+     disposizione dei disegni: da 1024px sta in una colonna stretta accanto
+     al testo, più stretta che su un tablet in verticale, quindi la larghezza
+     della finestra non dice quanto spazio ha davvero il disegno. Il
+     contenimento in larghezza impedisce anche al contenuto di allargare la
+     colonna della griglia di pagina oltre la sua quota. */
+  .fc-figure {
+    container: telaio / inline-size;
+  }
+
   /* Stesse regole di sempre (erano in ChartFrame): l'SVG non ha più un
      aspect-ratio fisso in CSS, è il viewBox 640×440 a decidere la propria
      proporzione, come farebbe un'immagine responsive. */
@@ -116,6 +126,14 @@ const H = 440;
     padding: 2.5rem 2rem;
     /* Stessa sfumatura del fondo SVG (`#0c3151` → `#081f36`), qui in CSS. */
     background: linear-gradient(155deg, #0c3151, #081f36);
+  }
+  /* Figura stretta (telefoni sotto i 400px): meno margine laterale, così il
+     contenuto guadagna una ventina di px senza toccare il bordo interno a
+     14px né le tacche d'angolo. */
+  @container telaio (width < 22rem) {
+    .fc-frame--html {
+      padding: 2.25rem 1.4rem;
+    }
   }
   .fc-frame--html::before {
     content: '';
