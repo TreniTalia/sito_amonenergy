@@ -1,6 +1,10 @@
 ---
 titolo: "HV/MV protection testing"
 lead: "Controlled injection of trip thresholds to CEI 0-16: the protection actually trips where the setting says it should, and in the time it says it will."
+
+# Pexels photo, Vjanodic WERSOV (https://www.pexels.com/photo/38217230/).
+copertina: "../../../assets/img/tech/cover/verifica-protezioni-at-mt.jpg"
+copertinaAlt: "Corridor inside an electrical substation lined with rows of protection and control switchgear"
 seoTitle: "HV/MV protection testing: I> and I>> thresholds to standard"
 seoDescription: "HV/MV protection relay testing to CEI 0-16: controlled injection of the I> and I>> thresholds, trip times measured with DRTS/64 and ISA CBA 1000, threshold-by-threshold report."
 ordine: 3

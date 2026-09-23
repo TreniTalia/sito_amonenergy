@@ -53,10 +53,14 @@ const serviziDettaglio = defineCollection({
   // Un livello di cartella per lingua: il glob prende entrambe, la route
   // filtra per prefisso dell'id.
   loader: glob({ pattern: '**/*.md', base: './src/content/servizi-dettaglio' }),
-  schema: () =>
+  schema: ({ image }) =>
     z.object({
       titolo: z.string(),
       lead: z.string(),
+      // Foto di cover della PageHero. Stessa foto per la pagina e la sua
+      // gemella inglese; cambia solo l'alt.
+      copertina: image(),
+      copertinaAlt: z.string(),
       seoTitle: z.string(),
       seoDescription: z.string(),
       ordine: z.number(),

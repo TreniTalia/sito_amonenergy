@@ -287,6 +287,8 @@ collections:
     fields: &servizio_dettaglio_fields
       - { label: "Titolo", name: "titolo", widget: "string", hint: "Il titolo della pagina, es. \"Prova SFRA sui trasformatori di potenza\"." }
       - { label: "Testo introduttivo (lead)", name: "lead", widget: "text", hint: "2-3 righe subito sotto il titolo: che cos'è la prova e perché serve." }
+      - { label: "Foto di cover", name: "copertina", widget: "image", media_folder: "/src/assets/img/tech/cover", public_folder: "../../../assets/img/tech/cover", hint: "Foto orizzontale 3:2, almeno 2400px. Usa la stessa foto sulla pagina gemella nell'altra lingua." }
+      - { label: "Testo alternativo della cover", name: "copertinaAlt", widget: "string", hint: "Descrive la foto per chi non la vede, nella lingua della pagina." }
       - { label: "Titolo SEO", name: "seoTitle", widget: "string", hint: "Il titolo che compare su Google, diverso dal titolo grande della pagina." }
       - { label: "Descrizione SEO", name: "seoDescription", widget: "text", hint: "1-2 righe che compaiono sotto il link nei risultati Google." }
       - { label: "Ordine", name: "ordine", widget: "number", value_type: "int", hint: "Stesso numero della pagina gemella nell'altra lingua, altrimenti le pagine si ordinano in modo diverso nelle due lingue." }

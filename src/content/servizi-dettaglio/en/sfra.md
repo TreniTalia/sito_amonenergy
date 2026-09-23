@@ -1,6 +1,10 @@
 ---
 titolo: "SFRA testing on power transformers"
 lead: "Sweep frequency response analysis to IEC 60076-18: a non-destructive measurement that reveals the mechanical condition of the core and windings without opening the machine."
+
+# Pexels photo, Andy Coffie (https://www.pexels.com/photo/30762645/).
+copertina: "../../../assets/img/tech/cover/sfra.jpg"
+copertinaAlt: "Electrical substation with transmission towers and transformers under a hazy grey sky"
 seoTitle: "SFRA transformer test: frequency response analysis"
 seoDescription: "SFRA testing on power transformers to IEC 60076-18: sweep from 20 Hz to 2 MHz, comparison against the reference signature, report on mechanical defects."
 ordine: 1

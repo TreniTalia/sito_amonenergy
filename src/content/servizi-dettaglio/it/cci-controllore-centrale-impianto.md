@@ -1,6 +1,10 @@
 ---
 titolo: "CCI: Controllore Centrale d'Impianto"
 lead: "Installazione, configurazione e gestione del Controllore Centrale d'Impianto in partnership con Teamware: le funzioni di osservabilità e controllabilità richieste dal distributore, conformi a CEI 0-16 V5."
+
+# Foto Pexels, Neville Hawkins (https://www.pexels.com/photo/37061434/).
+copertina: "../../../assets/img/tech/cover/cci-controllore-centrale-impianto.jpg"
+copertinaAlt: "Campo fotovoltaico con file di pannelli solari e una cabina tecnica sotto un cielo nuvoloso"
 seoTitle: "CCI Controllore Centrale d'Impianto: PF1, PF2, CEI 0-16"
 seoDescription: "Installazione e gestione del Controllore Centrale d'Impianto (CCI) in partnership con Teamware: funzioni PF1 osservabilità e PF2 controllabilità conformi a CEI 0-16 V5 e Delibera ARERA 564/2025/R/eel."
 ordine: 7

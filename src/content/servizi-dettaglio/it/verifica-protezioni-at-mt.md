@@ -1,6 +1,10 @@
 ---
 titolo: "Verifica delle protezioni AT/MT"
 lead: "Iniezione controllata delle soglie di intervento secondo CEI 0-16: la protezione scatta davvero dove la taratura dice che deve scattare, e in quanto tempo."
+
+# Foto Pexels, Vjanodic WERSOV (https://www.pexels.com/photo/38217230/).
+copertina: "../../../assets/img/tech/cover/verifica-protezioni-at-mt.jpg"
+copertinaAlt: "Corridoio di una cabina elettrica con lunghe file di quadri di protezione e comando"
 seoTitle: "Verifica protezioni AT/MT: soglie I> e I>> a norma"
 seoDescription: "Verifica delle protezioni AT/MT secondo CEI 0-16: iniezione controllata delle soglie I> e I>>, tempi di intervento misurati con DRTS/64 e ISA CBA 1000, referto soglia per soglia."
 ordine: 3

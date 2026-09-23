@@ -1,6 +1,10 @@
 ---
 titolo: "Remote tripping under Allegato A.72"
 lead: "Testing and diagnostics of RIGEDI devices and A72 modems, commissioning support, performance analysis and SCADA integration: the channel through which the distributor commands the plant's disconnection when the network requires it."
+
+# Pexels photo, Quang Nguyen Vinh (https://www.pexels.com/photo/6416345/).
+copertina: "../../../assets/img/tech/cover/teledistacco-a72.jpg"
+copertinaAlt: "Wind turbines and electricity pylons in an arid landscape, with a substation in the background"
 seoTitle: "A72 remote tripping: RIGEDI and modem testing"
 seoDescription: "Testing and diagnostics of RIGEDI devices and A72 modems, commissioning support, performance analysis and SCADA integration for remote tripping of generation plants under Allegato A.72."
 ordine: 8

@@ -1,6 +1,10 @@
 ---
 titolo: "Partial discharge measurement on cables, switchgear and transformers"
 lead: "Partial discharge diagnostics to IEC 60270: apparent charge in picocoulombs reveals an insulation defect before it becomes a full breakdown."
+
+# Pexels photo, Mr Dr3igeteilt (https://www.pexels.com/photo/36137506/).
+copertina: "../../../assets/img/tech/cover/misure-scariche-parziali.jpg"
+copertinaAlt: "Close-up of high-voltage insulators and bushings backlit at sunset"
 seoTitle: "Partial discharge testing HV/MV: pC diagnostics"
 seoDescription: "Partial discharge measurement on HV/MV cables, switchgear and transformers to IEC 60270: apparent charge in pC, location with non-conventional methods."
 ordine: 2

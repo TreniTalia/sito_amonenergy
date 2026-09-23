@@ -46,6 +46,19 @@ function contenuto(html) {
   return html.slice(i, j);
 }
 
+/**
+ * La cover è la prima immagine dentro <main>: sta nella sezione della
+ * PageHero (classe `pagehero-photo`) e ha un alt descrittivo. Fino al
+ * 2026-09-23 queste pagine non avevano fotografie per scelta (spec del
+ * 2026-09-22, §3.2); il cliente l'ha ribaltata, e il test verifica ora il
+ * contrario.
+ */
+function haCover(html) {
+  const m = contenuto(html).match(/<img[^>]*>/);
+  if (!m) return false;
+  return /class="[^"]*pagehero-photo/.test(m[0]) && /alt="[^"]{12,}"/.test(m[0]);
+}
+
 describe('pagine tecniche', { skip }, () => {
   test('ROTTE è importabile e contiene le nove pagine tecniche', () => {
     assert.ok(ROTTE, 'src/i18n/routes.ts non importabile');
@@ -63,10 +76,7 @@ describe('pagine tecniche', { skip }, () => {
       assert.match(html, /"@type":"Service"/, `${lato}: manca il JSON-LD Service`);
       assert.match(html, /"@type":"FAQPage"/, `${lato}: manca il JSON-LD FAQPage`);
       assert.match(html, /<svg/, `${lato}: manca il diagramma SVG`);
-      assert.ok(
-        !/<img[^>]+\.(jpe?g|png|webp|avif)/.test(contenuto(html)),
-        `${lato}: la pagina contiene una fotografia`,
-      );
+      assert.ok(haCover(html), `${lato}: manca la foto di cover`);
     }
   });
 
@@ -111,7 +121,7 @@ describe('pagine tecniche', { skip }, () => {
     }
   });
 
-  test('tutte e nove le pagine tecniche esistono, in entrambe le lingue, con Service, FAQPage, nessuna fotografia e nessuna certificazione', () => {
+  test('tutte e nove le pagine tecniche esistono, in entrambe le lingue, con Service, FAQPage, foto di cover e nessuna certificazione', () => {
     for (const lato of ['it', 'en']) {
       for (const rotta of TECH_ROUTES) {
         const slug = slugDi(lato, rotta);
@@ -121,10 +131,7 @@ describe('pagine tecniche', { skip }, () => {
         assert.match(html, /"@type":"Service"/, `${lato}/${slug}: manca Service`);
         assert.match(html, /"@type":"FAQPage"/, `${lato}/${slug}: manca FAQPage`);
         assert.ok(!/certificazion|certification/i.test(html), `${lato}/${slug}: cita certificazioni`);
-        assert.ok(
-          !/<img[^>]+\.(jpe?g|png|webp|avif)/.test(contenuto(html)),
-          `${lato}/${slug}: la pagina contiene una fotografia`,
-        );
+        assert.ok(haCover(html), `${lato}/${slug}: manca la foto di cover`);
       }
     }
   });

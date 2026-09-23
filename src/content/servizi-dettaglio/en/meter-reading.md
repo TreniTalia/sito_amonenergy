@@ -1,6 +1,10 @@
 ---
 titolo: "Production and exchange meter reading"
 lead: "Acquisition, validation and delivery of production and exchange data: the measurement data the client needs to verify the plant, and the distributor needs for its own network accounting."
+
+# Pexels photo, Volker Morr (https://www.pexels.com/photo/33150559/).
+copertina: "../../../assets/img/tech/cover/lettura-contatori.jpg"
+copertinaAlt: "Vintage analogue instruments measuring volts, kilowatts and amperes inside an industrial hall"
 seoTitle: "Meter reading: production and exchange telemetry"
 seoDescription: "Reading and remote reading of production and exchange meters: periodic acquisition, data validation and a consultation portal for wind and solar plants connected at MV."
 ordine: 9

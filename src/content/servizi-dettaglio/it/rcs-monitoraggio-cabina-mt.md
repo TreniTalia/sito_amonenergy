@@ -1,6 +1,10 @@
 ---
 titolo: "Monitoraggio e controllo di cabina MT con RCS"
 lead: "Il nostro sistema proprietario di supervisione da remoto: analisi del guasto in tempo reale, richiusura automatica e storicizzazione dei dati, con una Control Room attiva 24 ore su 24, 365 giorni l'anno."
+
+# Foto Pexels, Paul Lichtblau (https://www.pexels.com/photo/25819964/).
+copertina: "../../../assets/img/tech/cover/rcs-monitoraggio-cabina-mt.jpg"
+copertinaAlt: "Parete di un vecchio quadro di controllo industriale con strumenti e spie, in penombra"
 seoTitle: "RCS: monitoraggio e controllo cabina MT da remoto"
 seoDescription: "RCS, il sistema proprietario Amon Energy per il monitoraggio di cabina MT: analisi guasti in tempo reale, richiusura automatica, integrazione SCADA e Control Room attiva 24/7/365."
 ordine: 6

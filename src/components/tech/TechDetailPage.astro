@@ -102,9 +102,7 @@ const faqPage = {
 ---
 
 <Base title={d.seoTitle} description={d.seoDescription} structuredData={[service, faqPage]}>
-  <!-- Nessuna fotografia su queste pagine: l'hero resta il navy pieno, e
-       l'unica immagine è il diagramma vettoriale più sotto. -->
-  <PageHero eyebrow={t.eyebrowHero} h1={d.titolo} sub={d.lead} />
+  <PageHero eyebrow={t.eyebrowHero} h1={d.titolo} sub={d.lead} image={d.copertina} imageAlt={d.copertinaAlt} />
 
   <!-- Il problema, e accanto il diagramma che lo mostra -->
   <section class="wrap-wide py-20 lg:py-28">

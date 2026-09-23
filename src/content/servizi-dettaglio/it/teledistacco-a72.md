@@ -1,6 +1,10 @@
 ---
 titolo: "Teledistacco secondo l'Allegato A.72"
 lead: "Verifica e diagnostica dei dispositivi RIGEDI e Modem A72, assistenza tecnica alla messa in servizio, analisi delle prestazioni e integrazione SCADA: il canale attraverso cui il distributore comanda il distacco dell'impianto quando la rete lo richiede."
+
+# Foto Pexels, Quang Nguyen Vinh (https://www.pexels.com/photo/6416345/).
+copertina: "../../../assets/img/tech/cover/teledistacco-a72.jpg"
+copertinaAlt: "Turbine eoliche e tralicci elettrici in un paesaggio arido, con una sottostazione sullo sfondo"
 seoTitle: "Teledistacco A72: verifica RIGEDI e Modem"
 seoDescription: "Verifica e diagnostica dei dispositivi RIGEDI e Modem A72, messa in servizio, analisi delle prestazioni e integrazione SCADA per il teledistacco degli impianti di produzione secondo l'Allegato A.72."
 ordine: 8

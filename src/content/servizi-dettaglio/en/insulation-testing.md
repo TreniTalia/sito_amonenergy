@@ -1,6 +1,10 @@
 ---
 titolo: "High-voltage insulation testing"
 lead: "A voltage ramp above operating levels with leakage current under control: the test that checks whether the insulation holds before the network finds out otherwise."
+
+# Pexels photo, Vladimir Srajber (https://www.pexels.com/photo/18373861/).
+copertina: "../../../assets/img/tech/cover/prove-isolamento.jpg"
+copertinaAlt: "String of glass disc insulators hanging from a high-voltage line against a deep blue sky"
 seoTitle: "HV/MV insulation testing: on-site dielectric strength"
 seoDescription: "High-voltage insulation testing with the Megger HV Test 80 kV: controlled voltage ramp, monitored leakage current, personnel qualified to CEI 11-27 and CEI EN 50110-1."
 ordine: 5

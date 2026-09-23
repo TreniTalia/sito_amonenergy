@@ -1,6 +1,10 @@
 ---
 titolo: "Power transformer testing"
 lead: "Turns ratio, winding resistance, tan delta: the tests that say whether a transformer is still what it was built to be."
+
+# Pexels photo, Pixabay (https://www.pexels.com/photo/236089/).
+copertina: "../../../assets/img/tech/cover/verifiche-trasformatori-di-potenza.jpg"
+copertinaAlt: "Bushings and insulators of a power transformer against a blue sky"
 seoTitle: "Power transformer testing: diagnostic checks"
 seoDescription: "Power transformer testing: turns ratio, winding resistance, tan delta and capacitance measurements with ISA T2000 and ISA STS5000 + TD500."
 ordine: 4
