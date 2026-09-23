@@ -1,0 +1,140 @@
+---
+import { proietta, type Scala } from './models/scale.ts';
+
+export interface Asse {
+  scala: Scala;
+  tacche: { v: number; t: string; minore?: boolean }[];
+  unita: string;
+}
+export interface Serie {
+  tipo: 'line' | 'scatter';
+  punti: [number, number][];
+  colore: string;
+  spessore?: number;
+  raggio?: number;
+  opacita?: number;
+  /** Asse y di riferimento: 'y' (default) o 'y2'. */
+  asse?: 'y' | 'y2';
+  legenda?: string;
+}
+interface Props {
+  uid: string;
+  ariaLabel: string;
+  x: Asse;
+  y: Asse;
+  y2?: Asse;
+  serie: Serie[];
+  banda?: { da: number; a: number; etichetta: string };
+  didascalia: string;
+  didascaliaSub: string;
+}
+const { uid, ariaLabel, x, y, y2, serie, banda, didascalia, didascaliaSub } = Astro.props;
+
+const W = 640, H = 400;
+const X0 = 78, X1 = y2 ? 566 : 608, Y0 = 70, Y1 = 330;
+const n = (v: number) => Math.round(v * 10) / 10;
+const px = (v: number) => n(proietta(x.scala, v, X0, X1));
+const py = (v: number, a: 'y' | 'y2' = 'y') => n(proietta((a === 'y2' ? y2! : y).scala, v, Y1, Y0));
+const linea = (s: Serie) => s.punti.map(([a, b]) => `${px(a)},${py(b, s.asse)}`).join(' ');
+const conLegenda = serie.filter((s) => s.legenda);
+
+// Calcola lo step delle entrate di legenda in base allo spazio disponibile.
+const legenda_step = (X1 - X0) / Math.max(1, conLegenda.length);
+---
+
+<figure class="chart">
+  <div class="chart__frame rounded-[var(--radius-card)] border border-navy-100 shadow-[var(--shadow-md)]">
+    <svg viewBox={`0 0 ${W} ${H}`} role="img" aria-label={ariaLabel} preserveAspectRatio="xMidYMid meet">
+      <defs>
+        <linearGradient id={`${uid}-bg`} x1="0" y1="0" x2="0.35" y2="1">
+          <stop offset="0" stop-color="#0c3151"></stop>
+          <stop offset="1" stop-color="#081f36"></stop>
+        </linearGradient>
+        <pattern id={`${uid}-dots`} width="24" height="24" patternUnits="userSpaceOnUse">
+          <circle cx="1.1" cy="1.1" r="1.1" fill="#4f93c4" fill-opacity="0.16"></circle>
+        </pattern>
+        <clipPath id={`${uid}-clip`}><rect x={X0} y={Y0} width={X1 - X0} height={Y1 - Y0}></rect></clipPath>
+      </defs>
+      <rect width={W} height={H} fill={`url(#${uid}-bg)`}></rect>
+      <rect width={W} height={H} fill={`url(#${uid}-dots)`}></rect>
+
+      {banda && (
+        <g>
+          <rect x={px(banda.da)} y={Y0} width={n(px(banda.a) - px(banda.da))} height={Y1 - Y0} fill="#4fd07f" fill-opacity="0.07" />
+          <line x1={px(banda.da)} y1={Y0} x2={px(banda.da)} y2={Y1} stroke="#4fd07f" stroke-opacity="0.45" stroke-dasharray="3 4" />
+        </g>
+      )}
+
+      <g stroke="#3f7fb0" stroke-width="0.8" opacity="0.22">
+        {x.tacche.map((k) => <line x1={px(k.v)} y1={Y0} x2={px(k.v)} y2={Y1} />)}
+        {y.tacche.map((k) => <line x1={X0} y1={py(k.v)} x2={X1} y2={py(k.v)} />)}
+      </g>
+      <g stroke="#6ba7d2" stroke-opacity="0.55" stroke-width="1">
+        <line x1={X0} y1={Y0} x2={X0} y2={Y1} />
+        <line x1={X0} y1={Y1} x2={X1} y2={Y1} />
+        {y2 && <line x1={X1} y1={Y0} x2={X1} y2={Y1} />}
+      </g>
+
+      <g clip-path={`url(#${uid}-clip)`}>
+        {serie.map((s) =>
+          s.tipo === 'line' ? (
+            <polyline points={linea(s)} fill="none" stroke={s.colore} stroke-width={s.spessore ?? 1.8} stroke-linejoin="round" stroke-linecap="round" opacity={s.opacita ?? 1} />
+          ) : (
+            <g fill={s.colore} fill-opacity={s.opacita ?? 0.55}>
+              {s.punti.map(([a, b]) => <circle cx={px(a)} cy={py(b, s.asse)} r={s.raggio ?? 1.6} />)}
+            </g>
+          ),
+        )}
+      </g>
+
+      <g class="chart-label" font-family="Inter Variable, Inter, sans-serif" font-size="12" font-weight="600" letter-spacing="0.06em" fill="#bcd6e8" paint-order="stroke" stroke="#081f36" stroke-width="3.5" stroke-opacity="0.85">
+        {x.tacche.map((k, i) => (
+          <text class={k.minore ? 'chart-label--minor' : ''} x={px(k.v)} y={Y1 + 22} text-anchor={i === 0 ? 'start' : i === x.tacche.length - 1 ? 'end' : 'middle'}>{k.t}</text>
+        ))}
+        {y.tacche.map((k) => <text x={X0 - 10} y={py(k.v) + 4} text-anchor="end">{k.t}</text>)}
+        <text x={X0 - 10} y={Y0 - 14} text-anchor="end">{y.unita}</text>
+        <text x={X1} y={Y1 + 44} text-anchor="end">{x.unita}</text>
+        {y2 && y2.tacche.map((k) => <text x={X1 + 10} y={py(k.v, 'y2') + 4} text-anchor="start">{k.t}</text>)}
+        {y2 && <text x={X1 + 10} y={Y0 - 14} text-anchor="start">{y2.unita}</text>}
+        {banda && <text x={n(px(banda.a) - 8)} y={Y0 + 17} text-anchor="end" fill="#8fd9ab" letter-spacing="0.12em">{banda.etichetta}</text>}
+      </g>
+
+      <g class="chart-legend" transform={`translate(${X0} 30)`} font-family="Inter Variable, Inter, sans-serif" font-size="11" font-weight="600" fill="#bcd6e8">
+        {conLegenda.map((s, i) => (
+          <g transform={`translate(${i * legenda_step} 0)`}>
+            <line x1="0" y1="0" x2="20" y2="0" stroke={s.colore} stroke-width="2.2" />
+            <text x="28" y="4">{s.legenda}</text>
+          </g>
+        ))}
+      </g>
+
+      <rect x="14" y="14" width={W - 28} height={H - 28} rx="6" fill="none" stroke="#6ba7d2" stroke-opacity="0.26" />
+      <g stroke="#8fd9ab" stroke-opacity="0.5" stroke-width="1.4" stroke-linecap="square">
+        <line x1="14" y1="38" x2="14" y2="14" /><line x1="14" y1="14" x2="38" y2="14" />
+        <line x1={W - 38} y1="14" x2={W - 14} y2="14" /><line x1={W - 14} y1="14" x2={W - 14} y2="38" />
+        <line x1="14" y1={H - 38} x2="14" y2={H - 14} /><line x1="14" y1={H - 14} x2="38" y2={H - 14} />
+        <line x1={W - 38} y1={H - 14} x2={W - 14} y2={H - 14} /><line x1={W - 14} y1={H - 14} x2={W - 14} y2={H - 38} />
+      </g>
+    </svg>
+  </div>
+  <figcaption class="chart__caption">
+    <span class="chart__dot" aria-hidden="true"></span>
+    <span><strong>{didascalia}</strong><span class="chart__caption-sub">{didascaliaSub}</span></span>
+  </figcaption>
+</figure>
+
+<style>
+  .chart__frame { position: relative; overflow: hidden; aspect-ratio: 8 / 5; background: #0a2a44; }
+  .chart__frame svg { display: block; width: 100%; height: 100%; }
+  /* Su 390px la tela è larga ~350px reali: 12 unità di viewBox varrebbero
+     meno di 7px. Le etichette crescono nello spazio del disegno. */
+  @media (max-width: 767px) {
+    .chart-label { font-size: 22px; }
+    .chart-label--minor { display: none; }
+    .chart-legend { font-size: 20px; }
+  }
+  .chart__caption { display: flex; align-items: center; gap: 0.6rem; margin-top: 0.85rem; padding-left: 0.15rem; font-size: var(--fs-small); line-height: 1.35; }
+  .chart__caption strong { display: block; font-weight: 700; }
+  .chart__caption-sub { display: block; color: color-mix(in srgb, currentColor 62%, transparent); font-size: var(--fs-micro); }
+  .chart__dot { width: 0.5rem; height: 0.5rem; flex: none; border-radius: 999px; background: #2fa85f; box-shadow: 0 0 0 4px rgb(79 208 127 / 0.22); }
+</style>
