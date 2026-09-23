@@ -8,9 +8,10 @@
  * grandezze non sono comparabili. Il contenuto è quello che restituisce
  * davvero il modello di `charts/models/isolamento.ts`: la corrente letta
  * dallo strumento è la somma della carica della capacità del componente,
- * costante finché la tensione sale, e della conduzione attraverso
- * l'isolante, V/R. Un isolamento sano ha R costante e la corrente resta
- * bassa e piatta; uno compromesso ha una R che crolla oltre una soglia di
+ * costante finché la tensione sale e poi in rapido decadimento, e della
+ * conduzione attraverso l'isolante, V/R. Un isolamento sano ha R costante:
+ * la corrente resta bassa durante la rampa e si assesta in tenuta sulla sola
+ * conduzione. Uno compromesso ha una R che crolla oltre una soglia di
  * tensione, e la corrente si impenna prima di arrivare al valore di prova:
  * è quella la firma che la prova deve cogliere.
  */
@@ -27,7 +28,7 @@ const { lingua } = Astro.props;
 const TESTI = {
   it: {
     ariaLabel:
-      'Grafico della prova di isolamento su due assi: tensione di prova in kV a sinistra, corrente di fuga in microampere a destra. La tensione sale in rampa da 0 a 80 kV nei primi 8 minuti e poi tiene il valore di prova. La corrente di un isolamento sano resta bassa e piatta per tutta la prova; quella di un isolamento compromesso segue lo stesso andamento fino a circa 45 kV, poi si impenna e resta alta anche in tenuta, prima ancora di raggiungere il valore di prova.',
+      'Grafico della prova di isolamento su due assi: tensione di prova in kV a sinistra, corrente di fuga in microampere a destra. La tensione sale in rampa da 0 a 80 kV nei primi 8 minuti e poi tiene il valore di prova. La corrente di un isolamento sano resta bassa durante la rampa e si assesta in tenuta; quella di un isolamento compromesso segue lo stesso andamento fino a circa 45 kV, poi si impenna e resta alta anche in tenuta, prima ancora di raggiungere il valore di prova.',
     legendaTensione: 'Tensione di prova',
     legendaSano: 'Fuga, isolamento sano',
     legendaCompromesso: 'Fuga, isolamento compromesso',
@@ -36,7 +37,7 @@ const TESTI = {
   },
   en: {
     ariaLabel:
-      'Insulation test chart on two axes: test voltage in kV on the left, leakage current in microamps on the right. Voltage ramps from 0 to 80 kV over the first 8 minutes, then holds the test value. The current of healthy insulation stays low and flat throughout the test; that of compromised insulation follows the same path up to about 45 kV, then spikes and stays high even at withstand, before reaching the test value.',
+      'Insulation test chart on two axes: test voltage in kV on the left, leakage current in microamps on the right. Voltage ramps from 0 to 80 kV over the first 8 minutes, then holds the test value. The current of healthy insulation stays low during the ramp and settles at withstand; that of compromised insulation follows the same path up to about 45 kV, then spikes and stays high even at withstand, before reaching the test value.',
     legendaTensione: 'Test voltage',
     legendaSano: 'Leakage, healthy insulation',
     legendaCompromesso: 'Leakage, degraded insulation',

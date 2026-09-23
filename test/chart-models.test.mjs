@@ -145,4 +145,20 @@ describe('prova di isolamento a rampa', () => {
     assert.ok(correnteFuga(t, PROVA_ISOL, 'sano') < 1);
     assert.ok(correnteFuga(t, PROVA_ISOL, 'compromesso') > 20);
   });
+  test('a fine rampa la corrente di carica si esaurisce senza gradini', () => {
+    // Stesso passo del grafico (241 campioni su 12 minuti): fra due campioni
+    // consecutivi attorno alla fine della rampa la corrente non salta di più
+    // di 2 µA. Un gradino verticale vorrebbe dire una carica che sparisce di
+    // colpo, cosa che nessun dielettrico reale fa.
+    const passo = 12 / 240;
+    for (const stato of ['sano', 'compromesso']) {
+      let peggiore = 0;
+      for (let i = 1; i <= 240; i++) {
+        const t0 = (i - 1) * passo, t1 = i * passo;
+        if (t1 < PROVA_ISOL.durataRampaMin - 0.5 || t0 > PROVA_ISOL.durataRampaMin + 2) continue;
+        peggiore = Math.max(peggiore, Math.abs(correnteFuga(t1, PROVA_ISOL, stato) - correnteFuga(t0, PROVA_ISOL, stato)));
+      }
+      assert.ok(peggiore < 2, `${stato}: salto di ${peggiore.toFixed(2)} µA fra due campioni a fine rampa`);
+    }
+  });
 });
