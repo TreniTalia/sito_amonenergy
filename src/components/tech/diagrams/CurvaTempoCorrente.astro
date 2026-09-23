@@ -63,8 +63,8 @@ const punti = PUNTI_PROVA.map((p) => [p.I, p.t] as [number, number]);
   x={{
     scala: { tipo: 'log', min: 100, max: 20000 },
     // Unità vuota: ogni tacca porta già la propria ("100 A", "20 kA"), una
-    // "A" separata sarebbe ridondante (e a 390px finiva per toccare l'ultima
-    // tacca, vedi il report di task 5, fix round 2).
+    // "A" separata sarebbe ridondante e a 390px finirebbe per toccare
+    // l'ultima tacca.
     unita: '',
     tacche: [
       { v: 100, t: '100 A' },

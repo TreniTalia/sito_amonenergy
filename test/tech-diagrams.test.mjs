@@ -13,7 +13,7 @@
  * quello sì ha una dimensione fissa, e un box o un testo che lo superano
  * sono un difetto reale, che la tela tagli visivamente il resto o no.
  *
- * Il test verifica, per ciascuno schema, a 1440 e 390px:
+ * Il test verifica, per ciascuno schema, a 1440, 390 e 320px:
  * 1. ogni box e ogni elemento del contenuto restano dentro il bordo interno
  *    del telaio (niente scroll orizzontale di pagina);
  * 2. l'inchiostro di ogni testo (via Range) resta dentro il proprio box;
@@ -107,7 +107,11 @@ function paginePerSchema() {
 const SCHEMA_ROUTES = paginePerSchema();
 const PAGINE = SCHEMA_ROUTES.flatMap((r) => [r.it.replace(/^\//, ''), r.en.replace(/^\//, '')]);
 
-const LARGHEZZE = [1440, 390];
+// 320px è il caso più stretto: il marker della sagoma del trasformatore ci
+// resta sopra gli 11px effettivi per il margine più risicato di ogni altra
+// larghezza (misurato, non stimato) — merita una guardia propria, non solo
+// 1440/390.
+const LARGHEZZE = [1440, 390, 320];
 
 // Eseguita dentro `page.evaluate`: deve bastare a se stessa, senza chiusure
 // sul modulo Node (un realm JS diverso non le vede).
