@@ -4,7 +4,6 @@ import { c, mul, div, abs, par } from '../src/components/tech/charts/models/comp
 import { mulberry32, normale } from '../src/components/tech/charts/models/random.ts';
 import { proietta, logspace } from '../src/components/tech/charts/models/scale.ts';
 import { rispostaSfra, AVVOLGIMENTO_RIFERIMENTO as RIF, AVVOLGIMENTO_DEFORMATO as DEF } from '../src/components/tech/charts/models/sfra.ts';
-import { logspace as ls } from '../src/components/tech/charts/models/scale.ts';
 import { tempoInverso, tempoIntervento, TARATURA_ESEMPIO as TAR, PUNTI_PROVA } from '../src/components/tech/charts/models/iec60255.ts';
 import { nuvolaPrpd, tensioneProva } from '../src/components/tech/charts/models/prpd.ts';
 import { tensione, correnteFuga, PROVA_ESEMPIO as PROVA_ISOL } from '../src/components/tech/charts/models/isolamento.ts';
@@ -38,7 +37,7 @@ describe('fondamenta dei grafici', () => {
 });
 
 describe('modello SFRA', () => {
-  const f = ls(20, 2e6, 600);
+  const f = logspace(20, 2e6, 600);
   const rif = f.map((x) => rispostaSfra(x, RIF));
   const def = f.map((x) => rispostaSfra(x, DEF));
   test('ampiezze nel campo di misura', () => {

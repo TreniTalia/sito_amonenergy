@@ -4,7 +4,9 @@
  * ParamGrid alte uguali riga per riga, FAQ affiancata al blocco di
  * introduzione, box "Verifiche collegate" uniformi (le stesse ServiceCard
  * della griglia Servizi, non più il box bianco `.correlato`) e pre-footer
- * classico (la stessa `CtaBand` della home, con fotografia).
+ * classico (la stessa `CtaBand` della home, con fotografia). A 390px, dove
+ * le colonne si impilano, restano da verificare le fasce alternate, le card
+ * correlate e il pre-footer; la FAQ affiancata vale da 1024px in su.
  *
  * Il test parte dal `dist` già costruito e si salta se non c'è.
  */
@@ -68,7 +70,7 @@ describe('layout delle pagine tecniche di dettaglio', { skip }, () => {
   };
 
   for (const pagina of PAGINE) {
-    for (const width of [1024, 1440]) {
+    for (const width of [390, 1024, 1440]) {
       test(`${pagina} a ${width}px: fasce alternate, parametri allineati, FAQ affiancata, box uniformi, CTA classica`, async () => {
         const m = await misura(pagina, width);
 
@@ -84,7 +86,7 @@ describe('layout delle pagine tecniche di dettaglio', { skip }, () => {
           assert.ok(Math.max(...riga) - Math.min(...riga) <= 1, `${pagina}: riga di ParamGrid non allineata (${riga.join(', ')})`);
         }
 
-        assert.equal(m.faqAffiancata, true, `${pagina}: FAQ non affiancata all'introduzione a ${width}px`);
+        if (width >= 1024) assert.equal(m.faqAffiancata, true, `${pagina}: FAQ non affiancata all'introduzione a ${width}px`);
         assert.equal(m.ctaBand, true, `${pagina}: manca il pre-footer classico (.cta-band)`);
         assert.equal(m.correlatiBianchi, 0, `${pagina}: restano box .correlato bianchi`);
         assert.ok(m.correlatiCard >= 2, `${pagina}: attese almeno due card correlate, trovate ${m.correlatiCard}`);
