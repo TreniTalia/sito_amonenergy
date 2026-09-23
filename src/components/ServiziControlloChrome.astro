@@ -159,18 +159,23 @@
   /* Le due card hanno testi di lunghezza diversa, quindi le righe di tag
      partivano ad altezze diverse e la fascia leggeva storta. Con `subgrid` le
      righe sono le stesse per tutte e due — pill, titolo, testo elastico, tag,
-     partner — e i tag si allineano da soli qualunque cosa ci sia scritta sopra.
-     La quinta riga in RCS resta vuota: è il posto della riga partner della CCI.
+     partner, link alla pagina tecnica — e i tag si allineano da soli qualunque
+     cosa ci sia scritta sopra. La quinta riga in RCS resta vuota: è il posto
+     della riga partner della CCI. Per questo il link è ancorato alla sesta
+     riga: in RCS, lasciato al flusso, salirebbe nella quinta e si
+     sfalserebbe rispetto a quello della CCI. Il numero di righe deve seguire
+     il numero di elementi della card più ricca: con cinque righe e sei
+     elementi, il link della CCI finiva nella riga del partner, sopra il logo.
      Dove `subgrid` non c'è, restano le card a flex di prima: disallineate, ma
      integre. */
   @supports (grid-template-rows: subgrid) {
     @media (min-width: 768px) {
       .control-cards {
-        grid-template-rows: auto auto 1fr auto auto;
+        grid-template-rows: auto auto 1fr auto auto auto;
       }
       .control-cards > article {
         display: grid;
-        grid-row: span 5;
+        grid-row: span 6;
         grid-template-rows: subgrid;
         /* Una subgrid eredita gli spazi del genitore: senza questo, il `gap-5`
            fra le due card si infilava anche fra le righe dentro ciascuna. Le
@@ -180,6 +185,10 @@
       /* In flex la pill stava a `self-start`; in griglia ogni cella si allarga
          per default e la pill diventava una barra da un bordo all'altro. */
       .control-cards > article > .ds-pill {
+        justify-self: start;
+      }
+      .control-cards > article > .dettaglio-link {
+        grid-row: 6;
         justify-self: start;
       }
     }
