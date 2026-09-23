@@ -6,6 +6,7 @@ import { proietta, logspace } from '../src/components/tech/charts/models/scale.t
 import { rispostaSfra, AVVOLGIMENTO_RIFERIMENTO as RIF, AVVOLGIMENTO_DEFORMATO as DEF } from '../src/components/tech/charts/models/sfra.ts';
 import { logspace as ls } from '../src/components/tech/charts/models/scale.ts';
 import { tempoInverso, tempoIntervento, TARATURA_ESEMPIO as TAR, PUNTI_PROVA } from '../src/components/tech/charts/models/iec60255.ts';
+import { nuvolaPrpd, tensioneProva } from '../src/components/tech/charts/models/prpd.ts';
 
 describe('fondamenta dei grafici', () => {
   test('aritmetica complessa', () => {
@@ -109,5 +110,21 @@ describe('caratteristica IEC 60255-151 standard inverse', () => {
       const teor = tempoIntervento(p.I, TAR);
       assert.ok(Math.abs(p.t - teor) / teor < 0.05);
     }
+  });
+});
+
+describe('PRPD di una cavità interna', () => {
+  const a = nuvolaPrpd(7, 900), b = nuvolaPrpd(7, 900);
+  test('deterministica con lo stesso seme', () => assert.deepEqual(a, b));
+  test('fasi in [0, 360) e cariche positive', () => {
+    for (const p of a) assert.ok(p.fase >= 0 && p.fase < 360 && p.pC > 0);
+  });
+  test('impulsi sui fronti di salita delle due semionde', () => {
+    const inFronte = a.filter((p) => (p.fase >= 0 && p.fase < 90) || (p.fase >= 180 && p.fase < 270)).length;
+    assert.ok(inFronte / a.length > 0.8, `solo ${inFronte}/${a.length} sui fronti`);
+  });
+  test('la tensione di prova è una sinusoide', () => {
+    assert.ok(Math.abs(tensioneProva(90, 12) - 12) < 1e-9);
+    assert.ok(Math.abs(tensioneProva(270, 12) + 12) < 1e-9);
   });
 });

@@ -1,16 +1,24 @@
 ---
 /**
- * Diagramma delle misure di scariche parziali (PD).
+ * Diagramma PRPD (phase-resolved partial discharge) delle misure di scariche
+ * parziali.
  *
- * Stessa lingua grafica di RispostaFrequenza.astro — fondo navy, reticolo a
- * puntini, cornice con tacche d'angolo, verde solo come accento. Qui il
- * contenuto è la sinusoide di tensione a frequenza di rete con gli impulsi di
- * scarica sovrapposti: è la lettura tipica di uno strumento come il
- * b2 HVA68TD+PD, che misura la carica apparente in picocoulomb secondo il
- * metodo convenzionale della IEC 60270. La soglia tratteggiata è il livello
- * di sensibilità sotto il quale un impulso si perde nel rumore di fondo.
+ * Stessa lingua grafica delle altre diagnostiche, ora sul telaio condiviso
+ * `ChartFrame`: fondo navy, reticolo a puntini, cornice con tacche d'angolo.
+ * Il contenuto è quello che restituisce davvero uno strumento come il
+ * b2 HVA68TD+PD: ogni punto è un impulso di scarica, in ascissa la fase della
+ * tensione di prova a cui è comparso, in ordinata la sua carica apparente in
+ * picocoulomb secondo il metodo convenzionale della IEC 60270. La nuvola di
+ * `charts/models/prpd.ts` è quella di una cavità interna all'isolante: scarica
+ * sui fronti di salita delle due semionde, con due "orecchie" quasi
+ * simmetriche (la negativa un po' più alta, come si vede di solito), non a
+ * caso su tutta la fase. La sinusoide di riferimento è la tensione di prova
+ * stessa, sull'asse destro in kV: è quella che fissa la fase, non un dato in
+ * pC.
  */
 import type { Lingua } from '../../../i18n/routes.ts';
+import ChartFrame from '../charts/ChartFrame.astro';
+import { nuvolaPrpd, tensioneProva } from '../charts/models/prpd.ts';
 
 interface Props {
   lingua: Lingua;
@@ -21,302 +29,50 @@ const { lingua } = Astro.props;
 const TESTI = {
   it: {
     ariaLabel:
-      'Grafico delle misure di scariche parziali: sinusoide di tensione a frequenza di rete con impulsi di scarica sovrapposti, ampiezza in picocoulomb. Una soglia tratteggiata segna il livello di sensibilità: gli impulsi sopra soglia sono evidenziati in verde, quelli sotto si perdono nel rumore di fondo.',
-    soglia: 'SOGLIA DI SENSIBILITÀ',
-    tensioneDiRete: 'Tensione a frequenza di rete',
-    impulsoRilevato: 'Impulso di scarica rilevato',
-    caption: 'Impulsi di scarica in picocoulomb',
-    captionSub: 'Curva esemplificativa · metodo convenzionale, carica apparente in pC secondo IEC 60270',
+      'Diagramma PRPD delle misure di scariche parziali: fase della tensione di prova in ascissa, carica apparente in picocoulomb in ordinata. Gli impulsi di una cavità interna all\'isolante si addensano in due nuvole sui fronti di salita delle due semionde della tensione, una attorno ai 45 gradi e una, leggermente più intensa, attorno ai 225 gradi.',
+    legendaNuvola: 'Impulsi di scarica',
+    legendaSinusoide: 'Tensione di prova',
+    caption: 'Impulsi di scarica per fase della tensione',
+    captionSub: 'Calcolato da modello · cavità interna, carica apparente in pC secondo IEC 60270',
   },
   en: {
     ariaLabel:
-      'Partial discharge measurement chart: mains-frequency voltage sinusoid with discharge pulses overlaid, amplitude in picocoulombs. A dashed threshold marks the sensitivity level: pulses above threshold are highlighted in green, those below are lost in the background noise.',
-    soglia: 'SENSITIVITY THRESHOLD',
-    tensioneDiRete: 'Mains-frequency voltage',
-    impulsoRilevato: 'Detected discharge pulse',
-    caption: 'Discharge pulses in picocoulombs',
-    captionSub: 'Sample curve · conventional method, apparent charge in pC under IEC 60270',
+      'PRPD chart of partial discharge measurements: phase of the test voltage on the horizontal axis, apparent charge in picocoulombs on the vertical axis. Pulses from an internal void in the insulation cluster in two clouds on the rising fronts of the two voltage half cycles, one around 45 degrees and one, slightly stronger, around 225 degrees.',
+    legendaNuvola: 'Discharge pulses',
+    legendaSinusoide: 'Test voltage',
+    caption: 'Discharge pulses by voltage phase',
+    captionSub: 'Computed from a model · internal void, apparent charge in pC under IEC 60270',
   },
 } as const;
 
 const t = TESTI[lingua];
 
-const W = 640;
-const H = 320;
-
-const X0 = 78;
-const X1 = 608;
-const Y0 = 48;
-const Y1 = 252;
-
-// Due cicli a 50 Hz: 0-40 ms, l'intervallo che rende leggibile la sinusoide
-// senza affollare il tracciato di impulsi.
-const T_MIN = 0;
-const T_MAX = 40;
-const PC_MIN = 0;
-const PC_MAX = 50;
-const SOGLIA_PC = 8;
-
-const x = (t: number) => X0 + ((t - T_MIN) / (T_MAX - T_MIN)) * (X1 - X0);
-const yPC = (pc: number) => Y1 - ((pc - PC_MIN) / (PC_MAX - PC_MIN)) * (Y1 - Y0);
-const n = (v: number) => Math.round(v * 10) / 10;
-
-// Sinusoide di riferimento (tensione), centrata a metà pannello: è un
-// riferimento di fase, non un dato in pC, quindi non usa l'asse verticale.
-const V_MID = (Y0 + Y1) / 2 + 14;
-const V_AMP = (Y1 - Y0) * 0.3;
-const yV = (t: number) => V_MID - V_AMP * Math.sin((2 * Math.PI * t) / 20);
-
-const PASSI = 240;
-const dV: string[] = [];
-for (let i = 0; i <= PASSI; i++) {
-  const t = T_MIN + ((T_MAX - T_MIN) * i) / PASSI;
-  dV.push(`${n(x(t))},${n(yV(t))}`);
-}
-
-// Impulsi di scarica: ampiezza in pC a istanti scelti lungo i due cicli.
-// Alcuni sopra soglia (rilevabili, verdi), uno sotto soglia (si perde nel
-// rumore, colore neutro) — è il punto che la nota della pagina spiega.
-const impulsi = [
-  { t: 3, pc: 14 },
-  { t: 6.5, pc: 34 },
-  { t: 9, pc: 22 },
-  { t: 13, pc: 5 },
-  { t: 17, pc: 41 },
-  { t: 23, pc: 17 },
-  { t: 26.5, pc: 38 },
-  { t: 29, pc: 26 },
-  { t: 33, pc: 12 },
-  { t: 37, pc: 30 },
-];
-
-const uid = 'pd';
+const nuvola = nuvolaPrpd(7, 900).map((p) => [p.fase, p.pC] as [number, number]);
+const sinusoide = Array.from({ length: 181 }, (_, i) => [i * 2, tensioneProva(i * 2, 12)] as [number, number]);
 ---
 
-<figure class="pd-plot">
-  <div class="pd-plot__frame rounded-[var(--radius-card)] border border-navy-100 shadow-[var(--shadow-md)]">
-    <svg
-      viewBox={`0 0 ${W} ${H}`}
-      role="img"
-      aria-label={t.ariaLabel}
-      preserveAspectRatio="xMidYMid meet"
-    >
-      <defs>
-        <linearGradient id={`${uid}-bg`} x1="0" y1="0" x2="0.35" y2="1">
-          <stop offset="0" stop-color="#0c3151"></stop>
-          <stop offset="1" stop-color="#081f36"></stop>
-        </linearGradient>
-        <pattern id={`${uid}-dots`} width="24" height="24" patternUnits="userSpaceOnUse">
-          <circle cx="1.1" cy="1.1" r="1.1" fill="#4f93c4" fill-opacity="0.16"></circle>
-        </pattern>
-        <clipPath id={`${uid}-clip`}>
-          <rect x={X0} y={Y0} width={X1 - X0} height={Y1 - Y0}></rect>
-        </clipPath>
-      </defs>
-
-      <rect width={W} height={H} fill={`url(#${uid}-bg)`}></rect>
-      <rect width={W} height={H} fill={`url(#${uid}-dots)`}></rect>
-
-      <!-- Reticolo: cicli in verticale (ogni 10 ms), scala pC in orizzontale. -->
-      <g stroke="#3f7fb0" stroke-width="0.8" opacity="0.22">
-        {[0, 10, 20, 30, 40].map((t) => <line x1={n(x(t))} y1={Y0} x2={n(x(t))} y2={Y1} />)}
-        {[0, 10, 20, 30, 40, 50].map((pc) => <line x1={X0} y1={n(yPC(pc))} x2={X1} y2={n(yPC(pc))} />)}
-      </g>
-
-      <!-- Soglia di sensibilità: tratteggiata, sotto i tracciati. -->
-      <line
-        x1={X0}
-        y1={n(yPC(SOGLIA_PC))}
-        x2={X1}
-        y2={n(yPC(SOGLIA_PC))}
-        stroke="#8fd9ab"
-        stroke-opacity="0.55"
-        stroke-width="1.2"
-        stroke-dasharray="4 4"
-      ></line>
-
-      <!-- Assi e tacche da strumento. -->
-      <g stroke="#6ba7d2" stroke-opacity="0.55" stroke-width="1">
-        <line x1={X0} y1={Y0} x2={X0} y2={Y1}></line>
-        <line x1={X0} y1={Y1} x2={X1} y2={Y1}></line>
-        {[0, 10, 20, 30, 40].map((t) => <line x1={n(x(t))} y1={Y1} x2={n(x(t))} y2={Y1 + 6} />)}
-        {[0, 10, 20, 30, 40, 50].map((pc) => <line x1={X0 - 6} y1={n(yPC(pc))} x2={X0} y2={n(yPC(pc))} />)}
-      </g>
-
-      <g clip-path={`url(#${uid}-clip)`}>
-        <!-- Sinusoide di tensione: riferimento di fase, tratto sottile. -->
-        <polyline points={dV.join(' ')} fill="none" stroke="#6ba7d2" stroke-width="1.4" stroke-linejoin="round"></polyline>
-
-        <!-- Impulsi di scarica: uno stelo verticale per impulso, dalla linea
-             di base fino all'ampiezza in pC. Sopra soglia in verde, sotto
-             soglia in tono neutro. -->
-        {
-          impulsi.map((imp) => (
-            <line
-              x1={n(x(imp.t))}
-              y1={n(yV(imp.t))}
-              x2={n(x(imp.t))}
-              y2={n(yPC(imp.pc))}
-              stroke={imp.pc >= SOGLIA_PC ? '#4fd07f' : '#5a86a8'}
-              stroke-width={imp.pc >= SOGLIA_PC ? 2.2 : 1.4}
-              stroke-linecap="round"
-            />
-          ))
-        }
-        {
-          impulsi
-            .filter((imp) => imp.pc >= SOGLIA_PC)
-            .map((imp) => <circle cx={n(x(imp.t))} cy={n(yPC(imp.pc))} r="2.6" fill="#4fd07f" />)
-        }
-      </g>
-
-      <!-- Etichette degli assi. -->
-      <g
-        class="plot-label"
-        font-family="Inter Variable, Inter, sans-serif"
-        font-size="12"
-        font-weight="600"
-        letter-spacing="0.08em"
-        fill="#bcd6e8"
-        paint-order="stroke"
-        stroke="#081f36"
-        stroke-width="3.5"
-        stroke-opacity="0.85"
-      >
-        {
-          [0, 10, 20, 30, 40].map((t, i) => (
-            <text x={n(x(t))} y={Y1 + 22} text-anchor={i === 0 ? 'start' : i === 4 ? 'end' : 'middle'}>
-              {t} ms
-            </text>
-          ))
-        }
-        {[0, 10, 20, 30, 40, 50].map((pc) => <text x={X0 - 12} y={n(yPC(pc) + 4)} text-anchor="end">{pc}</text>)}
-        <text x={X0 - 12} y={Y0 - 16} text-anchor="end">pC</text>
-      </g>
-
-      <g
-        class="plot-label plot-label--band"
-        font-family="Inter Variable, Inter, sans-serif"
-        font-size="11"
-        font-weight="600"
-        letter-spacing="0.1em"
-        fill="#8fd9ab"
-        paint-order="stroke"
-        stroke="#081f36"
-        stroke-width="3.5"
-        stroke-opacity="0.85"
-      >
-        <text x={X1 - 8} y={n(yPC(SOGLIA_PC) - 8)} text-anchor="end">{t.soglia}</text>
-      </g>
-
-      <!-- Legenda. -->
-      <g transform={`translate(${X0 + 16} ${Y0 + 10})`}>
-        <line x1="0" y1="0" x2="22" y2="0" stroke="#6ba7d2" stroke-width="1.4"></line>
-        <circle class="pd-legend-dot" cx="30" cy="22" r="2.6" fill="#4fd07f"></circle>
-        <g
-          class="plot-label plot-legend"
-          font-family="Inter Variable, Inter, sans-serif"
-          font-size="11"
-          font-weight="600"
-          letter-spacing="0.06em"
-          fill="#bcd6e8"
-          paint-order="stroke"
-          stroke="#081f36"
-          stroke-width="3.5"
-          stroke-opacity="0.85"
-        >
-          <text x="30" y="4">{t.tensioneDiRete}</text>
-          <text class="plot-legend-2" x="40" y="26" fill="#8fd9ab">{t.impulsoRilevato}</text>
-        </g>
-      </g>
-
-      <!-- Cornice con tacche d'angolo. -->
-      <rect x="14" y="14" width={W - 28} height={H - 28} rx="6" fill="none" stroke="#6ba7d2" stroke-opacity="0.26" stroke-width="1"></rect>
-      <g stroke="#8fd9ab" stroke-opacity="0.5" stroke-width="1.4" stroke-linecap="square">
-        <line x1="14" y1="38" x2="14" y2="14"></line>
-        <line x1="14" y1="14" x2="38" y2="14"></line>
-        <line x1={W - 38} y1="14" x2={W - 14} y2="14"></line>
-        <line x1={W - 14} y1="14" x2={W - 14} y2="38"></line>
-        <line x1="14" y1={H - 38} x2="14" y2={H - 14}></line>
-        <line x1="14" y1={H - 14} x2="38" y2={H - 14}></line>
-        <line x1={W - 38} y1={H - 14} x2={W - 14} y2={H - 14}></line>
-        <line x1={W - 14} y1={H - 14} x2={W - 14} y2={H - 38}></line>
-      </g>
-    </svg>
-  </div>
-
-  <figcaption class="pd-plot__caption">
-    <span class="pd-plot__dot" aria-hidden="true"></span>
-    <span>
-      <strong>{t.caption}</strong>
-      <span class="pd-plot__caption-sub">
-        {t.captionSub}
-      </span>
-    </span>
-  </figcaption>
-</figure>
-
-<style>
-  .pd-plot__frame {
-    position: relative;
-    overflow: hidden;
-    aspect-ratio: 2 / 1;
-    background: #0a2a44;
-  }
-
-  .pd-plot__frame svg {
-    display: block;
-    width: 100%;
-    height: 100%;
-  }
-
-  @media (max-width: 767px) {
-    .plot-label {
-      font-size: 20px;
-    }
-
-    .plot-label--band {
-      font-size: 18px;
-    }
-
-    .plot-legend-2 {
-      transform: translateY(6px);
-    }
-
-    .pd-legend-dot {
-      transform: translateY(6px);
-    }
-  }
-
-  .pd-plot__caption {
-    display: flex;
-    align-items: center;
-    gap: 0.6rem;
-    margin-top: 0.85rem;
-    padding-left: 0.15rem;
-    color: currentColor;
-    font-size: var(--fs-small);
-    line-height: 1.35;
-  }
-
-  .pd-plot__caption strong {
-    display: block;
-    font-weight: 700;
-    letter-spacing: 0.01em;
-  }
-
-  .pd-plot__caption-sub {
-    display: block;
-    color: color-mix(in srgb, currentColor 62%, transparent);
-    font-size: var(--fs-micro);
-  }
-
-  .pd-plot__dot {
-    width: 0.5rem;
-    height: 0.5rem;
-    flex: none;
-    border-radius: 999px;
-    background: #2fa85f;
-    box-shadow: 0 0 0 4px rgb(79 208 127 / 0.22);
-  }
-</style>
+<ChartFrame
+  uid="prpd"
+  ariaLabel={t.ariaLabel}
+  x={{
+    scala: { tipo: 'lin', min: 0, max: 360 },
+    unita: '°',
+    tacche: [0, 90, 180, 270, 360].map((v) => ({ v, t: `${v}°` })),
+  }}
+  y={{
+    scala: { tipo: 'lin', min: 0, max: 100 },
+    unita: 'pC',
+    tacche: [0, 25, 50, 75, 100].map((v) => ({ v, t: String(v) })),
+  }}
+  y2={{
+    scala: { tipo: 'lin', min: -15, max: 15 },
+    unita: 'kV',
+    tacche: [-15, 0, 15].map((v) => ({ v, t: String(v) })),
+  }}
+  serie={[
+    { tipo: 'scatter', punti: nuvola, colore: '#4fd07f', raggio: 1.8, opacita: 0.5, legenda: t.legendaNuvola },
+    { tipo: 'line', punti: sinusoide, colore: '#bcd6e8', spessore: 1.4, opacita: 0.8, asse: 'y2', legenda: t.legendaSinusoide },
+  ]}
+  didascalia={t.caption}
+  didascaliaSub={t.captionSub}
+/>
