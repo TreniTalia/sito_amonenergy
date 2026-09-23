@@ -3,18 +3,11 @@
  * Griglia HTML/CSS per gli schemi a catena orizzontale (RCS, A.72, lettura
  * contatori): fino a 4 box, quattro colonne da 768px in su, una sola colonna
  * (impilati) sotto i 768px, con le frecce che passano da orizzontali a
- * verticali.
- *
- * Fix round 1: la versione precedente disegnava tutto in SVG a coordinate
- * fisse, con la larghezza delle righe stimata a build time (`righe.ts`) —
- * una stima, non una misura, che a certe combinazioni di lingua/larghezza
- * sbagliava e faceva uscire il testo dal box ("Protezione di interfaccia"
- * nel teledistacco A.72, tagli di parole altrove). Qui i box sono elementi
- * HTML reali: il testo va a capo secondo le regole normali del flusso e non
- * può mai uscire dal proprio riquadro, perché è il riquadro a crescere con
- * lui. Le dimensioni dei testi sono quelle del sistema di design
- * (`--fs-small`/`--fs-micro`), non stimate: niente più corse a chi arriva
- * primo fra dimensione mobile e reale.
+ * verticali. I box sono elementi HTML reali: il testo va a capo secondo le
+ * regole normali del flusso e non può mai uscire dal proprio riquadro,
+ * perché è il riquadro a crescere con lui. Le dimensioni dei testi sono
+ * quelle del sistema di design (`--fs-small`/`--fs-micro`), le stesse a
+ * qualunque larghezza e in qualunque lingua.
  */
 interface Blocco {
   t1: string;
@@ -22,16 +15,15 @@ interface Blocco {
   accento?: boolean;
 }
 interface Props {
-  uid: string;
   blocchi: Blocco[];
   sopra?: { etichetta: string };
   sotto?: { etichetta: string; evidenza?: string };
   unica?: { etichetta: string };
 }
-const { uid, blocchi, sopra, sotto, unica } = Astro.props;
+const { blocchi, sopra, sotto, unica } = Astro.props;
 ---
 
-<div class="chain" id={`chain-${uid}`}>
+<div class="chain">
   {sopra && (
     <div class="chain__lane chain__lane--sopra">
       <span class="chain__lane-label">{sopra.etichetta}</span>
@@ -93,6 +85,11 @@ const { uid, blocchi, sopra, sotto, unica } = Astro.props;
   }
 
   .chain__box {
+    /* Un box è un elemento di griglia sull'asse principale: senza
+       `min-width: 0` il suo minimo implicito è la larghezza del contenuto
+       più lungo, e una parola senza spazi (un refuso, un termine tecnico non
+       tradotto) allargherebbe la colonna invece di andare a capo. */
+    min-width: 0;
     background: #0f3656;
     border: 1.4px solid rgba(107, 167, 210, 0.55);
     border-radius: 10px;
@@ -110,6 +107,7 @@ const { uid, blocchi, sopra, sotto, unica } = Astro.props;
     font-weight: 700;
     font-size: var(--fs-small);
     line-height: 1.25;
+    overflow-wrap: anywhere;
   }
   .chain__box--accento .chain__box-title {
     color: #8fd9ab;
@@ -120,6 +118,7 @@ const { uid, blocchi, sopra, sotto, unica } = Astro.props;
     line-height: 1.35;
     color: #bcd6e8;
     opacity: 0.85;
+    overflow-wrap: anywhere;
   }
 
   .chain__lane {

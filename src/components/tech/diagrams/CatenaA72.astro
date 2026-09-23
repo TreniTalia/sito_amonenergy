@@ -11,8 +11,8 @@
  * pagine di controllo, qui applicata a una catena di sicurezza di rete.
  * Disegnata sulla griglia condivisa `SchemaFrame`/`BlockChain`: il titolo del
  * primo box (PI, "Protezione di interfaccia") è HTML reale, quindi va a capo
- * secondo il flusso normale e non esce più dal riquadro come nella prima
- * versione SVG a coordinate fisse.
+ * secondo il flusso normale e resta sempre dentro il proprio riquadro,
+ * qualunque sia la lingua o la larghezza dello schermo.
  */
 import type { Lingua } from '../../../i18n/routes.ts';
 import SchemaFrame from './SchemaFrame.astro';
@@ -58,9 +58,8 @@ const TESTI = {
 const t = TESTI[lingua];
 ---
 
-<SchemaFrame uid="a72" ariaLabel={t.ariaLabel} didascalia={t.caption} didascaliaSub={t.captionSub}>
+<SchemaFrame ariaLabel={t.ariaLabel} didascalia={t.caption} didascaliaSub={t.captionSub}>
   <BlockChain
-    uid="a72"
     blocchi={t.blocchi.map((b, i) => ({ ...b, accento: i === 0 }))}
     sopra={{ etichetta: t.stato }}
     sotto={{ etichetta: t.comando }}

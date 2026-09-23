@@ -32,12 +32,12 @@ interface Props {
 const { uid, ariaLabel, x, y, y2, serie, banda, didascalia, didascaliaSub } = Astro.props;
 
 // Fondo, trama, cornice con tacche e didascalia sono il telaio condiviso
-// `FrameChrome` (anche da `SchemaFrame`, Task 8): qui restano solo gli assi e
-// le serie, disegnati nello `<slot />` del telaio. W e H devono combaciare con
-// le costanti dentro FrameChrome (640×440): la tela non ha un aspect-ratio
-// fisso in CSS, è l'SVG stesso (via viewBox) a decidere la propria
-// proporzione, ed è un rettangolo un po' meno largo di prima (640×440 invece
-// di 640×400) per dare più altezza reale al grafico sugli schermi stretti.
+// `FrameChrome` (usato anche da `SchemaFrame` per gli schemi a blocchi): qui
+// restano solo gli assi e le serie, disegnati nello `<slot />` del telaio.
+// W e H devono combaciare con le costanti dentro FrameChrome (640×440): la
+// tela non ha un aspect-ratio fisso in CSS, è l'SVG stesso (via viewBox) a
+// decidere la propria proporzione, un rettangolo un po' meno largo che alto
+// per dare più altezza reale al grafico sugli schermi stretti.
 const W = 640, H = 440;
 const X0 = 78, X1 = y2 ? 566 : 608, Y0 = 46, Y1 = 370;
 const n = (v: number) => Math.round(v * 10) / 10;

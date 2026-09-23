@@ -6,22 +6,20 @@
  * cornice con tacche d'angolo da strumento, didascalia con il pallino verde.
  *
  * Due modalità, dietro `mode`:
- * - 'svg' (default, usata solo da `ChartFrame`): il contenuto è SVG a
- *   coordinate fisse 640×440, com'era da sempre. Invariata dal fix round 1 in
- *   poi: `ChartFrame.astro` non tocca questo file, e `test/charts-layout.test.mjs`
- *   lo dimostra restando verde.
+ * - 'svg' (default, usata da `ChartFrame`): il contenuto è SVG a coordinate
+ *   fisse 640×440, la tela su cui assi e serie si posizionano per numero.
  * - 'html' (usata da `SchemaFrame`): il contenuto è HTML/CSS reale, che va a
- *   capo da solo e decide da sé quanto spazio occupare — niente più tela
- *   640×440 fissa con bande vuote quando il contenuto è più corto. Fondo,
- *   trama e tacche d'angolo diventano CSS invece di rect/line SVG, ma sono
- *   lo stesso disegno con gli stessi colori.
+ *   capo da solo e decide da sé quanto spazio occupare — un telaio a misura
+ *   del contenuto, non una tela fissa. Fondo, trama e tacche d'angolo
+ *   diventano proprietà CSS invece di rect/line SVG, con gli stessi colori.
  *
  * Il nome BEM dei pezzi (`${figureClass}__frame` ecc.) tiene i selettori
- * `figure.chart`/`.chart__legend`/… di `ChartFrame` invariati dopo l'estrazione:
- * qui dentro serve solo a comporre la classe, la resa nel DOM non cambia.
+ * `figure.chart`/`.chart__legend`/… di `ChartFrame` invariati: qui dentro
+ * serve solo a comporre la classe, la resa nel DOM non cambia.
  */
 interface Props {
-  uid: string;
+  /** ID univoco per i riferimenti SVG (gradiente, trama): solo in modalità 'svg'. */
+  uid?: string;
   ariaLabel: string;
   didascalia: string;
   didascaliaSub: string;

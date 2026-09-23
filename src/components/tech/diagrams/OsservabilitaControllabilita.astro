@@ -10,11 +10,11 @@
  * riferimento normativo comune, confermato dal cliente: CEI 0-16 V5 e la
  * Delibera ARERA 564/2025/R/eel.
  *
- * HTML/CSS reale (fix round 1): la versione SVG precedente tagliava i titoli
- * delle colonne contro il bordo superiore della tela a ogni larghezza (una
- * `y` assoluta non lascia spazio a un titolo più alto del previsto). Le due
- * colonne sono ora `<div>` in un flusso normale, affiancate da 768px in su e
- * impilate sotto, dentro lo stesso telaio `SchemaFrame`.
+ * HTML/CSS reale: le due colonne sono `<div>` in un flusso normale, che si
+ * dimensionano sul proprio contenuto invece che su coordinate assolute — un
+ * titolo più alto del previsto si fa semplicemente spazio, non viene tagliato
+ * dal bordo del box sottostante. Affiancate da 768px in su, impilate sotto,
+ * dentro lo stesso telaio `SchemaFrame`.
  */
 import type { Lingua } from '../../../i18n/routes.ts';
 import SchemaFrame from './SchemaFrame.astro';
@@ -65,7 +65,7 @@ const colonne = [
 ] as const;
 ---
 
-<SchemaFrame uid="occ" ariaLabel={t.ariaLabel} didascalia={t.caption} didascaliaSub={t.captionSub}>
+<SchemaFrame ariaLabel={t.ariaLabel} didascalia={t.caption} didascaliaSub={t.captionSub}>
   <div class="occ">
     {
       colonne.map((col) => (
@@ -109,6 +109,11 @@ const colonne = [
     flex-direction: column;
     align-items: stretch;
     flex: 1 1 0;
+    /* Elemento di griglia flessibile sull'asse principale (`.occ` è una riga):
+       senza questo il minimo implicito è la larghezza del contenuto più
+       lungo, e una parola senza spazi allargherebbe la colonna anziché
+       andare a capo. */
+    min-width: 0;
     max-width: 15rem;
   }
   /* Separatore verticale fra le due colonne, come il tratteggio dell'SVG. */
@@ -148,6 +153,7 @@ const colonne = [
     font-weight: 700;
     font-size: var(--fs-small);
     line-height: 1.3;
+    overflow-wrap: anywhere;
   }
   .occ__box--cci .occ__box-title {
     font-family: var(--font-display);

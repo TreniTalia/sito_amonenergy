@@ -53,9 +53,8 @@ const TESTI = {
 const t = TESTI[lingua];
 ---
 
-<SchemaFrame uid="ctr" ariaLabel={t.ariaLabel} didascalia={t.caption} didascaliaSub={t.captionSub}>
+<SchemaFrame ariaLabel={t.ariaLabel} didascalia={t.caption} didascaliaSub={t.captionSub}>
   <BlockChain
-    uid="ctr"
     blocchi={t.blocchi.map((b, i) => ({ ...b, accento: i === 3 }))}
     unica={{ etichetta: t.datoDiMisura }}
   />

@@ -57,9 +57,8 @@ const TESTI = {
 const t = TESTI[lingua];
 ---
 
-<SchemaFrame uid="rcs" ariaLabel={t.ariaLabel} didascalia={t.caption} didascaliaSub={t.captionSub}>
+<SchemaFrame ariaLabel={t.ariaLabel} didascalia={t.caption} didascaliaSub={t.captionSub}>
   <BlockChain
-    uid="rcs"
     blocchi={t.blocchi.map((b, i) => ({ ...b, accento: i === 1 }))}
     sopra={{ etichetta: t.stato }}
     sotto={{ etichetta: t.comando, evidenza: t.richiusura }}

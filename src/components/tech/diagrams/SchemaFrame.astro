@@ -2,24 +2,21 @@
 /**
  * Telaio per gli schemi a blocchi (catene RCS/A.72/contatori, PF1/PF2 del
  * CCI, sagoma del trasformatore): stesso fondo, trama e cornice dei grafici a
- * dati, tramite il telaio comune `FrameChrome` in modalità 'html' — qui il
+ * dati, tramite il telaio comune `FrameChrome` in modalità 'html'. Il
  * contenuto è HTML/CSS reale (box, frecce, liste), non SVG a coordinate
- * fisse: va a capo da solo e non ha bisogno di una tela 640×440 con bande
- * vuote quando il contenuto è più corto (fix round 1: prima il testo dei box
- * usciva dal riquadro a certe larghezze, e a 1440px restava un terzo di tela
- * vuoto sopra e sotto il disegno).
+ * fisse: va a capo da solo e non ha bisogno di una tela di dimensione fissa
+ * quando il contenuto è più corto o più lungo del previsto.
  */
 import FrameChrome from '../charts/FrameChrome.astro';
 
 interface Props {
-  uid: string;
   ariaLabel: string;
   didascalia: string;
   didascaliaSub: string;
 }
-const { uid, ariaLabel, didascalia, didascaliaSub } = Astro.props;
+const { ariaLabel, didascalia, didascaliaSub } = Astro.props;
 ---
 
-<FrameChrome uid={uid} ariaLabel={ariaLabel} didascalia={didascalia} didascaliaSub={didascaliaSub} figureClass="schema" mode="html">
+<FrameChrome ariaLabel={ariaLabel} didascalia={didascalia} didascaliaSub={didascaliaSub} figureClass="schema" mode="html">
   <slot />
 </FrameChrome>
