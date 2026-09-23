@@ -2,9 +2,9 @@
 titolo: "Prova SFRA sui trasformatori di potenza"
 lead: "Analisi della risposta in frequenza secondo IEC 60076-18: una misura non distruttiva che rivela lo stato meccanico di nucleo e avvolgimenti senza aprire la macchina."
 
-# Foto Pexels, Andy Coffie (https://www.pexels.com/photo/30762645/).
+# Foto Pexels, Matthias Schleiden (https://www.pexels.com/photo/11166542/).
 copertina: "../../../assets/img/tech/cover/sfra.jpg"
-copertinaAlt: "Sottostazione elettrica con tralicci e trasformatori sotto un cielo grigio e velato"
+copertinaAlt: "Trasformatore su palo con cavi e isolatori contro un cielo azzurro e nuvoloso"
 seoTitle: "Prova SFRA trasformatore: risposta in frequenza"
 seoDescription: "Prova SFRA su trasformatori di potenza secondo IEC 60076-18: misura da 20 Hz a 2 MHz, confronto con l'impronta di riferimento, referto sui difetti meccanici."
 ordine: 1

@@ -2,9 +2,9 @@
 titolo: "RCS remote monitoring and control of MV substations"
 lead: "Our proprietary remote supervision system: real-time fault analysis, automatic reclosing and data logging, with a Control Room active 24 hours a day, 365 days a year."
 
-# Pexels photo, Paul Lichtblau (https://www.pexels.com/photo/25819964/).
+# Pexels photo, panumas nikhomkhai (https://www.pexels.com/photo/17489156/).
 copertina: "../../../assets/img/tech/cover/rcs-monitoraggio-cabina-mt.jpg"
-copertinaAlt: "Wall of an old industrial control panel with gauges and indicator lights in low light"
+copertinaAlt: "Close-up of a server rack with blue indicator lights in a control room"
 seoTitle: "RCS: remote MV substation monitoring and control"
 seoDescription: "RCS, Amon Energy's proprietary system for MV substation monitoring: real-time fault analysis, automatic reclosing, SCADA integration and a Control Room active 24/7/365."
 ordine: 6

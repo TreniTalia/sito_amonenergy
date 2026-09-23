@@ -2,9 +2,9 @@
 titolo: "Lettura e telelettura contatori di produzione"
 lead: "Acquisizione, validazione e messa a disposizione dei dati di produzione e scambio: il dato di misura che serve al cliente per verificare l'impianto e al distributore per la propria contabilità di rete."
 
-# Foto Pexels, Volker Morr (https://www.pexels.com/photo/33150559/).
+# Foto Pexels, Brett Sayles (https://www.pexels.com/photo/4330787/).
 copertina: "../../../assets/img/tech/cover/lettura-contatori.jpg"
-copertinaAlt: "Strumenti analogici d'epoca che misurano volt, kilowatt e ampere in un capannone industriale"
+copertinaAlt: "Pannello di permutazione in fibra ottica con cavi turchesi e connettori bianchi"
 seoTitle: "Lettura contatori: telelettura produzione e scambio"
 seoDescription: "Lettura e telelettura dei contatori di produzione e scambio: acquisizione periodica, validazione dei dati e portale di consultazione per impianti fotovoltaici ed eolici connessi in MT."
 ordine: 9

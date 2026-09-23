@@ -3,9 +3,10 @@
 // parziali, RCS...): tutto ciò che in `src/pages/servizi/[slug].astro` non
 // era già delegato a un sotto-componente. Estratto qui perché la gemella
 // inglese (`src/pages/en/services/[slug].astro`) ha la stessa struttura e le
-// stesse regole (niente fotografie, stesso ordine di sezioni): senza questo
-// componente le due route dovrebbero ricopiare lo stesso markup, e sarebbe
-// solo questione di tempo prima che divergessero.
+// stesse regole (stesso ordine di sezioni, foto di cover presa dal
+// frontmatter: la gemella EN usa lo stesso jpg, cambia solo l'alt): senza
+// questo componente le due route dovrebbero ricopiare lo stesso markup, e
+// sarebbe solo questione di tempo prima che divergessero.
 import type { CollectionEntry } from 'astro:content';
 import Base from '../../layouts/Base.astro';
 import PageHero from '../../components/PageHero.astro';

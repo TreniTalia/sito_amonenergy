@@ -2,9 +2,9 @@
 titolo: "Misure di scariche parziali su cavi, quadri e trasformatori"
 lead: "Diagnosi delle scariche parziali secondo IEC 60270: la carica apparente in picocoulomb rivela un difetto di isolamento prima che diventi un guasto franco."
 
-# Foto Pexels, Mr Dr3igeteilt (https://www.pexels.com/photo/36137506/).
+# Foto Pexels, Magda Ehlers (https://www.pexels.com/photo/37517742/).
 copertina: "../../../assets/img/tech/cover/misure-scariche-parziali.jpg"
-copertinaAlt: "Primo piano di isolatori e boccole di un impianto ad alta tensione in controluce al tramonto"
+copertinaAlt: "Cavo elettrico arrotolato su un palo di legno contro un cielo grigio"
 seoTitle: "Misure scariche parziali AT/MT: diagnosi in pC"
 seoDescription: "Misure di scariche parziali su cavi, quadri e trasformatori AT/MT secondo IEC 60270: carica apparente in pC, localizzazione con metodi non convenzionali."
 ordine: 2
