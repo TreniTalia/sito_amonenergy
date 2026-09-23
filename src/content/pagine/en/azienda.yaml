@@ -2,16 +2,23 @@ pagina: "azienda"
 
 eyebrow: "About us"
 h1: "Energy professionals, since 2020."
+sub: "Over twenty years of work on HV/MV electrical plants, from a single site in Puglia, serving renewable energy across Central-Southern Italy."
 
+storiaTitolo: "Twenty years of substations, one team."
 storia: "Amon Energy's experience is rooted in 2000: founded as PL System, then Energy System, with over 100 HV/MV substations built and O&M contracts on more than 30 substations across Southern Italy, up to the acquisition by the BayWa r.e. Group in 2019. In 2020 Mario Palumbo and Ludovico Lombardi founded Amon Energy S.r.l., bringing together over twenty years of expertise in HV/MV electrical plants into a single company, now serving renewable energy across Central-Southern Italy."
 
 # NOTE: text drafted from the facts stated in the spec alone (founded 2020,
 # partners, Energy System Services, 20+ years of experience, renewables focus
 # in Central-Southern Italy). To be reviewed/validated by the client before
-# go-live — not verbatim brochure copy.
-missione: "Amon Energy's mission is to stand alongside energy-sector operators at every stage of a plant's life — from construction to testing, through to day-to-day management — with the same technical expertise built over more than twenty years in civil, industrial and HV/MV electrical plants, now serving renewable energy across Central-Southern Italy."
+# go-live: not verbatim brochure copy.
+missioneTitolo: "Alongside energy producers, at every stage of a plant's life."
+missione: "We work alongside energy-sector operators from construction to testing, through to everyday management. We do it with the technical expertise built over more than twenty years on civil, industrial and HV/MV electrical plants, which we now put at the service of renewable energy across Central-Southern Italy."
 
-raggioAzione: "One 5,000 m² site in Castelluccio dei Sauri (FG), with a strategic spare-parts warehouse and a Control Room active 24/7/365. Centrally located relative to Central-Southern Italy, it lets us reach most plants in the area within hours — a decisive factor when a fault cannot wait."
+raggioTitolo: "A central site, a few hours from the plants."
+raggioAzione: "One 5,000 m² site in Castelluccio dei Sauri (FG), with a strategic spare-parts warehouse and a Control Room active 24/7/365. From here we reach most plants in Central-Southern Italy within a few hours, and when a fault cannot wait, that is what makes the difference."
+
+strumentazioneTitolo: "Our technical equipment."
+strumentazioneTesto: "Calibrated, verified test instruments, on board our mobile labs. We arrive on site with everything needed to measure, so the test never has to be postponed."
 
 marqueeTitolo: "Our clients"
 

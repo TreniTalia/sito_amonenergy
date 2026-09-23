@@ -243,9 +243,15 @@ collections:
           - { label: "Tipo pagina", name: "pagina", widget: "hidden", default: "azienda", i18n: "duplicate" }
           - { label: "Eyebrow (etichetta sopra il titolo)", name: "eyebrow", widget: "string", i18n: true }
           - { label: "Titolo grande (H1)", name: "h1", widget: "text", i18n: true }
-          - { label: "Storia", name: "storia", widget: "text", i18n: true }
-          - { label: "Missione", name: "missione", widget: "text", i18n: true, hint: "Testo redatto dai soli fatti noti — da far validare dal cliente." }
-          - { label: "Tempestività d'intervento (testo raggio d'azione)", name: "raggioAzione", widget: "text", i18n: true }
+          - { label: "Sottotitolo della cover", name: "sub", widget: "text", i18n: true }
+          - { label: "Storia: titolo", name: "storiaTitolo", widget: "string", i18n: true }
+          - { label: "Storia: testo", name: "storia", widget: "text", i18n: true }
+          - { label: "Missione: titolo", name: "missioneTitolo", widget: "string", i18n: true }
+          - { label: "Missione: testo", name: "missione", widget: "text", i18n: true, hint: "Testo redatto dai soli fatti noti, da far validare dal cliente." }
+          - { label: "Tempestività d'intervento: titolo", name: "raggioTitolo", widget: "string", i18n: true }
+          - { label: "Tempestività d'intervento: testo", name: "raggioAzione", widget: "text", i18n: true }
+          - { label: "Strumentazione: titolo", name: "strumentazioneTitolo", widget: "string", i18n: true }
+          - { label: "Strumentazione: testo", name: "strumentazioneTesto", widget: "text", i18n: true }
           - { label: "Titolo sezione clienti", name: "marqueeTitolo", widget: "string", i18n: true }
           - label: "Strumentazione (elenco tag)"
             name: "strumentazione"

@@ -121,9 +121,17 @@ const aziendaSchema = z.object({
   pagina: z.literal('azienda'),
   eyebrow: z.string(),
   h1: z.string(),
+  // Il sottotitolo della cover non è decorativo: senza, la cover di Azienda
+  // restava più bassa di quelle di Lavori e Contatti.
+  sub: z.string(),
+  storiaTitolo: z.string(),
   storia: z.string(),
+  missioneTitolo: z.string(),
   missione: z.string(),
+  raggioTitolo: z.string(),
   raggioAzione: z.string(),
+  strumentazioneTitolo: z.string(),
+  strumentazioneTesto: z.string(),
   strumentazione: z.array(z.string()),
   marqueeTitolo: z.string(),
 });

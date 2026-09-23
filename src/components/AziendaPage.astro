@@ -1,0 +1,218 @@
+---
+// Corpo condiviso della pagina Azienda (`/azienda/`) e della gemella inglese
+// (`/en/company/`): stessa struttura, stesse foto, cambiano solo i testi.
+// Tenuto in un componente per lo stesso motivo di TechDetailPage: due route
+// che ricopiano lo stesso markup finiscono per divergere.
+//
+// Ordine delle fasce: le superfici si alternano sempre (chiaro, navy, grigio
+// azzurro, chiaro...) e due fasce navy non sono mai adiacenti. Per questo i
+// numeri stanno subito dopo la storia e la missione è su fondo chiaro, con
+// una sua foto.
+import { getEntry } from 'astro:content';
+import { Image } from 'astro:assets';
+import Base from '../layouts/Base.astro';
+import PageHero from './PageHero.astro';
+import CoverageMap from './CoverageMap.astro';
+import StatBar from './StatBar.astro';
+import ClientMarquee from './ClientMarquee.astro';
+import CtaBand from './CtaBand.astro';
+import type { Lingua } from '../i18n/routes.ts';
+// Foto Pexels, Robert So (https://www.pexels.com/photo/18468536/): portali e
+// sbarre di una sottostazione AT all'alba. Toni freddi, niente persone né
+// marchi: sotto il filtro e il velo di PageHero legge come le cover di
+// Servizi e Lavori.
+import heroImg from '../assets/img/photos/azienda-hero-substation-alba.jpg';
+// Foto Pexels, Phil Evenden (https://www.pexels.com/photo/36358684/):
+// apparecchiature AT di una sottostazione sotto cielo pieno. Ritagliata a 4:3
+// nel file stesso, non solo via CSS, per non servire pixel che nessuno vede.
+import storiaImg from '../assets/img/photos/azienda-storia-sottostazione.jpg';
+// Foto Pexels, Francesco Ungaro (https://www.pexels.com/photo/15207534/):
+// aerogeneratori su colline appenniniche. Ritagliata a 4:3 come la storia.
+import missioneImg from '../assets/img/photos/azienda-missione-eolico.jpg';
+// Foto reale del laboratorio mobile Amon Energy: resta, perché mostra un
+// mezzo dell'azienda e nessuna foto di repertorio può sostituirlo.
+import vanImg from '../assets/img/photos/van-laboratorio-aperto.jpg';
+
+interface Props {
+  lingua: Lingua;
+  title: string;
+  description: string;
+}
+
+const { lingua, title, description } = Astro.props;
+
+const TESTI = {
+  it: {
+    heroAlt: "Portali e sbarre in acciaio di una sottostazione elettrica ad alta tensione, all'alba",
+    storiaEyebrow: 'La nostra storia',
+    storiaAlt: 'Isolatori e apparecchiature di manovra di una sottostazione elettrica AT sotto il cielo azzurro',
+    missioneEyebrow: 'La nostra missione',
+    missioneAlt: "Aerogeneratori sul crinale di una collina boscosa dell'Appennino, sotto un cielo nuvoloso",
+    statNota: "Numeri dell'operatività Amon Energy",
+    raggioEyebrow: "Tempestività d'intervento",
+    strumentazioneEyebrow: 'Strumentazione',
+    vanAlt: 'Il laboratorio mobile di Amon Energy con la strumentazione di prova a bordo, in campo durante un intervento',
+  },
+  en: {
+    heroAlt: 'Steel gantries and busbars of a high voltage electrical substation, at dawn',
+    storiaEyebrow: 'Our story',
+    storiaAlt: 'Insulators and switchgear of an HV electrical substation under a blue sky',
+    missioneEyebrow: 'Our mission',
+    missioneAlt: 'Wind turbines on the ridge of a wooded Apennine hill, under a cloudy sky',
+    statNota: "Amon Energy's operational figures",
+    raggioEyebrow: 'Response time',
+    strumentazioneEyebrow: 'Instrumentation',
+    vanAlt: "Amon Energy's mobile lab with test instrumentation on board, in the field during a call-out",
+  },
+} as const;
+const t = TESTI[lingua];
+
+const azienda = await getEntry('pagine', `${lingua}/azienda`);
+if (!azienda || azienda.data.pagina !== 'azienda') throw new Error(`pagine/${lingua}/azienda.yaml missing or malformed`);
+const d = azienda.data;
+
+// Stessi numeri operativi della home: unica fonte, per non tenere due copie
+// dello stesso dato che potrebbero disallinearsi.
+const home = await getEntry('pagine', `${lingua}/home`);
+if (!home || home.data.pagina !== 'home') throw new Error(`pagine/${lingua}/home.yaml missing or malformed`);
+const { statbar } = home.data;
+---
+
+<Base title={title} description={description}>
+  <PageHero eyebrow={d.eyebrow} h1={d.h1} sub={d.sub} image={heroImg} imageAlt={t.heroAlt} />
+
+  <!-- Storia. Stessa proporzione testo/immagine del blocco RCS della home
+       (1.05 : 0.95) con una foto 4:3: a 1440px la foto è alta quanto il
+       blocco di testo, invece di doppiarlo come faceva il vecchio 4:5. -->
+  <section class="wrap-wide py-20 lg:py-28">
+    <div class="grid items-center gap-12 lg:grid-cols-[1.05fr_0.95fr] lg:gap-16">
+      <div>
+        <div class="ds-eyebrow" data-reveal>
+          <span class="ds-eyebrow-dash"></span>
+          <span class="ds-eyebrow-label">{t.storiaEyebrow}</span>
+        </div>
+        <h2 class="text-headline max-w-[22ch]" data-reveal style="--reveal-delay:80ms">{d.storiaTitolo}</h2>
+        <p class="measure text-body mt-5 text-ink/75" data-reveal style="--reveal-delay:120ms">{d.storia}</p>
+      </div>
+      <figure class="azienda-figure" data-reveal style="--reveal-delay:120ms">
+        <Image
+          src={storiaImg}
+          alt={t.storiaAlt}
+          class="azienda-foto"
+          widths={[600, 900, 1200, 1600]}
+          sizes="(min-width: 1024px) 44vw, 100vw"
+        />
+      </figure>
+    </div>
+  </section>
+
+  <StatBar items={statbar} nota={t.statNota} />
+
+  <!-- Missione: a specchio della storia, foto a sinistra. Su telefono il
+       testo resta sopra la foto, come in tutte le altre fasce. -->
+  <section class="bg-navy-100">
+    <div class="wrap-wide py-20 lg:py-28">
+      <div class="grid items-center gap-12 lg:grid-cols-[0.95fr_1.05fr] lg:gap-16">
+        <div class="lg:order-2">
+          <div class="ds-eyebrow" data-reveal>
+            <span class="ds-eyebrow-dash"></span>
+            <span class="ds-eyebrow-label">{t.missioneEyebrow}</span>
+          </div>
+          <h2 class="text-headline max-w-[22ch]" data-reveal style="--reveal-delay:80ms">{d.missioneTitolo}</h2>
+          <p class="measure text-body mt-5 text-ink/75" data-reveal style="--reveal-delay:120ms">{d.missione}</p>
+        </div>
+        <figure class="azienda-figure lg:order-1" data-reveal style="--reveal-delay:120ms">
+          <Image
+            src={missioneImg}
+            alt={t.missioneAlt}
+            class="azienda-foto"
+            widths={[600, 900, 1200, 1600]}
+            sizes="(min-width: 1024px) 44vw, 100vw"
+          />
+        </figure>
+      </div>
+    </div>
+  </section>
+
+  <section class="wrap-wide py-20 lg:py-28">
+    <div class="grid items-center gap-12 lg:grid-cols-[1.05fr_0.95fr] lg:gap-16">
+      <div>
+        <div class="ds-eyebrow" data-reveal>
+          <span class="ds-eyebrow-dash"></span>
+          <span class="ds-eyebrow-label">{t.raggioEyebrow}</span>
+        </div>
+        <h2 class="text-headline max-w-[22ch]" data-reveal style="--reveal-delay:80ms">{d.raggioTitolo}</h2>
+        <p class="measure text-body mt-5 text-ink/75" data-reveal style="--reveal-delay:120ms">{d.raggioAzione}</p>
+      </div>
+      <div class="relative" data-reveal style="--reveal-delay:120ms">
+        <CoverageMap lingua={lingua} />
+      </div>
+    </div>
+  </section>
+
+  <section class="bg-navy-100">
+    <div class="wrap-wide py-20 lg:py-28">
+      <div class="grid items-center gap-12 lg:grid-cols-[0.95fr_1.05fr] lg:gap-16">
+        <div class="lg:order-2">
+          <div class="ds-eyebrow" data-reveal>
+            <span class="ds-eyebrow-dash"></span>
+            <span class="ds-eyebrow-label">{t.strumentazioneEyebrow}</span>
+          </div>
+          <h2 class="text-headline max-w-[22ch]" data-reveal style="--reveal-delay:80ms">{d.strumentazioneTitolo}</h2>
+          <p class="measure text-body mt-5 text-ink/75" data-reveal style="--reveal-delay:120ms">{d.strumentazioneTesto}</p>
+          <ul class="mt-8 flex list-none flex-wrap gap-2.5 p-0" data-reveal style="--reveal-delay:160ms">
+            {
+              d.strumentazione.map((s) => (
+                <li class="rounded-full border border-navy-900/12 bg-paper/80 px-4 py-2 font-display text-sm font-medium text-navy-900 shadow-[var(--shadow-sm)] backdrop-blur">
+                  {s}
+                </li>
+              ))
+            }
+          </ul>
+        </div>
+        <figure class="azienda-figure lg:order-1" data-reveal style="--reveal-delay:120ms">
+          <Image
+            src={vanImg}
+            alt={t.vanAlt}
+            class="azienda-foto"
+            widths={[600, 900, 1200, 1600]}
+            sizes="(min-width: 1024px) 44vw, 100vw"
+          />
+        </figure>
+      </div>
+    </div>
+  </section>
+
+  <!-- Roster clienti: destinazione dell'ancora #clienti, il redirect 301 da
+       /i-nostri-clienti/, un URL del vecchio sito con autorità propria. -->
+  <div id="clienti">
+    <ClientMarquee titolo={d.marqueeTitolo} lingua={lingua} />
+  </div>
+
+  <!-- La fascia classica della home, con il suo titolo: niente variante
+       dedicata a questa pagina. -->
+  <CtaBand lingua={lingua} />
+</Base>
+
+<style>
+  .azienda-figure {
+    overflow: hidden;
+    border-radius: var(--radius-card);
+    border: 1px solid color-mix(in srgb, var(--color-navy-900) 10%, transparent);
+    box-shadow: var(--shadow-md);
+    aspect-ratio: 4 / 3;
+  }
+  /* Tre foto di fonti diverse (due di repertorio, una dell'azienda) nella
+     stessa pagina: una sola correzione comune le mette sullo stesso registro.
+     Un filo meno saturazione toglie il blu elettrico del cielo e il verde
+     acceso dei prati, che sul navy del sito stonerebbero; il contrasto appena
+     alzato compensa la perdita di corpo. Nessuna tinta: le foto a colori
+     restano a colori, il duotone è riservato ai fondali. */
+  .azienda-foto {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    filter: saturate(0.82) contrast(1.05);
+  }
+</style>
