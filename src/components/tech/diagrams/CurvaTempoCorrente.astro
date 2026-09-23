@@ -62,7 +62,10 @@ const punti = PUNTI_PROVA.map((p) => [p.I, p.t] as [number, number]);
   ariaLabel={t.ariaLabel}
   x={{
     scala: { tipo: 'log', min: 100, max: 20000 },
-    unita: 'A',
+    // Unità vuota: ogni tacca porta già la propria ("100 A", "20 kA"), una
+    // "A" separata sarebbe ridondante (e a 390px finiva per toccare l'ultima
+    // tacca, vedi il report di task 5, fix round 2).
+    unita: '',
     tacche: [
       { v: 100, t: '100 A' },
       { v: 1000, t: '1 kA' },
@@ -72,7 +75,8 @@ const punti = PUNTI_PROVA.map((p) => [p.I, p.t] as [number, number]);
   }}
   y={{
     scala: { tipo: 'log', min: 0.01, max: 100 },
-    unita: 's',
+    // Idem: ogni tacca porta già la "s" ("0,01 s" … "100 s").
+    unita: '',
     tacche: [0.01, 0.1, 1, 10, 100].map((v) => ({ v, t: `${num(v)} s` })),
   }}
   serie={[

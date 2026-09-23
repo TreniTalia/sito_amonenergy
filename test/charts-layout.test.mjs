@@ -1,16 +1,22 @@
 /**
- * Regressione di layout della legenda dei grafici a dati (`ChartFrame`), su
- * viewport reali.
+ * Regressione di layout dei grafici a dati (`ChartFrame`), su viewport reali.
  *
- * La legenda era disegnata dentro l'SVG, in colonne di larghezza uguale
- * calcolata dal numero di voci, senza tenere conto della larghezza reale del
- * testo: con due voci corte (SFRA) reggeva, ma con tre voci italiane più
- * lunghe (protezioni AT/MT) le etichette si sovrapponevano, sia a 1440px sia
- * a 390px. Ora la legenda è un elenco HTML (`<ul class="chart__legend">`,
- * `flex-wrap`) sovrapposto alla tela: va a capo da solo, qualunque sia il
- * numero di voci o la larghezza dello schermo. Questo test verifica, con
- * misure reali via Playwright, che non ci siano più sovrapposizioni: né fra
- * voci di legenda, né fra la legenda e le tacche degli assi.
+ * Due difetti trovati in due giri di verifica successivi, entrambi ora
+ * coperti qui:
+ *
+ * 1. LEGENDA. Era disegnata dentro l'SVG, in colonne di larghezza uguale
+ *    calcolata dal numero di voci, senza tenere conto della larghezza reale
+ *    del testo: con due voci corte (SFRA) reggeva, ma con tre voci italiane
+ *    più lunghe (protezioni AT/MT) le etichette si sovrapponevano, sia a
+ *    1440px sia a 390px. Ora è un elenco HTML (`<ul class="chart__legend">`,
+ *    `flex-wrap`) in flusso normale sopra la tela: va a capo da solo,
+ *    qualunque sia il numero di voci o la larghezza dello schermo.
+ *
+ * 2. TACCHE DI ASSE. L'etichetta dell'unità (es. "dB", "Hz") è a uno
+ *    scostamento fisso dalla prima tacca, ma a 390px il font delle tacche
+ *    raddoppia (22 invece di 12): un difetto preesistente (mai la SFRA di
+ *    Task 4), mai controllato finché questo test non ha iniziato a misurare
+ *    anche le sovrapposizioni fra tacche.
  *
  * Le pagine da controllare non sono un elenco scritto a mano: sono derivate
  * da ROTTE, e per ciascuna si controlla se la pagina contiene un
@@ -128,7 +134,13 @@ describe('legenda dei grafici a dati (ChartFrame)', { skip }, () => {
         // Le tacche `minore` sono `display:none` sotto 768px: rettangolo
         // nullo, da escludere.
         .filter((r) => r.right > r.left && r.bottom > r.top);
-      return { legenda, tacche };
+      // L'asse verticale (linea x1=X0,y1=Y0,x2=X0,y2=Y1 del gruppo
+      // `.chart-axis`): la sua altezza a schermo è l'altezza reale dell'area
+      // del grafico, senza dover conoscere qui le costanti interne del
+      // viewBox di ChartFrame.
+      const assiY = [...fig.querySelectorAll('.chart-axis line')].map((l) => box(l));
+      const altezzaPlot = Math.max(...assiY.map((r) => r.bottom - r.top));
+      return { legenda, tacche, altezzaPlot };
     });
     await page.close();
     return m;
@@ -136,7 +148,7 @@ describe('legenda dei grafici a dati (ChartFrame)', { skip }, () => {
 
   for (const pagina of PAGINE) {
     for (const width of LARGHEZZE) {
-      test(`${pagina} a ${width}px: legenda senza sovrapposizioni, né fra voci né con le tacche`, async () => {
+      test(`${pagina} a ${width}px: legenda e tacche senza sovrapposizioni`, async () => {
         const m = await misura(pagina, width);
         if (!m) return; // pagina senza figure.chart: non pertinente
         assert.ok(m.legenda.length > 0, `${pagina}: figure.chart presente ma nessuna voce di legenda trovata`);
@@ -157,7 +169,26 @@ describe('legenda dei grafici a dati (ChartFrame)', { skip }, () => {
             );
           }
         }
+        // Tacca contro tacca (assi X e Y, tacche e unità comprese: l'unità
+        // non è marcata diversamente dalle altre tacche nel DOM, è un altro
+        // <text> dello stesso gruppo `.chart-label`).
+        for (let i = 0; i < m.tacche.length; i++) {
+          for (let j = i + 1; j < m.tacche.length; j++) {
+            assert.ok(
+              !sovrapposti(m.tacche[i], m.tacche[j]),
+              `${pagina} @ ${width}px: tacca "${m.tacche[i].txt}" sovrapposta a "${m.tacche[j].txt}"`,
+            );
+          }
+        }
       });
+
+      if (width === 390) {
+        test(`${pagina} a 390px: area del grafico alta almeno 170px reali`, async () => {
+          const m = await misura(pagina, width);
+          if (!m) return; // pagina senza figure.chart: non pertinente
+          assert.ok(m.altezzaPlot >= 170, `${pagina}: area del grafico alta ${m.altezzaPlot.toFixed(1)}px, attesi almeno 170px`);
+        });
+      }
     }
   }
 });

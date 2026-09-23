@@ -30,17 +30,15 @@ interface Props {
 }
 const { uid, ariaLabel, x, y, y2, serie, banda, didascalia, didascaliaSub } = Astro.props;
 
-const W = 640, H = 400;
-// Y0 più alto di prima (70): la legenda non è più disegnata dentro l'SVG (che
-// scala col contenitore, testo compreso) ma in HTML sopra la tela, in un
-// elenco che va a capo da solo. Il suo testo però ha una dimensione fissa in
-// pixel reali (il minimo di leggibilità, --fs-micro): sulla tela più stretta
-// (390px, ~220px di altezza) due righe di legenda occupano una fetta molto
-// più grande, in proporzione, di quanto non accada su una tela larga (1440px,
-// ~375px). Y0 riserva lo spazio per il caso peggiore (tre voci di legenda su
-// due righe, alla larghezza minima), verificato con misure reali via
-// Playwright: vedi il report di task 5, fix round 2.
-const X0 = 78, X1 = y2 ? 566 : 608, Y0 = 150, Y1 = 330;
+// H più alto di prima (400): la tela non ha più un aspect-ratio fisso in CSS,
+// è l'SVG stesso (via viewBox) a decidere la propria proporzione, ed è un
+// rettangolo un po' meno largo di prima (640×440 invece di 640×400) per dare
+// più altezza reale al grafico sugli schermi stretti. La legenda ora sta in
+// flusso normale sopra l'SVG (vedi sotto), non più sovrapposta alla tela:
+// Y0 torna basso, deve solo lasciare spazio alle tacche d'angolo e, se
+// presente, all'etichetta dell'unità.
+const W = 640, H = 440;
+const X0 = 78, X1 = y2 ? 566 : 608, Y0 = 46, Y1 = 370;
 const n = (v: number) => Math.round(v * 10) / 10;
 const px = (v: number) => n(proietta(x.scala, v, X0, X1));
 const py = (v: number, a: 'y' | 'y2' = 'y') => n(proietta((a === 'y2' ? y2! : y).scala, v, Y1, Y0));
@@ -91,7 +89,7 @@ const conLegenda = serie.filter((s) => s.legenda);
         {x.tacche.map((k) => <line x1={px(k.v)} y1={Y0} x2={px(k.v)} y2={Y1} />)}
         {y.tacche.map((k) => <line x1={X0} y1={py(k.v)} x2={X1} y2={py(k.v)} />)}
       </g>
-      <g stroke="#6ba7d2" stroke-opacity="0.55" stroke-width="1">
+      <g class="chart-axis" stroke="#6ba7d2" stroke-opacity="0.55" stroke-width="1">
         <line x1={X0} y1={Y0} x2={X0} y2={Y1} />
         <line x1={X0} y1={Y1} x2={X1} y2={Y1} />
         {y2 && <line x1={X1} y1={Y0} x2={X1} y2={Y1} />}
@@ -114,10 +112,13 @@ const conLegenda = serie.filter((s) => s.legenda);
           <text class={k.minore ? 'chart-label--minor' : ''} x={px(k.v)} y={Y1 + 22} text-anchor={i === 0 ? 'start' : i === x.tacche.length - 1 ? 'end' : 'middle'}>{k.t}</text>
         ))}
         {y.tacche.map((k) => <text x={X0 - 10} y={py(k.v) + 4} text-anchor="end">{k.t}</text>)}
-        <text x={X0 - 10} y={Y0 - 14} text-anchor="end">{y.unita}</text>
-        <text x={X1} y={Y1 + 44} text-anchor="end">{x.unita}</text>
+        {/* Scostamento maggiore di prima (-14): a 390px il font delle tacche
+            raddoppia (22 invece di 12) ma questo restava fisso, e il testo
+            dell'unità finiva incollato alla prima tacca. */}
+        {y.unita && <text x={X0 - 10} y={Y0 - 24} text-anchor="end">{y.unita}</text>}
+        {x.unita && <text x={X1} y={Y1 + 54} text-anchor="end">{x.unita}</text>}
         {y2 && y2.tacche.map((k) => <text x={X1 + 10} y={py(k.v, 'y2') + 4} text-anchor="start">{k.t}</text>)}
-        {y2 && <text x={X1 + 10} y={Y0 - 14} text-anchor="start">{y2.unita}</text>}
+        {y2 && y2.unita && <text x={X1 + 10} y={Y0 - 24} text-anchor="start">{y2.unita}</text>}
         {banda && <text x={n(px(banda.a) - 8)} y={Y0 + 17} text-anchor="end" fill="#8fd9ab" letter-spacing="0.12em">{banda.etichetta}</text>}
       </g>
 
@@ -137,33 +138,34 @@ const conLegenda = serie.filter((s) => s.legenda);
 </figure>
 
 <style>
-  .chart__frame { position: relative; overflow: hidden; aspect-ratio: 8 / 5; background: #0a2a44; }
-  .chart__frame svg { display: block; width: 100%; height: 100%; }
+  /* Niente più aspect-ratio fisso: con la legenda in flusso normale sopra
+     l'SVG, forzare un rapporto sul contenitore avrebbe tagliato l'area del
+     grafico dello spazio preso dalla legenda. L'SVG mantiene da solo la
+     propria proporzione (640×440, dal viewBox) tramite width:100%/height:auto
+     — il comportamento nativo di un elemento sostituito con rapporto
+     intrinseco, lo stesso di un'immagine responsive. */
+  .chart__frame { display: flex; flex-direction: column; overflow: hidden; background: #0a2a44; }
+  .chart__frame svg { display: block; width: 100%; height: auto; }
   /* Su 390px la tela è larga ~350px reali: 12 unità di viewBox varrebbero
      meno di 7px. Le etichette crescono nello spazio del disegno. */
   @media (max-width: 767px) {
     .chart-label { font-size: 22px; }
     .chart-label--minor { display: none; }
   }
-  /* Legenda in HTML, non più nell'SVG: a differenza del testo SVG (che segue
-     la larghezza del viewBox e finiva per sovrapporsi appena le voci erano
-     tre, sia a 1440 sia a 390px, perché la colonna calcolata non teneva conto
-     della larghezza reale del testo) un elenco flex va a capo da solo, in
-     qualunque punto di rottura e con qualunque numero di voci. Resta sulla
-     tela navy (non sopra la didascalia, che eredita il colore chiaro della
-     pagina) perché i colori delle serie sono pensati per quel fondo. */
+  /* Legenda in HTML, non più nell'SVG (il testo SVG segue la larghezza del
+     viewBox: con tre voci italiane più lunghe si sovrapponeva, sia a 1440 sia
+     a 390px, perché la colonna calcolata non teneva conto della larghezza
+     reale del testo). In flusso normale, non sovrapposta alla tela: prende
+     lo spazio che le serve sopra l'SVG invece di doverlo riservare dentro il
+     viewBox. Il padding sinistro allinea la prima voce con l'asse Y del
+     grafico (X0/W del viewBox). */
   .chart__legend {
-    position: absolute;
-    top: 0.55rem;
-    left: 0.9rem;
-    right: 0.9rem;
-    z-index: 1;
     display: flex;
     flex-wrap: wrap;
     gap: 0.2rem 1.1rem;
     list-style: none;
     margin: 0;
-    padding: 0;
+    padding: 0.6rem 0.9rem 0.4rem 12.2%;
   }
   .chart__legend li {
     display: flex;
