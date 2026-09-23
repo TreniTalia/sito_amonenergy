@@ -147,8 +147,10 @@ const ctaLabel = CTA_LABEL[lingua];
           <article class="ds-panel flex flex-col p-7 lg:p-8" data-reveal style={`--reveal-delay:${i * 100}ms`}>
             <span class="ds-pill self-start">{s.tag}</span>
             <h3 class="text-title mt-5">{s.titolo}</h3>
-            <p class="text-small mt-3 text-navy-100/95">{s.testo}</p>
-            <ul class="mt-6 flex flex-wrap gap-2 border-t border-white/12 pt-5">
+            <p class="text-small mb-6 mt-3 text-navy-100/95">{s.testo}</p>
+            {/* `mt-auto` spinge i tag sul fondo: testi di lunghezza diversa
+                non devono sfalsare la riga dei tag fra i tre pannelli. */}
+            <ul class="mt-auto flex flex-wrap gap-2 border-t border-white/12 pt-5">
               {s.specs.map((spec) => (
                 <li class="text-micro rounded-full border border-white/18 bg-white/8 px-3 py-1 font-display font-medium tracking-wide text-navy-100">
                   {spec}
