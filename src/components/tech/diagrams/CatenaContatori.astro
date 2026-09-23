@@ -8,9 +8,12 @@
  * differenza di RCS e teledistacco qui non c'è un comando che ridiscende: la
  * catena della lettura contatori è a senso unico, dal campo al dato
  * consultabile, ed è per questo disegnata su un'unica corsia centrale invece
- * che su due corsie opposte.
+ * che su due corsie opposte. Disegnata sulla griglia condivisa
+ * `SchemaFrame`/`BlockChain`, come le altre catene delle pagine tecniche.
  */
 import type { Lingua } from '../../../i18n/routes.ts';
+import SchemaFrame from './SchemaFrame.astro';
+import BlockChain from './BlockChain.astro';
 
 interface Props {
   lingua: Lingua;
@@ -25,8 +28,12 @@ const TESTI = {
     blocchi: [
       { t1: 'Contatore', t2: 'Produzione e scambio' },
       { t1: 'Acquisizione', t2: 'Lettura periodica' },
-      { t1: 'Validazione', t2: 'Controllo coerenza dati' },
-      { t1: 'Portale', t2: 'Consultazione dati' },
+      // "Controllo coerenza dati" andrebbe a capo su tre righe nel box:
+      // righe() ne tiene solo due e perderebbe "dati". "Consultazione dati"
+      // esce dal box a 390px (misurato nel browser): "Consultazione" da sola
+      // è troppo larga al font mobile.
+      { t1: 'Validazione', t2: 'Controllo coerenza' },
+      { t1: 'Portale', t2: 'Vista dati' },
     ],
     datoDiMisura: 'DATO DI MISURA',
     caption: 'Dal contatore al dato consultabile',
@@ -36,9 +43,12 @@ const TESTI = {
     ariaLabel:
       'Four-block chain on a single one-way lane: production and exchange meter, data acquisition with periodic reading, validation with consistency checks, consultation portal for the customer and the distributor.',
     blocchi: [
-      { t1: 'Meter', t2: 'Production and exchange' },
+      // "Production and exchange" e "Data consistency check" andrebbero a
+      // capo su tre righe nel box: righe() ne tiene solo due e perderebbe una
+      // parola.
+      { t1: 'Meter', t2: 'Production, exchange' },
       { t1: 'Acquisition', t2: 'Periodic reading' },
-      { t1: 'Validation', t2: 'Data consistency check' },
+      { t1: 'Validation', t2: 'Consistency check' },
       { t1: 'Portal', t2: 'Data consultation' },
     ],
     datoDiMisura: 'MEASUREMENT DATA',
@@ -48,173 +58,12 @@ const TESTI = {
 } as const;
 
 const t = TESTI[lingua];
-
-const W = 640;
-const H = 320;
-const uid = 'ctr';
-
-const blocchi = [
-  { cx: 108, t1: t.blocchi[0].t1, t2: t.blocchi[0].t2 },
-  { cx: 268, t1: t.blocchi[1].t1, t2: t.blocchi[1].t2 },
-  { cx: 428, t1: t.blocchi[2].t1, t2: t.blocchi[2].t2 },
-  { cx: 555, t1: t.blocchi[3].t1, t2: t.blocchi[3].t2 },
-];
-const boxW = 128;
-const boxH = 84;
-const laneY = 160; // unica corsia centrale, a senso unico
-const n = (v: number) => Math.round(v * 10) / 10;
 ---
 
-<figure class="ctr-plot">
-  <div class="ctr-plot__frame rounded-[var(--radius-card)] border border-navy-100 shadow-[var(--shadow-md)]">
-    <svg
-      viewBox={`0 0 ${W} ${H}`}
-      role="img"
-      aria-label={t.ariaLabel}
-      preserveAspectRatio="xMidYMid meet"
-    >
-      <defs>
-        <linearGradient id={`${uid}-bg`} x1="0" y1="0" x2="0.35" y2="1">
-          <stop offset="0" stop-color="#0c3151"></stop>
-          <stop offset="1" stop-color="#081f36"></stop>
-        </linearGradient>
-        <pattern id={`${uid}-dots`} width="24" height="24" patternUnits="userSpaceOnUse">
-          <circle cx="1.1" cy="1.1" r="1.1" fill="#4f93c4" fill-opacity="0.16"></circle>
-        </pattern>
-        <marker id={`${uid}-arrow`} viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
-          <path d="M0,0 L10,5 L0,10 Z" fill="#4fd07f"></path>
-        </marker>
-      </defs>
-
-      <rect width={W} height={H} fill={`url(#${uid}-bg)`}></rect>
-      <rect width={W} height={H} fill={`url(#${uid}-dots)`}></rect>
-
-      <!-- Corsia unica: il dato scorre in un solo verso, dal contatore al portale. -->
-      <line x1={n(blocchi[0].cx + boxW / 2)} y1={laneY} x2={n(blocchi[1].cx - boxW / 2)} y2={laneY} stroke="#4fd07f" stroke-opacity="0.7" stroke-width="1.8" marker-end={`url(#${uid}-arrow)`}></line>
-      <line x1={n(blocchi[1].cx + boxW / 2)} y1={laneY} x2={n(blocchi[2].cx - boxW / 2)} y2={laneY} stroke="#4fd07f" stroke-opacity="0.7" stroke-width="1.8" marker-end={`url(#${uid}-arrow)`}></line>
-      <line x1={n(blocchi[2].cx + boxW / 2)} y1={laneY} x2={n(blocchi[3].cx - boxW / 2)} y2={laneY} stroke="#4fd07f" stroke-opacity="0.7" stroke-width="1.8" marker-end={`url(#${uid}-arrow)`}></line>
-
-      <!-- Blocchi. -->
-      {
-        blocchi.map((b, i) => (
-          <g>
-            <rect
-              x={n(b.cx - boxW / 2)}
-              y={n(laneY - boxH / 2)}
-              width={boxW}
-              height={boxH}
-              rx="8"
-              fill={i === 3 ? '#123a5e' : '#0e3457'}
-              stroke={i === 3 ? '#8fd9ab' : '#6ba7d2'}
-              stroke-opacity={i === 3 ? '0.75' : '0.6'}
-              stroke-width={i === 3 ? '1.7' : '1.4'}
-            />
-            <text
-              x={n(b.cx)}
-              y={laneY - 5}
-              text-anchor="middle"
-              font-family="Sora, Inter Variable, Inter, sans-serif"
-              font-size="13"
-              font-weight="700"
-              fill={i === 3 ? '#8fd9ab' : '#e7f0f7'}
-            >
-              {b.t1}
-            </text>
-            <text
-              x={n(b.cx)}
-              y={laneY + 20}
-              text-anchor="middle"
-              font-family="Inter Variable, Inter, sans-serif"
-              font-size="10.5"
-              fill="#bcd6e8"
-              fill-opacity="0.85"
-            >
-              {b.t2}
-            </text>
-          </g>
-        ))
-      }
-
-      <!-- Etichetta di corsia. -->
-      <g font-family="Inter Variable, Inter, sans-serif" font-size="10.5" font-weight="700" letter-spacing="0.06em">
-        <text x={blocchi[0].cx} y={laneY - boxH / 2 - 16} fill="#8fd9ab">{t.datoDiMisura}</text>
-      </g>
-
-      <!-- Cornice con tacche d'angolo. -->
-      <rect x="14" y="14" width={W - 28} height={H - 28} rx="6" fill="none" stroke="#6ba7d2" stroke-opacity="0.26" stroke-width="1"></rect>
-      <g stroke="#8fd9ab" stroke-opacity="0.5" stroke-width="1.4" stroke-linecap="square">
-        <line x1="14" y1="38" x2="14" y2="14"></line>
-        <line x1="14" y1="14" x2="38" y2="14"></line>
-        <line x1={W - 38} y1="14" x2={W - 14} y2="14"></line>
-        <line x1={W - 14} y1="14" x2={W - 14} y2="38"></line>
-        <line x1="14" y1={H - 38} x2="14" y2={H - 14}></line>
-        <line x1="14" y1={H - 14} x2="38" y2={H - 14}></line>
-        <line x1={W - 38} y1={H - 14} x2={W - 14} y2={H - 14}></line>
-        <line x1={W - 14} y1={H - 14} x2={W - 14} y2={H - 38}></line>
-      </g>
-    </svg>
-  </div>
-
-  <figcaption class="ctr-plot__caption">
-    <span class="ctr-plot__dot" aria-hidden="true"></span>
-    <span>
-      <strong>{t.caption}</strong>
-      <span class="ctr-plot__caption-sub">
-        {t.captionSub}
-      </span>
-    </span>
-  </figcaption>
-</figure>
-
-<style>
-  .ctr-plot__frame {
-    position: relative;
-    overflow: hidden;
-    aspect-ratio: 2 / 1;
-    background: #0a2a44;
-  }
-
-  .ctr-plot__frame svg {
-    display: block;
-    width: 100%;
-    height: 100%;
-  }
-
-  @media (max-width: 767px) {
-    .ctr-plot__frame svg text {
-      font-size: 15px;
-    }
-  }
-
-  .ctr-plot__caption {
-    display: flex;
-    align-items: center;
-    gap: 0.6rem;
-    margin-top: 0.85rem;
-    padding-left: 0.15rem;
-    color: currentColor;
-    font-size: var(--fs-small);
-    line-height: 1.35;
-  }
-
-  .ctr-plot__caption strong {
-    display: block;
-    font-weight: 700;
-    letter-spacing: 0.01em;
-  }
-
-  .ctr-plot__caption-sub {
-    display: block;
-    color: color-mix(in srgb, currentColor 62%, transparent);
-    font-size: var(--fs-micro);
-  }
-
-  .ctr-plot__dot {
-    width: 0.5rem;
-    height: 0.5rem;
-    flex: none;
-    border-radius: 999px;
-    background: #2fa85f;
-    box-shadow: 0 0 0 4px rgb(79 208 127 / 0.22);
-  }
-</style>
+<SchemaFrame uid="ctr" ariaLabel={t.ariaLabel} didascalia={t.caption} didascaliaSub={t.captionSub}>
+  <BlockChain
+    uid="ctr"
+    blocchi={t.blocchi.map((b, i) => ({ ...b, accento: i === 3 }))}
+    unica={{ etichetta: t.datoDiMisura }}
+  />
+</SchemaFrame>

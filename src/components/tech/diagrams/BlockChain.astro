@@ -1,0 +1,148 @@
+---
+/**
+ * Griglia fissa per gli schemi a catena orizzontale (RCS, A.72, lettura
+ * contatori): fino a 4 box allineati sulla stessa riga, con una corsia sopra
+ * (lo stato che risale), una sotto (il comando che ridiscende) oppure
+ * un'unica corsia fra i box quando il flusso è a senso unico (nessun
+ * comando in ritorno). I testi dei box vanno a capo a build time con
+ * `righe()` e non escono mai dal perimetro del box: è il difetto che questo
+ * componente elimina rispetto ai vecchi file a coordinate scritte a mano
+ * (la voce "Protezione di interfaccia" del teledistacco A.72 usciva dal suo
+ * riquadro).
+ */
+import { righe } from './righe.ts';
+
+interface Blocco {
+  t1: string;
+  t2: string;
+  accento?: boolean;
+}
+interface Props {
+  uid: string;
+  blocchi: Blocco[];
+  sopra?: { etichetta: string };
+  sotto?: { etichetta: string; evidenza?: string };
+  unica?: { etichetta: string };
+}
+const { uid, blocchi, sopra, sotto, unica } = Astro.props;
+
+const n = (v: number) => Math.round(v * 10) / 10;
+
+// Griglia fissa, uguale per tutte le catene: al massimo 4 box larghi 132,
+// passo 150, primo centro a x = 95 (centri 95, 245, 395, 545), sempre sulla
+// stessa riga y = 174. Le tre corsie possibili stanno sopra, sotto o in
+// mezzo ai box, mai tutte insieme (una catena è o a due versi, o a un verso
+// solo con un'unica corsia centrale).
+const CENTRI = [95, 245, 395, 545];
+const BOX_W = 132;
+const BOX_H = 92;
+const BOX_Y = 174;
+const LANE_SOPRA_Y = 138;
+const LANE_SOTTO_Y = 302;
+const LANE_UNICA_Y = 220;
+const MAX_TESTO = BOX_W - 16; // 116: padding di 8 per lato dentro il box
+
+const centri = CENTRI.slice(0, blocchi.length);
+const primo = centri[0];
+const ultimo = centri[centri.length - 1];
+
+// Sotto i 768px il font dei box cresce da 13/11 a 21/21 (vedi <style> più
+// sotto): a quella larghezza la tela reale è ~348px per 640 unità di
+// viewBox, cioè uno scarto tela/font di ~0,54; sotto i 21px il testo
+// scenderebbe sotto gli 11px effettivi richiesti su schermo. righe() usa
+// quindi 21 per stimare dove va a capo: è la dimensione più larga, quindi il
+// numero di righe calcolato qui vale sia a 1440 sia a 390px.
+const EM_MOBILE = 21;
+const LH1 = 15; // interlinea del titolo alla dimensione desktop (13px)
+const LH2 = 13; // interlinea del sottotitolo alla dimensione desktop (11px)
+// Margine ampio fra titolo e sottotitolo: sotto i 768px entrambi i testi
+// salgono a 21px (molto più dei 13/11 desktop), e senza questo margine la
+// seconda riga del titolo arriverebbe a toccare la prima del sottotitolo nei
+// box dove entrambi vanno a capo su due righe.
+const GAP = 16;
+function layout(b: Blocco) {
+  const l1 = righe(b.t1, EM_MOBILE, MAX_TESTO);
+  const l2 = righe(b.t2, EM_MOBILE, MAX_TESTO);
+  const totale = l1.length * LH1 + GAP + l2.length * LH2;
+  const top = BOX_Y + BOX_H / 2 - totale / 2;
+  const y1 = n(top + LH1 * 0.78);
+  const y2 = n(top + l1.length * LH1 + GAP + LH2 * 0.85);
+  return { l1, l2, y1, y2 };
+}
+---
+
+{sopra && (
+  <g stroke="#3f7fb0" stroke-opacity="0.45" stroke-width="1">
+    {centri.map((cx) => <line x1={cx} y1={LANE_SOPRA_Y} x2={cx} y2={BOX_Y} />)}
+  </g>
+)}
+{sotto && (
+  <g stroke="#3f7fb0" stroke-opacity="0.45" stroke-width="1">
+    {centri.map((cx) => <line x1={cx} y1={n(BOX_Y + BOX_H)} x2={cx} y2={LANE_SOTTO_Y} />)}
+  </g>
+)}
+
+{sopra && (
+  <Fragment>
+    {/* Corsia dello stato: risale da sinistra a destra. */}
+    <line x1={primo} y1={LANE_SOPRA_Y} x2={ultimo} y2={LANE_SOPRA_Y} stroke="#6ba7d2" stroke-width="1.6" marker-end={`url(#${uid}-arrow-blue)`} />
+    <text x={primo} y={LANE_SOPRA_Y - 12} class="schema-label" font-family="Inter Variable, Inter, sans-serif" font-size="10.5" font-weight="700" letter-spacing="0.06em" fill="#8fbfe0">{sopra.etichetta}</text>
+  </Fragment>
+)}
+
+{sotto && (
+  <Fragment>
+    {/* Corsia del comando: ridiscende da destra a sinistra. */}
+    <line x1={ultimo} y1={LANE_SOTTO_Y} x2={primo} y2={LANE_SOTTO_Y} stroke="#4fd07f" stroke-width="2" marker-end={`url(#${uid}-arrow-green)`} />
+    <text x={ultimo} y={LANE_SOTTO_Y + 22} text-anchor="end" class="schema-label" font-family="Inter Variable, Inter, sans-serif" font-size="10.5" font-weight="700" letter-spacing="0.06em" fill="#8fd9ab">{sotto.etichetta}</text>
+    {sotto.evidenza && centri.length > 1 && (
+      <text x={n((centri[0] + centri[1]) / 2)} y={LANE_SOTTO_Y + 22} text-anchor="middle" class="schema-label" font-family="Inter Variable, Inter, sans-serif" font-size="10.5" font-weight="700" letter-spacing="0.06em" fill="#8fd9ab">{sotto.evidenza}</text>
+    )}
+  </Fragment>
+)}
+
+{unica && (
+  <Fragment>
+    {/* Unica corsia, a senso unico: una freccia per ogni coppia di box adiacenti. */}
+    <g stroke="#4fd07f" stroke-opacity="0.7" stroke-width="1.8">
+      {centri.slice(0, -1).map((cx, i) => (
+        <line x1={n(cx + BOX_W / 2)} y1={LANE_UNICA_Y} x2={n(centri[i + 1] - BOX_W / 2)} y2={LANE_UNICA_Y} marker-end={`url(#${uid}-arrow-green)`} />
+      ))}
+    </g>
+    <text x={primo} y={n(LANE_UNICA_Y - BOX_H / 2 - 16)} class="schema-label" font-family="Inter Variable, Inter, sans-serif" font-size="10.5" font-weight="700" letter-spacing="0.06em" fill="#8fd9ab">{unica.etichetta}</text>
+  </Fragment>
+)}
+
+{blocchi.map((b, i) => {
+  const cx = centri[i];
+  const { l1, l2, y1, y2 } = layout(b);
+  const strokeColor = b.accento ? '#4fd07f' : '#6ba7d2';
+  const strokeOpacity = b.accento ? '0.75' : '0.55';
+  const strokeWidth = b.accento ? '1.6' : '1.4';
+  return (
+    <g data-schema-box>
+      <rect class="schema-box" x={n(cx - BOX_W / 2)} y={BOX_Y} width={BOX_W} height={BOX_H} rx="10" fill="#0f3656" stroke={strokeColor} stroke-opacity={strokeOpacity} stroke-width={strokeWidth} />
+      {/* La seconda riga (se c'è) usa dy in "em": scala insieme al font-size
+          del suo stesso tspan, quindi l'interlinea resta proporzionata anche
+          sotto i 768px, quando il font cresce da 13/11 a 21px. */}
+      <text class="schema-box__t" x={cx} y={y1} text-anchor="middle" font-family="Sora, Inter Variable, Inter, sans-serif" font-size="13" font-weight="700" fill="#e7f0f7">
+        {l1.map((riga, i) => <tspan x={cx} dy={i === 0 ? '0' : '1.2em'}>{riga}</tspan>)}
+      </text>
+      <text class="schema-box__t" x={cx} y={y2} text-anchor="middle" font-family="Inter Variable, Inter, sans-serif" font-size="11" fill="#bcd6e8" fill-opacity="0.85">
+        {l2.map((riga, i) => <tspan x={cx} dy={i === 0 ? '0' : '1.2em'}>{riga}</tspan>)}
+      </text>
+    </g>
+  );
+})}
+
+<style>
+  /* Sotto i 768px la tela reale è ~350px per 640 unità di viewBox: senza
+     ingrandire i font qui, titolo e sottotitolo dei box scenderebbero sotto
+     gli 11px effettivi su schermo. Titolo e sottotitolo salgono alla stessa
+     dimensione (21px): righe() è stata calcolata su questo stesso valore
+     (EM_MOBILE), quindi il numero di righe resta corretto. */
+  @media (max-width: 767px) {
+    .schema-label { font-size: 22px; }
+    .schema-box__t { font-size: 21px; }
+  }
+</style>

@@ -1,0 +1,109 @@
+---
+/**
+ * Telaio condiviso dai due tipi di disegno tecnico del sito: i grafici a dati
+ * (`ChartFrame`) e gli schemi a blocchi (`SchemaFrame`, Task 8). È la parte
+ * che non cambia mai da un disegno all'altro — fondo navy sfumato, trama a
+ * puntini, cornice con tacche d'angolo da strumento, didascalia con il
+ * pallino verde — mentre il contenuto (assi e serie, o box e frecce) resta
+ * uno `<slot />` a coordinate 640×440, la stessa tela per ogni disegno del
+ * sito. Il nome BEM dei pezzi (`${figureClass}__frame` ecc.) tiene i selettori
+ * `figure.chart`/`.chart__legend`/… di `ChartFrame` invariati dopo l'estrazione:
+ * qui dentro serve solo a comporre la classe, la resa nel DOM non cambia.
+ */
+interface Props {
+  uid: string;
+  ariaLabel: string;
+  didascalia: string;
+  didascaliaSub: string;
+  /** Prefisso BEM del disegno chiamante: 'chart' o 'schema'. */
+  figureClass: string;
+}
+const { uid, ariaLabel, didascalia, didascaliaSub, figureClass } = Astro.props;
+
+const W = 640;
+const H = 440;
+---
+
+<figure class={figureClass}>
+  <div class={`${figureClass}__frame fc-frame rounded-[var(--radius-card)] border border-navy-100 shadow-[var(--shadow-md)]`}>
+    <slot name="legend" />
+    <svg viewBox={`0 0 ${W} ${H}`} role="img" aria-label={ariaLabel} preserveAspectRatio="xMidYMid meet">
+      <defs>
+        <linearGradient id={`${uid}-bg`} x1="0" y1="0" x2="0.35" y2="1">
+          <stop offset="0" stop-color="#0c3151"></stop>
+          <stop offset="1" stop-color="#081f36"></stop>
+        </linearGradient>
+        <pattern id={`${uid}-dots`} width="24" height="24" patternUnits="userSpaceOnUse">
+          <circle cx="1.1" cy="1.1" r="1.1" fill="#4f93c4" fill-opacity="0.16"></circle>
+        </pattern>
+        <slot name="defs" />
+      </defs>
+      <rect width={W} height={H} fill={`url(#${uid}-bg)`}></rect>
+      <rect width={W} height={H} fill={`url(#${uid}-dots)`}></rect>
+
+      <slot />
+
+      <rect x="14" y="14" width={W - 28} height={H - 28} rx="6" fill="none" stroke="#6ba7d2" stroke-opacity="0.26"></rect>
+      <g stroke="#8fd9ab" stroke-opacity="0.5" stroke-width="1.4" stroke-linecap="square">
+        <line x1="14" y1="38" x2="14" y2="14"></line>
+        <line x1="14" y1="14" x2="38" y2="14"></line>
+        <line x1={W - 38} y1="14" x2={W - 14} y2="14"></line>
+        <line x1={W - 14} y1="14" x2={W - 14} y2="38"></line>
+        <line x1="14" y1={H - 38} x2="14" y2={H - 14}></line>
+        <line x1="14" y1={H - 14} x2="38" y2={H - 14}></line>
+        <line x1={W - 38} y1={H - 14} x2={W - 14} y2={H - 14}></line>
+        <line x1={W - 14} y1={H - 14} x2={W - 14} y2={H - 38}></line>
+      </g>
+    </svg>
+  </div>
+  <figcaption class={`${figureClass}__caption fc-caption`}>
+    <span class={`${figureClass}__dot fc-dot`} aria-hidden="true"></span>
+    <span>
+      <strong>{didascalia}</strong>
+      <span class={`${figureClass}__caption-sub fc-caption-sub`}>{didascaliaSub}</span>
+    </span>
+  </figcaption>
+</figure>
+
+<style>
+  /* Stesse regole di sempre (erano in ChartFrame): l'SVG non ha più un
+     aspect-ratio fisso in CSS, è il viewBox 640×440 a decidere la propria
+     proporzione, come farebbe un'immagine responsive. */
+  .fc-frame {
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    background: #0a2a44;
+  }
+  .fc-frame svg {
+    display: block;
+    width: 100%;
+    height: auto;
+  }
+  .fc-caption {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    margin-top: 0.85rem;
+    padding-left: 0.15rem;
+    font-size: var(--fs-small);
+    line-height: 1.35;
+  }
+  .fc-caption strong {
+    display: block;
+    font-weight: 700;
+  }
+  .fc-caption-sub {
+    display: block;
+    color: color-mix(in srgb, currentColor 62%, transparent);
+    font-size: var(--fs-micro);
+  }
+  .fc-dot {
+    width: 0.5rem;
+    height: 0.5rem;
+    flex: none;
+    border-radius: 999px;
+    background: #2fa85f;
+    box-shadow: 0 0 0 4px rgb(79 208 127 / 0.22);
+  }
+</style>
