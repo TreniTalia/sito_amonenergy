@@ -11,13 +11,16 @@
  * disegnata a mano.
  *
  * Il contenuto è quello che la IEC 60076-18 misura davvero: ampiezza in dB
- * su scala logaritmica da 20 Hz a 2 MHz, calcolata dal modello a rete RLC di
- * `charts/models/sfra.ts` (matrici ABCD di una scala a N sezioni). Il
- * tracciato di riferimento e quello misurato coincidono in bassa frequenza —
- * dove risponde il nucleo, insensibile alla geometria degli avvolgimenti —
- * e divergono sopra i 100 kHz, la regione in cui una deformazione
- * dell'avvolgimento sposta le risonanze. È l'unico punto del disegno che
- * deve leggersi al primo sguardo.
+ * su scala logaritmica da 20 Hz a 2 MHz, calcolata dal modello di
+ * `charts/models/sfra.ts`: ramo di magnetizzazione del nucleo in cascata con
+ * la rete RLC dell'avvolgimento (dischi con mutue induttanze), terminata su
+ * 50 Ω. Ne escono le tre regioni di una SFRA vera: la discesa del nucleo con
+ * il minimo profondo attorno a 1 kHz, le risonanze della banda media, quelle
+ * più fitte della banda alta. Il tracciato di riferimento e quello misurato
+ * coincidono in bassa frequenza — dove risponde il nucleo, insensibile alla
+ * geometria degli avvolgimenti — e divergono sopra i 100 kHz, dove una
+ * deformazione dell'avvolgimento sposta e rimodella le risonanze. È l'unico
+ * punto del disegno che deve leggersi al primo sguardo.
  */
 import type { Lingua } from '../../../i18n/routes.ts';
 import ChartFrame from '../charts/ChartFrame.astro';

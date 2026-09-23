@@ -50,4 +50,42 @@ describe('modello SFRA', () => {
     for (let i = 1; i < f.length - 1; i++) if (f[i] > 1e3 && rif[i] < rif[i - 1] && rif[i] < rif[i + 1]) minimi++;
     assert.ok(minimi >= 3, `minimi trovati: ${minimi}`);
   });
+
+  // Test di forma: una SFRA end-to-end a circuito aperto non è un passa-basso.
+  // Il nucleo fa scendere la risposta già dai 20 Hz, l'antirisonanza fra
+  // induttanza di magnetizzazione e capacità dell'avvolgimento dà il minimo
+  // profondo fra qualche centinaio di hertz e qualche kilohertz, e sopra i
+  // 100 kHz restano risonanze distinte che la deformazione sposta, non trasla.
+  const estremi = (da) => {
+    let minimi = 0, massimi = 0;
+    for (let i = 1; i < f.length - 1; i++) {
+      if (f[i] <= da) continue;
+      if (rif[i] < rif[i - 1] && rif[i] < rif[i + 1]) minimi++;
+      if (rif[i] > rif[i - 1] && rif[i] > rif[i + 1]) massimi++;
+    }
+    return { minimi, massimi };
+  };
+  test('in bassa frequenza l\'attenuazione cresce con la frequenza (nucleo)', () => {
+    const a20 = rispostaSfra(20, RIF), a200 = rispostaSfra(200, RIF);
+    assert.ok(a20 - a200 > 10, `da 20 a 200 Hz scende di ${(a20 - a200).toFixed(1)} dB`);
+  });
+  test('il minimo sotto 10 kHz cade fra 200 Hz e 5 kHz', () => {
+    let im = 0;
+    f.forEach((x, i) => { if (x < 1e4 && rif[i] < rif[im]) im = i; });
+    assert.ok(f[im] > 200 && f[im] < 5e3, `minimo a ${f[im].toFixed(0)} Hz`);
+  });
+  test('sopra 100 kHz almeno due minimi e due massimi locali', () => {
+    const { minimi, massimi } = estremi(1e5);
+    assert.ok(minimi >= 2 && massimi >= 2, `minimi ${minimi}, massimi ${massimi}`);
+  });
+  test('sopra 100 kHz lo scostamento non è una traslazione costante', () => {
+    const d = [];
+    f.forEach((x, i) => { if (x > 1e5) d.push(def[i] - rif[i]); });
+    let cambi = 0;
+    for (let i = 1; i < d.length; i++) if (Math.sign(d[i]) * Math.sign(d[i - 1]) < 0) cambi++;
+    const media = d.reduce((s, v) => s + v, 0) / d.length;
+    const sd = Math.sqrt(d.reduce((s, v) => s + (v - media) ** 2, 0) / d.length);
+    assert.ok(cambi >= 1, `lo scarto non cambia mai segno sopra 100 kHz`);
+    assert.ok(sd > 1, `deviazione standard dello scarto ${sd.toFixed(2)} dB`);
+  });
 });
