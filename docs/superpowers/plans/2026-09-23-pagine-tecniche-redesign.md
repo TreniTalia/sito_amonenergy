@@ -329,7 +329,7 @@ Markup delle fasce 2, 5, 6, 7, 8, 9 (le fasce 3 e 4 restano come sono):
               <figure class="tech-figure" data-reveal style="--reveal-delay:120ms">
                 <Image
                   src={progetto.data.immagine}
-                  alt={progetto.data.immagineAlt}
+                  alt={lingua === 'en' ? (progetto.data.immagineAltEn ?? progetto.data.immagineAlt) : progetto.data.immagineAlt}
                   class="tech-figure__img"
                   widths={[600, 900, 1200]}
                   sizes="(min-width: 1024px) 44vw, 100vw"
