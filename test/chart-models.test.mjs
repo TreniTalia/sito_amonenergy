@@ -7,6 +7,7 @@ import { rispostaSfra, AVVOLGIMENTO_RIFERIMENTO as RIF, AVVOLGIMENTO_DEFORMATO a
 import { logspace as ls } from '../src/components/tech/charts/models/scale.ts';
 import { tempoInverso, tempoIntervento, TARATURA_ESEMPIO as TAR, PUNTI_PROVA } from '../src/components/tech/charts/models/iec60255.ts';
 import { nuvolaPrpd, tensioneProva } from '../src/components/tech/charts/models/prpd.ts';
+import { tensione, correnteFuga, PROVA_ESEMPIO as PROVA_ISOL } from '../src/components/tech/charts/models/isolamento.ts';
 
 describe('fondamenta dei grafici', () => {
   test('aritmetica complessa', () => {
@@ -126,5 +127,22 @@ describe('PRPD di una cavità interna', () => {
   test('la tensione di prova è una sinusoide', () => {
     assert.ok(Math.abs(tensioneProva(90, 12) - 12) < 1e-9);
     assert.ok(Math.abs(tensioneProva(270, 12) + 12) < 1e-9);
+  });
+});
+
+describe('prova di isolamento a rampa', () => {
+  test('rampa fino a 80 kV e poi tenuta', () => {
+    assert.equal(tensione(0, PROVA_ISOL), 0);
+    assert.equal(tensione(PROVA_ISOL.durataRampaMin, PROVA_ISOL), 80);
+    assert.equal(tensione(PROVA_ISOL.durataRampaMin + 1, PROVA_ISOL), 80);
+  });
+  test('durante la rampa la corrente di carica vale C·dV/dt', () => {
+    const icar = PROVA_ISOL.C * ((80e3 / PROVA_ISOL.durataRampaMin) / 60) * 1e6;
+    assert.ok(Math.abs(correnteFuga(1, PROVA_ISOL, 'sano') - icar) < 0.5);
+  });
+  test('in tenuta il sano scende sotto 1 µA, il compromesso resta sopra 20', () => {
+    const t = PROVA_ISOL.durataRampaMin + 1;
+    assert.ok(correnteFuga(t, PROVA_ISOL, 'sano') < 1);
+    assert.ok(correnteFuga(t, PROVA_ISOL, 'compromesso') > 20);
   });
 });

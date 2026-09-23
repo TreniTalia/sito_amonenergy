@@ -1,15 +1,22 @@
 ---
 /**
- * Diagramma della prova di isolamento in tensione continua a gradini.
+ * Diagramma della prova di isolamento in alta tensione a rampa controllata.
  *
- * Stessa lingua grafica delle altre tre diagnostiche. Il contenuto è la
- * rampa di tensione applicata dal Megger HV Test 80 kV nel tempo, con la
- * corrente di fuga sovrapposta: in un isolamento sano la corrente resta
- * bassa e piatta all'aumentare della tensione, in un isolamento compromesso
- * si impenna prima di raggiungere il valore di prova — è quella la zona
- * marcata come anomalia.
+ * Ora sul telaio condiviso `ChartFrame`, su due assi: la tensione di prova
+ * (asse sinistro, kV) e la corrente di fuga (asse destro, µA), che prima
+ * condividevano lo stesso asse in kV, un errore di lettura perché le due
+ * grandezze non sono comparabili. Il contenuto è quello che restituisce
+ * davvero il modello di `charts/models/isolamento.ts`: la corrente letta
+ * dallo strumento è la somma della carica della capacità del componente,
+ * costante finché la tensione sale, e della conduzione attraverso
+ * l'isolante, V/R. Un isolamento sano ha R costante e la corrente resta
+ * bassa e piatta; uno compromesso ha una R che crolla oltre una soglia di
+ * tensione, e la corrente si impenna prima di arrivare al valore di prova:
+ * è quella la firma che la prova deve cogliere.
  */
 import type { Lingua } from '../../../i18n/routes.ts';
+import ChartFrame from '../charts/ChartFrame.astro';
+import { tensione, correnteFuga, PROVA_ESEMPIO } from '../charts/models/isolamento.ts';
 
 interface Props {
   lingua: Lingua;
@@ -20,278 +27,58 @@ const { lingua } = Astro.props;
 const TESTI = {
   it: {
     ariaLabel:
-      "Grafico della prova di isolamento: rampa di tensione da 0 a 80 kV nel tempo e corrente di fuga sovrapposta. La corrente resta bassa e quasi piatta per la maggior parte della prova, poi si impenna bruscamente prima di raggiungere il valore di prova: quella zona è marcata come anomalia, il segno di un isolamento compromesso.",
-    anomalia: 'ANOMALIA',
-    tensioneDiProva: 'Tensione di prova',
-    correnteDiFuga: 'Corrente di fuga',
+      'Grafico della prova di isolamento su due assi: tensione di prova in kV a sinistra, corrente di fuga in microampere a destra. La tensione sale in rampa da 0 a 80 kV nei primi 8 minuti e poi tiene il valore di prova. La corrente di un isolamento sano resta bassa e piatta per tutta la prova; quella di un isolamento compromesso segue lo stesso andamento fino a circa 45 kV, poi si impenna e resta alta anche in tenuta, prima ancora di raggiungere il valore di prova.',
+    legendaTensione: 'Tensione di prova',
+    legendaSano: 'Fuga, isolamento sano',
+    legendaCompromesso: 'Fuga, isolamento compromesso',
     caption: 'Rampa di tensione e corrente di fuga',
-    captionSub: 'Curva esemplificativa · isolamento compromesso: corrente in impennata prima del valore di prova',
+    captionSub: 'Curva calcolata da modello · rampa a 80 kV, carica C·dV/dt più conduzione V/R',
   },
   en: {
     ariaLabel:
-      'Insulation test chart: voltage ramp from 0 to 80 kV over time with the leakage current overlaid. The current stays low and nearly flat for most of the test, then rises sharply before reaching the test value: that zone is marked as an anomaly, the sign of compromised insulation.',
-    anomalia: 'ANOMALY',
-    tensioneDiProva: 'Test voltage',
-    correnteDiFuga: 'Leakage current',
+      'Insulation test chart on two axes: test voltage in kV on the left, leakage current in microamps on the right. Voltage ramps from 0 to 80 kV over the first 8 minutes, then holds the test value. The current of healthy insulation stays low and flat throughout the test; that of compromised insulation follows the same path up to about 45 kV, then spikes and stays high even at withstand, before reaching the test value.',
+    legendaTensione: 'Test voltage',
+    legendaSano: 'Leakage, healthy insulation',
+    legendaCompromesso: 'Leakage, degraded insulation',
     caption: 'Voltage ramp and leakage current',
-    captionSub: 'Sample curve · compromised insulation: current spikes before the test value',
+    captionSub: 'Computed from a model · ramp to 80 kV, C·dV/dt charging plus V/R conduction',
   },
 } as const;
 
 const t = TESTI[lingua];
 
-const W = 640;
-const H = 320;
-
-const X0 = 78;
-const X1 = 608;
-const Y0 = 48;
-const Y1 = 252;
-
-const T_MIN = 0;
-const T_MAX = 10;
-const KV_MAX = 80;
-const MA_MAX = 10;
-
-const x = (t: number) => X0 + ((t - T_MIN) / (T_MAX - T_MIN)) * (X1 - X0);
-const yKV = (kv: number) => Y1 - (kv / KV_MAX) * (Y1 - Y0);
-const yMA = (ma: number) => Y1 - (ma / MA_MAX) * (Y1 - Y0);
-const n = (v: number) => Math.round(v * 10) / 10;
-
-// Rampa di tensione: sale linearmente da 0 a 80 kV in 8 minuti, poi tiene il
-// valore di prova per il resto della prova.
-const T_RAMPA = 8;
-function tensione(t: number): number {
-  if (t <= T_RAMPA) return (KV_MAX * t) / T_RAMPA;
-  return KV_MAX;
-}
-
-// Corrente di fuga: piatta e bassa per gran parte della rampa, poi in
-// prossimità del valore di prova si impenna — la firma di un cedimento
-// incipiente dell'isolamento che la prova a gradini fa emergere prima della
-// scarica franca.
-const T_ANOMALIA = 7.1;
-function corrente(t: number): number {
-  const base = 0.6 + 0.35 * t;
-  if (t <= T_ANOMALIA) return base;
-  const oltre = t - T_ANOMALIA;
-  return base + 9.5 * Math.pow(oltre / (T_MAX - T_ANOMALIA), 2.1);
-}
-
-const PASSI = 200;
-const serie = (fn: (t: number) => number, yFn: (v: number) => number, max: number) => {
-  const p: string[] = [];
-  for (let i = 0; i <= PASSI; i++) {
-    const t = T_MIN + ((T_MAX - T_MIN) * i) / PASSI;
-    p.push(`${n(x(t))},${n(yFn(Math.min(max, fn(t))))}`);
-  }
-  return p.join(' ');
-};
-
-const dTensione = serie(tensione, yKV, KV_MAX);
-const dCorrente = serie(corrente, yMA, MA_MAX);
-
-const xAnomalia = x(T_ANOMALIA);
-const decadiT = [0, 2, 4, 6, 8, 10];
-const scalaKV = [0, 20, 40, 60, 80];
-const uid = 'ins';
+// 241 campioni su 12 minuti (passo 0,05 min): rampa di 8 minuti più 4 minuti
+// di tenuta, abbastanza fitti da disegnare senza spigoli l'impennata del
+// compromesso attorno alla soglia.
+const tt = Array.from({ length: 241 }, (_, i) => i * (12 / 240));
+const kv = tt.map((m) => [m, tensione(m, PROVA_ESEMPIO)] as [number, number]);
+const sano = tt.map((m) => [m, correnteFuga(m, PROVA_ESEMPIO, 'sano')] as [number, number]);
+const comp = tt.map((m) => [m, Math.min(40, correnteFuga(m, PROVA_ESEMPIO, 'compromesso'))] as [number, number]);
 ---
 
-<figure class="ins-plot">
-  <div class="ins-plot__frame rounded-[var(--radius-card)] border border-navy-100 shadow-[var(--shadow-md)]">
-    <svg
-      viewBox={`0 0 ${W} ${H}`}
-      role="img"
-      aria-label={t.ariaLabel}
-      preserveAspectRatio="xMidYMid meet"
-    >
-      <defs>
-        <linearGradient id={`${uid}-bg`} x1="0" y1="0" x2="0.35" y2="1">
-          <stop offset="0" stop-color="#0c3151"></stop>
-          <stop offset="1" stop-color="#081f36"></stop>
-        </linearGradient>
-        <pattern id={`${uid}-dots`} width="24" height="24" patternUnits="userSpaceOnUse">
-          <circle cx="1.1" cy="1.1" r="1.1" fill="#4f93c4" fill-opacity="0.16"></circle>
-        </pattern>
-        <clipPath id={`${uid}-clip`}>
-          <rect x={X0} y={Y0} width={X1 - X0} height={Y1 - Y0}></rect>
-        </clipPath>
-      </defs>
-
-      <rect width={W} height={H} fill={`url(#${uid}-bg)`}></rect>
-      <rect width={W} height={H} fill={`url(#${uid}-dots)`}></rect>
-
-      <!-- Zona di anomalia: dal punto in cui la corrente si stacca dalla
-           linea di base fino alla fine della prova. -->
-      <rect x={n(xAnomalia)} y={Y0} width={n(X1 - xAnomalia)} height={Y1 - Y0} fill="#e0616b" fill-opacity="0.1"></rect>
-      <line x1={n(xAnomalia)} y1={Y0} x2={n(xAnomalia)} y2={Y1} stroke="#e0616b" stroke-opacity="0.5" stroke-width="1" stroke-dasharray="3 4"></line>
-
-      <!-- Reticolo. -->
-      <g stroke="#3f7fb0" stroke-width="0.8" opacity="0.22">
-        {decadiT.map((t) => <line x1={n(x(t))} y1={Y0} x2={n(x(t))} y2={Y1} />)}
-        {scalaKV.map((kv) => <line x1={X0} y1={n(yKV(kv))} x2={X1} y2={n(yKV(kv))} />)}
-      </g>
-
-      <!-- Assi e tacche da strumento. -->
-      <g stroke="#6ba7d2" stroke-opacity="0.55" stroke-width="1">
-        <line x1={X0} y1={Y0} x2={X0} y2={Y1}></line>
-        <line x1={X0} y1={Y1} x2={X1} y2={Y1}></line>
-        {decadiT.map((t) => <line x1={n(x(t))} y1={Y1} x2={n(x(t))} y2={Y1 + 6} />)}
-        {scalaKV.map((kv) => <line x1={X0 - 6} y1={n(yKV(kv))} x2={X0} y2={n(yKV(kv))} />)}
-      </g>
-
-      <g clip-path={`url(#${uid}-clip)`} fill="none" stroke-linejoin="round" stroke-linecap="round">
-        <polyline points={dTensione} stroke="#bcd6e8" stroke-width="1.8"></polyline>
-        <polyline points={dCorrente} stroke="#e0616b" stroke-width="2"></polyline>
-      </g>
-
-      <!-- Etichette degli assi. -->
-      <g
-        class="plot-label"
-        font-family="Inter Variable, Inter, sans-serif"
-        font-size="12"
-        font-weight="600"
-        letter-spacing="0.08em"
-        fill="#bcd6e8"
-        paint-order="stroke"
-        stroke="#081f36"
-        stroke-width="3.5"
-        stroke-opacity="0.85"
-      >
-        {
-          decadiT.map((t, i) => (
-            <text x={n(x(t))} y={Y1 + 22} text-anchor={i === 0 ? 'start' : i === decadiT.length - 1 ? 'end' : 'middle'}>
-              {t} min
-            </text>
-          ))
-        }
-        {scalaKV.map((kv) => <text x={X0 - 12} y={n(yKV(kv) + 4)} text-anchor="end">{kv}</text>)}
-        <text x={X0 - 12} y={Y0 - 16} text-anchor="end">kV</text>
-      </g>
-
-      <g
-        class="plot-label plot-label--band"
-        font-family="Inter Variable, Inter, sans-serif"
-        font-size="11"
-        font-weight="600"
-        letter-spacing="0.1em"
-        fill="#f0a3a9"
-        paint-order="stroke"
-        stroke="#081f36"
-        stroke-width="3.5"
-        stroke-opacity="0.85"
-      >
-        <text x={X1 - 8} y={Y0 + 17} text-anchor="end">{t.anomalia}</text>
-      </g>
-
-      <!-- Legenda. -->
-      <g transform={`translate(${X0 + 16} ${Y0 + 10})`}>
-        <line x1="0" y1="0" x2="22" y2="0" stroke="#bcd6e8" stroke-width="1.8"></line>
-        <line class="ins-legend-rule" x1="0" y1="22" x2="22" y2="22" stroke="#e0616b" stroke-width="2"></line>
-        <g
-          class="plot-label plot-legend"
-          font-family="Inter Variable, Inter, sans-serif"
-          font-size="11"
-          font-weight="600"
-          letter-spacing="0.06em"
-          fill="#bcd6e8"
-          paint-order="stroke"
-          stroke="#081f36"
-          stroke-width="3.5"
-          stroke-opacity="0.85"
-        >
-          <text x="30" y="4">{t.tensioneDiProva}</text>
-          <text class="ins-legend-2" x="30" y="26" fill="#f0a3a9">{t.correnteDiFuga}</text>
-        </g>
-      </g>
-
-      <!-- Cornice con tacche d'angolo. -->
-      <rect x="14" y="14" width={W - 28} height={H - 28} rx="6" fill="none" stroke="#6ba7d2" stroke-opacity="0.26" stroke-width="1"></rect>
-      <g stroke="#8fd9ab" stroke-opacity="0.5" stroke-width="1.4" stroke-linecap="square">
-        <line x1="14" y1="38" x2="14" y2="14"></line>
-        <line x1="14" y1="14" x2="38" y2="14"></line>
-        <line x1={W - 38} y1="14" x2={W - 14} y2="14"></line>
-        <line x1={W - 14} y1="14" x2={W - 14} y2="38"></line>
-        <line x1="14" y1={H - 38} x2="14" y2={H - 14}></line>
-        <line x1="14" y1={H - 14} x2="38" y2={H - 14}></line>
-        <line x1={W - 38} y1={H - 14} x2={W - 14} y2={H - 14}></line>
-        <line x1={W - 14} y1={H - 14} x2={W - 14} y2={H - 38}></line>
-      </g>
-    </svg>
-  </div>
-
-  <figcaption class="ins-plot__caption">
-    <span class="ins-plot__dot" aria-hidden="true"></span>
-    <span>
-      <strong>{t.caption}</strong>
-      <span class="ins-plot__caption-sub">
-        {t.captionSub}
-      </span>
-    </span>
-  </figcaption>
-</figure>
-
-<style>
-  .ins-plot__frame {
-    position: relative;
-    overflow: hidden;
-    aspect-ratio: 2 / 1;
-    background: #0a2a44;
-  }
-
-  .ins-plot__frame svg {
-    display: block;
-    width: 100%;
-    height: 100%;
-  }
-
-  @media (max-width: 767px) {
-    .plot-label {
-      font-size: 20px;
-    }
-
-    .plot-label--band {
-      font-size: 18px;
-    }
-
-    .ins-legend-2 {
-      transform: translateY(6px);
-    }
-
-    .ins-legend-rule {
-      transform: translateY(6px);
-    }
-  }
-
-  .ins-plot__caption {
-    display: flex;
-    align-items: center;
-    gap: 0.6rem;
-    margin-top: 0.85rem;
-    padding-left: 0.15rem;
-    color: currentColor;
-    font-size: var(--fs-small);
-    line-height: 1.35;
-  }
-
-  .ins-plot__caption strong {
-    display: block;
-    font-weight: 700;
-    letter-spacing: 0.01em;
-  }
-
-  .ins-plot__caption-sub {
-    display: block;
-    color: color-mix(in srgb, currentColor 62%, transparent);
-    font-size: var(--fs-micro);
-  }
-
-  .ins-plot__dot {
-    width: 0.5rem;
-    height: 0.5rem;
-    flex: none;
-    border-radius: 999px;
-    background: #2fa85f;
-    box-shadow: 0 0 0 4px rgb(79 208 127 / 0.22);
-  }
-</style>
+<ChartFrame
+  uid="ins"
+  ariaLabel={t.ariaLabel}
+  x={{
+    scala: { tipo: 'lin', min: 0, max: 12 },
+    unita: 'min',
+    tacche: [0, 2, 4, 6, 8, 10, 12].map((v) => ({ v, t: String(v) })),
+  }}
+  y={{
+    scala: { tipo: 'lin', min: 0, max: 80 },
+    unita: 'kV',
+    tacche: [0, 20, 40, 60, 80].map((v) => ({ v, t: String(v) })),
+  }}
+  y2={{
+    scala: { tipo: 'lin', min: 0, max: 40 },
+    unita: 'µA',
+    tacche: [0, 10, 20, 30, 40].map((v) => ({ v, t: String(v) })),
+  }}
+  serie={[
+    { tipo: 'line', punti: kv, colore: '#bcd6e8', spessore: 1.8, legenda: t.legendaTensione },
+    { tipo: 'line', punti: sano, colore: '#4fd07f', spessore: 1.8, asse: 'y2', legenda: t.legendaSano },
+    { tipo: 'line', punti: comp, colore: '#e05a3d', spessore: 1.8, asse: 'y2', legenda: t.legendaCompromesso },
+  ]}
+  didascalia={t.caption}
+  didascaliaSub={t.captionSub}
+/>
