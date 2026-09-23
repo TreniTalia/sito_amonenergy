@@ -10,8 +10,9 @@
  * indietro attraverso lo SCADA — la stessa struttura a due corsie delle altre
  * pagine di controllo, qui applicata a una catena di sicurezza di rete.
  * Disegnata sulla griglia condivisa `SchemaFrame`/`BlockChain`: il titolo del
- * primo box, che a coordinate scritte a mano usciva dal riquadro, ora va a
- * capo con `righe()` come ogni altro box del sito.
+ * primo box (PI, "Protezione di interfaccia") è HTML reale, quindi va a capo
+ * secondo il flusso normale e non esce più dal riquadro come nella prima
+ * versione SVG a coordinate fisse.
  */
 import type { Lingua } from '../../../i18n/routes.ts';
 import SchemaFrame from './SchemaFrame.astro';
@@ -28,15 +29,9 @@ const TESTI = {
     ariaLabel:
       "Catena a quattro blocchi: protezione di interfaccia con dispositivo RIGEDI, modem, integrazione SCADA, distributore. Una freccia superiore porta lo stato della protezione fino allo SCADA, una freccia inferiore riporta il comando di distacco o riconnessione dal distributore fino alla protezione di interfaccia.",
     blocchi: [
-      // "Protezione di interfaccia" (senza accorciare) va a capo su tre
-      // righe nel box da 132 unità: la funzione righe() ne tiene solo due e
-      // perderebbe "interfaccia". Senza la preposizione il titolo va a capo
-      // pulito su due righe, "Protezione" / "interfaccia".
-      { t1: 'Protezione interfaccia', t2: 'Dispositivo RIGEDI' },
+      { t1: 'Protezione di interfaccia', t2: 'Dispositivo RIGEDI' },
       { t1: 'Modem', t2: 'Ricezione comando' },
-      // "Stato e storicizzazione" esce dal box a 390px (misurato nel
-      // browser): "storicizzazione" da sola è troppo larga al font mobile.
-      { t1: 'Integrazione SCADA', t2: 'Stato, storico' },
+      { t1: 'Integrazione SCADA', t2: 'Stato e storicizzazione' },
       { t1: 'Distributore', t2: 'Ordine di distacco' },
     ],
     stato: 'STATO',
@@ -50,12 +45,8 @@ const TESTI = {
     blocchi: [
       { t1: 'Interface protection', t2: 'RIGEDI device' },
       { t1: 'Modem', t2: 'Command reception' },
-      // "Status and history" andrebbe a capo su tre righe nel box: righe()
-      // ne tiene solo due e perderebbe "history". "Disconnection order" esce
-      // dal box a 390px (misurato nel browser): "Disconnection" da sola è
-      // troppo larga al font mobile.
-      { t1: 'SCADA integration', t2: 'Status, history' },
-      { t1: 'Distributor', t2: 'Trip order' },
+      { t1: 'SCADA integration', t2: 'Status and history' },
+      { t1: 'Distributor', t2: 'Disconnection order' },
     ],
     stato: 'STATUS',
     comando: 'DISCONNECTION COMMAND',

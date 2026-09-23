@@ -1,17 +1,21 @@
 ---
 /**
- * Griglia fissa per gli schemi a catena orizzontale (RCS, A.72, lettura
- * contatori): fino a 4 box allineati sulla stessa riga, con una corsia sopra
- * (lo stato che risale), una sotto (il comando che ridiscende) oppure
- * un'unica corsia fra i box quando il flusso è a senso unico (nessun
- * comando in ritorno). I testi dei box vanno a capo a build time con
- * `righe()` e non escono mai dal perimetro del box: è il difetto che questo
- * componente elimina rispetto ai vecchi file a coordinate scritte a mano
- * (la voce "Protezione di interfaccia" del teledistacco A.72 usciva dal suo
- * riquadro).
+ * Griglia HTML/CSS per gli schemi a catena orizzontale (RCS, A.72, lettura
+ * contatori): fino a 4 box, quattro colonne da 768px in su, una sola colonna
+ * (impilati) sotto i 768px, con le frecce che passano da orizzontali a
+ * verticali.
+ *
+ * Fix round 1: la versione precedente disegnava tutto in SVG a coordinate
+ * fisse, con la larghezza delle righe stimata a build time (`righe.ts`) —
+ * una stima, non una misura, che a certe combinazioni di lingua/larghezza
+ * sbagliava e faceva uscire il testo dal box ("Protezione di interfaccia"
+ * nel teledistacco A.72, tagli di parole altrove). Qui i box sono elementi
+ * HTML reali: il testo va a capo secondo le regole normali del flusso e non
+ * può mai uscire dal proprio riquadro, perché è il riquadro a crescere con
+ * lui. Le dimensioni dei testi sono quelle del sistema di design
+ * (`--fs-small`/`--fs-micro`), non stimate: niente più corse a chi arriva
+ * primo fra dimensione mobile e reale.
  */
-import { righe } from './righe.ts';
-
 interface Blocco {
   t1: string;
   t2: string;
@@ -25,124 +29,184 @@ interface Props {
   unica?: { etichetta: string };
 }
 const { uid, blocchi, sopra, sotto, unica } = Astro.props;
-
-const n = (v: number) => Math.round(v * 10) / 10;
-
-// Griglia fissa, uguale per tutte le catene: al massimo 4 box larghi 132,
-// passo 150, primo centro a x = 95 (centri 95, 245, 395, 545), sempre sulla
-// stessa riga y = 174. Le tre corsie possibili stanno sopra, sotto o in
-// mezzo ai box, mai tutte insieme (una catena è o a due versi, o a un verso
-// solo con un'unica corsia centrale).
-const CENTRI = [95, 245, 395, 545];
-const BOX_W = 132;
-const BOX_H = 92;
-const BOX_Y = 174;
-const LANE_SOPRA_Y = 138;
-const LANE_SOTTO_Y = 302;
-const LANE_UNICA_Y = 220;
-const MAX_TESTO = BOX_W - 16; // 116: padding di 8 per lato dentro il box
-
-const centri = CENTRI.slice(0, blocchi.length);
-const primo = centri[0];
-const ultimo = centri[centri.length - 1];
-
-// Sotto i 768px il font dei box cresce da 13/11 a 21/21 (vedi <style> più
-// sotto): a quella larghezza la tela reale è ~348px per 640 unità di
-// viewBox, cioè uno scarto tela/font di ~0,54; sotto i 21px il testo
-// scenderebbe sotto gli 11px effettivi richiesti su schermo. righe() usa
-// quindi 21 per stimare dove va a capo: è la dimensione più larga, quindi il
-// numero di righe calcolato qui vale sia a 1440 sia a 390px.
-const EM_MOBILE = 21;
-const LH1 = 15; // interlinea del titolo alla dimensione desktop (13px)
-const LH2 = 13; // interlinea del sottotitolo alla dimensione desktop (11px)
-// Margine ampio fra titolo e sottotitolo: sotto i 768px entrambi i testi
-// salgono a 21px (molto più dei 13/11 desktop), e senza questo margine la
-// seconda riga del titolo arriverebbe a toccare la prima del sottotitolo nei
-// box dove entrambi vanno a capo su due righe.
-const GAP = 16;
-function layout(b: Blocco) {
-  const l1 = righe(b.t1, EM_MOBILE, MAX_TESTO);
-  const l2 = righe(b.t2, EM_MOBILE, MAX_TESTO);
-  const totale = l1.length * LH1 + GAP + l2.length * LH2;
-  const top = BOX_Y + BOX_H / 2 - totale / 2;
-  const y1 = n(top + LH1 * 0.78);
-  const y2 = n(top + l1.length * LH1 + GAP + LH2 * 0.85);
-  return { l1, l2, y1, y2 };
-}
 ---
 
-{sopra && (
-  <g stroke="#3f7fb0" stroke-opacity="0.45" stroke-width="1">
-    {centri.map((cx) => <line x1={cx} y1={LANE_SOPRA_Y} x2={cx} y2={BOX_Y} />)}
-  </g>
-)}
-{sotto && (
-  <g stroke="#3f7fb0" stroke-opacity="0.45" stroke-width="1">
-    {centri.map((cx) => <line x1={cx} y1={n(BOX_Y + BOX_H)} x2={cx} y2={LANE_SOTTO_Y} />)}
-  </g>
-)}
+<div class="chain" id={`chain-${uid}`}>
+  {sopra && (
+    <div class="chain__lane chain__lane--sopra">
+      <span class="chain__lane-label">{sopra.etichetta}</span>
+      <span class="chain__lane-line" aria-hidden="true"></span>
+    </div>
+  )}
 
-{sopra && (
-  <Fragment>
-    {/* Corsia dello stato: risale da sinistra a destra. */}
-    <line x1={primo} y1={LANE_SOPRA_Y} x2={ultimo} y2={LANE_SOPRA_Y} stroke="#6ba7d2" stroke-width="1.6" marker-end={`url(#${uid}-arrow-blue)`} />
-    <text x={primo} y={LANE_SOPRA_Y - 12} class="schema-label" font-family="Inter Variable, Inter, sans-serif" font-size="10.5" font-weight="700" letter-spacing="0.06em" fill="#8fbfe0">{sopra.etichetta}</text>
-  </Fragment>
-)}
+  {unica && <p class="chain__lane-label chain__lane-label--unica">{unica.etichetta}</p>}
 
-{sotto && (
-  <Fragment>
-    {/* Corsia del comando: ridiscende da destra a sinistra. */}
-    <line x1={ultimo} y1={LANE_SOTTO_Y} x2={primo} y2={LANE_SOTTO_Y} stroke="#4fd07f" stroke-width="2" marker-end={`url(#${uid}-arrow-green)`} />
-    <text x={ultimo} y={LANE_SOTTO_Y + 22} text-anchor="end" class="schema-label" font-family="Inter Variable, Inter, sans-serif" font-size="10.5" font-weight="700" letter-spacing="0.06em" fill="#8fd9ab">{sotto.etichetta}</text>
-    {sotto.evidenza && centri.length > 1 && (
-      <text x={n((centri[0] + centri[1]) / 2)} y={LANE_SOTTO_Y + 22} text-anchor="middle" class="schema-label" font-family="Inter Variable, Inter, sans-serif" font-size="10.5" font-weight="700" letter-spacing="0.06em" fill="#8fd9ab">{sotto.evidenza}</text>
-    )}
-  </Fragment>
-)}
+  <div class:list={['chain__boxes', { 'chain__boxes--unica': !!unica }]}>
+    {
+      blocchi.map((b, i) => (
+        <>
+          <div class="chain__box" data-schema-box class:list={{ 'chain__box--accento': b.accento }}>
+            <p class="chain__box-title">{b.t1}</p>
+            <p class="chain__box-sub">{b.t2}</p>
+          </div>
+          {unica && i < blocchi.length - 1 && (
+            <span class="chain__connector" aria-hidden="true">
+              <svg viewBox="0 0 24 24">
+                <path d="M4 12h13M13 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" />
+              </svg>
+            </span>
+          )}
+        </>
+      ))
+    }
+  </div>
 
-{unica && (
-  <Fragment>
-    {/* Unica corsia, a senso unico: una freccia per ogni coppia di box adiacenti. */}
-    <g stroke="#4fd07f" stroke-opacity="0.7" stroke-width="1.8">
-      {centri.slice(0, -1).map((cx, i) => (
-        <line x1={n(cx + BOX_W / 2)} y1={LANE_UNICA_Y} x2={n(centri[i + 1] - BOX_W / 2)} y2={LANE_UNICA_Y} marker-end={`url(#${uid}-arrow-green)`} />
-      ))}
-    </g>
-    <text x={primo} y={n(LANE_UNICA_Y - BOX_H / 2 - 16)} class="schema-label" font-family="Inter Variable, Inter, sans-serif" font-size="10.5" font-weight="700" letter-spacing="0.06em" fill="#8fd9ab">{unica.etichetta}</text>
-  </Fragment>
-)}
-
-{blocchi.map((b, i) => {
-  const cx = centri[i];
-  const { l1, l2, y1, y2 } = layout(b);
-  const strokeColor = b.accento ? '#4fd07f' : '#6ba7d2';
-  const strokeOpacity = b.accento ? '0.75' : '0.55';
-  const strokeWidth = b.accento ? '1.6' : '1.4';
-  return (
-    <g data-schema-box>
-      <rect class="schema-box" x={n(cx - BOX_W / 2)} y={BOX_Y} width={BOX_W} height={BOX_H} rx="10" fill="#0f3656" stroke={strokeColor} stroke-opacity={strokeOpacity} stroke-width={strokeWidth} />
-      {/* La seconda riga (se c'è) usa dy in "em": scala insieme al font-size
-          del suo stesso tspan, quindi l'interlinea resta proporzionata anche
-          sotto i 768px, quando il font cresce da 13/11 a 21px. */}
-      <text class="schema-box__t" x={cx} y={y1} text-anchor="middle" font-family="Sora, Inter Variable, Inter, sans-serif" font-size="13" font-weight="700" fill="#e7f0f7">
-        {l1.map((riga, i) => <tspan x={cx} dy={i === 0 ? '0' : '1.2em'}>{riga}</tspan>)}
-      </text>
-      <text class="schema-box__t" x={cx} y={y2} text-anchor="middle" font-family="Inter Variable, Inter, sans-serif" font-size="11" fill="#bcd6e8" fill-opacity="0.85">
-        {l2.map((riga, i) => <tspan x={cx} dy={i === 0 ? '0' : '1.2em'}>{riga}</tspan>)}
-      </text>
-    </g>
-  );
-})}
+  {sotto && (
+    <div class="chain__lane chain__lane--sotto">
+      {sotto.evidenza && <span class="chain__lane-evidenza">{sotto.evidenza}</span>}
+      <span class="chain__lane-line" aria-hidden="true"></span>
+      <span class="chain__lane-label">{sotto.etichetta}</span>
+    </div>
+  )}
+</div>
 
 <style>
-  /* Sotto i 768px la tela reale è ~350px per 640 unità di viewBox: senza
-     ingrandire i font qui, titolo e sottotitolo dei box scenderebbero sotto
-     gli 11px effettivi su schermo. Titolo e sottotitolo salgono alla stessa
-     dimensione (21px): righe() è stata calcolata su questo stesso valore
-     (EM_MOBILE), quindi il numero di righe resta corretto. */
+  .chain {
+    display: flex;
+    flex-direction: column;
+    gap: 0.85rem;
+    color: #e7f0f7;
+  }
+
+  /* Griglia: 4 colonne da 768px, una sola sotto. Con `unica` (contatori) le
+     colonne aggiuntive "auto" ospitano le frecce fra un box e l'altro, senza
+     bisogno di misurarne la posizione via JS: sono semplicemente altre
+     colonne della stessa griglia. */
+  .chain__boxes {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 0.85rem;
+  }
+  .chain__boxes--unica {
+    grid-template-columns: 1fr auto 1fr auto 1fr auto 1fr;
+    align-items: center;
+  }
+
+  .chain__box {
+    background: #0f3656;
+    border: 1.4px solid rgba(107, 167, 210, 0.55);
+    border-radius: 10px;
+    padding: 0.85rem 0.9rem;
+    text-align: center;
+  }
+  .chain__box--accento {
+    background: #123a5e;
+    border-color: #4fd07f;
+    border-width: 1.6px;
+  }
+  .chain__box-title {
+    margin: 0;
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: var(--fs-small);
+    line-height: 1.25;
+  }
+  .chain__box--accento .chain__box-title {
+    color: #8fd9ab;
+  }
+  .chain__box-sub {
+    margin: 0.25rem 0 0;
+    font-size: var(--fs-micro);
+    line-height: 1.35;
+    color: #bcd6e8;
+    opacity: 0.85;
+  }
+
+  .chain__lane {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+  }
+  .chain__lane-label,
+  .chain__lane-evidenza {
+    flex: none;
+    font-family: var(--font-body);
+    font-weight: 700;
+    font-size: 0.6875rem;
+    line-height: 1.2;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+  .chain__lane--sopra .chain__lane-label {
+    color: #8fbfe0;
+  }
+  .chain__lane--sotto .chain__lane-label,
+  .chain__lane--sotto .chain__lane-evidenza,
+  .chain__lane-label--unica {
+    color: #8fd9ab;
+  }
+  .chain__lane-label--unica {
+    margin: 0;
+  }
+
+  /* Linea di corsia con freccia: un bordo triangolare CSS all'estremità,
+     niente marker SVG (non serve più un `<marker>` condiviso). */
+  .chain__lane-line {
+    position: relative;
+    flex: 1 1 auto;
+    min-width: 1.5rem;
+    height: 2px;
+    border-radius: 1px;
+  }
+  .chain__lane--sopra .chain__lane-line {
+    background: #6ba7d2;
+  }
+  .chain__lane--sopra .chain__lane-line::after {
+    content: '';
+    position: absolute;
+    right: -1px;
+    top: 50%;
+    translate: 0 -50%;
+    border-top: 5px solid transparent;
+    border-bottom: 5px solid transparent;
+    border-left: 7px solid #6ba7d2;
+  }
+  .chain__lane--sotto .chain__lane-line {
+    background: #4fd07f;
+  }
+  .chain__lane--sotto .chain__lane-line::after {
+    content: '';
+    position: absolute;
+    left: -1px;
+    top: 50%;
+    translate: 0 -50%;
+    border-top: 5px solid transparent;
+    border-bottom: 5px solid transparent;
+    border-right: 7px solid #4fd07f;
+  }
+
+  .chain__connector {
+    display: flex;
+    justify-self: center;
+    width: 1.4rem;
+    height: 1.4rem;
+    color: #4fd07f;
+  }
+  .chain__connector svg {
+    width: 100%;
+    height: 100%;
+  }
+
+  /* Sotto i 768px la griglia diventa una sola colonna: i box si impilano
+     nell'ordine della catena, e la freccia fra un box e l'altro (solo per
+     `unica`) ruota di 90° per restare coerente col nuovo verso verticale. */
   @media (max-width: 767px) {
-    .schema-label { font-size: 22px; }
-    .schema-box__t { font-size: 21px; }
+    .chain__boxes {
+      grid-template-columns: 1fr;
+    }
+    .chain__connector {
+      transform: rotate(90deg);
+    }
   }
 </style>

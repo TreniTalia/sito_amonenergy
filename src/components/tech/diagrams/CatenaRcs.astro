@@ -27,13 +27,9 @@ const TESTI = {
       "Catena a quattro blocchi: cabina MT, unità RCS in campo, collegamento dati, Control Room. Una freccia superiore porta lo stato dell'impianto dalla cabina alla Control Room, una freccia inferiore riporta il comando dalla Control Room alla cabina. La richiusura automatica dopo un guasto estinto, decisa dall'unità RCS senza attesa dell'operatore, è evidenziata in verde sulla corsia di comando.",
     blocchi: [
       { t1: 'Cabina MT', t2: 'Interruttore, sensori' },
-      // "Analisi guasto in campo" e "Amon Energy, 24/7" andrebbero a capo su
-      // tre righe nel box: righe() ne tiene solo due e perderebbe una parola.
-      { t1: 'Unità RCS', t2: 'Analisi in campo' },
-      // "Collegamento dati" esce dal box a 390px (misurato nel browser, non
-      // stimato): "Collegamento" da solo è troppo largo al font mobile.
-      { t1: 'Link dati', t2: 'Rete cellulare' },
-      { t1: 'Control Room', t2: 'Assistenza 24/7' },
+      { t1: 'Unità RCS', t2: 'Analisi guasto in campo' },
+      { t1: 'Collegamento dati', t2: 'Rete cellulare' },
+      { t1: 'Control Room', t2: 'Amon Energy, 24/7' },
     ],
     stato: 'STATO',
     comando: 'COMANDO',
@@ -46,9 +42,9 @@ const TESTI = {
       'Four-block chain: MV substation, field RCS unit, data link, Control Room. An upper arrow carries the plant status from the substation up to the Control Room, a lower arrow carries the command from the Control Room down to the substation. The automatic reclosing after a cleared fault, decided by the RCS unit without waiting for an operator, is highlighted in green on the command lane.',
     blocchi: [
       { t1: 'MV substation', t2: 'Breaker, sensors' },
-      { t1: 'RCS unit', t2: 'On-site analysis' },
+      { t1: 'RCS unit', t2: 'On-site fault analysis' },
       { t1: 'Data link', t2: 'Cellular network' },
-      { t1: 'Control Room', t2: 'Support 24/7' },
+      { t1: 'Control Room', t2: 'Amon Energy, 24/7' },
     ],
     stato: 'STATUS',
     comando: 'COMMAND',

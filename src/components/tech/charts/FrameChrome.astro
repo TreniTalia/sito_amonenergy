@@ -1,12 +1,22 @@
 ---
 /**
- * Telaio condiviso dai due tipi di disegno tecnico del sito: i grafici a dati
- * (`ChartFrame`) e gli schemi a blocchi (`SchemaFrame`, Task 8). È la parte
- * che non cambia mai da un disegno all'altro — fondo navy sfumato, trama a
- * puntini, cornice con tacche d'angolo da strumento, didascalia con il
- * pallino verde — mentre il contenuto (assi e serie, o box e frecce) resta
- * uno `<slot />` a coordinate 640×440, la stessa tela per ogni disegno del
- * sito. Il nome BEM dei pezzi (`${figureClass}__frame` ecc.) tiene i selettori
+ * Telaio condiviso dai disegni tecnici del sito: i grafici a dati
+ * (`ChartFrame`) e gli schemi a blocchi (`SchemaFrame`). È la parte che non
+ * cambia mai da un disegno all'altro — fondo navy sfumato, trama a puntini,
+ * cornice con tacche d'angolo da strumento, didascalia con il pallino verde.
+ *
+ * Due modalità, dietro `mode`:
+ * - 'svg' (default, usata solo da `ChartFrame`): il contenuto è SVG a
+ *   coordinate fisse 640×440, com'era da sempre. Invariata dal fix round 1 in
+ *   poi: `ChartFrame.astro` non tocca questo file, e `test/charts-layout.test.mjs`
+ *   lo dimostra restando verde.
+ * - 'html' (usata da `SchemaFrame`): il contenuto è HTML/CSS reale, che va a
+ *   capo da solo e decide da sé quanto spazio occupare — niente più tela
+ *   640×440 fissa con bande vuote quando il contenuto è più corto. Fondo,
+ *   trama e tacche d'angolo diventano CSS invece di rect/line SVG, ma sono
+ *   lo stesso disegno con gli stessi colori.
+ *
+ * Il nome BEM dei pezzi (`${figureClass}__frame` ecc.) tiene i selettori
  * `figure.chart`/`.chart__legend`/… di `ChartFrame` invariati dopo l'estrazione:
  * qui dentro serve solo a comporre la classe, la resa nel DOM non cambia.
  */
@@ -17,45 +27,63 @@ interface Props {
   didascaliaSub: string;
   /** Prefisso BEM del disegno chiamante: 'chart' o 'schema'. */
   figureClass: string;
+  /** 'svg' (default) = tela fissa 640×440; 'html' = contenuto reale, telaio a misura. */
+  mode?: 'svg' | 'html';
 }
-const { uid, ariaLabel, didascalia, didascaliaSub, figureClass } = Astro.props;
+const { uid, ariaLabel, didascalia, didascaliaSub, figureClass, mode = 'svg' } = Astro.props;
 
 const W = 640;
 const H = 440;
 ---
 
 <figure class={figureClass}>
-  <div class={`${figureClass}__frame fc-frame rounded-[var(--radius-card)] border border-navy-100 shadow-[var(--shadow-md)]`}>
-    <slot name="legend" />
-    <svg viewBox={`0 0 ${W} ${H}`} role="img" aria-label={ariaLabel} preserveAspectRatio="xMidYMid meet">
-      <defs>
-        <linearGradient id={`${uid}-bg`} x1="0" y1="0" x2="0.35" y2="1">
-          <stop offset="0" stop-color="#0c3151"></stop>
-          <stop offset="1" stop-color="#081f36"></stop>
-        </linearGradient>
-        <pattern id={`${uid}-dots`} width="24" height="24" patternUnits="userSpaceOnUse">
-          <circle cx="1.1" cy="1.1" r="1.1" fill="#4f93c4" fill-opacity="0.16"></circle>
-        </pattern>
-        <slot name="defs" />
-      </defs>
-      <rect width={W} height={H} fill={`url(#${uid}-bg)`}></rect>
-      <rect width={W} height={H} fill={`url(#${uid}-dots)`}></rect>
+  {mode === 'html' ? (
+    <div
+      class={`${figureClass}__frame fc-frame fc-frame--html rounded-[var(--radius-card)] border border-navy-100 shadow-[var(--shadow-md)]`}
+      role="group"
+      aria-label={ariaLabel}
+    >
+      <span class="fc-corner fc-corner--tl" aria-hidden="true"></span>
+      <span class="fc-corner fc-corner--tr" aria-hidden="true"></span>
+      <span class="fc-corner fc-corner--bl" aria-hidden="true"></span>
+      <span class="fc-corner fc-corner--br" aria-hidden="true"></span>
+      <div class="fc-html-content">
+        <slot />
+      </div>
+    </div>
+  ) : (
+    <div class={`${figureClass}__frame fc-frame rounded-[var(--radius-card)] border border-navy-100 shadow-[var(--shadow-md)]`}>
+      <slot name="legend" />
+      <svg viewBox={`0 0 ${W} ${H}`} role="img" aria-label={ariaLabel} preserveAspectRatio="xMidYMid meet">
+        <defs>
+          <linearGradient id={`${uid}-bg`} x1="0" y1="0" x2="0.35" y2="1">
+            <stop offset="0" stop-color="#0c3151"></stop>
+            <stop offset="1" stop-color="#081f36"></stop>
+          </linearGradient>
+          <pattern id={`${uid}-dots`} width="24" height="24" patternUnits="userSpaceOnUse">
+            <circle cx="1.1" cy="1.1" r="1.1" fill="#4f93c4" fill-opacity="0.16"></circle>
+          </pattern>
+          <slot name="defs" />
+        </defs>
+        <rect width={W} height={H} fill={`url(#${uid}-bg)`}></rect>
+        <rect width={W} height={H} fill={`url(#${uid}-dots)`}></rect>
 
-      <slot />
+        <slot />
 
-      <rect x="14" y="14" width={W - 28} height={H - 28} rx="6" fill="none" stroke="#6ba7d2" stroke-opacity="0.26"></rect>
-      <g stroke="#8fd9ab" stroke-opacity="0.5" stroke-width="1.4" stroke-linecap="square">
-        <line x1="14" y1="38" x2="14" y2="14"></line>
-        <line x1="14" y1="14" x2="38" y2="14"></line>
-        <line x1={W - 38} y1="14" x2={W - 14} y2="14"></line>
-        <line x1={W - 14} y1="14" x2={W - 14} y2="38"></line>
-        <line x1="14" y1={H - 38} x2="14" y2={H - 14}></line>
-        <line x1="14" y1={H - 14} x2="38" y2={H - 14}></line>
-        <line x1={W - 38} y1={H - 14} x2={W - 14} y2={H - 14}></line>
-        <line x1={W - 14} y1={H - 14} x2={W - 14} y2={H - 38}></line>
-      </g>
-    </svg>
-  </div>
+        <rect x="14" y="14" width={W - 28} height={H - 28} rx="6" fill="none" stroke="#6ba7d2" stroke-opacity="0.26"></rect>
+        <g stroke="#8fd9ab" stroke-opacity="0.5" stroke-width="1.4" stroke-linecap="square">
+          <line x1="14" y1="38" x2="14" y2="14"></line>
+          <line x1="14" y1="14" x2="38" y2="14"></line>
+          <line x1={W - 38} y1="14" x2={W - 14} y2="14"></line>
+          <line x1={W - 14} y1="14" x2={W - 14} y2="38"></line>
+          <line x1="14" y1={H - 38} x2="14" y2={H - 14}></line>
+          <line x1="14" y1={H - 14} x2="38" y2={H - 14}></line>
+          <line x1={W - 38} y1={H - 14} x2={W - 14} y2={H - 14}></line>
+          <line x1={W - 14} y1={H - 14} x2={W - 14} y2={H - 38}></line>
+        </g>
+      </svg>
+    </div>
+  )}
   <figcaption class={`${figureClass}__caption fc-caption`}>
     <span class={`${figureClass}__dot fc-dot`} aria-hidden="true"></span>
     <span>
@@ -80,6 +108,71 @@ const H = 440;
     width: 100%;
     height: auto;
   }
+
+  /* Variante 'html': niente più viewBox 640×440, il telaio si dimensiona sul
+     proprio contenuto. Fondo e trama diventano proprietà CSS invece di
+     rect/pattern SVG, stessi colori e stessa scala (24px di passo, cerchi da
+     ~1.1px) della variante SVG. */
+  .fc-frame--html {
+    position: relative;
+    padding: 2.5rem 2rem;
+    /* Stessa sfumatura del fondo SVG (`#0c3151` → `#081f36`), qui in CSS. */
+    background: linear-gradient(155deg, #0c3151, #081f36);
+  }
+  .fc-frame--html::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image: radial-gradient(circle at 1px 1px, rgba(79, 147, 196, 0.16) 1.1px, transparent 0);
+    background-size: 24px 24px;
+    pointer-events: none;
+  }
+  .fc-frame--html::after {
+    content: '';
+    position: absolute;
+    inset: 14px;
+    border: 1px solid rgba(107, 167, 210, 0.26);
+    border-radius: 6px;
+    pointer-events: none;
+  }
+  /* Tacche d'angolo: un bordo a L da 24px per angolo, stessa lunghezza e
+     stesso colore delle tacche SVG (`#8fd9ab`, opacità 0,5, spessore 1.4). */
+  .fc-corner {
+    position: absolute;
+    width: 24px;
+    height: 24px;
+    pointer-events: none;
+  }
+  .fc-corner--tl {
+    top: 14px;
+    left: 14px;
+    border-top: 1.4px solid rgba(143, 217, 171, 0.5);
+    border-left: 1.4px solid rgba(143, 217, 171, 0.5);
+  }
+  .fc-corner--tr {
+    top: 14px;
+    right: 14px;
+    border-top: 1.4px solid rgba(143, 217, 171, 0.5);
+    border-right: 1.4px solid rgba(143, 217, 171, 0.5);
+  }
+  .fc-corner--bl {
+    bottom: 14px;
+    left: 14px;
+    border-bottom: 1.4px solid rgba(143, 217, 171, 0.5);
+    border-left: 1.4px solid rgba(143, 217, 171, 0.5);
+  }
+  .fc-corner--br {
+    bottom: 14px;
+    right: 14px;
+    border-bottom: 1.4px solid rgba(143, 217, 171, 0.5);
+    border-right: 1.4px solid rgba(143, 217, 171, 0.5);
+  }
+  .fc-html-content {
+    position: relative;
+    z-index: 1;
+    color: #e7f0f7;
+  }
+
   .fc-caption {
     display: flex;
     align-items: center;

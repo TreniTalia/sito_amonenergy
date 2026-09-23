@@ -2,12 +2,12 @@
 /**
  * Telaio per gli schemi a blocchi (catene RCS/A.72/contatori, PF1/PF2 del
  * CCI, sagoma del trasformatore): stesso fondo, trama e cornice dei grafici a
- * dati, tramite il telaio comune `FrameChrome` — qui non ci sono assi né
- * serie, solo box e frecce disegnati nello `<slot />`, sempre a coordinate
- * 640×440 come ogni altro disegno del sito. Definisce anche i due marcatori
- * di freccia (blu per lo stato che risale, verde per il comando che
- * ridiscende) con lo stesso stile dei vecchi diagrammi a catena, riusabili da
- * chi disegna nello slot senza doverli ridefinire.
+ * dati, tramite il telaio comune `FrameChrome` in modalità 'html' — qui il
+ * contenuto è HTML/CSS reale (box, frecce, liste), non SVG a coordinate
+ * fisse: va a capo da solo e non ha bisogno di una tela 640×440 con bande
+ * vuote quando il contenuto è più corto (fix round 1: prima il testo dei box
+ * usciva dal riquadro a certe larghezze, e a 1440px restava un terzo di tela
+ * vuoto sopra e sotto il disegno).
  */
 import FrameChrome from '../charts/FrameChrome.astro';
 
@@ -20,14 +20,6 @@ interface Props {
 const { uid, ariaLabel, didascalia, didascaliaSub } = Astro.props;
 ---
 
-<FrameChrome uid={uid} ariaLabel={ariaLabel} didascalia={didascalia} didascaliaSub={didascaliaSub} figureClass="schema">
-  <Fragment slot="defs">
-    <marker id={`${uid}-arrow-blue`} viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
-      <path d="M0,0 L10,5 L0,10 Z" fill="#6ba7d2"></path>
-    </marker>
-    <marker id={`${uid}-arrow-green`} viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
-      <path d="M0,0 L10,5 L0,10 Z" fill="#4fd07f"></path>
-    </marker>
-  </Fragment>
+<FrameChrome uid={uid} ariaLabel={ariaLabel} didascalia={didascalia} didascaliaSub={didascaliaSub} figureClass="schema" mode="html">
   <slot />
 </FrameChrome>

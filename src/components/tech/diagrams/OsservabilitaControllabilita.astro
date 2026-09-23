@@ -10,14 +10,14 @@
  * riferimento normativo comune, confermato dal cliente: CEI 0-16 V5 e la
  * Delibera ARERA 564/2025/R/eel.
  *
- * Non è una catena orizzontale come RCS/A.72/contatori, quindi non usa
- * `BlockChain`: è disegnato direttamente dentro `SchemaFrame`, sulla stessa
- * griglia di box (132 di larghezza, la stessa funzione `righe()` per andare a
- * capo senza uscire dal riquadro) per restare coerente col resto del sito.
+ * HTML/CSS reale (fix round 1): la versione SVG precedente tagliava i titoli
+ * delle colonne contro il bordo superiore della tela a ogni larghezza (una
+ * `y` assoluta non lascia spazio a un titolo più alto del previsto). Le due
+ * colonne sono ora `<div>` in un flusso normale, affiancate da 768px in su e
+ * impilate sotto, dentro lo stesso telaio `SchemaFrame`.
  */
 import type { Lingua } from '../../../i18n/routes.ts';
 import SchemaFrame from './SchemaFrame.astro';
-import { righe } from './righe.ts';
 
 interface Props {
   lingua: Lingua;
@@ -51,133 +51,153 @@ const TESTI = {
 } as const;
 
 const t = TESTI[lingua];
-const uid = 'occ';
 
-// Griglia: due colonne di tre box, stessa larghezza box (132) e stesso
-// margine interno (116 di testo utile) della griglia orizzontale di
-// BlockChain, così le due famiglie di schemi restano coerenti fra loro.
-const COL1 = 190;
-const COL2 = 450;
-const ROW_TOP = 116;
-const ROW_MID = 200;
-const ROW_BOT = 284;
-const BOX_W = 132;
-const BOX_H = 58;
-const MAX_TESTO = BOX_W - 16;
-const n = (v: number) => Math.round(v * 10) / 10;
-
-// Un solo rigo di testo per box (non titolo+sottotitolo come in BlockChain):
-// righe() lo spezza al massimo su due righe, centrate sul centro riga. Come
-// in BlockChain, la stima usa la dimensione mobile (21, la più larga: sotto
-// i 768px il font cresce ma il viewBox no) e le righe oltre la prima sono
-// `tspan` con `dy` in "em", cioè proporzionati al font-size in vigore anche
-// dopo il cambio di dimensione sotto i 768px.
-const EM_MOBILE = 21;
-const LH = 15;
-function layout(testo: string, rowY: number) {
-  const linee = righe(testo, EM_MOBILE, MAX_TESTO);
-  const top = n(rowY - (linee.length * LH) / 2 + LH * 0.78);
-  return { linee, y: top };
-}
+// Le frecce sono un piccolo SVG per verso (su per PF1, giù per PF2): non
+// serve più un `<marker>` condiviso, ogni colonna disegna la propria.
+const FRECCIA = {
+  up: 'M12 20V7M6 11l6-6 6 6',
+  down: 'M12 4v13M6 13l6 6 6-6',
+} as const;
 
 const colonne = [
-  {
-    cx: COL1,
-    titolo: t.pf1,
-    titoloFill: '#8fbfe0',
-    righe: [
-      { rowY: ROW_TOP, testo: t.distributore, cci: false },
-      { rowY: ROW_MID, testo: 'CCI', cci: true },
-      { rowY: ROW_BOT, testo: t.impianto, cci: false },
-    ],
-    // PF1, osservabilità: lo stato risale, dal basso in alto.
-    frecce: [
-      { y1: n(ROW_BOT - BOX_H / 2), y2: n(ROW_MID + BOX_H / 2) },
-      { y1: n(ROW_MID - BOX_H / 2), y2: n(ROW_TOP + BOX_H / 2) },
-    ],
-    freccia: `url(#${uid}-arrow-blue)`,
-    strokeFreccia: '#6ba7d2',
-  },
-  {
-    cx: COL2,
-    titolo: t.pf2,
-    titoloFill: '#8fd9ab',
-    righe: [
-      { rowY: ROW_TOP, testo: t.distributore, cci: false },
-      { rowY: ROW_MID, testo: 'CCI', cci: true },
-      { rowY: ROW_BOT, testo: t.impianto, cci: false },
-    ],
-    // PF2, controllabilità: il comando scende, dall'alto in basso.
-    frecce: [
-      { y1: n(ROW_TOP + BOX_H / 2), y2: n(ROW_MID - BOX_H / 2) },
-      { y1: n(ROW_MID + BOX_H / 2), y2: n(ROW_BOT - BOX_H / 2) },
-    ],
-    freccia: `url(#${uid}-arrow-green)`,
-    strokeFreccia: '#4fd07f',
-  },
+  { colore: 'blue', titolo: t.pf1, direzione: 'up' as const },
+  { colore: 'green', titolo: t.pf2, direzione: 'down' as const },
 ] as const;
 ---
 
-<SchemaFrame uid={uid} ariaLabel={t.ariaLabel} didascalia={t.caption} didascaliaSub={t.captionSub}>
-  <!-- Separatore centrale fra le due colonne. -->
-  <line x1="320" y1="88" x2="320" y2="314" stroke="#3f7fb0" stroke-opacity="0.3" stroke-width="1" stroke-dasharray="2 4"></line>
-
-  {
-    colonne.map((col) => (
-      <>
-        <text x={col.cx} y="90" text-anchor="middle" class="schema-label" font-family="Sora, Inter Variable, Inter, sans-serif" font-size="14" font-weight="700" fill={col.titoloFill}>
-          {col.titolo}
-        </text>
-        {col.frecce.map((f) => (
-          <line x1={col.cx} y1={f.y1} x2={col.cx} y2={f.y2} stroke={col.strokeFreccia} stroke-width="1.8" marker-end={col.freccia} />
-        ))}
-        {col.righe.map((riga) => {
-          const { linee, y } = layout(riga.testo, riga.rowY);
-          return (
-            <g data-schema-box>
-              <rect
-                class="schema-box"
-                x={n(col.cx - BOX_W / 2)}
-                y={n(riga.rowY - BOX_H / 2)}
-                width={BOX_W}
-                height={BOX_H}
-                rx="8"
-                fill={riga.cci ? '#123a5e' : '#0e3457'}
-                stroke={riga.cci ? '#8fd9ab' : '#6ba7d2'}
-                stroke-opacity={riga.cci ? '0.7' : '0.6'}
-                stroke-width={riga.cci ? '1.6' : '1.4'}
-              />
-              <text
-                class="schema-box__t"
-                x={col.cx}
-                y={y}
-                text-anchor="middle"
-                font-family={riga.cci ? 'Sora, Inter Variable, Inter, sans-serif' : 'Inter Variable, Inter, sans-serif'}
-                font-size={riga.cci ? '12.5' : '12'}
-                font-weight="700"
-                fill={riga.cci ? '#8fd9ab' : '#e7f0f7'}
-              >
-                {linee.map((testoRiga, i) => <tspan x={col.cx} dy={i === 0 ? '0' : '1.2em'}>{testoRiga}</tspan>)}
-              </text>
-            </g>
-          );
-        })}
-      </>
-    ))
-  }
-
-  <!-- Riferimento normativo comune. -->
-  <text x="320" y="376" text-anchor="middle" class="schema-label" font-family="Inter Variable, Inter, sans-serif" font-size="11" font-weight="600" letter-spacing="0.04em" fill="#bcd6e8" fill-opacity="0.85">
-    {t.riferimento}
-  </text>
+<SchemaFrame uid="occ" ariaLabel={t.ariaLabel} didascalia={t.caption} didascaliaSub={t.captionSub}>
+  <div class="occ">
+    {
+      colonne.map((col) => (
+        <div class:list={['occ__col', `occ__col--${col.colore}`]}>
+          <p class="occ__title">{col.titolo}</p>
+          <div class="occ__box" data-schema-box>
+            <p class="occ__box-title">{t.distributore}</p>
+          </div>
+          <span class="occ__arrow" aria-hidden="true">
+            <svg viewBox="0 0 24 24">
+              <path d={FRECCIA[col.direzione]} fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" />
+            </svg>
+          </span>
+          <div class="occ__box occ__box--cci" data-schema-box>
+            <p class="occ__box-title">CCI</p>
+          </div>
+          <span class="occ__arrow" aria-hidden="true">
+            <svg viewBox="0 0 24 24">
+              <path d={FRECCIA[col.direzione]} fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" />
+            </svg>
+          </span>
+          <div class="occ__box" data-schema-box>
+            <p class="occ__box-title">{t.impianto}</p>
+          </div>
+        </div>
+      ))
+    }
+  </div>
+  <p class="occ__riferimento">{t.riferimento}</p>
 </SchemaFrame>
 
 <style>
-  /* Stessa strategia di BlockChain: sotto i 768px la tela reale è ~350px per
-     640 unità di viewBox, e senza ingrandire i font qui i testi scenderebbero
-     sotto gli 11px effettivi su schermo. */
+  .occ {
+    display: flex;
+    justify-content: center;
+    gap: 2.5rem;
+    color: #e7f0f7;
+  }
+  .occ__col {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    flex: 1 1 0;
+    max-width: 15rem;
+  }
+  /* Separatore verticale fra le due colonne, come il tratteggio dell'SVG. */
+  .occ__col + .occ__col {
+    border-left: 1px dashed rgba(63, 127, 176, 0.3);
+    padding-left: 2.5rem;
+  }
+  .occ__title {
+    margin: 0 0 0.5rem;
+    text-align: center;
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: var(--fs-small);
+    line-height: 1.3;
+  }
+  .occ__col--blue .occ__title {
+    color: #8fbfe0;
+  }
+  .occ__col--green .occ__title {
+    color: #8fd9ab;
+  }
+  .occ__box {
+    background: #0e3457;
+    border: 1.4px solid rgba(107, 167, 210, 0.6);
+    border-radius: 8px;
+    padding: 0.6rem 0.75rem;
+    text-align: center;
+  }
+  .occ__box--cci {
+    background: #123a5e;
+    border-color: #8fd9ab;
+    border-width: 1.6px;
+  }
+  .occ__box-title {
+    margin: 0;
+    font-family: var(--font-body);
+    font-weight: 700;
+    font-size: var(--fs-small);
+    line-height: 1.3;
+  }
+  .occ__box--cci .occ__box-title {
+    font-family: var(--font-display);
+    color: #8fd9ab;
+  }
+  .occ__arrow {
+    display: flex;
+    justify-content: center;
+    width: 1.4rem;
+    height: 1.4rem;
+    margin: 0.1rem auto;
+  }
+  .occ__col--blue .occ__arrow {
+    color: #6ba7d2;
+  }
+  .occ__col--green .occ__arrow {
+    color: #4fd07f;
+  }
+  .occ__arrow svg {
+    width: 100%;
+    height: 100%;
+  }
+  .occ__riferimento {
+    margin: 1.75rem 0 0;
+    text-align: center;
+    font-family: var(--font-body);
+    font-weight: 600;
+    font-size: var(--fs-micro);
+    letter-spacing: 0.04em;
+    color: #bcd6e8;
+    opacity: 0.85;
+  }
+
+  /* Sotto i 768px le due colonne si impilano: ognuna resta una colonna
+     verticale (i box non cambiano orientamento), cambia solo l'affiancamento. */
   @media (max-width: 767px) {
-    .schema-label { font-size: 22px; }
-    .schema-box__t { font-size: 21px; }
+    .occ {
+      flex-direction: column;
+      align-items: center;
+      gap: 1.5rem;
+    }
+    .occ__col {
+      max-width: 18rem;
+      width: 100%;
+    }
+    .occ__col + .occ__col {
+      border-left: none;
+      padding-left: 0;
+      border-top: 1px dashed rgba(63, 127, 176, 0.3);
+      padding-top: 1.5rem;
+    }
   }
 </style>
