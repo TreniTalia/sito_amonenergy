@@ -132,6 +132,15 @@ const legenda_step = (X1 - X0) / Math.max(1, conLegenda.length);
     .chart-label { font-size: 22px; }
     .chart-label--minor { display: none; }
     .chart-legend { font-size: 20px; }
+    /* Con due voci di legenda l'affiancamento in colonne resta leggibile
+       anche col font ingrandito da mobile. Con tre voci le colonne (larghe
+       un terzo della tela) diventano più strette del testo italiano più
+       lungo: le impiliamo una per riga. La selezione (primo figlio che è
+       anche terzultimo) intercetta solo i gruppi con esattamente tre voci,
+       senza toccare quelli a due. */
+    .chart-legend > g:nth-child(1):nth-last-child(3) { transform: translate(0px, 0px); }
+    .chart-legend > g:nth-child(1):nth-last-child(3) ~ g:nth-child(2) { transform: translate(0px, 24px); }
+    .chart-legend > g:nth-child(1):nth-last-child(3) ~ g:nth-child(3) { transform: translate(0px, 48px); }
   }
   .chart__caption { display: flex; align-items: center; gap: 0.6rem; margin-top: 0.85rem; padding-left: 0.15rem; font-size: var(--fs-small); line-height: 1.35; }
   .chart__caption strong { display: block; font-weight: 700; }

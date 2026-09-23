@@ -2,14 +2,21 @@
 /**
  * Diagramma tempo-corrente per la verifica delle protezioni AT/MT.
  *
- * Stessa lingua grafica delle altre diagnostiche — fondo navy, reticolo a
- * puntini, cornice con tacche d'angolo. Il contenuto è la caratteristica a
- * tempo indipendente su assi log-log: due gradini (soglia selettiva I> e
- * soglia di massima corrente I>>) e il punto di prova con cui si verifica che
- * il relè scatti dove la taratura dice che deve scattare — è quello che fanno
- * il DRTS/64 e l'ISA CBA 1000 iniettando corrente secondaria o primaria.
+ * Stessa lingua grafica delle altre diagnostiche, qui sul telaio condiviso
+ * `ChartFrame`: fondo navy, reticolo a puntini, cornice con tacche d'angolo.
+ * Il contenuto è la caratteristica calcolata dal modello di
+ * `charts/models/iec60255.ts`: soglia selettiva I> a tempo inverso secondo la
+ * curva "standard inverse" della IEC 60255-151, tagliata alle correnti di
+ * cortocircuito dalla soglia di massima corrente I>> a tempo definito. I
+ * punti verdi sono le iniezioni di prova ai multipli canonici della soglia,
+ * con il tempo cronometrato che si discosta di pochi punti percentuali dalla
+ * curva teorica, come in un referto reale di verifica con DRTS/64 o ISA CBA
+ * 1000.
  */
 import type { Lingua } from '../../../i18n/routes.ts';
+import ChartFrame from '../charts/ChartFrame.astro';
+import { tempoIntervento, TARATURA_ESEMPIO, PUNTI_PROVA } from '../charts/models/iec60255.ts';
+import { logspace } from '../charts/models/scale.ts';
 
 interface Props {
   lingua: Lingua;
@@ -17,275 +24,62 @@ interface Props {
 
 const { lingua } = Astro.props;
 
+// Formattazione dei decimali secondo la lingua: virgola in italiano, punto in
+// inglese.
+const num = (v: number) => (lingua === 'it' ? String(v).replace('.', ',') : String(v));
+
 const TESTI = {
   it: {
     ariaLabel:
-      'Diagramma tempo-corrente su assi logaritmici: due gradini di intervento, la soglia selettiva I> con tempo di intervento più lungo e la soglia di massima corrente I>> quasi istantanea. Un punto verde segna la corrente di prova iniettata e il tempo di intervento misurato, sovrapposto al gradino I>>.',
+      'Diagramma tempo-corrente su assi logaritmici: la soglia selettiva I> a tempo inverso secondo la IEC 60255-151, con il tempo di intervento che scende al crescere della corrente, tagliata alle correnti più alte dalla soglia di massima corrente I>> a tempo definito. Punti verdi segnano le correnti di prova iniettate e i tempi di intervento misurati, vicini alla curva teorica.',
     caption: 'Verifica della curva di intervento',
-    captionSub: 'Caratteristica esemplificativa · assi log-log, gradini I> e I>> a tempo indipendente',
-    legendaI1: 'Soglia selettiva I>',
-    legendaI2: 'Soglia di massima corrente I>>',
+    captionSub: 'Curva calcolata da modello · IEC 60255-151 standard inverse, Is 400 A, TMS 0,1, I>> 4 kA',
+    legendaCurva: 'Caratteristica I> tempo inverso',
+    legendaSoglia: 'Soglia I>> tempo definito',
+    legendaPunti: 'Punti di prova',
   },
   en: {
     ariaLabel:
-      'Time-current diagram on logarithmic axes: two tripping steps, the selective threshold I> with a longer tripping time and the overcurrent threshold I>> which is near-instantaneous. A green point marks the injected test current and the measured tripping time, overlaid on the I>> step.',
+      'Time-current diagram on logarithmic axes: the selective threshold I> at inverse time under IEC 60255-151, with tripping time falling as current rises, cut off at higher currents by the definite-time overcurrent threshold I>>. Green points mark the injected test currents and the measured tripping times, close to the theoretical curve.',
     caption: 'Tripping curve verification',
-    captionSub: 'Sample characteristic · log-log axes, definite-time I> and I>> steps',
-    legendaI1: 'Selective threshold I>',
-    legendaI2: 'Overcurrent threshold I>>',
+    captionSub: 'Computed from a model · IEC 60255-151 standard inverse, Is 400 A, TMS 0.1, I>> 4 kA',
+    legendaCurva: 'I> inverse-time curve',
+    legendaSoglia: 'I>> definite-time threshold',
+    legendaPunti: 'Test points',
   },
 } as const;
 
 const t = TESTI[lingua];
 
-const W = 640;
-const H = 320;
-
-const X0 = 86;
-const X1 = 608;
-const Y0 = 48;
-const Y1 = 252;
-
-const I_MIN = 100;
-const I_MAX = 10_000;
-const T_MIN = 0.01;
-const T_MAX = 10;
-
-const UI_MIN = Math.log10(I_MIN);
-const UI_MAX = Math.log10(I_MAX);
-const UT_MIN = Math.log10(T_MIN);
-const UT_MAX = Math.log10(T_MAX);
-
-const x = (i: number) => X0 + ((Math.log10(i) - UI_MIN) / (UI_MAX - UI_MIN)) * (X1 - X0);
-const y = (t: number) => Y1 - ((Math.log10(t) - UT_MIN) / (UT_MAX - UT_MIN)) * (Y1 - Y0);
-const n = (v: number) => Math.round(v * 10) / 10;
-
-// Soglie della caratteristica a tempo indipendente: I> selettiva, ritardata;
-// I>> di massima corrente, quasi istantanea. Ogni gradino è verticale alla
-// soglia e orizzontale al tempo di intervento fissato.
-const I1 = 300; // soglia I>
-const T1 = 1; // tempo di intervento di I> (s)
-const I2 = 2000; // soglia I>>
-const T2 = 0.08; // tempo di intervento di I>> (s)
-
-const gradinoI1 = [
-  `${n(x(I1))},${n(Y0)}`,
-  `${n(x(I1))},${n(y(T1))}`,
-  `${n(x(I_MAX))},${n(y(T1))}`,
-].join(' ');
-
-const gradinoI2 = [
-  `${n(x(I2))},${n(y(T1))}`,
-  `${n(x(I2))},${n(y(T2))}`,
-  `${n(x(I_MAX))},${n(y(T2))}`,
-].join(' ');
-
-// Punto di prova: corrente iniettata durante la verifica, che deve cadere sul
-// gradino I>> con il tempo di intervento misurato dallo strumento.
-const iProva = 3200;
-const tProva = T2;
-
-const decadiI = [100, 1_000, 10_000];
-const decadiT = [0.01, 0.1, 1, 10];
-const uid = 'tcc';
+const I = logspace(420, 20000, 300);
+const curva = I.map((i) => [i, Math.min(100, tempoIntervento(i, TARATURA_ESEMPIO))] as [number, number]);
+const soglia = [[4000, 0.05], [20000, 0.05]] as [number, number][];
+const punti = PUNTI_PROVA.map((p) => [p.I, p.t] as [number, number]);
 ---
 
-<figure class="tcc-plot">
-  <div class="tcc-plot__frame rounded-[var(--radius-card)] border border-navy-100 shadow-[var(--shadow-md)]">
-    <svg
-      viewBox={`0 0 ${W} ${H}`}
-      role="img"
-      aria-label={t.ariaLabel}
-      preserveAspectRatio="xMidYMid meet"
-    >
-      <defs>
-        <linearGradient id={`${uid}-bg`} x1="0" y1="0" x2="0.35" y2="1">
-          <stop offset="0" stop-color="#0c3151"></stop>
-          <stop offset="1" stop-color="#081f36"></stop>
-        </linearGradient>
-        <pattern id={`${uid}-dots`} width="24" height="24" patternUnits="userSpaceOnUse">
-          <circle cx="1.1" cy="1.1" r="1.1" fill="#4f93c4" fill-opacity="0.16"></circle>
-        </pattern>
-        <clipPath id={`${uid}-clip`}>
-          <rect x={X0} y={Y0} width={X1 - X0} height={Y1 - Y0}></rect>
-        </clipPath>
-      </defs>
-
-      <rect width={W} height={H} fill={`url(#${uid}-bg)`}></rect>
-      <rect width={W} height={H} fill={`url(#${uid}-dots)`}></rect>
-
-      <!-- Reticolo log-log: decadi in verticale (corrente), decadi in
-           orizzontale (tempo). -->
-      <g stroke="#3f7fb0" stroke-width="0.8" opacity="0.22">
-        {decadiI.map((i) => <line x1={n(x(i))} y1={Y0} x2={n(x(i))} y2={Y1} />)}
-        {decadiT.map((t) => <line x1={X0} y1={n(y(t))} x2={X1} y2={n(y(t))} />)}
-      </g>
-
-      <!-- Assi e tacche da strumento. -->
-      <g stroke="#6ba7d2" stroke-opacity="0.55" stroke-width="1">
-        <line x1={X0} y1={Y0} x2={X0} y2={Y1}></line>
-        <line x1={X0} y1={Y1} x2={X1} y2={Y1}></line>
-        {decadiI.map((i) => <line x1={n(x(i))} y1={Y1} x2={n(x(i))} y2={Y1 + 6} />)}
-        {decadiT.map((t) => <line x1={X0 - 6} y1={n(y(t))} x2={X0} y2={n(y(t))} />)}
-      </g>
-
-      <g clip-path={`url(#${uid}-clip)`} fill="none" stroke-linejoin="round" stroke-linecap="round">
-        <polyline points={gradinoI1} stroke="#bcd6e8" stroke-width="1.8"></polyline>
-        <polyline points={gradinoI2} stroke="#4fd07f" stroke-width="1.8"></polyline>
-      </g>
-
-      <!-- Punto di prova: iniezione di corrente e tempo di intervento
-           misurato, in evidenza sul gradino I>>. -->
-      <circle cx={n(x(iProva))} cy={n(y(tProva))} r="4.2" fill="#4fd07f" stroke="#081f36" stroke-width="1.4"></circle>
-      <circle cx={n(x(iProva))} cy={n(y(tProva))} r="9" fill="none" stroke="#4fd07f" stroke-opacity="0.45" stroke-width="1.4"></circle>
-
-      <!-- Etichette degli assi. -->
-      <g
-        class="plot-label"
-        font-family="Inter Variable, Inter, sans-serif"
-        font-size="12"
-        font-weight="600"
-        letter-spacing="0.08em"
-        fill="#bcd6e8"
-        paint-order="stroke"
-        stroke="#081f36"
-        stroke-width="3.5"
-        stroke-opacity="0.85"
-      >
-        {
-          decadiI.map((i, idx) => (
-            <text x={n(x(i))} y={Y1 + 22} text-anchor={idx === 0 ? 'start' : idx === decadiI.length - 1 ? 'end' : 'middle'}>
-              {i >= 1000 ? `${i / 1000} kA` : `${i} A`}
-            </text>
-          ))
-        }
-        {decadiT.map((t) => <text x={X0 - 12} y={n(y(t) + 4)} text-anchor="end">{t < 1 ? `${t}` : `${t}`} s</text>)}
-      </g>
-
-      <!-- Etichette dei gradini, ancorate al tratto orizzontale di ciascuno. -->
-      <g
-        class="plot-label plot-label--band"
-        font-family="Inter Variable, Inter, sans-serif"
-        font-size="12"
-        font-weight="700"
-        letter-spacing="0.06em"
-        paint-order="stroke"
-        stroke="#081f36"
-        stroke-width="3.5"
-        stroke-opacity="0.85"
-      >
-        <text x={n(x(I1)) + 10} y={n(y(T1) - 8)} fill="#bcd6e8">I&gt;</text>
-        <text x={n(x(I2)) + 10} y={n(y(T2) - 8)} fill="#8fd9ab">I&gt;&gt;</text>
-      </g>
-
-      <!-- Legenda. -->
-      <g transform={`translate(${X0 + 16} ${Y0 + 10})`}>
-        <line x1="0" y1="0" x2="22" y2="0" stroke="#bcd6e8" stroke-width="1.8"></line>
-        <line class="tcc-legend-rule" x1="0" y1="22" x2="22" y2="22" stroke="#4fd07f" stroke-width="1.8"></line>
-        <g
-          class="plot-label plot-legend"
-          font-family="Inter Variable, Inter, sans-serif"
-          font-size="11"
-          font-weight="600"
-          letter-spacing="0.06em"
-          fill="#bcd6e8"
-          paint-order="stroke"
-          stroke="#081f36"
-          stroke-width="3.5"
-          stroke-opacity="0.85"
-        >
-          <text x="30" y="4">{t.legendaI1}</text>
-          <text class="tcc-legend-2" x="30" y="26" fill="#8fd9ab">{t.legendaI2}</text>
-        </g>
-      </g>
-
-      <!-- Cornice con tacche d'angolo. -->
-      <rect x="14" y="14" width={W - 28} height={H - 28} rx="6" fill="none" stroke="#6ba7d2" stroke-opacity="0.26" stroke-width="1"></rect>
-      <g stroke="#8fd9ab" stroke-opacity="0.5" stroke-width="1.4" stroke-linecap="square">
-        <line x1="14" y1="38" x2="14" y2="14"></line>
-        <line x1="14" y1="14" x2="38" y2="14"></line>
-        <line x1={W - 38} y1="14" x2={W - 14} y2="14"></line>
-        <line x1={W - 14} y1="14" x2={W - 14} y2="38"></line>
-        <line x1="14" y1={H - 38} x2="14" y2={H - 14}></line>
-        <line x1="14" y1={H - 14} x2="38" y2={H - 14}></line>
-        <line x1={W - 38} y1={H - 14} x2={W - 14} y2={H - 14}></line>
-        <line x1={W - 14} y1={H - 14} x2={W - 14} y2={H - 38}></line>
-      </g>
-    </svg>
-  </div>
-
-  <figcaption class="tcc-plot__caption">
-    <span class="tcc-plot__dot" aria-hidden="true"></span>
-    <span>
-      <strong>{t.caption}</strong>
-      <span class="tcc-plot__caption-sub">
-        {t.captionSub}
-      </span>
-    </span>
-  </figcaption>
-</figure>
-
-<style>
-  .tcc-plot__frame {
-    position: relative;
-    overflow: hidden;
-    aspect-ratio: 2 / 1;
-    background: #0a2a44;
-  }
-
-  .tcc-plot__frame svg {
-    display: block;
-    width: 100%;
-    height: 100%;
-  }
-
-  @media (max-width: 767px) {
-    .plot-label {
-      font-size: 20px;
-    }
-
-    .plot-label--band {
-      font-size: 22px;
-    }
-
-    .tcc-legend-2 {
-      transform: translateY(6px);
-    }
-
-    .tcc-legend-rule {
-      transform: translateY(6px);
-    }
-  }
-
-  .tcc-plot__caption {
-    display: flex;
-    align-items: center;
-    gap: 0.6rem;
-    margin-top: 0.85rem;
-    padding-left: 0.15rem;
-    color: currentColor;
-    font-size: var(--fs-small);
-    line-height: 1.35;
-  }
-
-  .tcc-plot__caption strong {
-    display: block;
-    font-weight: 700;
-    letter-spacing: 0.01em;
-  }
-
-  .tcc-plot__caption-sub {
-    display: block;
-    color: color-mix(in srgb, currentColor 62%, transparent);
-    font-size: var(--fs-micro);
-  }
-
-  .tcc-plot__dot {
-    width: 0.5rem;
-    height: 0.5rem;
-    flex: none;
-    border-radius: 999px;
-    background: #2fa85f;
-    box-shadow: 0 0 0 4px rgb(79 208 127 / 0.22);
-  }
-</style>
+<ChartFrame
+  uid="tcc"
+  ariaLabel={t.ariaLabel}
+  x={{
+    scala: { tipo: 'log', min: 100, max: 20000 },
+    unita: 'A',
+    tacche: [
+      { v: 100, t: '100 A' },
+      { v: 1000, t: '1 kA' },
+      { v: 10000, t: '10 kA', minore: true },
+      { v: 20000, t: '20 kA' },
+    ],
+  }}
+  y={{
+    scala: { tipo: 'log', min: 0.01, max: 100 },
+    unita: 's',
+    tacche: [0.01, 0.1, 1, 10, 100].map((v) => ({ v, t: `${num(v)} s` })),
+  }}
+  serie={[
+    { tipo: 'line', punti: curva, colore: '#bcd6e8', spessore: 1.8, legenda: t.legendaCurva },
+    { tipo: 'line', punti: soglia, colore: '#4fd07f', spessore: 1.8, legenda: t.legendaSoglia },
+    { tipo: 'scatter', punti: punti, colore: '#4fd07f', raggio: 4, opacita: 1, legenda: t.legendaPunti },
+  ]}
+  didascalia={t.caption}
+  didascaliaSub={t.captionSub}
+/>

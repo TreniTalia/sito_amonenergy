@@ -5,6 +5,7 @@ import { mulberry32, normale } from '../src/components/tech/charts/models/random
 import { proietta, logspace } from '../src/components/tech/charts/models/scale.ts';
 import { rispostaSfra, AVVOLGIMENTO_RIFERIMENTO as RIF, AVVOLGIMENTO_DEFORMATO as DEF } from '../src/components/tech/charts/models/sfra.ts';
 import { logspace as ls } from '../src/components/tech/charts/models/scale.ts';
+import { tempoInverso, tempoIntervento, TARATURA_ESEMPIO as TAR, PUNTI_PROVA } from '../src/components/tech/charts/models/iec60255.ts';
 
 describe('fondamenta dei grafici', () => {
   test('aritmetica complessa', () => {
@@ -87,5 +88,26 @@ describe('modello SFRA', () => {
     const sd = Math.sqrt(d.reduce((s, v) => s + (v - media) ** 2, 0) / d.length);
     assert.ok(cambi >= 1, `lo scarto non cambia mai segno sopra 100 kHz`);
     assert.ok(sd > 1, `deviazione standard dello scarto ${sd.toFixed(2)} dB`);
+  });
+});
+
+describe('caratteristica IEC 60255-151 standard inverse', () => {
+  test('formula ai multipli canonici', () => {
+    const atteso = (k) => (0.1 * 0.14) / (k ** 0.02 - 1);
+    for (const k of [2, 5, 10]) {
+      const t = tempoInverso(k * 400, 400, 0.1);
+      assert.ok(Math.abs(t - atteso(k)) / atteso(k) < 0.005, `k=${k}: ${t}`);
+    }
+    assert.equal(tempoInverso(300, 400, 0.1), Infinity);
+  });
+  test('I>> taglia la curva a tempo definito', () => {
+    assert.equal(tempoIntervento(TAR.Iist * 1.5, TAR), TAR.tIst);
+    assert.ok(tempoIntervento(TAR.Is * 2, TAR) > TAR.tIst);
+  });
+  test('i punti di prova cadono entro il 5% della curva', () => {
+    for (const p of PUNTI_PROVA) {
+      const teor = tempoIntervento(p.I, TAR);
+      assert.ok(Math.abs(p.t - teor) / teor < 0.05);
+    }
   });
 });
