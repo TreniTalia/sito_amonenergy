@@ -10,6 +10,11 @@
  *    allineare tag, riga partner e link. Il link "Come funziona" aggiunto come
  *    sesto elemento finiva nella riga del partner, sopra il logo Teamware.
  *
+ * 3. INDICE DEGLI APPROFONDIMENTI IN COLONNA. Le pagine tecniche erano una
+ *    fila di pillole a capo libero. Ora sono due colonne (diagnostica, poi
+ *    controllo), una riga per pagina: stesse righe allineate a sinistra e
+ *    larghe uguali dentro ogni colonna, nessuna pagina dimenticata.
+ *
  * Il test parte dal `dist` già costruito e si salta se non c'è.
  */
 import { test, before, after, describe } from 'node:test';
@@ -101,6 +106,12 @@ describe('card della pagina Servizi', { skip }, () => {
         tagsTop: [Math.round(box(tags(rcs)).top), Math.round(box(tags(cci)).top)],
         partnerBottom: Math.round(box(partner).bottom),
         cciLinkTop: Math.round(box(link(cci)).top),
+        indice: [...document.querySelectorAll('.tech-index-list')].map((ol) =>
+          [...ol.querySelectorAll('.tech-index-row')].map((a) => {
+            const r = box(a);
+            return { left: Math.round(r.left), width: Math.round(r.width) };
+          }),
+        ),
       };
     });
     await page.close();
@@ -120,6 +131,18 @@ describe('card della pagina Servizi', { skip }, () => {
         assert.ok(Math.abs(m.tagsTop[0] - m.tagsTop[1]) <= 1, `tag sfalsati: ${m.tagsTop.join(' / ')}`);
         assert.ok(Math.abs(m.linkTop[0] - m.linkTop[1]) <= 1, `link sfalsati: ${m.linkTop.join(' / ')}`);
         assert.ok(m.cciLinkTop >= m.partnerBottom, `il link CCI (top ${m.cciLinkTop}) copre la riga partner (bottom ${m.partnerBottom})`);
+      });
+
+      test(`${pagina} a ${width}px: indice degli approfondimenti in due colonne ordinate`, async () => {
+        const { indice } = await misura(pagina, width);
+        assert.deepEqual(indice.map((c) => c.length), [5, 4], 'attese 5 pagine di diagnostica e 4 di controllo');
+        for (const colonna of indice) {
+          const lefts = new Set(colonna.map((r) => r.left));
+          const widths = new Set(colonna.map((r) => r.width));
+          assert.equal(lefts.size, 1, `righe non allineate a sinistra: ${[...lefts].join(', ')}`);
+          assert.equal(widths.size, 1, `righe di larghezza diversa: ${[...widths].join(', ')}`);
+        }
+        assert.ok(indice[1][0].left > indice[0][0].left, 'le due colonne devono stare affiancate da 1024px in su');
       });
     }
   }

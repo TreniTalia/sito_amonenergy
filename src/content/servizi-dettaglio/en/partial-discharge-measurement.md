@@ -4,6 +4,7 @@ lead: "Partial discharge diagnostics to IEC 60270: apparent charge in picocoulom
 seoTitle: "Partial discharge testing HV/MV: pC diagnostics"
 seoDescription: "Partial discharge measurement on HV/MV cables, switchgear and transformers to IEC 60270: apparent charge in pC, location with non-conventional methods."
 ordine: 2
+area: "diagnostica"
 diagramma: "scariche-parziali"
 
 problema:

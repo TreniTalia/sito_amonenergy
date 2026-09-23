@@ -4,6 +4,7 @@ lead: "Acquisition, validation and delivery of production and exchange data: the
 seoTitle: "Meter reading: production and exchange telemetry"
 seoDescription: "Reading and remote reading of production and exchange meters: periodic acquisition, data validation and a consultation portal for wind and solar plants connected at MV."
 ordine: 9
+area: "controllo"
 diagramma: "catena-contatori"
 
 problema:

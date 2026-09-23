@@ -4,6 +4,7 @@ import { Image } from 'astro:assets';
 import Base from '../../layouts/Base.astro';
 import PageHero from '../../components/PageHero.astro';
 import ServiceCard from '../../components/ServiceCard.astro';
+import TechIndex from '../../components/TechIndex.astro';
 import CtaBand from '../../components/CtaBand.astro';
 import IconCloud from '../../components/IconCloud.astro';
 import ServiziControlloChrome from '../../components/ServiziControlloChrome.astro';
@@ -133,24 +134,7 @@ const tecnologieIcons = tecnologie.voci
       }
     </div>
 
-    {
-      dettagli.length > 0 && (
-        <div class="mt-10 border-t border-navy-100 pt-8" data-reveal>
-          <p class="text-micro font-display font-semibold uppercase tracking-[0.12em] text-ink/55">
-            Approfondimenti tecnici
-          </p>
-          <ul class="mt-4 flex list-none flex-wrap gap-3 p-0">
-            {dettagli.map((v) => (
-              <li>
-                <a href={`/servizi/${v.id.slice(3)}/`} class="dettaglio-link">
-                  {v.data.titolo}
-                </a>
-              </li>
-            ))}
-          </ul>
-        </div>
-      )
-    }
+    <TechIndex voci={dettagli} lingua="it" />
   </section>
 
   <!-- Controllo e monitoraggio: RCS + CCI -->

@@ -4,6 +4,7 @@ lead: "Installazione, configurazione e gestione del Controllore Centrale d'Impia
 seoTitle: "CCI Controllore Centrale d'Impianto: PF1, PF2, CEI 0-16"
 seoDescription: "Installazione e gestione del Controllore Centrale d'Impianto (CCI) in partnership con Teamware: funzioni PF1 osservabilità e PF2 controllabilità conformi a CEI 0-16 V5 e Delibera ARERA 564/2025/R/eel."
 ordine: 7
+area: "controllo"
 diagramma: "osservabilita-controllabilita"
 
 problema:

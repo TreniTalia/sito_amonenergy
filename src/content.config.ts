@@ -60,6 +60,9 @@ const serviziDettaglio = defineCollection({
       seoTitle: z.string(),
       seoDescription: z.string(),
       ordine: z.number(),
+      // Colonna dell'indice "Approfondimenti tecnici" su /servizi/: prove
+      // strumentali da una parte, sistemi di controllo dall'altra.
+      area: z.enum(['diagnostica', 'controllo']),
       diagramma: z.string(),
       problema: z.array(z.string()).min(2),
       parametri: z.array(z.object({ titolo: z.string(), testo: z.string(), icona: z.string() })).min(4),

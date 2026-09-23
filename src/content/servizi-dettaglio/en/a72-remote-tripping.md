@@ -4,6 +4,7 @@ lead: "Testing and diagnostics of RIGEDI devices and A72 modems, commissioning s
 seoTitle: "A72 remote tripping: RIGEDI and modem testing"
 seoDescription: "Testing and diagnostics of RIGEDI devices and A72 modems, commissioning support, performance analysis and SCADA integration for remote tripping of generation plants under Allegato A.72."
 ordine: 8
+area: "controllo"
 diagramma: "catena-a72"
 
 problema:

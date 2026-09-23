@@ -4,6 +4,7 @@ lead: "Our proprietary remote supervision system: real-time fault analysis, auto
 seoTitle: "RCS: remote MV substation monitoring and control"
 seoDescription: "RCS, Amon Energy's proprietary system for MV substation monitoring: real-time fault analysis, automatic reclosing, SCADA integration and a Control Room active 24/7/365."
 ordine: 6
+area: "controllo"
 diagramma: "catena-rcs"
 
 problema:

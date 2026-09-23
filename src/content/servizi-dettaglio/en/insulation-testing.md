@@ -4,6 +4,7 @@ lead: "A voltage ramp above operating levels with leakage current under control:
 seoTitle: "HV/MV insulation testing: on-site dielectric strength"
 seoDescription: "High-voltage insulation testing with the Megger HV Test 80 kV: controlled voltage ramp, monitored leakage current, personnel qualified to CEI 11-27 and CEI EN 50110-1."
 ordine: 5
+area: "diagnostica"
 diagramma: "rampa-isolamento"
 
 problema:

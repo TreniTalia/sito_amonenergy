@@ -4,6 +4,7 @@ lead: "Sweep frequency response analysis to IEC 60076-18: a non-destructive meas
 seoTitle: "SFRA transformer test: frequency response analysis"
 seoDescription: "SFRA testing on power transformers to IEC 60076-18: sweep from 20 Hz to 2 MHz, comparison against the reference signature, report on mechanical defects."
 ordine: 1
+area: "diagnostica"
 diagramma: "risposta-frequenza"
 
 problema:

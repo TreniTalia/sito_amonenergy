@@ -4,6 +4,7 @@ lead: "Analisi della risposta in frequenza secondo IEC 60076-18: una misura non 
 seoTitle: "Prova SFRA trasformatore: risposta in frequenza"
 seoDescription: "Prova SFRA su trasformatori di potenza secondo IEC 60076-18: misura da 20 Hz a 2 MHz, confronto con l'impronta di riferimento, referto sui difetti meccanici."
 ordine: 1
+area: "diagnostica"
 diagramma: "risposta-frequenza"
 
 problema:

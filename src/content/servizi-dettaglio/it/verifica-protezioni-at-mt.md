@@ -4,6 +4,7 @@ lead: "Iniezione controllata delle soglie di intervento secondo CEI 0-16: la pro
 seoTitle: "Verifica protezioni AT/MT: soglie I> e I>> a norma"
 seoDescription: "Verifica delle protezioni AT/MT secondo CEI 0-16: iniezione controllata delle soglie I> e I>>, tempi di intervento misurati con DRTS/64 e ISA CBA 1000, referto soglia per soglia."
 ordine: 3
+area: "diagnostica"
 diagramma: "curva-tempo-corrente"
 
 problema:

@@ -4,6 +4,7 @@ lead: "Turns ratio, winding resistance, tan delta: the tests that say whether a 
 seoTitle: "Power transformer testing: diagnostic checks"
 seoDescription: "Power transformer testing: turns ratio, winding resistance, tan delta and capacitance measurements with ISA T2000 and ISA STS5000 + TD500."
 ordine: 4
+area: "diagnostica"
 diagramma: "punti-misura-trasformatore"
 
 problema:

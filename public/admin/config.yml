@@ -290,6 +290,7 @@ collections:
       - { label: "Titolo SEO", name: "seoTitle", widget: "string", hint: "Il titolo che compare su Google, diverso dal titolo grande della pagina." }
       - { label: "Descrizione SEO", name: "seoDescription", widget: "text", hint: "1-2 righe che compaiono sotto il link nei risultati Google." }
       - { label: "Ordine", name: "ordine", widget: "number", value_type: "int", hint: "Stesso numero della pagina gemella nell'altra lingua, altrimenti le pagine si ordinano in modo diverso nelle due lingue." }
+      - { label: "Area", name: "area", widget: "select", options: [{ label: "Diagnostica strumentale", value: "diagnostica" }, { label: "Controllo e monitoraggio", value: "controllo" }], hint: "La colonna in cui la pagina compare nell'indice \"Approfondimenti tecnici\" di /servizi/. Stesso valore della pagina gemella nell'altra lingua." }
       - label: "Disegno tecnico"
         name: "diagramma"
         widget: "select"

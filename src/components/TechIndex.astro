@@ -1,0 +1,107 @@
+---
+// Indice "Approfondimenti tecnici" di /servizi/ e /en/services/: le pagine
+// tecniche di dettaglio divise in due colonne per `area`, una riga per
+// pagina. Sostituisce la fila di pillole a capo libero, che con titoli di
+// lunghezza molto diversa non aveva un ordine leggibile.
+import type { CollectionEntry } from 'astro:content';
+import { Icon } from 'astro-icon/components';
+import type { Lingua } from '../i18n/routes.ts';
+
+interface Props {
+  voci: CollectionEntry<'serviziDettaglio'>[];
+  lingua: Lingua;
+}
+
+const { voci, lingua } = Astro.props;
+
+const TESTI = {
+  it: {
+    titolo: 'Approfondimenti tecnici',
+    base: '/servizi/',
+    aree: { diagnostica: 'Diagnostica strumentale', controllo: 'Controllo e monitoraggio' },
+  },
+  en: {
+    titolo: 'In-depth guides',
+    base: '/en/services/',
+    aree: { diagnostica: 'Instrument diagnostics', controllo: 'Control and monitoring' },
+  },
+} as const;
+const t = TESTI[lingua];
+
+const ordinate = [...voci].sort((a, b) => a.data.ordine - b.data.ordine);
+const gruppi = (['diagnostica', 'controllo'] as const)
+  .map((area) => ({ area, titolo: t.aree[area], voci: ordinate.filter((v) => v.data.area === area) }))
+  .filter((g) => g.voci.length > 0);
+---
+
+{
+  gruppi.length > 0 && (
+    <div class="tech-index mt-14 border-t border-navy-100 pt-10" data-reveal>
+      <p class="text-micro font-display font-semibold uppercase tracking-[0.12em] text-ink/55">{t.titolo}</p>
+      <div class="mt-6 grid gap-10 lg:grid-cols-2 lg:gap-16">
+        {gruppi.map((g) => (
+          <div>
+            <h3 class="text-title text-ink">{g.titolo}</h3>
+            <ol class="tech-index-list mt-4 list-none p-0">
+              {g.voci.map((v) => (
+                <li>
+                  <a href={`${t.base}${v.id.slice(3)}/`} class="tech-index-row group">
+                    <span class="tnum tech-index-num">{String(v.data.ordine).padStart(2, '0')}</span>
+                    <span class="tech-index-title">{v.data.titolo}</span>
+                    <Icon
+                      name="fa6-solid:arrow-right"
+                      class="tech-index-arrow"
+                      aria-hidden="true"
+                    />
+                  </a>
+                </li>
+              ))}
+            </ol>
+          </div>
+        ))}
+      </div>
+    </div>
+  )
+}
+
+<style>
+  .tech-index-list {
+    border-top: 1px solid var(--color-navy-100);
+  }
+  .tech-index-row {
+    display: grid;
+    grid-template-columns: 2.25rem 1fr auto;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem 0.75rem;
+    border-bottom: 1px solid var(--color-navy-100);
+    color: var(--color-navy-900);
+    text-decoration: none;
+    transition: background-color 0.25s var(--ease-signature, ease);
+  }
+  .tech-index-row:hover {
+    background: color-mix(in srgb, var(--color-navy-100) 55%, transparent);
+  }
+  .tech-index-num {
+    font-family: var(--font-display);
+    font-size: var(--fs-small);
+    font-weight: 600;
+    color: var(--color-signal-400);
+  }
+  .tech-index-title {
+    font-family: var(--font-display);
+    font-weight: 600;
+    line-height: 1.35;
+  }
+  .tech-index-arrow {
+    font-size: 0.75rem;
+    color: var(--color-navy-300);
+    transition:
+      transform 0.3s var(--ease-signature, ease),
+      color 0.25s var(--ease-signature, ease);
+  }
+  .tech-index-row:hover .tech-index-arrow {
+    color: var(--color-navy-900);
+    transform: translateX(4px);
+  }
+</style>

@@ -4,6 +4,7 @@ lead: "Diagnosi delle scariche parziali secondo IEC 60270: la carica apparente i
 seoTitle: "Misure scariche parziali AT/MT: diagnosi in pC"
 seoDescription: "Misure di scariche parziali su cavi, quadri e trasformatori AT/MT secondo IEC 60270: carica apparente in pC, localizzazione con metodi non convenzionali."
 ordine: 2
+area: "diagnostica"
 diagramma: "scariche-parziali"
 
 problema:

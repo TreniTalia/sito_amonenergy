@@ -4,6 +4,7 @@ lead: "Controlled injection of trip thresholds to CEI 0-16: the protection actua
 seoTitle: "HV/MV protection testing: I> and I>> thresholds to standard"
 seoDescription: "HV/MV protection relay testing to CEI 0-16: controlled injection of the I> and I>> thresholds, trip times measured with DRTS/64 and ISA CBA 1000, threshold-by-threshold report."
 ordine: 3
+area: "diagnostica"
 diagramma: "curva-tempo-corrente"
 
 problema:

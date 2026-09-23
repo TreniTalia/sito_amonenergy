@@ -4,6 +4,7 @@ lead: "Rapporto di trasformazione, resistenza degli avvolgimenti, tan delta: le 
 seoTitle: "Verifiche trasformatori di potenza: prove diagnostiche"
 seoDescription: "Verifiche su trasformatori di potenza: rapporto di trasformazione, resistenza degli avvolgimenti, tan delta e capacità con ISA T2000 e ISA STS5000 + TD500."
 ordine: 4
+area: "diagnostica"
 diagramma: "punti-misura-trasformatore"
 
 problema:
