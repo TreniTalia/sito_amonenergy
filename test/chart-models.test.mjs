@@ -3,6 +3,8 @@ import assert from 'node:assert/strict';
 import { c, mul, div, abs, par } from '../src/components/tech/charts/models/complex.ts';
 import { mulberry32, normale } from '../src/components/tech/charts/models/random.ts';
 import { proietta, logspace } from '../src/components/tech/charts/models/scale.ts';
+import { rispostaSfra, AVVOLGIMENTO_RIFERIMENTO as RIF, AVVOLGIMENTO_DEFORMATO as DEF } from '../src/components/tech/charts/models/sfra.ts';
+import { logspace as ls } from '../src/components/tech/charts/models/scale.ts';
 
 describe('fondamenta dei grafici', () => {
   test('aritmetica complessa', () => {
@@ -29,5 +31,23 @@ describe('fondamenta dei grafici', () => {
     const f = logspace(20, 2e6, 5);
     assert.equal(f.length, 5);
     assert.ok(Math.abs(f[0] - 20) < 1e-9 && Math.abs(f[4] - 2e6) < 1e-6);
+  });
+});
+
+describe('modello SFRA', () => {
+  const f = ls(20, 2e6, 600);
+  const rif = f.map((x) => rispostaSfra(x, RIF));
+  const def = f.map((x) => rispostaSfra(x, DEF));
+  test('ampiezze nel campo di misura', () => {
+    for (const v of rif) assert.ok(v <= 0 && v >= -100, `valore fuori scala: ${v}`);
+  });
+  test('coincidono sotto 10 kHz, si separano sopra 100 kHz', () => {
+    f.forEach((x, i) => { if (x < 1e4) assert.ok(Math.abs(rif[i] - def[i]) < 1, `scarto a ${x} Hz`); });
+    assert.ok(f.some((x, i) => x > 1e5 && Math.abs(rif[i] - def[i]) > 3), 'nessuno scostamento sopra 100 kHz');
+  });
+  test('almeno tre risonanze fra 1 kHz e 2 MHz', () => {
+    let minimi = 0;
+    for (let i = 1; i < f.length - 1; i++) if (f[i] > 1e3 && rif[i] < rif[i - 1] && rif[i] < rif[i + 1]) minimi++;
+    assert.ok(minimi >= 3, `minimi trovati: ${minimi}`);
   });
 });
