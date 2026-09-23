@@ -56,7 +56,10 @@ const sinusoide = Array.from({ length: 181 }, (_, i) => [i * 2, tensioneProva(i 
   ariaLabel={t.ariaLabel}
   x={{
     scala: { tipo: 'lin', min: 0, max: 360 },
-    unita: '°',
+    // Unità vuota: ogni tacca porta già il proprio simbolo di grado ("90°",
+    // "360°"), un'unità "°" separata sarebbe ridondante e finiva come un
+    // glifo isolato vicino all'angolo della cornice (fix round 1, task 6).
+    unita: '',
     tacche: [0, 90, 180, 270, 360].map((v) => ({ v, t: `${v}°` })),
   }}
   y={{
