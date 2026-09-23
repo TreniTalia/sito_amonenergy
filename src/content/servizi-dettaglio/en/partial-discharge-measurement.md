@@ -12,8 +12,8 @@ area: "diagnostica"
 diagramma: "scariche-parziali"
 
 problema:
-  - "Insulation doesn't fail all at once. It first fails at a microscopic point — an air bubble in a resin, a defect in a joint's assembly, a sharp edge on a screen — and at that point, every time the electric field passes over it, a tiny discharge fires. No circuit breaker sees it, no low-voltage insulation test picks it up: the machine stays in service, apparently healthy, while the defect keeps working."
-  - "That is exactly what partial discharges are: localised discharges that don't bridge the full insulation between two conductors, but progressively erode the point where they ignite. Over time the channel lengthens, the discharged energy grows, and what is today a pulse of a few picocoulombs becomes tomorrow a complete breakdown — often without warning, at an unpredictable moment."
+  - "Insulation doesn't fail all at once. It first fails at a microscopic point (an air bubble in a resin, a defect in a joint's assembly, a sharp edge on a screen), and at that point, every time the electric field passes over it, a tiny discharge fires. No circuit breaker sees it, no low-voltage insulation test picks it up: the machine stays in service, apparently healthy, while the defect keeps working."
+  - "That is exactly what partial discharges are: localised discharges that don't bridge the full insulation between two conductors, but progressively erode the point where they ignite. Over time the channel lengthens, the discharged energy grows, and what is today a pulse of a few picocoulombs becomes tomorrow a complete breakdown, often without warning, at an unpredictable moment."
   - "Measuring them in the field, on a plant in service or during a scheduled outage, means seeing the defect while it is still a pulse and not yet an outage. That's the difference between scheduled maintenance on a joint or a cell and a fault that stops production."
 
 parametri:
@@ -38,7 +38,7 @@ parametri:
 
 fasi:
   - titolo: "Site survey and choice of measurement point"
-    testo: "Identifying access points to the circuit — cable terminations, joints, MV cells, transformer bushings — and checking the shielding conditions needed to reach the required sensitivity."
+    testo: "Identifying access points to the circuit (cable terminations, joints, MV cells, transformer bushings) and checking the shielding conditions needed to reach the required sensitivity."
   - titolo: "Lock-out/tag-out and connection"
     testo: "Where the measurement requires an outage, isolating and earthing the component. Where it's compatible with operation, connecting the sensor without interrupting the supply."
   - titolo: "Measurement with the b2 HVA68TD+PD"
@@ -60,8 +60,8 @@ assettoMisura:
 
 norma:
   codice: "IEC 60270 / CEI EN 60270"
-  titolo: "High-voltage test techniques – Partial discharge measurements"
-  note: "Applies to partial discharge measurements in high voltage: the conventional method measures the apparent charge in picocoulombs (pC). Non-conventional methods also exist — UHF, acoustic — which can't be calibrated in charge but are useful for locating the ignition point."
+  titolo: "High-voltage test techniques: Partial discharge measurements"
+  note: "Applies to partial discharge measurements in high voltage: the conventional method measures the apparent charge in picocoulombs (pC). There are also non-conventional methods (UHF, acoustic), which can't be calibrated in charge but are useful for locating the ignition point."
 
 faq:
   - d: "What exactly does a partial discharge test measure?"
@@ -69,9 +69,9 @@ faq:
   - d: "Does the component need to be out of service?"
     r: "It depends on the measurement point and the circuit's accessibility. Some measurements are taken with the plant in operation, others require an outage to connect the sensor correctly. We assess it case by case during the site survey."
   - d: "What's the difference between the conventional and non-conventional method?"
-    r: "The conventional IEC 60270 method returns a value calibrated in picocoulombs, comparable over time and against reference thresholds. Non-conventional methods — UHF, acoustic — can't be calibrated in charge, but they let you physically locate the point where the discharge ignites."
+    r: "The conventional IEC 60270 method returns a value calibrated in picocoulombs, comparable over time and against reference thresholds. Non-conventional methods (UHF, acoustic) can't be calibrated in charge, but they let you physically locate the point where the discharge ignites."
   - d: "Does a low partial discharge level mean everything is fine?"
-    r: "On its own, no — the trend matters too. A level that's stable over time is a different indicator from one that grows from measurement to measurement, even while staying below an absolute threshold. That's why, where the component's history allows it, we always compare today's measurement against previous ones."
+    r: "On its own, no: the trend matters too. A level that's stable over time is a different indicator from one that grows from measurement to measurement, even while staying below an absolute threshold. That's why, where the component's history allows it, we always compare today's measurement against previous ones."
 
 correlati:
   - "sfra"

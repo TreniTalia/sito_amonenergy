@@ -13,7 +13,7 @@ diagramma: "catena-contatori"
 
 problema:
   - "A generation plant has at least two meters that count different things: the production meter, which measures the energy the plant generates, and the exchange meter, bidirectional, which measures how much is injected into the network and how much, if any, is drawn from it. These are the figures the client uses to verify the plant's actual yield and the distributor uses for its own network accounting."
-  - "A reading taken once, glanced at on the meter's display, doesn't say much: what's needed is a periodic, repeatable reading that collects values at regular intervals and makes them comparable over time. And it's data that needs checking too, because an anomalous value — an implausible jump, a meter that stops responding — has to be caught before it ends up in a comparison or an invoice."
+  - "A reading taken once, glanced at on the meter's display, doesn't say much: what's needed is a periodic, repeatable reading that collects values at regular intervals and makes them comparable over time. And it's data that needs checking too, because an anomalous value (an implausible jump, a meter that stops responding) has to be caught before it ends up in a comparison or an invoice."
   - "We handle the whole chain: periodic acquisition from the production and exchange meters, validation of the collected data to catch anomalies, and delivery on a portal where the client and, where required, the distributor can consult the measurement history."
 
 parametri:
@@ -39,7 +39,7 @@ fasi:
   - titolo: "Activating periodic acquisition"
     testo: "Configuring the automatic data collection at the required intervals, with an initial check that the acquired values match those read directly on the meter."
   - titolo: "Validation and delivery of the data"
-    testo: "Consistency checks on the collected data and publication on the consultation portal, flagging anomalies — a missed reading, an out-of-range value — as soon as they're detected."
+    testo: "Consistency checks on the collected data and publication on the consultation portal, flagging anomalies (a missed reading, an out-of-range value) as soon as they're detected."
   - titolo: "Operation and ongoing support"
     testo: "Maintaining the acquisition chain, intervening on meters or connections in the event of a persistent anomaly, and keeping the portal updated with the measurement history."
 
@@ -60,7 +60,7 @@ faq:
   - d: "How often is the data acquired?"
     r: "Acquisition is periodic, at regular intervals set during activation: that regularity is what makes the history comparable over time, instead of a series of isolated readings taken on request."
   - d: "What happens if a meter stops responding?"
-    r: "Data validation catches the anomaly — a missing reading or an inconsistent value — and flags it, so intervention happens before the data gap becomes a problem in a comparison or a check with the distributor."
+    r: "Data validation catches the anomaly, a missing reading or an inconsistent value, and flags it, so intervention happens before the data gap becomes a problem in a comparison or a check with the distributor."
   - d: "Is the data also available to the distributor?"
     r: "Where the connection point requires it, yes: the measurement data made available answers exactly the distributor's need to manage the network with up-to-date information on every connected plant."
   - d: "Does this service integrate with RCS?"

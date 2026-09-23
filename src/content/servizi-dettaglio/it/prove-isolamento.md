@@ -13,7 +13,7 @@ diagramma: "rampa-isolamento"
 
 problema:
   - "Un isolamento elettrico funziona finché non viene messo alla prova: a tensione di esercizio può reggere per anni anche con un difetto in corso, semplicemente perché il campo elettrico applicato non basta a farlo emergere. La prova di isolamento esiste per superare quella tensione, in condizioni controllate, e vedere se il materiale regge un margine superiore a quello che vedrà mai in servizio."
-  - "Durante la prova non basta guardare se scocca una scarica franca. La corrente di fuga — la piccola corrente che attraversa comunque l'isolamento durante la rampa — è un indicatore più fine: in un isolamento sano resta bassa e quasi piatta all'aumentare della tensione, in un isolamento compromesso si impenna prima ancora di raggiungere il valore di prova. È quel punto di impennata, non solo la tenuta finale, che la misura deve cogliere."
+  - "Durante la prova non basta guardare se scocca una scarica franca. La corrente di fuga, cioè la piccola corrente che attraversa comunque l'isolamento durante la rampa, è un indicatore più fine: in un isolamento sano resta bassa e quasi piatta all'aumentare della tensione, in un isolamento compromesso si impenna prima ancora di raggiungere il valore di prova. È quel punto di impennata, non solo la tenuta finale, che la misura deve cogliere."
   - "Si esegue su cavi, macchine e apparecchiature AT/MT dopo l'installazione, dopo una riparazione, o come verifica periodica su impianti esistenti: un margine di isolamento che si riduce nel tempo è spesso il primo segnale di un componente da programmare per la sostituzione, prima che lo segnali un'interruzione."
 
 parametri:
@@ -71,7 +71,7 @@ faq:
   - d: "Fino a che tensione arriva la prova?"
     r: "Il generatore in dotazione raggiunge tensioni di prova fino a 80 kV in sito. Il valore effettivo di prova dipende dal componente e dalla tensione di esercizio dell'impianto, e viene definito prima dell'intervento."
   - d: "Su quali componenti si esegue questa prova?"
-    r: "Su cavi, macchine e apparecchiature AT/MT dopo l'installazione o una riparazione, e come verifica periodica su impianti esistenti. L'assetto di misura — tensione, durata, criteri — si adatta al componente specifico."
+    r: "Su cavi, macchine e apparecchiature AT/MT dopo l'installazione o una riparazione, e come verifica periodica su impianti esistenti. L'assetto di misura (tensione, durata, criteri) si adatta al componente specifico."
   - d: "Che cosa succede se la prova rileva un'anomalia?"
     r: "La prova si interrompe prima del cedimento franco, la zona in cui la corrente di fuga si è impennata viene documentata nel referto, e indichiamo se il componente richiede riparazione, sostituzione o un approfondimento diagnostico prima di tornare in servizio."
 

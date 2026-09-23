@@ -13,7 +13,7 @@ diagramma: "catena-a72"
 
 problema:
   - "Un impianto di produzione connesso alla rete MT non decide da solo quando restare in servizio: in certe condizioni di rischio per la rete, è il distributore a dover poter comandare il distacco da remoto. È la funzione descritta dall'Allegato A.72 al Codice di Rete, applicata attraverso la procedura che sul campo tutti chiamano RIGEDI, e implementata sull'impianto con un dispositivo dedicato e un modem che riceve il comando."
-  - "Il dispositivo da solo non basta: deve essere verificato, tenuto in efficienza e integrato con il resto dell'impianto perché il comando di distacco — e quello, altrettanto importante, di riconnessione — arrivi davvero e venga eseguito nei tempi previsti. Un modem che non risponde o una protezione di interfaccia mal configurata trasformano un requisito di sicurezza di rete in un punto cieco."
+  - "Il dispositivo da solo non basta: deve essere verificato, tenuto in efficienza e integrato con il resto dell'impianto perché il comando di distacco, e quello altrettanto importante di riconnessione, arrivi davvero e venga eseguito nei tempi previsti. Un modem che non risponde o una protezione di interfaccia mal configurata trasformano un requisito di sicurezza di rete in un punto cieco."
   - "Verifichiamo e diagnostichiamo i dispositivi RIGEDI e il Modem A72, assistiamo alla messa in servizio, analizziamo le prestazioni del collegamento e la conformità del sistema, supportiamo la comunicazione con il distributore nelle fasi di attivazione e integriamo il tutto con lo SCADA dell'impianto, così che il teledistacco sia un canale verificato e non solo installato."
 
 parametri:
@@ -54,7 +54,7 @@ strumentazione:
 
 norma:
   codice: "Allegato A.72 al Codice di Rete"
-  titolo: "Allegato A.72 al Codice di Rete di Terna — disciplina del teledistacco degli impianti di produzione"
+  titolo: "Allegato A.72 al Codice di Rete di Terna: disciplina del teledistacco degli impianti di produzione"
   note: "L'Allegato A.72 è un allegato al Codice di Rete di Terna, non una parte della CEI 0-16: definisce il teledistacco, cioè la possibilità per il distributore di comandare da remoto il distacco di un impianto di produzione quando la sicurezza della rete lo richiede, e la successiva riconnessione. Sul campo la procedura è nota come RIGEDI. Il quadro di connessione alla rete MT resta quello della CEI 0-16, la regola tecnica generale di connessione alle reti AT ed MT."
 
 faq:

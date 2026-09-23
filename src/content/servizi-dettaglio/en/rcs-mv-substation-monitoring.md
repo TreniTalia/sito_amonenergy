@@ -13,7 +13,7 @@ diagramma: "catena-rcs"
 
 problema:
   - "An MV substation with no remote supervision is only visible once someone physically reaches it. A transient fault that clears itself, a switching operation that needs doing outside working hours, a parameter drifting out of range: without a system reading the plant's status in real time, the first news often comes from the client reporting a plant stoppage, not from the substation itself."
-  - "RCS is the supervision and control system we developed to close that gap. It analyses the type of fault detected by the breaker, distinguishes a transient event from a persistent one, and when the fault is found to have cleared, recloses automatically without waiting for manual intervention — the difference between a plant down for minutes and one down for hours."
+  - "RCS is the supervision and control system we developed to close that gap. It analyses the type of fault detected by the breaker, distinguishes a transient event from a persistent one, and when the fault is found to have cleared, recloses automatically without waiting for manual intervention: that is the difference between a plant down for minutes and one down for hours."
   - "Everything runs through our Control Room: a cloud web app accessible from PC, tablet and smartphone, an event history for every substation, remote protection resets and manual switching operations when an operator's action is needed. Multiple managed sites are visible from a single screen, with the same immediacy as reading a single panel."
 
 parametri:
@@ -24,7 +24,7 @@ parametri:
     testo: "A single platform accessible from PC, tablet and smartphone shows the status of every managed substation, with the ability to carry out manual switching operations remotely when human intervention is needed."
     icona: "fa6-solid:cloud"
   - titolo: "Data logging"
-    testo: "Every event — fault, switching operation, reclosing, alarm — stays archived with date, time and recorded parameters: a searchable history, not just an alarm that blinks and disappears."
+    testo: "Every event (fault, switching operation, reclosing, alarm) stays archived with date, time and recorded parameters: a searchable history, not just an alarm that blinks and disappears."
     icona: "fa6-solid:database"
   - titolo: "Remote protection reset"
     testo: "When an intervention doesn't require someone on site, the protection reset is carried out from the Control Room: fewer site visits, less time between the fault and restoration."
@@ -55,7 +55,7 @@ strumentazione:
 norma:
   codice: "CEI EN 50110-1"
   titolo: "Operation of electrical installations"
-  note: "A remote switching operation — an automatic reclosing or a protection reset commanded from the Control Room — remains an act of operating the electrical installation, with the same safety criteria as an operation carried out on site. RCS doesn't replace this framework: it automates what can be automated safely and leaves the rest to a qualified operator where an on-site decision is needed."
+  note: "A remote switching operation, such as an automatic reclosing or a protection reset commanded from the Control Room, remains an act of operating the electrical installation, with the same safety criteria as an operation carried out on site. RCS doesn't replace this framework: it automates what can be automated safely and leaves the rest to a qualified operator where an on-site decision is needed."
 
 faq:
   - d: "What is the RCS system?"
@@ -63,7 +63,7 @@ faq:
   - d: "How does automatic reclosing work?"
     r: "The RCS algorithm distinguishes a transient fault, which clears on its own, from a persistent one. In the first case it recloses the breaker without waiting for manual intervention; in the second it keeps it open and flags the event to the Control Room for an operator's assessment."
   - d: "What data is logged?"
-    r: "Every relevant event — faults, switching operations, reclosing, alarms and protection resets — is recorded with date, time and parameters, so the substation's history is always available to consult, not just the latest real-time status."
+    r: "Every relevant event (faults, switching operations, reclosing, alarms and protection resets) is recorded with date, time and parameters, so the substation's history is always available to consult, not just the latest real-time status."
   - d: "Can RCS talk to the client's SCADA?"
     r: "Yes, SCADA integration brings substation data inside the client's or distributor's wider supervision system, avoiding a separate platform to consult in parallel."
   - d: "What happens outside office hours?"

@@ -13,7 +13,7 @@ diagramma: "osservabilita-controllabilita"
 
 problema:
   - "A distributor accepting a generation plant onto the network needs two things a passive plant doesn't require: to know at all times how it's performing, and to be able to limit the power it injects when the network requires it. Without a dedicated device, neither is possible from outside the plant."
-  - "The Central Plant Controller is that device. It reads the plant's operating parameters and makes them available to the distributor — the function CEI 0-16 V5 calls PF1, observability — and receives the distributor's command to limit the active power injected, down to zero if necessary — the PF2 function, controllability."
+  - "The Central Plant Controller is that device. It reads the plant's operating parameters and makes them available to the distributor (the function CEI 0-16 V5 calls PF1, observability) and receives the distributor's command to limit the active power injected, down to zero if necessary: this is the PF2 function, controllability."
   - "We install, configure and manage the CCI in partnership with Teamware: from choosing the configuration best suited to the plant through to day-to-day operation, so that PF1 and PF2 stay operational without the client having to worry about it."
 
 parametri:
@@ -52,7 +52,7 @@ strumentazione:
 
 norma:
   codice: "CEI 0-16 V5"
-  titolo: "Technical rule for connection to HV and MV networks — observability and controllability functions"
+  titolo: "Technical rule for connection to HV and MV networks: observability and controllability functions"
   note: "Version 5 of CEI 0-16 introduces the PF1 function (observability: the CCI reads and makes the plant's status available to the distributor) and PF2 (controllability: the distributor can limit the active power injected, down to zero). ARERA Resolution 564/2025/R/eel sets out the timing and incentives for bringing plants already connected up to these functions."
 
 faq:

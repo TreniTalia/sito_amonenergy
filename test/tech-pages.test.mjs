@@ -203,4 +203,36 @@ describe('pagine tecniche', { skip }, () => {
       }
     }
   });
+
+  // Il testo che si legge in pagina: niente script, stili e commenti, tag
+  // tolti, entità delle lineette e dello spazio indivisibile decodificate.
+  const testoVisibile = (html) =>
+    html
+      .replace(/<!--[\s\S]*?-->/g, ' ')
+      .replace(/<(script|style)\b[\s\S]*?<\/\1>/gi, ' ')
+      .replace(/<[^>]+>/g, ' ')
+      .replace(/&mdash;|&#8212;|&#x2014;/gi, '—')
+      .replace(/&ndash;|&#8211;|&#x2013;/gi, '–')
+      .replace(/&nbsp;|&#160;|&#xa0;/gi, ' ');
+
+  test('nessuna lineetta usata come pausa nel testo delle pagine tecniche', () => {
+    const trovate = [];
+    for (const rotta of TECH_ROUTES) {
+      for (const lato of ['it', 'en']) {
+        const testo = testoVisibile(contenuto(readFileSync(fileDi(lato, rotta), 'utf8')));
+        for (const m of testo.matchAll(/.{0,30}\s[—–]\s.{0,30}/g)) trovate.push(`${hrefDi(lato, slugDi(lato, rotta))}: «${m[0].trim()}»`);
+      }
+    }
+    assert.deepEqual(trovate, [], `lineette usate come pausa:\n${trovate.join('\n')}`);
+  });
+
+  test('il testo alternativo dell og:image non separa il titolo con una lineetta', () => {
+    for (const rotta of TECH_ROUTES) {
+      for (const lato of ['it', 'en']) {
+        const m = readFileSync(fileDi(lato, rotta), 'utf8').match(/property="og:image:alt" content="([^"]*)"/);
+        assert.ok(m, `${hrefDi(lato, slugDi(lato, rotta))}: manca og:image:alt`);
+        assert.doesNotMatch(m[1], /\s[—–]\s/, `${hrefDi(lato, slugDi(lato, rotta))}: og:image:alt «${m[1]}»`);
+      }
+    }
+  });
 });

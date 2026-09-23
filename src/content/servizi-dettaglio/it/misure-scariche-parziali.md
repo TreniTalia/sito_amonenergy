@@ -12,8 +12,8 @@ area: "diagnostica"
 diagramma: "scariche-parziali"
 
 problema:
-  - "Un isolamento non cede tutto in una volta. Prima cede in un punto microscopico — una bolla d'aria in una resina, un difetto di posa in un giunto, un affilamento sul bordo di uno schermo — e in quel punto, ogni volta che il campo elettrico ci passa sopra, scocca una scarica piccolissima. Nessun interruttore la vede, nessuna prova di isolamento a bassa tensione la intercetta: la macchina resta in servizio, apparentemente sana, mentre il difetto lavora."
-  - "Le scariche parziali sono proprio questo: scariche localizzate che non attraversano l'intero isolamento fra due conduttori, ma erodono progressivamente il punto in cui si innescano. Con il tempo il canale si allunga, l'energia scaricata cresce, e quello che oggi è un impulso di pochi picocoulomb diventa domani un cedimento completo — spesso senza preavviso, in un momento imprevedibile."
+  - "Un isolamento non cede tutto in una volta. Prima cede in un punto microscopico (una bolla d'aria in una resina, un difetto di posa in un giunto, un affilamento sul bordo di uno schermo), e in quel punto, ogni volta che il campo elettrico ci passa sopra, scocca una scarica piccolissima. Nessun interruttore la vede, nessuna prova di isolamento a bassa tensione la intercetta: la macchina resta in servizio, apparentemente sana, mentre il difetto lavora."
+  - "Le scariche parziali sono proprio questo: scariche localizzate che non attraversano l'intero isolamento fra due conduttori, ma erodono progressivamente il punto in cui si innescano. Con il tempo il canale si allunga, l'energia scaricata cresce, e quello che oggi è un impulso di pochi picocoulomb diventa domani un cedimento completo, spesso senza preavviso, in un momento imprevedibile."
   - "Misurarle in campo, su un impianto in servizio o durante un fuori servizio programmato, significa vedere il difetto mentre è ancora un impulso e non un'interruzione. È la differenza fra una manutenzione programmata su un giunto o una cella e un guasto che ferma la produzione."
 
 parametri:
@@ -38,7 +38,7 @@ parametri:
 
 fasi:
   - titolo: "Sopralluogo e scelta del punto di misura"
-    testo: "Individuazione dei punti di accesso al circuito — terminali di cavo, giunti, celle MT, passanti di trasformatore — e verifica delle condizioni di schermatura necessarie a raggiungere la sensibilità richiesta."
+    testo: "Individuazione dei punti di accesso al circuito (terminali di cavo, giunti, celle MT, passanti di trasformatore) e verifica delle condizioni di schermatura necessarie a raggiungere la sensibilità richiesta."
   - titolo: "Messa in sicurezza e collegamento"
     testo: "Dove la misura richiede il fuori servizio, sezionamento e messa a terra del componente. Dove è compatibile con l'esercizio, collegamento del sensore senza interruzione della fornitura."
   - titolo: "Misura con il b2 HVA68TD+PD"
@@ -60,8 +60,8 @@ assettoMisura:
 
 norma:
   codice: "IEC 60270 / CEI EN 60270"
-  titolo: "High-voltage test techniques – Partial discharge measurements"
-  note: "Si applica alle misure di scariche parziali in alta tensione: il metodo convenzionale misura la carica apparente in picocoulomb (pC). Esistono anche metodi non convenzionali — UHF, acustici — che non sono calibrabili in carica ma sono utili alla localizzazione del punto di innesco."
+  titolo: "High-voltage test techniques: Partial discharge measurements"
+  note: "Si applica alle misure di scariche parziali in alta tensione: il metodo convenzionale misura la carica apparente in picocoulomb (pC). Esistono anche metodi non convenzionali (UHF, acustici) che non sono calibrabili in carica ma sono utili alla localizzazione del punto di innesco."
 
 faq:
   - d: "Che cosa misura esattamente una prova di scariche parziali?"
@@ -69,7 +69,7 @@ faq:
   - d: "Il componente deve essere fuori servizio?"
     r: "Dipende dal punto di misura e dall'accessibilità del circuito. Alcune misure si eseguono a impianto in esercizio, altre richiedono il fuori servizio per collegare correttamente il sensore. Lo valutiamo caso per caso durante il sopralluogo."
   - d: "Qual è la differenza fra metodo convenzionale e non convenzionale?"
-    r: "Il metodo convenzionale della IEC 60270 restituisce un valore calibrato in picocoulomb, confrontabile nel tempo e con soglie di riferimento. I metodi non convenzionali — UHF, acustici — non sono calibrabili in carica, ma permettono di localizzare fisicamente il punto in cui la scarica si innesca."
+    r: "Il metodo convenzionale della IEC 60270 restituisce un valore calibrato in picocoulomb, confrontabile nel tempo e con soglie di riferimento. I metodi non convenzionali (UHF, acustici) non sono calibrabili in carica, ma permettono di localizzare fisicamente il punto in cui la scarica si innesca."
   - d: "Un livello di scariche parziali basso significa che va tutto bene?"
     r: "Da solo non basta: conta anche il trend. Un livello stabile nel tempo è un indicatore diverso da uno che cresce misura dopo misura, anche restando sotto una soglia assoluta. Per questo, dove la storia del componente lo consente, confrontiamo sempre la misura di oggi con quelle precedenti."
 

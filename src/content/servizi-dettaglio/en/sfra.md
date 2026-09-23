@@ -17,7 +17,7 @@ problema:
   - "Comparing the signature recorded today against a reference reveals core movement, winding deformation and displacement, partial winding collapse, loosened or failed clamping structures, shorted turns and open windings. The result is not a pass or fail: it is a diagnosis with a location, because different frequency regions tell different parts of the machine's story."
 
 parametri:
-  - titolo: "20 Hz – 2 MHz measurement band"
+  - titolo: "20 Hz to 2 MHz measurement band"
     testo: "The range prescribed by IEC 60076-18. Below the kilohertz range the magnetic circuit responds, in the mid range the winding-to-winding interactions, above 100 kHz the geometry of the individual winding and the test leads."
     icona: "fa6-solid:wave-square"
   - titolo: "Test voltage below 10 V RMS"
@@ -56,7 +56,7 @@ strumentazione:
 
 assettoMisura:
   - etichetta: "Measurement range"
-    valore: "20 Hz – 2 MHz"
+    valore: "20 Hz to 2 MHz"
   - etichetta: "Injected signal"
     valore: "Sinusoidal, < 10 V RMS"
   - etichetta: "Machine status"
@@ -68,7 +68,7 @@ assettoMisura:
 
 norma:
   codice: "IEC 60076-18"
-  titolo: "Power transformers – Part 18: Measurement of frequency response"
+  titolo: "Power transformers, Part 18: Measurement of frequency response"
   note: "Introduced in 2012, it defines how a transformer's frequency response is measured and documented. It sets the measurement range from 20 Hz to 2 MHz, keeps the test voltage below 10 V RMS to avoid altering the machine's magnetic state, and prescribes double-shielded coaxial cables earthed with flat, wide braids. Repeatability is the point: the standard requires recording the test conditions so that today's measurement is comparable with the one taken five years from now."
 
 caso:
@@ -77,7 +77,7 @@ caso:
 
 faq:
   - d: "What exactly does the SFRA test measure?"
-    r: "It measures a winding's transfer function: a low-voltage sinusoidal signal is injected and the response is recorded as frequency varies, from 20 Hz to 2 MHz. The resulting curve depends on the inductances and capacitances distributed inside the machine — that is, its internal geometry."
+    r: "It measures a winding's transfer function: a low-voltage sinusoidal signal is injected and the response is recorded as frequency varies, from 20 Hz to 2 MHz. The resulting curve depends on the inductances and capacitances distributed inside the machine, in other words on its internal geometry."
   - d: "Do you need a previous reference signature?"
     r: "It's the best condition, but not the only one. Without a history, the three phases of the same transformer are compared against each other, and the machine against a sister unit of identical construction. The first campaign, in any case, also serves as the starting signature for every one that follows."
   - d: "Does the transformer need to be out of service?"

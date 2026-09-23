@@ -12,8 +12,8 @@ area: "diagnostica"
 diagramma: "curva-tempo-corrente"
 
 problema:
-  - "A protection relay is set once, in the workshop or at commissioning, and from that moment stays silent: it only acts when something goes wrong. But precisely because it almost never acts, a relay that has drifted out of setting can stay invisible for years — the protection appears to be there, but if the fault arrives it doesn't trip where it should, or trips too late, or doesn't trip at all."
-  - "There are at least two thresholds that matter: the selective one, set to trip with a delay that gives downstream protections time to act first, and the overcurrent one, set to trip almost instantly on genuinely dangerous faults. If either one drifts — because of an internal relay fault, deteriorated wiring, or a setting never updated after a network change — the plant's selectivity breaks even though everything looks fine on the surface."
+  - "A protection relay is set once, in the workshop or at commissioning, and from that moment stays silent: it only acts when something goes wrong. But precisely because it almost never acts, a relay that has drifted out of setting can stay invisible for years: the protection appears to be there, but if the fault arrives it doesn't trip where it should, or trips too late, or doesn't trip at all."
+  - "There are at least two thresholds that matter: the selective one, set to trip with a delay that gives downstream protections time to act first, and the overcurrent one, set to trip almost instantly on genuinely dangerous faults. If either one drifts, because of an internal relay fault, deteriorated wiring or a setting never updated after a network change, the plant's selectivity breaks even though everything looks fine on the surface."
   - "Testing them means injecting simulated currents and voltages into the relay's circuit and measuring, with a calibrated instrument, whether the threshold trips at the right value and in the right time. It's the only way to know the protection will do what it was set to do, before a real fault has to tell you."
 
 parametri:
@@ -40,7 +40,7 @@ fasi:
   - titolo: "Site survey and lock-out/tag-out"
     testo: "Opening the relay compartment, verifying the absence of voltage on the secondary circuits, disconnecting the breaker's trip circuits to isolate the test from network operation."
   - titolo: "Injection with the DRTS/64"
-    testo: "Injecting simulated currents and voltages into the relay's secondary circuits, reproducing the fault conditions for each threshold — I> and I>> — at the declared setting values."
+    testo: "Injecting simulated currents and voltages into the relay's secondary circuits, reproducing the fault conditions for each threshold (I> and I>>) at the declared setting values."
   - titolo: "Breaker analysis with the ISA CBA 1000"
     testo: "Measuring the actual opening time of the breaker commanded by the relay and its contact resistance: the check doesn't stop at the electronic threshold, it goes all the way to the switching device."
   - titolo: "Compliance report"
@@ -65,11 +65,11 @@ assettoMisura:
 norma:
   codice: "CEI 0-16"
   titolo: "Reference technical rule for connecting active and passive users to the distributors' HV and MV networks"
-  note: "Sets the protection criteria — general and interface — that an active or passive user must meet to stay connected to the distributors' HV and MV networks: trip thresholds, times, selectivity criteria across the different protection levels. Periodic testing of thresholds and trip times is the condition for that protection, set on the bench, to actually work in the field."
+  note: "Sets the protection criteria, general and interface, that an active or passive user must meet to stay connected to the distributors' HV and MV networks: trip thresholds, times, selectivity criteria across the different protection levels. Periodic testing of thresholds and trip times is the condition for that protection, set on the bench, to actually work in the field."
 
 faq:
   - d: "What does testing the I> and I>> thresholds mean?"
-    r: "It means injecting a simulated current into the relay's circuit at or near each threshold's setting value and verifying that it trips at exactly that value and in the expected time — not earlier, not later, not at a different value."
+    r: "It means injecting a simulated current into the relay's circuit at or near each threshold's setting value and verifying that it trips at exactly that value and in the expected time: not earlier, not later, not at a different value."
   - d: "Why are two instruments needed, the DRTS/64 and the ISA CBA 1000?"
     r: "The DRTS/64 tests the relay: it injects the simulated quantities and measures whether the electronic threshold trips correctly. The ISA CBA 1000 tests the breaker: it measures the actual opening time and the contact resistance. A well-set protection with a slow breaker doesn't protect the plant the way it should."
   - d: "Does the test require the line to be out of service?"

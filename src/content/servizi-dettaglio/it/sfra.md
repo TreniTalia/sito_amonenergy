@@ -17,7 +17,7 @@ problema:
   - "Il confronto fra l'impronta registrata e quella misurata oggi mette in evidenza movimento del nucleo, deformazione e spostamento degli avvolgimenti, collasso parziale di un avvolgimento, cedimento o allentamento delle strutture di serraggio, spire in cortocircuito e avvolgimenti aperti. Il risultato non è un verde o un rosso: è una diagnosi con una localizzazione, perché regioni di frequenza diverse raccontano parti diverse della macchina."
 
 parametri:
-  - titolo: "Banda di misura 20 Hz – 2 MHz"
+  - titolo: "Banda di misura da 20 Hz a 2 MHz"
     testo: "L'intervallo prescritto dalla IEC 60076-18. Sotto il kilohertz risponde il circuito magnetico, nella zona intermedia le interazioni fra avvolgimenti, sopra i 100 kHz la geometria del singolo avvolgimento e il cablaggio di prova."
     icona: "fa6-solid:wave-square"
   - titolo: "Tensione di prova sotto 10 V RMS"
@@ -62,7 +62,7 @@ strumentazione:
 # Come si misura, non con che cosa.
 assettoMisura:
   - etichetta: "Intervallo di misura"
-    valore: "20 Hz – 2 MHz"
+    valore: "Da 20 Hz a 2 MHz"
   - etichetta: "Segnale iniettato"
     valore: "Sinusoidale, < 10 V RMS"
   - etichetta: "Stato della macchina"
@@ -74,7 +74,7 @@ assettoMisura:
 
 norma:
   codice: "IEC 60076-18"
-  titolo: "Power transformers – Part 18: Measurement of frequency response"
+  titolo: "Power transformers, Part 18: Measurement of frequency response"
   note: "Introdotta nel 2012, definisce come si misura e si documenta la risposta in frequenza di un trasformatore. Fissa l'intervallo di misura da 20 Hz a 2 MHz, tiene la tensione di prova sotto i 10 V RMS per non alterare lo stato magnetico della macchina, e prescrive cavi coassiali a doppia schermatura messi a terra con trecce piatte e larghe. La ripetibilità è il punto: la norma chiede di registrare le condizioni di prova perché la misura di oggi sia confrontabile con quella di fra cinque anni."
 
 caso:

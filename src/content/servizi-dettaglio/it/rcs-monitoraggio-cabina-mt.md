@@ -13,7 +13,7 @@ diagramma: "catena-rcs"
 
 problema:
   - "Una cabina MT senza supervisione remota è visibile solo quando qualcuno la raggiunge fisicamente. Un guasto transitorio che si estingue da solo, una manovra da eseguire fuori orario, un parametro che scivola fuori soglia: senza un sistema che legga lo stato dell'impianto in tempo reale, la prima notizia arriva spesso dal cliente che segnala il fermo impianto, non dalla cabina stessa."
-  - "RCS è il sistema di supervisione e controllo che abbiamo sviluppato per colmare quella distanza. Analizza il tipo di guasto rilevato dall'interruttore, distingue un evento transitorio da uno persistente e, quando il guasto risulta estinto, richiude in automatico senza attendere l'intervento manuale — la differenza fra un impianto fermo per minuti e uno fermo per ore."
+  - "RCS è il sistema di supervisione e controllo che abbiamo sviluppato per colmare quella distanza. Analizza il tipo di guasto rilevato dall'interruttore, distingue un evento transitorio da uno persistente e, quando il guasto risulta estinto, richiude in automatico senza attendere l'intervento manuale: è la differenza fra un impianto fermo per minuti e uno fermo per ore."
   - "Tutto passa dalla nostra Control Room: web app in cloud accessibile da PC, tablet e smartphone, cronologia degli eventi per ogni cabina, reset delle protezioni e manovre manuali da remoto quando serve l'intervento di un operatore. Più strutture in gestione sono visibili da un'unica schermata, con la stessa immediatezza con cui si leggerebbe un solo quadro."
 
 parametri:
@@ -24,7 +24,7 @@ parametri:
     testo: "Un'unica piattaforma accessibile da PC, tablet e smartphone mostra lo stato di ogni cabina in gestione, con la possibilità di eseguire manovre manuali da remoto quando serve l'intervento umano."
     icona: "fa6-solid:cloud"
   - titolo: "Storicizzazione dei dati"
-    testo: "Ogni evento — guasto, manovra, richiusura, allarme — resta archiviato con data, ora e parametri rilevati: una cronologia consultabile, non solo un allarme che lampeggia e sparisce."
+    testo: "Ogni evento (guasto, manovra, richiusura, allarme) resta archiviato con data, ora e parametri rilevati: una cronologia consultabile, non solo un allarme che lampeggia e sparisce."
     icona: "fa6-solid:database"
   - titolo: "Reset protezioni da remoto"
     testo: "Quando un intervento non richiede la presenza in cabina, il reset delle protezioni si esegue dalla Control Room: meno trasferte, meno tempo fra il guasto e il ripristino."
@@ -55,7 +55,7 @@ strumentazione:
 norma:
   codice: "CEI EN 50110-1"
   titolo: "Esercizio degli impianti elettrici"
-  note: "Una manovra da remoto — una richiusura automatica o un reset delle protezioni comandato dalla Control Room — resta un atto di esercizio dell'impianto elettrico, con gli stessi criteri di sicurezza di una manovra eseguita in loco. RCS non sostituisce questo quadro: lo automatizza dove l'automazione è sicura e lo lascia all'operatore qualificato dove serve una decisione in campo."
+  note: "Una manovra da remoto, come una richiusura automatica o un reset delle protezioni comandato dalla Control Room, resta un atto di esercizio dell'impianto elettrico, con gli stessi criteri di sicurezza di una manovra eseguita in loco. RCS non sostituisce questo quadro: lo automatizza dove l'automazione è sicura e lo lascia all'operatore qualificato dove serve una decisione in campo."
 
 faq:
   - d: "Che cos'è il sistema RCS?"
@@ -63,7 +63,7 @@ faq:
   - d: "Come funziona la richiusura automatica?"
     r: "L'algoritmo RCS distingue un guasto transitorio, che si estingue da solo, da un guasto persistente. Nel primo caso richiude l'interruttore senza attendere l'intervento manuale; nel secondo mantiene l'apertura e segnala l'evento alla Control Room per la valutazione di un operatore."
   - d: "Quali dati restano storicizzati?"
-    r: "Ogni evento rilevante — guasti, manovre, richiusure, allarmi e reset delle protezioni — viene registrato con data, ora e parametri, così la cronologia della cabina è sempre consultabile, non solo l'ultimo stato in tempo reale."
+    r: "Ogni evento rilevante (guasti, manovre, richiusure, allarmi e reset delle protezioni) viene registrato con data, ora e parametri, così la cronologia della cabina è sempre consultabile, non solo l'ultimo stato in tempo reale."
   - d: "RCS può dialogare con lo SCADA del cliente?"
     r: "Sì, l'integrazione SCADA porta i dati di cabina all'interno del sistema di supervisione più ampio del cliente o del distributore, evitando una piattaforma separata da consultare in parallelo."
   - d: "Che cosa succede fuori dall'orario di ufficio?"

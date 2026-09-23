@@ -13,7 +13,7 @@ diagramma: "catena-contatori"
 
 problema:
   - "Un impianto di produzione ha almeno due contatori che contano cose diverse: quello di produzione, che misura l'energia generata dall'impianto, e quello di scambio, bidirezionale, che misura quanto viene immesso in rete e quanto eventualmente prelevato. Sono i dati con cui il cliente verifica la resa reale dell'impianto e con cui il distributore tiene la propria contabilità di rete."
-  - "Il dato preso una volta sola, letto a vista sul display del contatore, dice poco: serve una lettura periodica, ripetibile, che raccolga i valori a intervalli regolari e li renda confrontabili nel tempo. Ed è un dato che va anche controllato, perché un valore anomalo — un salto improbabile, un contatore che non risponde — va intercettato prima di finire in un confronto o in una fattura."
+  - "Il dato preso una volta sola, letto a vista sul display del contatore, dice poco: serve una lettura periodica, ripetibile, che raccolga i valori a intervalli regolari e li renda confrontabili nel tempo. Ed è un dato che va anche controllato, perché un valore anomalo (un salto improbabile, un contatore che non risponde) va intercettato prima di finire in un confronto o in una fattura."
   - "Ci occupiamo dell'intera catena: acquisizione periodica dai contatori di produzione e scambio, validazione dei dati raccolti per intercettare le anomalie, e messa a disposizione su un portale dove cliente e, dove previsto, distributore possono consultare lo storico delle misure."
 
 parametri:
@@ -39,7 +39,7 @@ fasi:
   - titolo: "Attivazione dell'acquisizione periodica"
     testo: "Configurazione della raccolta automatica dei dati agli intervalli previsti, con prima verifica che i valori acquisiti corrispondano a quelli letti direttamente sul contatore."
   - titolo: "Validazione e messa a disposizione dei dati"
-    testo: "Controllo di coerenza sui dati raccolti e pubblicazione sul portale di consultazione, con segnalazione delle anomalie — mancata lettura, valore fuori range — appena rilevate."
+    testo: "Controllo di coerenza sui dati raccolti e pubblicazione sul portale di consultazione, con segnalazione delle anomalie (mancata lettura, valore fuori range) appena rilevate."
   - titolo: "Esercizio e assistenza continuativa"
     testo: "Manutenzione della catena di acquisizione, intervento sui contatori o sui collegamenti in caso di anomalia persistente, aggiornamento del portale con lo storico delle misure."
 
@@ -60,7 +60,7 @@ faq:
   - d: "Con che frequenza vengono acquisiti i dati?"
     r: "L'acquisizione è periodica, a intervalli regolari definiti in fase di attivazione: è quella regolarità a rendere lo storico confrontabile nel tempo, invece di una serie di letture isolate prese su richiesta."
   - d: "Che cosa succede se un contatore smette di rispondere?"
-    r: "La validazione dei dati intercetta l'anomalia — una lettura mancante o un valore incoerente — e la segnala, così l'intervento arriva prima che il vuoto di dati diventi un problema in un confronto o in una verifica con il distributore."
+    r: "La validazione dei dati intercetta l'anomalia, una lettura mancante o un valore incoerente, e la segnala, così l'intervento arriva prima che il vuoto di dati diventi un problema in un confronto o in una verifica con il distributore."
   - d: "I dati sono consultabili anche dal distributore?"
     r: "Dove previsto dal punto di connessione, sì: il dato di misura reso disponibile risponde proprio alla necessità del distributore di gestire la rete con informazioni aggiornate su ogni impianto connesso."
   - d: "Questo servizio si integra con RCS?"

@@ -13,7 +13,7 @@ diagramma: "catena-a72"
 
 problema:
   - "A generation plant connected to the MV network doesn't decide on its own when to stay in service: under certain network risk conditions, the distributor must be able to command a remote disconnection. This is the function described by Allegato A.72 to the Codice di Rete, applied through the procedure everyone in the field calls RIGEDI, and implemented on the plant with a dedicated device and a modem that receives the command."
-  - "The device alone isn't enough: it has to be tested, kept in working order and integrated with the rest of the plant so that the disconnection command — and, just as important, the reconnection one — actually arrives and is executed within the required time. A modem that doesn't respond, or a badly configured interface protection, turns a network safety requirement into a blind spot."
+  - "The device alone isn't enough: it has to be tested, kept in working order and integrated with the rest of the plant so that the disconnection command, and the equally important reconnection one, actually arrives and is executed within the required time. A modem that doesn't respond, or a badly configured interface protection, turns a network safety requirement into a blind spot."
   - "We test and diagnose RIGEDI devices and the A72 modem, support commissioning, analyse the connection's performance and the system's compliance, support communication with the distributor during activation, and integrate everything with the plant's SCADA, so remote tripping is a verified channel, not just an installed one."
 
 parametri:
@@ -54,7 +54,7 @@ strumentazione:
 
 norma:
   codice: "Allegato A.72 to the Codice di Rete"
-  titolo: "Allegato A.72 to Terna's Codice di Rete — governs remote tripping of generation plants"
+  titolo: "Allegato A.72 to Terna's Codice di Rete, governing remote tripping of generation plants"
   note: "Allegato A.72 is an attachment to Terna's Codice di Rete, not part of CEI 0-16: it defines remote tripping, i.e. the distributor's ability to remotely command the disconnection of a generation plant when network safety requires it, and its subsequent reconnection. In the field the procedure is known as RIGEDI. The MV network connection framework remains CEI 0-16, the general technical rule for connecting to HV and MV networks."
 
 faq:

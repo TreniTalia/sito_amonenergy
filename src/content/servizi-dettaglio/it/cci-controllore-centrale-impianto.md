@@ -13,7 +13,7 @@ diagramma: "osservabilita-controllabilita"
 
 problema:
   - "Il distributore che accoglie in rete un impianto di produzione ha bisogno di due cose che un impianto passivo non richiede: sapere in ogni momento come sta funzionando, e poterne limitare la potenza immessa quando la rete lo richiede. Senza un dispositivo dedicato, nessuna delle due è possibile dall'esterno dell'impianto."
-  - "Il Controllore Centrale d'Impianto è quel dispositivo. Legge i parametri di funzionamento dell'impianto e li rende disponibili al distributore — è la funzione che CEI 0-16 V5 chiama PF1, osservabilità — e riceve dal distributore il comando di limitare la potenza attiva immessa, fino ad azzerarla se necessario — la funzione PF2, controllabilità."
+  - "Il Controllore Centrale d'Impianto è quel dispositivo. Legge i parametri di funzionamento dell'impianto e li rende disponibili al distributore (è la funzione che CEI 0-16 V5 chiama PF1, osservabilità) e riceve dal distributore il comando di limitare la potenza attiva immessa, fino ad azzerarla se necessario: è la funzione PF2, controllabilità."
   - "Installiamo, configuriamo e gestiamo il CCI in partnership con Teamware: dalla scelta della configurazione più adatta all'impianto fino all'esercizio quotidiano, così che PF1 e PF2 restino operative senza che il cliente debba occuparsene."
 
 parametri:
@@ -52,7 +52,7 @@ strumentazione:
 
 norma:
   codice: "CEI 0-16 V5"
-  titolo: "Regola tecnica di connessione alle reti AT e MT — funzioni di osservabilità e controllabilità"
+  titolo: "Regola tecnica di connessione alle reti AT e MT: funzioni di osservabilità e controllabilità"
   note: "La versione 5 della CEI 0-16 introduce le funzioni PF1 (osservabilità: il CCI legge e rende disponibile al distributore lo stato dell'impianto) e PF2 (controllabilità: il distributore può limitare la potenza attiva immessa fino ad azzerarla). La Delibera ARERA 564/2025/R/eel disciplina tempi e contributi per l'adeguamento degli impianti già connessi a queste funzioni."
 
 faq:
