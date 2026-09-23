@@ -31,19 +31,41 @@ interface Props {
 const { uid, ariaLabel, x, y, y2, serie, banda, didascalia, didascaliaSub } = Astro.props;
 
 const W = 640, H = 400;
-const X0 = 78, X1 = y2 ? 566 : 608, Y0 = 70, Y1 = 330;
+// Y0 più alto di prima (70): la legenda non è più disegnata dentro l'SVG (che
+// scala col contenitore, testo compreso) ma in HTML sopra la tela, in un
+// elenco che va a capo da solo. Il suo testo però ha una dimensione fissa in
+// pixel reali (il minimo di leggibilità, --fs-micro): sulla tela più stretta
+// (390px, ~220px di altezza) due righe di legenda occupano una fetta molto
+// più grande, in proporzione, di quanto non accada su una tela larga (1440px,
+// ~375px). Y0 riserva lo spazio per il caso peggiore (tre voci di legenda su
+// due righe, alla larghezza minima), verificato con misure reali via
+// Playwright: vedi il report di task 5, fix round 2.
+const X0 = 78, X1 = y2 ? 566 : 608, Y0 = 150, Y1 = 330;
 const n = (v: number) => Math.round(v * 10) / 10;
 const px = (v: number) => n(proietta(x.scala, v, X0, X1));
 const py = (v: number, a: 'y' | 'y2' = 'y') => n(proietta((a === 'y2' ? y2! : y).scala, v, Y1, Y0));
 const linea = (s: Serie) => s.punti.map(([a, b]) => `${px(a)},${py(b, s.asse)}`).join(' ');
 const conLegenda = serie.filter((s) => s.legenda);
-
-// Calcola lo step delle entrate di legenda in base allo spazio disponibile.
-const legenda_step = (X1 - X0) / Math.max(1, conLegenda.length);
 ---
 
 <figure class="chart">
   <div class="chart__frame rounded-[var(--radius-card)] border border-navy-100 shadow-[var(--shadow-md)]">
+    {conLegenda.length > 0 && (
+      <ul class="chart__legend">
+        {conLegenda.map((s) => (
+          <li>
+            <span class="chart__legend-swatch" aria-hidden="true">
+              {s.tipo === 'scatter' ? (
+                <svg viewBox="0 0 16 16"><circle cx="8" cy="8" r="4.5" fill={s.colore}></circle></svg>
+              ) : (
+                <svg viewBox="0 0 20 8"><line x1="0" y1="4" x2="20" y2="4" stroke={s.colore} stroke-width="2.6" stroke-linecap="round"></line></svg>
+              )}
+            </span>
+            <span>{s.legenda}</span>
+          </li>
+        ))}
+      </ul>
+    )}
     <svg viewBox={`0 0 ${W} ${H}`} role="img" aria-label={ariaLabel} preserveAspectRatio="xMidYMid meet">
       <defs>
         <linearGradient id={`${uid}-bg`} x1="0" y1="0" x2="0.35" y2="1">
@@ -99,15 +121,6 @@ const legenda_step = (X1 - X0) / Math.max(1, conLegenda.length);
         {banda && <text x={n(px(banda.a) - 8)} y={Y0 + 17} text-anchor="end" fill="#8fd9ab" letter-spacing="0.12em">{banda.etichetta}</text>}
       </g>
 
-      <g class="chart-legend" transform={`translate(${X0} 30)`} font-family="Inter Variable, Inter, sans-serif" font-size="11" font-weight="600" fill="#bcd6e8">
-        {conLegenda.map((s, i) => (
-          <g transform={`translate(${i * legenda_step} 0)`}>
-            <line x1="0" y1="0" x2="20" y2="0" stroke={s.colore} stroke-width="2.2" />
-            <text x="28" y="4">{s.legenda}</text>
-          </g>
-        ))}
-      </g>
-
       <rect x="14" y="14" width={W - 28} height={H - 28} rx="6" fill="none" stroke="#6ba7d2" stroke-opacity="0.26" />
       <g stroke="#8fd9ab" stroke-opacity="0.5" stroke-width="1.4" stroke-linecap="square">
         <line x1="14" y1="38" x2="14" y2="14" /><line x1="14" y1="14" x2="38" y2="14" />
@@ -131,17 +144,41 @@ const legenda_step = (X1 - X0) / Math.max(1, conLegenda.length);
   @media (max-width: 767px) {
     .chart-label { font-size: 22px; }
     .chart-label--minor { display: none; }
-    .chart-legend { font-size: 20px; }
-    /* Con due voci di legenda l'affiancamento in colonne resta leggibile
-       anche col font ingrandito da mobile. Con tre voci le colonne (larghe
-       un terzo della tela) diventano più strette del testo italiano più
-       lungo: le impiliamo una per riga. La selezione (primo figlio che è
-       anche terzultimo) intercetta solo i gruppi con esattamente tre voci,
-       senza toccare quelli a due. */
-    .chart-legend > g:nth-child(1):nth-last-child(3) { transform: translate(0px, 0px); }
-    .chart-legend > g:nth-child(1):nth-last-child(3) ~ g:nth-child(2) { transform: translate(0px, 24px); }
-    .chart-legend > g:nth-child(1):nth-last-child(3) ~ g:nth-child(3) { transform: translate(0px, 48px); }
   }
+  /* Legenda in HTML, non più nell'SVG: a differenza del testo SVG (che segue
+     la larghezza del viewBox e finiva per sovrapporsi appena le voci erano
+     tre, sia a 1440 sia a 390px, perché la colonna calcolata non teneva conto
+     della larghezza reale del testo) un elenco flex va a capo da solo, in
+     qualunque punto di rottura e con qualunque numero di voci. Resta sulla
+     tela navy (non sopra la didascalia, che eredita il colore chiaro della
+     pagina) perché i colori delle serie sono pensati per quel fondo. */
+  .chart__legend {
+    position: absolute;
+    top: 0.55rem;
+    left: 0.9rem;
+    right: 0.9rem;
+    z-index: 1;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.2rem 1.1rem;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+  .chart__legend li {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-family: var(--font-body);
+    font-size: var(--fs-micro);
+    line-height: 1.2;
+    font-weight: 600;
+    letter-spacing: 0.01em;
+    color: #bcd6e8;
+    white-space: nowrap;
+  }
+  .chart__legend-swatch { display: flex; width: 1.15rem; height: 0.7rem; flex: none; }
+  .chart__legend-swatch svg { width: 100%; height: 100%; overflow: visible; }
   .chart__caption { display: flex; align-items: center; gap: 0.6rem; margin-top: 0.85rem; padding-left: 0.15rem; font-size: var(--fs-small); line-height: 1.35; }
   .chart__caption strong { display: block; font-weight: 700; }
   .chart__caption-sub { display: block; color: color-mix(in srgb, currentColor 62%, transparent); font-size: var(--fs-micro); }
