@@ -43,41 +43,12 @@
  */
 import { test, before, after, describe } from 'node:test';
 import assert from 'node:assert/strict';
-import { createServer } from 'node:http';
-import { readFileSync, readdirSync, statSync, existsSync } from 'node:fs';
+import { readFileSync, readdirSync, existsSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import path from 'node:path';
+import { avviaServer, motivoSalto, playwright, senzaMedia } from './helpers/dist-server.mjs';
 
-const DIST = fileURLToPath(new URL('../dist', import.meta.url));
-const hasDist = existsSync(path.join(DIST, 'servizi', 'index.html'));
-
-let playwright = null;
-try {
-  playwright = await import('playwright');
-} catch {
-  /* devDependency assente: i test si saltano */
-}
-
-const skip = !hasDist
-  ? 'dist assente: esegui `npm run build` prima di questo test'
-  : !playwright
-    ? 'playwright non installato'
-    : false;
-
-const MIME = {
-  '.html': 'text/html',
-  '.js': 'text/javascript',
-  '.css': 'text/css',
-  '.svg': 'image/svg+xml',
-  '.png': 'image/png',
-  '.webp': 'image/webp',
-  '.avif': 'image/avif',
-  '.jpg': 'image/jpeg',
-  '.mp4': 'video/mp4',
-  '.woff2': 'font/woff2',
-  '.xml': 'application/xml',
-  '.json': 'application/json',
-};
+const skip = motivoSalto('servizi/index.html');
 
 const { ROTTE } = await import('../src/i18n/routes.ts').catch(() => ({ ROTTE: null }));
 
@@ -234,34 +205,19 @@ describe('schemi a blocchi (SchemaFrame/BlockChain)', { skip }, () => {
   let origin;
 
   before(async () => {
-    server = createServer((q, s) => {
-      let f = path.join(DIST, decodeURIComponent(q.url.split('?')[0]));
-      try {
-        if (statSync(f).isDirectory()) f = path.join(f, 'index.html');
-      } catch {
-        f += '.html';
-      }
-      try {
-        const body = readFileSync(f);
-        s.setHeader('content-type', MIME[path.extname(f)] ?? 'application/octet-stream');
-        s.end(body);
-      } catch {
-        s.statusCode = 404;
-        s.end('404');
-      }
-    });
-    await new Promise((r) => server.listen(0, '127.0.0.1', r));
-    origin = `http://127.0.0.1:${server.address().port}/`;
+    server = await avviaServer();
+    origin = server.origin;
     browser = await playwright.chromium.launch();
   });
 
   after(async () => {
     await browser?.close();
-    server?.close();
+    await server?.close();
   });
 
   const misura = async (pagina, width) => {
     const page = await browser.newPage({ viewport: { width, height: 900 }, reducedMotion: 'reduce' });
+    await senzaMedia(page);
     await page.goto(origin + pagina, { waitUntil: 'load' });
     const m = await page.evaluate(misuraSchema);
     await page.close();
@@ -293,14 +249,17 @@ describe('schemi a blocchi (SchemaFrame/BlockChain)', { skip }, () => {
 
   test('esattamente le pagine con diagramma a blocchi hanno uno schema rilevato', async () => {
     assert.equal(PAGINE.length, 10, `attese 10 pagine (5 diagrammi a blocchi × IT/EN) dal contenuto, derivate ${PAGINE.length}`);
-    const risultati = await Promise.all(PAGINE.map((p) => misura(p, 1440)));
-    const senzaSchema = PAGINE.filter((_, i) => !risultati[i]);
+    // Una pagina alla volta: dieci pagine aperte insieme bastano, su Windows,
+    // a esaurire i buffer dei socket locali.
+    const senzaSchema = [];
+    for (const p of PAGINE) if (!(await misura(p, 1440))) senzaSchema.push(p);
     assert.deepEqual(senzaSchema, [], `pagine con diagramma a blocchi nel contenuto ma senza schema rilevato in pagina: ${senzaSchema.join(', ')}`);
   });
 
   test('il controllo sa fallire: un titolo senza spazi e senza a-capo viene segnalato', async () => {
     const pagina = PAGINE[0];
     const page = await browser.newPage({ viewport: { width: 390, height: 900 }, reducedMotion: 'reduce' });
+    await senzaMedia(page);
     await page.goto(origin + pagina, { waitUntil: 'load' });
 
     const pulito = await page.evaluate(misuraSchema);

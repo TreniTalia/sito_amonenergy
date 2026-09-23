@@ -1,29 +1,22 @@
-import { readFileSync, existsSync, statSync } from 'node:fs';
+import { readFileSync, existsSync } from 'node:fs';
 import { test, describe, before, after } from 'node:test';
 import assert from 'node:assert/strict';
 import { fileURLToPath } from 'node:url';
 import path from 'node:path';
 import { globSync } from 'node:fs';
-import { createServer } from 'node:http';
+import { avviaServer, DIST, playwright } from './helpers/dist-server.mjs';
 
-const DIST = fileURLToPath(new URL('../dist', import.meta.url));
 const skip = existsSync(path.join(DIST, 'index.html'))
   ? false
   : 'dist assente: esegui `npm run build` prima di questo test';
 
-// Stesso preambolo Playwright degli altri test del repo (hero-mobile-layout,
-// navbar-active-pill): `dist` serve staticamente via HTTP locale, il browser
-// è un `chromium` headless. Qui in più leggiamo `analytics.ts` per sapere se
-// il Measurement ID è ancora il segnaposto: in quel caso lo script GA4 non
-// viene nemmeno iniettato in pagina, quindi il test che verifica il
-// caricamento *dopo* il consenso non ha nulla da osservare e va saltato.
-let playwright = null;
-try {
-  playwright = await import('playwright');
-} catch {
-  /* devDependency assente: i test si saltano */
-}
-
+// Stesso preambolo Playwright degli altri test del repo
+// (`test/helpers/dist-server.mjs`): `dist` serve staticamente via HTTP
+// locale, il browser è un `chromium` headless. Qui in più leggiamo
+// `analytics.ts` per sapere se il Measurement ID è ancora il segnaposto: in
+// quel caso lo script GA4 non viene nemmeno iniettato in pagina, quindi il
+// test che verifica il caricamento *dopo* il consenso non ha nulla da
+// osservare e va saltato.
 const skipPlaywright = skip
   ? skip
   : !playwright
@@ -35,16 +28,6 @@ const analyticsSrc = readFileSync(
   'utf8',
 );
 const ga4Segnaposto = /GA4_ID\s*=\s*'G-XXXXXXXXXX'/.test(analyticsSrc);
-
-const MIME = {
-  '.html': 'text/html',
-  '.js': 'text/javascript',
-  '.css': 'text/css',
-  '.svg': 'image/svg+xml',
-  '.png': 'image/png',
-  '.webp': 'image/webp',
-  '.woff2': 'font/woff2',
-};
 
 // `globSync` restituisce separatori nativi (backslash su Windows): si
 // normalizza a `/` solo per il confronto del prefisso, i path restano
@@ -143,30 +126,15 @@ describe('Google Analytics dietro consenso', { skip: skipPlaywright }, () => {
   let origin;
 
   before(async () => {
-    server = createServer((q, s) => {
-      let f = path.join(DIST, decodeURIComponent(q.url.split('?')[0]));
-      try {
-        if (statSync(f).isDirectory()) f = path.join(f, 'index.html');
-      } catch {
-        f += '.html';
-      }
-      try {
-        const body = readFileSync(f);
-        s.setHeader('content-type', MIME[path.extname(f)] ?? 'application/octet-stream');
-        s.end(body);
-      } catch {
-        s.statusCode = 404;
-        s.end('404');
-      }
-    });
-    await new Promise((r) => server.listen(0, '127.0.0.1', r));
-    origin = `http://127.0.0.1:${server.address().port}`;
+    server = await avviaServer();
+    // Qui le URL si compongono come `${origin}/`: l'origine va senza barra.
+    origin = server.origin.replace(/\/$/, '');
     browser = await playwright.chromium.launch();
   });
 
   after(async () => {
     await browser?.close();
-    server?.close();
+    await server?.close();
   });
 
   // Non dipende dal segnaposto: che GA4 sia attivo o no, prima del consenso

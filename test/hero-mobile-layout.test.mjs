@@ -25,41 +25,9 @@
  */
 import { test, before, after, describe } from 'node:test';
 import assert from 'node:assert/strict';
-import { createServer } from 'node:http';
-import { readFileSync, statSync, existsSync } from 'node:fs';
-import { fileURLToPath } from 'node:url';
-import path from 'node:path';
+import { avviaServer, motivoSalto, playwright } from './helpers/dist-server.mjs';
 
-const DIST = fileURLToPath(new URL('../dist', import.meta.url));
-const hasDist = existsSync(path.join(DIST, 'index.html'));
-
-let playwright = null;
-try {
-  playwright = await import('playwright');
-} catch {
-  /* devDependency assente: i test si saltano */
-}
-
-const skip = !hasDist
-  ? 'dist assente: esegui `npm run build` prima di questo test'
-  : !playwright
-    ? 'playwright non installato'
-    : false;
-
-const MIME = {
-  '.html': 'text/html',
-  '.js': 'text/javascript',
-  '.css': 'text/css',
-  '.svg': 'image/svg+xml',
-  '.png': 'image/png',
-  '.webp': 'image/webp',
-  '.avif': 'image/avif',
-  '.jpg': 'image/jpeg',
-  '.mp4': 'video/mp4',
-  '.woff2': 'font/woff2',
-  '.xml': 'application/xml',
-  '.json': 'application/json',
-};
+const skip = motivoSalto();
 
 describe('layout dell’hero su viewport reali', { skip }, () => {
   let server;
@@ -67,34 +35,17 @@ describe('layout dell’hero su viewport reali', { skip }, () => {
   let origin;
 
   before(async () => {
-    server = createServer((q, s) => {
-      let f = path.join(DIST, decodeURIComponent(q.url.split('?')[0]));
-      try {
-        if (statSync(f).isDirectory()) f = path.join(f, 'index.html');
-      } catch {
-        f += '.html';
-      }
-      try {
-        const body = readFileSync(f);
-        s.setHeader('content-type', MIME[path.extname(f)] ?? 'application/octet-stream');
-        // Il media element chiede byte-range: senza `accept-ranges` alcuni
-        // browser rifiutano di partire, e il test misurerebbe il server, non la
-        // pagina.
-        s.setHeader('accept-ranges', 'bytes');
-        s.end(body);
-      } catch {
-        s.statusCode = 404;
-        s.end('404');
-      }
-    });
-    await new Promise((r) => server.listen(0, '127.0.0.1', r));
-    origin = `http://127.0.0.1:${server.address().port}/`;
+    // Il media element chiede byte-range: senza `accept-ranges` alcuni
+    // browser rifiutano di partire, e il test misurerebbe il server, non la
+    // pagina.
+    server = await avviaServer({ acceptRanges: true });
+    origin = server.origin;
     browser = await playwright.chromium.launch();
   });
 
   after(async () => {
     await browser?.close();
-    server?.close();
+    await server?.close();
   });
 
   /** Apre la home a una viewport data e restituisce le misure che ci interessano. */
