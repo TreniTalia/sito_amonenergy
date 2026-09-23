@@ -8,18 +8,21 @@
  * Due modalità, dietro `mode`:
  * - 'svg' (default, usata da `ChartFrame`): il contenuto è SVG a coordinate
  *   fisse 640×440, la tela su cui assi e serie si posizionano per numero.
+ *   Sopra la tela c'è la legenda HTML: fondo, trama, cornice interna e
+ *   tacche d'angolo sono CSS sul telaio intero, così circondano legenda e
+ *   grafico insieme invece di lasciare la legenda fuori dalla cornice.
+ *   Cornice e tacche sono misurate in unità della figura (`cqw`), nella
+ *   stessa proporzione delle 14 e 24 unità di viewBox del disegno: cadono
+ *   sempre nello stesso punto della tela, a qualunque larghezza.
  * - 'html' (usata da `SchemaFrame`): il contenuto è HTML/CSS reale, che va a
- *   capo da solo e decide da sé quanto spazio occupare — un telaio a misura
- *   del contenuto, non una tela fissa. Fondo, trama e tacche d'angolo
- *   diventano proprietà CSS invece di rect/line SVG, con gli stessi colori.
+ *   capo da solo e decide da sé quanto spazio occupare, un telaio a misura
+ *   del contenuto e non una tela fissa. Cornice a 14px e tacche da 24px.
  *
  * Il nome BEM dei pezzi (`${figureClass}__frame` ecc.) tiene i selettori
  * `figure.chart`/`.chart__legend`/… di `ChartFrame` invariati: qui dentro
  * serve solo a comporre la classe, la resa nel DOM non cambia.
  */
 interface Props {
-  /** ID univoco per i riferimenti SVG (gradiente, trama): solo in modalità 'svg'. */
-  uid?: string;
   ariaLabel: string;
   didascalia: string;
   didascaliaSub: string;
@@ -28,10 +31,11 @@ interface Props {
   /** 'svg' (default) = tela fissa 640×440; 'html' = contenuto reale, telaio a misura. */
   mode?: 'svg' | 'html';
 }
-const { uid, ariaLabel, didascalia, didascaliaSub, figureClass, mode = 'svg' } = Astro.props;
+const { ariaLabel, didascalia, didascaliaSub, figureClass, mode = 'svg' } = Astro.props;
 
 const W = 640;
 const H = 440;
+const angoli = ['tl', 'tr', 'bl', 'br'] as const;
 ---
 
 <figure class={`${figureClass} fc-figure`}>
@@ -41,44 +45,20 @@ const H = 440;
       role="group"
       aria-label={ariaLabel}
     >
-      <span class="fc-corner fc-corner--tl" aria-hidden="true"></span>
-      <span class="fc-corner fc-corner--tr" aria-hidden="true"></span>
-      <span class="fc-corner fc-corner--bl" aria-hidden="true"></span>
-      <span class="fc-corner fc-corner--br" aria-hidden="true"></span>
+      {angoli.map((a) => <span class={`fc-corner fc-corner--${a}`} aria-hidden="true"></span>)}
       <div class="fc-html-content">
         <slot />
       </div>
     </div>
   ) : (
-    <div class={`${figureClass}__frame fc-frame rounded-[var(--radius-card)] border border-navy-100 shadow-[var(--shadow-md)]`}>
+    <div class={`${figureClass}__frame fc-frame fc-frame--svg rounded-[var(--radius-card)] border border-navy-100 shadow-[var(--shadow-md)]`}>
+      {angoli.map((a) => <span class={`fc-corner fc-corner--${a}`} aria-hidden="true"></span>)}
       <slot name="legend" />
       <svg viewBox={`0 0 ${W} ${H}`} role="img" aria-label={ariaLabel} preserveAspectRatio="xMidYMid meet">
         <defs>
-          <linearGradient id={`${uid}-bg`} x1="0" y1="0" x2="0.35" y2="1">
-            <stop offset="0" stop-color="#0c3151"></stop>
-            <stop offset="1" stop-color="#081f36"></stop>
-          </linearGradient>
-          <pattern id={`${uid}-dots`} width="24" height="24" patternUnits="userSpaceOnUse">
-            <circle cx="1.1" cy="1.1" r="1.1" fill="#4f93c4" fill-opacity="0.16"></circle>
-          </pattern>
           <slot name="defs" />
         </defs>
-        <rect width={W} height={H} fill={`url(#${uid}-bg)`}></rect>
-        <rect width={W} height={H} fill={`url(#${uid}-dots)`}></rect>
-
         <slot />
-
-        <rect x="14" y="14" width={W - 28} height={H - 28} rx="6" fill="none" stroke="#6ba7d2" stroke-opacity="0.26"></rect>
-        <g stroke="#8fd9ab" stroke-opacity="0.5" stroke-width="1.4" stroke-linecap="square">
-          <line x1="14" y1="38" x2="14" y2="14"></line>
-          <line x1="14" y1="14" x2="38" y2="14"></line>
-          <line x1={W - 38} y1="14" x2={W - 14} y2="14"></line>
-          <line x1={W - 14} y1="14" x2={W - 14} y2="38"></line>
-          <line x1="14" y1={H - 38} x2="14" y2={H - 14}></line>
-          <line x1="14" y1={H - 14} x2="38" y2={H - 14}></line>
-          <line x1={W - 38} y1={H - 14} x2={W - 14} y2={H - 14}></line>
-          <line x1={W - 14} y1={H - 14} x2={W - 14} y2={H - 38}></line>
-        </g>
       </svg>
     </div>
   )}
@@ -102,30 +82,39 @@ const H = 440;
     container: telaio / inline-size;
   }
 
-  /* Stesse regole di sempre (erano in ChartFrame): l'SVG non ha più un
-     aspect-ratio fisso in CSS, è il viewBox 640×440 a decidere la propria
-     proporzione, come farebbe un'immagine responsive. */
+  /* Telaio comune alle due modalità: sfumatura navy (`#0c3151` → `#081f36`),
+     trama a puntini con passo di 24px, cornice interna e tacche d'angolo.
+     `--fc-inset` e `--fc-arm` sono la distanza della cornice dal bordo e la
+     lunghezza delle tacche, diverse per modalità. */
   .fc-frame {
+    --fc-inset: 14px;
+    --fc-arm: 24px;
+    position: relative;
     display: flex;
     flex-direction: column;
     overflow: hidden;
-    background: #0a2a44;
+    background: linear-gradient(155deg, #0c3151, #081f36);
   }
+  /* Con la tela SVG cornice e tacche seguono la scala del disegno: 14 e 24
+     unità su 640 di larghezza, espresse in larghezza della figura. */
+  .fc-frame--svg {
+    --fc-inset: calc(14 / 640 * 100cqw);
+    --fc-arm: calc(24 / 640 * 100cqw);
+  }
+  /* L'SVG non ha un aspect-ratio fisso in CSS, è il viewBox 640×440 a
+     decidere la propria proporzione, come farebbe un'immagine responsive.
+     Sta sopra la trama a puntini del telaio. */
   .fc-frame svg {
+    position: relative;
+    z-index: 1;
     display: block;
     width: 100%;
     height: auto;
   }
 
-  /* Variante 'html': niente più viewBox 640×440, il telaio si dimensiona sul
-     proprio contenuto. Fondo e trama diventano proprietà CSS invece di
-     rect/pattern SVG, stessi colori e stessa scala (24px di passo, cerchi da
-     ~1.1px) della variante SVG. */
+  /* Variante 'html': il telaio si dimensiona sul proprio contenuto. */
   .fc-frame--html {
-    position: relative;
     padding: 2.5rem 2rem;
-    /* Stessa sfumatura del fondo SVG (`#0c3151` → `#081f36`), qui in CSS. */
-    background: linear-gradient(155deg, #0c3151, #081f36);
   }
   /* Figura stretta (telefoni sotto i 400px): meno margine laterale, così il
      contenuto guadagna una ventina di px senza toccare il bordo interno a
@@ -135,7 +124,7 @@ const H = 440;
       padding: 2.25rem 1.4rem;
     }
   }
-  .fc-frame--html::before {
+  .fc-frame::before {
     content: '';
     position: absolute;
     inset: 0;
@@ -143,43 +132,44 @@ const H = 440;
     background-size: 24px 24px;
     pointer-events: none;
   }
-  .fc-frame--html::after {
+  .fc-frame::after {
     content: '';
     position: absolute;
-    inset: 14px;
+    inset: var(--fc-inset);
     border: 1px solid rgba(107, 167, 210, 0.26);
     border-radius: 6px;
     pointer-events: none;
   }
-  /* Tacche d'angolo: un bordo a L da 24px per angolo, stessa lunghezza e
-     stesso colore delle tacche SVG (`#8fd9ab`, opacità 0,5, spessore 1.4). */
+  /* Tacche d'angolo: un bordo a L per angolo (`#8fd9ab`, opacità 0,5,
+     spessore 1.4), sopra la tela. */
   .fc-corner {
     position: absolute;
-    width: 24px;
-    height: 24px;
+    z-index: 2;
+    width: var(--fc-arm);
+    height: var(--fc-arm);
     pointer-events: none;
   }
   .fc-corner--tl {
-    top: 14px;
-    left: 14px;
+    top: var(--fc-inset);
+    left: var(--fc-inset);
     border-top: 1.4px solid rgba(143, 217, 171, 0.5);
     border-left: 1.4px solid rgba(143, 217, 171, 0.5);
   }
   .fc-corner--tr {
-    top: 14px;
-    right: 14px;
+    top: var(--fc-inset);
+    right: var(--fc-inset);
     border-top: 1.4px solid rgba(143, 217, 171, 0.5);
     border-right: 1.4px solid rgba(143, 217, 171, 0.5);
   }
   .fc-corner--bl {
-    bottom: 14px;
-    left: 14px;
+    bottom: var(--fc-inset);
+    left: var(--fc-inset);
     border-bottom: 1.4px solid rgba(143, 217, 171, 0.5);
     border-left: 1.4px solid rgba(143, 217, 171, 0.5);
   }
   .fc-corner--br {
-    bottom: 14px;
-    right: 14px;
+    bottom: var(--fc-inset);
+    right: var(--fc-inset);
     border-bottom: 1.4px solid rgba(143, 217, 171, 0.5);
     border-right: 1.4px solid rgba(143, 217, 171, 0.5);
   }

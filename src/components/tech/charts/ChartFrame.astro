@@ -34,23 +34,56 @@ const { uid, ariaLabel, x, y, y2, serie, banda, didascalia, didascaliaSub } = As
 // Fondo, trama, cornice con tacche e didascalia sono il telaio condiviso
 // `FrameChrome` (usato anche da `SchemaFrame` per gli schemi a blocchi): qui
 // restano solo gli assi e le serie, disegnati nello `<slot />` del telaio.
-// W e H devono combaciare con le costanti dentro FrameChrome (640×440): la
-// tela non ha un aspect-ratio fisso in CSS, è l'SVG stesso (via viewBox) a
+// La tela non ha un aspect-ratio fisso in CSS, è l'SVG stesso (via viewBox) a
 // decidere la propria proporzione, un rettangolo un po' meno largo che alto
 // per dare più altezza reale al grafico sugli schermi stretti.
 const W = 640, H = 440;
-const X0 = 78, X1 = y2 ? 566 : 608, Y0 = 46, Y1 = 370;
+
+// Le etichette crescono fino a 22 unità nelle figure più strette (v. lo
+// stile in fondo): i margini sinistro e destro si calcolano sulla tacca più
+// lunga a quella dimensione, così nessuna esce dalla cornice interna (14
+// unità dal bordo) qualunque sia la larghezza. Larghezze dei glifi di Inter
+// 600 in em, arrotondate per eccesso, più lo 0,06em di spaziatura.
+const FS_MAX = 22;
+const CORNICE = 14;
+const glifo = (c: string) => (c === ' ' || c === ',' || c === '.' ? 0.3 : c === '-' ? 0.4 : c === '°' ? 0.42 : 0.66) + 0.06;
+const larghezza = (t: string) => [...t].reduce((s, c) => s + glifo(c), 0) * FS_MAX;
+const piuLunga = (a: Asse | undefined) => Math.max(0, ...(a?.tacche ?? []).map((k) => larghezza(k.t)), larghezza(a?.unita ?? ''));
+const X0 = Math.max(64, Math.ceil(CORNICE + 6 + piuLunga(y) + 10));
+const X1 = y2 ? Math.min(608, Math.floor(W - CORNICE - 6 - piuLunga(y2) - 10)) : 608;
+const Y0 = 46, Y1 = 370;
+
 const n = (v: number) => Math.round(v * 10) / 10;
 const px = (v: number) => n(proietta(x.scala, v, X0, X1));
 const py = (v: number, a: 'y' | 'y2' = 'y') => n(proietta((a === 'y2' ? y2! : y).scala, v, Y1, Y0));
 const linea = (s: Serie) => s.punti.map(([a, b]) => `${px(a)},${py(b, s.asse)}`).join(' ');
 const conLegenda = serie.filter((s) => s.legenda);
+
+// Una nuvola di punti è un solo `<path>` di segmenti lunghi zero con estremità
+// tonde (un cerchio per punto, di diametro pari allo spessore del tratto),
+// non un `<circle>` per punto: il PRPD ne ha 900, e in cerchi pesava 65 KB di
+// HTML. I punti vanno su quattro tracciati alternati perché dentro un solo
+// tracciato le sovrapposizioni non si sommano: i grumi più densi della
+// nuvola resterebbero chiari quanto i punti isolati.
+const TRACCIATI = 4;
+const nuvola = (s: Serie) =>
+  Array.from({ length: TRACCIATI }, (_, k) =>
+    s.punti
+      .filter((_, i) => i % TRACCIATI === k)
+      .map(([a, b]) => `M${px(a)} ${py(b, s.asse)}h0`)
+      .join(''),
+  ).filter(Boolean);
+
+// L'unità dell'asse X non si ripete se l'ultima tacca la porta già ("2 MHz"
+// con unità "Hz"): due righe con la stessa unità una sotto l'altra.
+const ultimaX = x.tacche[x.tacche.length - 1]?.t ?? '';
+const unitaX = x.unita && !ultimaX.endsWith(x.unita) ? x.unita : '';
 ---
 
-<FrameChrome uid={uid} ariaLabel={ariaLabel} didascalia={didascalia} didascaliaSub={didascaliaSub} figureClass="chart">
+<FrameChrome ariaLabel={ariaLabel} didascalia={didascalia} didascaliaSub={didascaliaSub} figureClass="chart">
   {conLegenda.length > 0 && (
     <Fragment slot="legend">
-      <ul class="chart__legend">
+      <ul class="chart__legend" style={`padding-left: ${n((X0 / W) * 100)}%`}>
         {conLegenda.map((s) => (
           <li>
             <span class="chart__legend-swatch" aria-hidden="true">
@@ -93,8 +126,8 @@ const conLegenda = serie.filter((s) => s.legenda);
       s.tipo === 'line' ? (
         <polyline points={linea(s)} fill="none" stroke={s.colore} stroke-width={s.spessore ?? 1.8} stroke-linejoin="round" stroke-linecap="round" opacity={s.opacita ?? 1} />
       ) : (
-        <g fill={s.colore} fill-opacity={s.opacita ?? 0.55}>
-          {s.punti.map(([a, b]) => <circle cx={px(a)} cy={py(b, s.asse)} r={s.raggio ?? 1.6} />)}
+        <g fill="none" stroke={s.colore} stroke-opacity={s.opacita ?? 0.55} stroke-width={n(2 * (s.raggio ?? 1.6))} stroke-linecap="round">
+          {nuvola(s).map((d) => <path d={d} />)}
         </g>
       ),
     )}
@@ -102,41 +135,58 @@ const conLegenda = serie.filter((s) => s.legenda);
 
   <g class="chart-label" font-family="Inter Variable, Inter, sans-serif" font-size="12" font-weight="600" letter-spacing="0.06em" fill="#bcd6e8" paint-order="stroke" stroke="#081f36" stroke-width="3.5" stroke-opacity="0.85">
     {x.tacche.map((k, i) => (
-      <text class={k.minore ? 'chart-label--minor' : ''} x={px(k.v)} y={Y1 + 22} text-anchor={i === 0 ? 'start' : i === x.tacche.length - 1 ? 'end' : 'middle'}>{k.t}</text>
+      <text class={k.minore ? 'chart-label--minor' : ''} data-asse="x" x={px(k.v)} y={Y1 + 22} text-anchor={i === 0 ? 'start' : i === x.tacche.length - 1 ? 'end' : 'middle'}>{k.t}</text>
     ))}
-    {y.tacche.map((k) => <text x={X0 - 10} y={py(k.v) + 4} text-anchor="end">{k.t}</text>)}
-    {/* Scostamento maggiore di prima (-14): a 390px il font delle tacche
-        raddoppia (22 invece di 12) ma questo restava fisso, e il testo
-        dell'unità finiva incollato alla prima tacca. */}
-    {y.unita && <text x={X0 - 10} y={Y0 - 24} text-anchor="end">{y.unita}</text>}
-    {x.unita && <text x={X1} y={Y1 + 54} text-anchor="end">{x.unita}</text>}
-    {y2 && y2.tacche.map((k) => <text x={X1 + 10} y={py(k.v, 'y2') + 4} text-anchor="start">{k.t}</text>)}
-    {y2 && y2.unita && <text x={X1 + 10} y={Y0 - 24} text-anchor="start">{y2.unita}</text>}
-    {banda && <text x={n(px(banda.a) - 8)} y={Y0 + 17} text-anchor="end" fill="#8fd9ab" letter-spacing="0.12em">{banda.etichetta}</text>}
+    {y.tacche.map((k) => <text data-asse="y" x={X0 - 10} y={py(k.v) + 4} text-anchor="end">{k.t}</text>)}
+    {/* Le unità stanno fuori dall'area del grafico: quella dell'asse Y sopra
+        la prima tacca, con uno scostamento che regge anche le etichette a 22
+        unità; quella dell'asse X sotto l'ultima tacca, abbastanza in alto da
+        restare dentro la cornice e fuori dalla tacca d'angolo. */}
+    {y.unita && <text class="chart-label__unit" data-asse="y" x={X0 - 10} y={Y0 - 24} text-anchor="end">{y.unita}</text>}
+    {unitaX && <text class="chart-label__unit" data-asse="x" x={Math.min(X1, 596)} y={Y1 + 48} text-anchor="end">{unitaX}</text>}
+    {y2 && y2.tacche.map((k) => <text data-asse="y2" x={X1 + 10} y={py(k.v, 'y2') + 4} text-anchor="start">{k.t}</text>)}
+    {y2 && y2.unita && <text class="chart-label__unit" data-asse="y2" x={X1 + 10} y={Y0 - 24} text-anchor="start">{y2.unita}</text>}
+    {banda && <text class="chart-label__band" x={n(px(banda.a) - 8)} y={Y0 + 17} text-anchor="end" fill="#8fd9ab" letter-spacing="0.12em">{banda.etichetta}</text>}
   </g>
 </FrameChrome>
 
 <style>
-  /* Su 390px la tela è larga ~350px reali: 12 unità di viewBox varrebbero
-     meno di 7px. Le etichette crescono nello spazio del disegno. */
-  @media (max-width: 767px) {
-    .chart-label { font-size: 22px; }
+  /* Le etichette sono testo SVG: il loro font-size è in unità di viewBox, e
+     in px reali vale font-size × larghezza della figura / 640. La figura non
+     segue la finestra (da 1024px sta nella colonna accanto al testo, circa
+     400px), quindi le soglie guardano la figura stessa (contenitore
+     `telaio` di `FrameChrome`). A ogni gradino il valore è scelto perché al
+     limite inferiore del gradino l'etichetta valga ancora almeno 11px. */
+  @container telaio (width < 37.5rem) {
+    .chart-label { font-size: 15px; }
     .chart-label--minor { display: none; }
   }
-  /* Legenda in HTML, non più nell'SVG (il testo SVG segue la larghezza del
-     viewBox: con tre voci italiane più lunghe si sovrapponeva, sia a 1440 sia
-     a 390px, perché la colonna calcolata non teneva conto della larghezza
-     reale del testo). In flusso normale, non sovrapposta alla tela: prende
-     lo spazio che le serve sopra l'SVG invece di doverlo riservare dentro il
-     viewBox. Il padding sinistro allinea la prima voce con l'asse Y del
-     grafico (X0/W del viewBox). */
+  @container telaio (width < 30rem) {
+    .chart-label { font-size: 18px; }
+  }
+  @container telaio (width < 25rem) {
+    .chart-label { font-size: 21px; }
+  }
+  @container telaio (width < 21.25rem) {
+    .chart-label { font-size: 22px; }
+  }
+  /* Legenda in HTML, non nell'SVG: il testo SVG segue la larghezza del
+     viewBox, e con tre voci italiane più lunghe si sovrapponeva, perché una
+     colonna calcolata non tiene conto della larghezza reale del testo. In
+     flusso normale, non sovrapposta alla tela: prende lo spazio che le serve
+     sopra l'SVG invece di doverlo riservare dentro il viewBox. Sta dentro la
+     cornice interna del telaio (`--fc-inset`): il margine alto la porta sotto
+     la cornice, quello destro lontano dalla tacca d'angolo. Il padding
+     sinistro, in linea, allinea la prima voce con l'asse Y del grafico. */
   .chart__legend {
+    position: relative;
+    z-index: 1;
     display: flex;
     flex-wrap: wrap;
     gap: 0.2rem 1.1rem;
     list-style: none;
     margin: 0;
-    padding: 0.6rem 0.9rem 0.4rem 12.2%;
+    padding: calc(var(--fc-inset) + 0.55rem) calc(var(--fc-inset) + var(--fc-arm) + 0.4rem) 0.4rem 12%;
   }
   .chart__legend li {
     display: flex;
