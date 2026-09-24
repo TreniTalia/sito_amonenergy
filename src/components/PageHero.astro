@@ -14,11 +14,25 @@ interface Props {
   /** Optional full-bleed background photo. */
   image?: ImageMetadata;
   imageAlt?: string;
+  /** `object-position` of the photo: where the crop falls when the hero's
+   * proportions differ from the photo's (on phones the hero is near square). */
+  imagePosition?: string;
 }
 
-const { eyebrow, h1, sub, tone = 'navy', image, imageAlt = '' } = Astro.props;
+const { eyebrow, h1, sub, tone = 'navy', image, imageAlt = '', imagePosition = 'center' } = Astro.props;
 
 const isControl = tone === 'control';
+
+// Su telefono la cover è quasi quadrata (circa 390×430) e la foto, in
+// `object-cover`, si scala sull'altezza: la larghezza mostrata vale
+// altezza × proporzione della foto, ben più di 100vw per un panorama. Con
+// `sizes="100vw"` il browser sceglierebbe una versione troppo stretta e la
+// ingrandirebbe. Qui `sizes` dichiara la larghezza reale sotto i 768px, e fra
+// le larghezze c'è anche quella originale della foto.
+const proporzione = image ? image.width / image.height : 1;
+const larghezzaMobile = Math.round(450 * proporzione);
+const larghezze = image ? [...new Set([768, 1280, 1600, image.width].filter((w) => w <= image.width))] : [];
+const sizes = `(max-width: 767px) max(100vw, ${larghezzaMobile}px), 100vw`;
 const labelClass = isControl ? 'ds-eyebrow-label--signal' : '';
 ---
 
@@ -30,8 +44,9 @@ const labelClass = isControl ? 'ds-eyebrow-label--signal' : '';
           src={image}
           alt={imageAlt}
           class="pagehero-photo absolute inset-0 h-full w-full object-cover"
-          widths={[768, 1280, 1600]}
-          sizes="100vw"
+          style={`object-position: ${imagePosition};`}
+          widths={larghezze}
+          sizes={sizes}
           loading="eager"
         />
         <div class="pagehero-scrim absolute inset-0" />

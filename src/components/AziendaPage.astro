@@ -17,11 +17,13 @@ import StatBar from './StatBar.astro';
 import ClientMarquee from './ClientMarquee.astro';
 import CtaBand from './CtaBand.astro';
 import type { Lingua } from '../i18n/routes.ts';
-// Foto Pexels, Robert So (https://www.pexels.com/photo/18468536/): portali e
-// sbarre di una sottostazione AT all'alba. Toni freddi, niente persone né
-// marchi: sotto il filtro e il velo di PageHero legge come le cover di
-// Servizi e Lavori.
-import heroImg from '../assets/img/photos/azienda-hero-substation-alba.jpg';
+// Foto reale della sede di Castelluccio dei Sauri: l'edificio degli uffici
+// oltre il cancello d'ingresso. È un panorama 3:1, quasi la stessa
+// proporzione della cover su desktop; su telefono la cover è quasi quadrata e
+// ne resta una fetta verticale, che `heroPosition` centra sull'edificio
+// invece che sul cancello.
+import heroImg from '../assets/img/photos/azienda-sede-castelluccio.jpg';
+const heroPosition = '44% 50%';
 // Foto Pexels, Phil Evenden (https://www.pexels.com/photo/36358684/):
 // apparecchiature AT di una sottostazione sotto cielo pieno. Ritagliata a 4:3
 // nel file stesso, non solo via CSS, per non servire pixel che nessuno vede.
@@ -43,7 +45,7 @@ const { lingua, title, description } = Astro.props;
 
 const TESTI = {
   it: {
-    heroAlt: "Portali e sbarre in acciaio di una sottostazione elettrica ad alta tensione, all'alba",
+    heroAlt: "La sede di Amon Energy a Castelluccio dei Sauri: l'edificio degli uffici oltre il cancello d'ingresso",
     storiaEyebrow: 'La nostra storia',
     storiaAlt: 'Isolatori e apparecchiature di manovra di una sottostazione elettrica AT sotto il cielo azzurro',
     missioneEyebrow: 'La nostra missione',
@@ -54,7 +56,7 @@ const TESTI = {
     vanAlt: 'Il laboratorio mobile di Amon Energy con la strumentazione di prova a bordo, in campo durante un intervento',
   },
   en: {
-    heroAlt: 'Steel gantries and busbars of a high voltage electrical substation, at dawn',
+    heroAlt: "Amon Energy's headquarters in Castelluccio dei Sauri: the office building beyond the entrance gate",
     storiaEyebrow: 'Our story',
     storiaAlt: 'Insulators and switchgear of an HV electrical substation under a blue sky',
     missioneEyebrow: 'Our mission',
@@ -79,7 +81,7 @@ const { statbar } = home.data;
 ---
 
 <Base title={title} description={description}>
-  <PageHero eyebrow={d.eyebrow} h1={d.h1} sub={d.sub} image={heroImg} imageAlt={t.heroAlt} />
+  <PageHero eyebrow={d.eyebrow} h1={d.h1} sub={d.sub} image={heroImg} imageAlt={t.heroAlt} imagePosition={heroPosition} />
 
   <!-- Storia. Stessa proporzione testo/immagine del blocco RCS della home
        (1.05 : 0.95) con una foto 4:3: a 1440px la foto è alta quanto il
