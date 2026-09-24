@@ -41,23 +41,27 @@ const isActive = (href: string) => (href === homeHref ? currentPath === href : c
 
 <header class="ds-header fixed inset-x-0 top-0 z-40" data-transparent={transparent ? 'true' : 'false'}>
   <div class="ds-header-wrap wrap-wide pt-3 md:pt-4">
-    <div class="ds-navbar flex items-center justify-between gap-4 rounded-[var(--radius-panel)] py-4 pl-5 pr-2.5 md:pl-7 md:pr-3">
-      <a href={homeHref} class="flex shrink-0 items-center text-paper" aria-label={lingua === 'en' ? 'Amon Energy, back to homepage' : 'Amon Energy, torna alla home'}>
-        <Logo variant="full" size={34} class="max-[420px]:[--logo-h:28px]" loading="eager" />
+    <div class="ds-navbar flex items-center justify-between gap-3 min-[360px]:gap-4 rounded-[var(--radius-panel)] py-4 pl-4 pr-2 min-[360px]:pl-5 min-[360px]:pr-2.5 md:pl-7 md:pr-3">
+      <a href={homeHref} class="flex min-h-11 shrink-0 items-center text-paper" aria-label={lingua === 'en' ? 'Amon Energy, back to homepage' : 'Amon Energy, torna alla home'}>
+        <Logo variant="full" size={34} class="max-[420px]:[--logo-h:28px]! max-[359px]:[--logo-h:24px]!" loading="eager" />
       </a>
 
       <nav class="ds-nav hidden md:flex items-center gap-1" aria-label={lingua === 'en' ? 'Main navigation' : 'Navigazione principale'}>
         <span class="ds-nav-pill" aria-hidden="true"></span>
         {
           navLinks.map((link) => (
-            <a href={link.href} class="ds-nav-link" aria-current={isActive(link.href) ? 'page' : undefined}>
+            <a
+              href={link.href}
+              class:list={['ds-nav-link', link.href === homeHref && 'ds-nav-link--home']}
+              aria-current={isActive(link.href) ? 'page' : undefined}
+            >
               {link.label}
             </a>
           ))
         }
       </nav>
 
-      <div class="flex items-center gap-2">
+      <div class="flex items-center gap-1.5 min-[360px]:gap-2">
         <!-- Solo da `md` in su: sotto quella soglia il selettore vive nel
              pannello mobile, non anche qui — altrimenti comparirebbe due
              volte sullo stesso schermo. -->
@@ -68,13 +72,15 @@ const isActive = (href: string) => (href === homeHref ? currentPath === href : c
         <a href={contatti.telefonoHref} class="ds-header-cta" aria-label={`${ui.header.chiamaAria} ${contatti.telefono}`}>
           <Icon name="fa6-solid:phone" class="shrink-0 text-[0.85rem]" />
           {/* Il numero intero sta nell'isola in due bande: sotto `md`, dove il
-              menu è dietro l'hamburger e lo spazio è tutto suo, e da `lg` in su,
-              dove la navbar è larga abbastanza per menu e numero insieme. Nella
-              banda in mezzo (768–1023) le quattro voci di menu ci sono già e il
-              numero non ci sta: lì diventa "Chiama"/"Call". Prima era una soglia
-              sola a 640px e fra 768 e 1023 il numero si spezzava su tre righe. */}
-          <span class="hidden sm:inline md:hidden lg:inline">{contatti.telefono}</span>
-          <span class="hidden xs:inline sm:hidden md:inline lg:hidden">{ui.header.chiamaBreve}</span>
+              menu è dietro l'hamburger e lo spazio è tutto suo, e da `xl` in su,
+              dove la navbar è larga abbastanza per menu, globo e numero insieme.
+              Fra 768 e 1279 le cinque voci di menu e il globo occupano quasi
+              tutta l'isola (in inglese le voci sono più larghe): lì il CTA è
+              solo l'icona, un bottone tondo; il numero resta nell'aria-label.
+              Con l'etichetta "Chiama"/"Call" il CTA usciva dalla navbar fino a
+              908px in italiano e 1048px in inglese. */}
+          <span class="hidden sm:inline md:hidden xl:inline">{contatti.telefono}</span>
+          <span class="hidden xs:inline sm:hidden">{ui.header.chiamaBreve}</span>
         </a>
 
         <button type="button" id="nav-toggle" class="md:hidden grid h-11 w-11 place-items-center rounded-[var(--radius-sm)] text-paper transition-colors hover:bg-white/10" aria-expanded="false" aria-controls="mobile-nav" aria-label={ui.header.apriMenu}>
@@ -85,7 +91,7 @@ const isActive = (href: string) => (href === homeHref ? currentPath === href : c
   </div>
 </header>
 
-<div id="mobile-nav" class="mobile-nav fixed inset-0 z-50 flex flex-col justify-between p-6 translate-x-full transition-transform duration-300 md:hidden" style="transition-timing-function: var(--ease-signature);">
+<div id="mobile-nav" role="dialog" aria-modal="true" aria-label="Menu" inert class="mobile-nav fixed inset-0 z-50 flex flex-col justify-between p-6 translate-x-full transition-transform duration-300 md:hidden" style="transition-timing-function: var(--ease-signature);">
   <div>
     <div class="flex items-center justify-between mb-10">
       <span class="text-paper"><Logo size={32} /></span>
@@ -184,15 +190,22 @@ const isActive = (href: string) => (href === homeHref ? currentPath === href : c
     window.scrollTo(0, lockedAt);
   };
 
+  // Da chiuso il pannello è solo fuori dallo schermo: `inert` lo toglie anche
+  // dalla tabulazione e dai lettori di schermo, che altrimenti vi entravano.
   const openNav = () => {
     panel?.classList.remove('translate-x-full');
+    panel?.removeAttribute('inert');
     toggle?.setAttribute('aria-expanded', 'true');
     lockScroll();
+    close?.focus({ preventScroll: true });
   };
   const closeNav = () => {
+    const eraAperto = toggle?.getAttribute('aria-expanded') === 'true';
     panel?.classList.add('translate-x-full');
+    panel?.setAttribute('inert', '');
     toggle?.setAttribute('aria-expanded', 'false');
     unlockScroll();
+    if (eraAperto && panel?.contains(document.activeElement)) toggle?.focus({ preventScroll: true });
   };
   toggle?.addEventListener('click', openNav);
   close?.addEventListener('click', closeNav);
@@ -221,7 +234,8 @@ const isActive = (href: string) => (href === homeHref ? currentPath === href : c
   const positionPill = (animate: boolean) => {
     if (!nav || !pill) return;
     const active = nav.querySelector<HTMLElement>('.ds-nav-link[aria-current="page"]');
-    if (!active) {
+    // Il link attivo può essere nascosto ("Home" fra 768 e 1023): niente pill.
+    if (!active || !active.offsetWidth) {
       pill.style.opacity = '0';
       return;
     }
@@ -413,6 +427,39 @@ const isActive = (href: string) => (href === homeHref ? currentPath === href : c
     transition:
       transform 0.2s var(--ease-signature),
       box-shadow 0.3s var(--ease-signature);
+  }
+  /* Fra 768 e 1023 l'isola non contiene cinque voci, globo e CTA: la voce
+     "Home" si nasconde, perché il logo porta già alla home ed è il primo
+     elemento della barra. */
+  @media (min-width: 768px) and (max-width: 1023px) {
+    .ds-nav-link--home {
+      display: none;
+    }
+    .ds-nav-link {
+      padding-inline: 9px;
+    }
+  }
+  /* Su telefono il CTA è il bersaglio più importante della pagina: almeno
+     44px di altezza, come chiede PRODUCT.md per tel e mail. */
+  @media (max-width: 767px) {
+    .ds-header-cta {
+      min-height: 44px;
+    }
+  }
+  /* Fra 768 e 1279 il CTA è solo l'icona: un bottone tondo della stessa
+     altezza del globo. */
+  @media (min-width: 768px) and (max-width: 1279px) {
+    .ds-header-cta {
+      width: 2.625rem;
+      height: 2.625rem;
+      padding: 0;
+      justify-content: center;
+    }
+  }
+  @media (min-width: 1024px) and (max-width: 1279px) {
+    .ds-nav-link {
+      padding-inline: 11px;
+    }
   }
   .ds-header-cta:hover {
     transform: translateY(-1px);

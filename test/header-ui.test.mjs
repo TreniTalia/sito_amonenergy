@@ -90,6 +90,43 @@ describe('globo della lingua e torna su', { skip }, () => {
     });
   }
 
+  // La navbar deve contenere logo, voci, globo, CTA e hamburger a ogni
+  // larghezza: fra 768 e 1048px (in inglese le voci sono più larghe) il CTA
+  // usciva dall'isola, e a 320px l'hamburger usciva dallo schermo.
+  test('la navbar contiene tutti i suoi elementi da 320 a 1400px, IT ed EN', async () => {
+    const fuori = [];
+    for (const pagina of ['servizi/', 'en/services/power-transformer-testing/']) {
+      for (const width of [320, 360, 390, 430, 768, 784, 800, 820, 848, 900, 1024, 1048, 1180, 1280, 1400]) {
+        const page = await apri(pagina, width, 700);
+        const r = await page.evaluate(() => {
+          const nb = document.querySelector('.ds-navbar').getBoundingClientRect();
+          return ['.ds-navbar > a', '.ds-nav', '.lang-globe', '.ds-header-cta', '#nav-toggle']
+            .map((s) => [s, document.querySelector(s)?.getBoundingClientRect()])
+            .filter(([, r]) => r && r.width && (r.left < nb.left + 1 || r.right > nb.right - 1))
+            .map(([s, r]) => `${s} ${Math.round(r.left)}..${Math.round(r.right)} fuori da ${Math.round(nb.left)}..${Math.round(nb.right)}`);
+        });
+        if (r.length) fuori.push(`${pagina} a ${width}px: ${r.join('; ')}`);
+        await page.close();
+      }
+    }
+    assert.deepEqual(fuori, []);
+  });
+
+  test('a 360px i valori dei pannelli strumentazione restano dentro il pannello', async () => {
+    const fuori = [];
+    for (const pagina of ['servizi/sfra/', 'en/services/power-transformer-testing/', 'en/services/partial-discharge-measurement/']) {
+      const page = await apri(pagina, 360, 800);
+      const r = await page.evaluate(() =>
+        [...document.querySelectorAll('.spec-panel__value')]
+          .filter((d) => d.getBoundingClientRect().right > d.closest('.spec-panel').getBoundingClientRect().right - 8)
+          .map((d) => d.textContent.trim()),
+      );
+      if (r.length) fuori.push(`${pagina}: ${r.join(', ')}`);
+      await page.close();
+    }
+    assert.deepEqual(fuori, []);
+  });
+
   test('a 1440px torna su compare dopo lo scorrimento e riporta in cima', async () => {
     const page = await apri('servizi/', 1440);
     const btn = page.locator('.back-to-top');

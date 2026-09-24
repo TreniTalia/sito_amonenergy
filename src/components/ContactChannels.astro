@@ -42,11 +42,11 @@ const t = TESTI[lingua];
   </div>
 
   <div class="text-small mt-8 flex flex-wrap items-center gap-x-6 gap-y-2 text-ink/70">
-    <a href={`mailto:${contatti.pec}`} class="hover:text-navy-700 transition-colors">PEC: {contatti.pec}</a>
-    <a href={contatti.linkedin} target="_blank" rel="noopener noreferrer" class="hover:text-navy-700 transition-colors">LinkedIn</a>
+    <a href={`mailto:${contatti.pec}`} class="inline-flex min-h-11 items-center hover:text-navy-700 transition-colors">PEC: {contatti.pec}</a>
+    <a href={contatti.linkedin} target="_blank" rel="noopener noreferrer" class="inline-flex min-h-11 items-center hover:text-navy-700 transition-colors">LinkedIn</a>
   </div>
 
-  <p class="text-micro mt-6 text-ink/50">
+  <p class="text-micro mt-6 text-ink/70">
     {t.piva} {contatti.piva} · {t.codiceFE} {contatti.codiceFE}
   </p>
 </div>

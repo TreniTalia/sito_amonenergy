@@ -39,7 +39,7 @@ const year = new Date().getFullYear();
         target="_blank"
         rel="noopener noreferrer"
       >
-        <span class="grid h-9 w-9 place-items-center rounded-[var(--radius-sm)] border border-white/20 bg-white/10">
+        <span class="grid h-11 w-11 place-items-center rounded-[var(--radius-sm)] border border-white/20 bg-white/10">
           <PackIcon name="linkedin" class="text-base" />
         </span>
         LinkedIn
@@ -48,24 +48,24 @@ const year = new Date().getFullYear();
 
     <div>
       <p class="ds-eyebrow-label" style="color: var(--color-paper); opacity: 0.75;">{ui.footer.naviga}</p>
-      <ul class="text-small mt-4 flex flex-col gap-3">
+      <ul class="text-small mt-3 flex flex-col md:mt-4 md:gap-3">
         {quickLinks.map((s) => (
-          <li><a href={s.href} class="text-paper/90 hover:text-signal-400 transition-colors">{s.label}</a></li>
+          <li><a href={s.href} class="inline-flex min-h-11 items-center text-paper/90 hover:text-signal-400 transition-colors md:min-h-0">{s.label}</a></li>
         ))}
       </ul>
     </div>
 
     <div>
       <p class="ds-eyebrow-label" style="color: var(--color-paper); opacity: 0.75;">{ui.footer.contatti}</p>
-      <ul class="text-small mt-4 flex flex-col gap-3 text-paper/90">
+      <ul class="text-small mt-3 flex flex-col text-paper/90 md:mt-4 md:gap-3">
         <!-- Il NAP resta in italiano: solo ", Italy" in coda per il lettore
              internazionale, mai una traduzione dell'indirizzo. -->
-        <li>{contatti.indirizzo}{lingua === 'en' && ', Italy'}</li>
-        <li><a href={contatti.telefonoHref} class="hover:text-signal-400 transition-colors">{contatti.telefono}</a></li>
-        <li><a href={`mailto:${contatti.email}`} class="hover:text-signal-400 transition-colors">{contatti.email}</a></li>
-        <li><a href={`mailto:${contatti.pec}`} class="hover:text-signal-400 transition-colors">{contatti.pec}</a></li>
-        <li>{lingua === 'en' ? 'VAT no.' : 'P.IVA'} {contatti.piva}</li>
-        <li>{lingua === 'en' ? 'E-invoicing code' : 'Codice FE'} {contatti.codiceFE}</li>
+        <li class="py-2.5 md:py-0">{contatti.indirizzo}{lingua === 'en' && ', Italy'}</li>
+        <li><a href={contatti.telefonoHref} class="inline-flex min-h-11 items-center hover:text-signal-400 transition-colors md:min-h-0">{contatti.telefono}</a></li>
+        <li><a href={`mailto:${contatti.email}`} class="inline-flex min-h-11 items-center hover:text-signal-400 transition-colors md:min-h-0">{contatti.email}</a></li>
+        <li><a href={`mailto:${contatti.pec}`} class="inline-flex min-h-11 items-center hover:text-signal-400 transition-colors md:min-h-0">{contatti.pec}</a></li>
+        <li class="py-2.5 md:py-0">{lingua === 'en' ? 'VAT no.' : 'P.IVA'} {contatti.piva}</li>
+        <li class="py-2.5 md:py-0">{lingua === 'en' ? 'E-invoicing code' : 'Codice FE'} {contatti.codiceFE}</li>
       </ul>
     </div>
   </div>
@@ -78,8 +78,8 @@ const year = new Date().getFullYear();
            le lascia andare a capo per conto loro, senza un breakpoint che
            decida al posto del contenuto. -->
       <div class="flex flex-wrap items-center justify-center gap-x-6 gap-y-2.5 text-center">
-        <a href={privacyHref} class="hover:text-signal-400 transition-colors">{ui.footer.privacyPolicy}</a>
-        <button type="button" id="footer-cookie-preferences" class="border-0 bg-transparent p-0 cursor-pointer hover:text-signal-400 transition-colors">{ui.footer.preferenzeCookie}</button>
+        <a href={privacyHref} class="inline-flex min-h-11 items-center hover:text-signal-400 transition-colors md:min-h-0">{ui.footer.privacyPolicy}</a>
+        <button type="button" id="footer-cookie-preferences" class="inline-flex min-h-11 items-center border-0 bg-transparent p-0 cursor-pointer hover:text-signal-400 transition-colors md:min-h-0">{ui.footer.preferenzeCookie}</button>
         <span>{lingua === 'en' ? 'VAT no.' : 'P.IVA'} {contatti.piva}</span>
       </div>
     </div>

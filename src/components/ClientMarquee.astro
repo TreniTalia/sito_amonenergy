@@ -43,7 +43,8 @@ const prefissoAria = testiUi(lingua).a11y.clientiAriaPrefisso;
     line-height: var(--lh-title);
     letter-spacing: -0.015em;
     color: var(--color-navy-700);
-    opacity: 0.6;
+    /* 0,8 e non 0,6: a 0,6 i nomi stavano sotto il contrasto AA. */
+    opacity: 0.8;
   }
 
   .marquee-track {

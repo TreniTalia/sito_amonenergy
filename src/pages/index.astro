@@ -32,7 +32,7 @@ const progettiPreview = (await getCollection('progetti'))
 ---
 
 <Base
-  title="Impianti elettrici AT/MT/BT e rinnovabili nel Centro-Sud Italia"
+  title="Impianti AT/MT e rinnovabili nel Centro-Sud"
   description="Amon Energy: costruzione, verifiche strumentali, ricerca guasti e monitoraggio 24/7 di impianti eolici e fotovoltaici in Centro-Sud Italia."
 >
   <Hero
@@ -54,12 +54,12 @@ const progettiPreview = (await getCollection('progetti'))
       <div data-reveal>
         <div class="ds-eyebrow">
           <span class="ds-eyebrow-dash"></span>
-          <span class="ds-eyebrow-label">Chi siamo</span>
+          <h2 class="ds-eyebrow-label">Chi siamo</h2>
         </div>
         <p class="measure text-lead text-ink/90">{chiSiamoBreve.testo}</p>
         <a
           href={chiSiamoBreve.link}
-          class="group mt-7 inline-flex items-center gap-2 font-semibold text-navy-900 transition-colors hover:text-navy-700"
+          class="group mt-7 inline-flex min-h-11 items-center gap-2 font-semibold text-navy-900 transition-colors hover:text-navy-700"
         >
           Scopri i servizi
           <Icon name="fa6-solid:arrow-right" class="text-xs transition-transform duration-300 group-hover:translate-x-1" style="transition-timing-function: var(--ease-signature);" />
@@ -69,7 +69,7 @@ const progettiPreview = (await getCollection('progetti'))
           {
             percheAmon.map((p, i) => (
               <div data-reveal style={`--reveal-delay:${i * 90}ms`}>
-                <span class="tnum font-display text-small font-semibold text-green-500">0{i + 1}</span>
+                <span class="tnum font-display text-small font-semibold text-green-600">0{i + 1}</span>
                 <h3 class="text-title mt-2.5 text-ink">{p.titolo}</h3>
                 <p class="text-small mt-2 text-ink/70">{p.testo}</p>
               </div>
@@ -125,7 +125,7 @@ const progettiPreview = (await getCollection('progetti'))
         ))
       }
     </div>
-    <a href="/servizi/" class="mt-8 inline-flex font-semibold text-navy-900 sm:hidden">Tutti i servizi →</a>
+    <a href="/servizi/" class="mt-8 inline-flex min-h-11 items-center font-semibold text-navy-900 sm:hidden">Tutti i servizi →</a>
   </section>
 
   <StatBar items={statbar} nota="Numeri dell'operatività Amon Energy" />
@@ -162,13 +162,13 @@ const progettiPreview = (await getCollection('progetti'))
             </div>
             <div class="mt-4">
               <h3 class="text-title text-ink">{p.data.titolo}</h3>
-              <p class="text-small mt-1 text-ink/60">{p.data.tipologia} · prov. {p.data.provincia}</p>
+              <p class="text-small mt-1 text-ink/70">{p.data.tipologia} · prov. {p.data.provincia}</p>
             </div>
           </a>
         ))
       }
     </div>
-    <a href="/lavori/" class="mt-8 inline-flex font-semibold text-navy-900 sm:hidden">Tutti i progetti →</a>
+    <a href="/lavori/" class="mt-8 inline-flex min-h-11 items-center font-semibold text-navy-900 sm:hidden">Tutti i progetti →</a>
   </section>
 
   <ClientMarquee titolo={marqueeTitolo} />

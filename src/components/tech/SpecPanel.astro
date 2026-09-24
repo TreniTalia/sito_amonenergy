@@ -88,6 +88,8 @@ const { titolo, voci } = Astro.props;
 
   .spec-panel__label {
     margin: 0;
+    flex: 1 1 auto;
+    min-width: 0;
     font-size: var(--fs-small);
     line-height: var(--lh-small, 1.4);
     color: color-mix(in srgb, var(--color-navy-100) 78%, transparent);
@@ -95,9 +97,16 @@ const { titolo, voci } = Astro.props;
 
   /* Sono misure: cifre tabulari perché la colonna dei valori deve restare
      allineata riga dopo riga, non "ballare" con cifre di larghezza diversa. */
+  /* Il valore può andare a capo: su un telefono da 360px "Ogni
+     avvolgimento, ogni fase" non sta su una riga accanto all'etichetta, e con
+     `flex: none` usciva dal pannello tagliato. Resta allineato a destra e non
+     supera i due terzi della riga, così l'etichetta ha sempre il suo spazio. */
   .spec-panel__value {
     margin: 0;
-    flex: none;
+    flex: 0 1 auto;
+    min-width: 0;
+    max-width: 66%;
+    overflow-wrap: break-word;
     text-align: right;
     font-family: var(--font-body);
     font-variant-numeric: tabular-nums;

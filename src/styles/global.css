@@ -39,6 +39,12 @@
 
   /* Shared */
   --color-signal-400: #4fb3d9; /* circuit blue — field-world signal accent */
+  /* Stesso azzurro, scurito per il testo su fondo chiaro: 5,4:1 su paper e
+     4,8:1 su navy-100 (WCAG AA). Il 400 su chiaro stava a 2,3:1. */
+  --color-signal-700: #1f708f;
+  /* Verde del logo scurito per il testo piccolo su chiaro: 5,4:1 su paper
+     (il 500 sta a 3,9:1, sotto AA). */
+  --color-green-600: #2f7548;
   --color-paper: #fafbfc;
   --color-ink: #16222e;
 
@@ -609,6 +615,12 @@
     line-height: var(--lh-label);
     letter-spacing: 0.1em;
     text-transform: uppercase;
+    color: var(--color-signal-700);
+  }
+  /* Su fondo scuro (cover, fasce navy: portano `text-paper`) torna l'azzurro
+     chiaro, che lì ha contrasto pieno. `:where()` tiene la specificità di una
+     classe sola, così le varianti qui sotto continuano a vincere. */
+  .text-paper :where(.ds-eyebrow-label) {
     color: var(--color-signal-400);
   }
   .ds-eyebrow-label--leaf {
