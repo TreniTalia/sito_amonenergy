@@ -39,9 +39,12 @@ const t = TESTI[lingua];
     class="cta-bg-img absolute left-0 w-full object-cover"
     data-parallax
     widths={[768, 1100, 1376, 1900]}
-    sizes="100vw"
+    sizes="(max-width: 767px) max(100vw, 1350px), 100vw"
     loading="lazy"
   />
+  <!-- Su telefono la fascia è alta e la foto, in object-cover e più alta del
+       136% per la parallasse, si mostra larga circa 1350px: `sizes` lo dice al
+       browser, che altrimenti sceglierebbe la versione da 768px. -->
   <!-- 72%, not 85%: the old sunset shot had highlights that punched through a
        heavier scrim, this one is mid-dark and got erased by it. Measured on the
        composited band, the worst pixel behind the headline is 6.2:1 and behind

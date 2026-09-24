@@ -101,13 +101,17 @@ const slides = await Promise.all(
               data-meta={s.meta}
               aria-label={`${t.apriGalleria}: ${s.titolo}`}
             >
+              {/* Su telefono la card è alta e stretta e la foto, in object-cover
+                  e più alta del riquadro per la parallasse, si mostra larga circa
+                  il doppio dello schermo: `200vw` fa scegliere al browser la
+                  versione giusta invece di una da 900px ingrandita. */}
               <Image
                 src={s.immagine}
                 alt={s.immagineAlt}
                 class="ps-photo"
                 data-parallax
-                widths={[480, 720, 900]}
-                sizes="(min-width: 1024px) 42vw, 82vw"
+                widths={[480, 720, 900, 1400, 2000].filter((w) => w <= s.immagine.width)}
+                sizes="(min-width: 1024px) 42vw, (min-width: 768px) 82vw, 200vw"
               />
               <span class="ps-scrim" aria-hidden="true" />
               <ProjectCardOverlay indexLabel={s.indexLabel} titolo={s.titolo} potenza={s.potenza} meta={s.meta}>
