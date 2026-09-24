@@ -6,7 +6,7 @@ lead: "Testing and diagnostics of RIGEDI devices and A72 modems, commissioning s
 copertina: "../../../assets/img/tech/cover/teledistacco-a72.jpg"
 copertinaAlt: "Wind turbines and electricity pylons in an arid landscape, with a substation in the background"
 seoTitle: "A72 remote tripping: RIGEDI and modem testing"
-seoDescription: "Testing and diagnostics of RIGEDI devices and A72 modems, commissioning support, performance analysis and SCADA integration for remote tripping of generation plants under Allegato A.72."
+seoDescription: "Testing and diagnostics of RIGEDI devices and A72 modems, commissioning, performance analysis and SCADA integration for remote tripping under Allegato A.72."
 ordine: 8
 area: "controllo"
 diagramma: "catena-a72"

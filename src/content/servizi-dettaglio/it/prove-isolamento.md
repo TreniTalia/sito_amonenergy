@@ -5,8 +5,8 @@ lead: "Rampa di tensione a valori superiori all'esercizio e corrente di fuga sot
 # Foto Pexels, Vladimir Srajber (https://www.pexels.com/photo/18373861/).
 copertina: "../../../assets/img/tech/cover/prove-isolamento.jpg"
 copertinaAlt: "Catena di isolatori in vetro sospesa su una linea ad alta tensione contro un cielo blu intenso"
-seoTitle: "Prove di isolamento AT/MT: rigidità dielettrica in sito"
-seoDescription: "Prove di isolamento in alta tensione con Megger HV Test 80 kV: rampa di tensione controllata, corrente di fuga monitorata, personale qualificato CEI 11-27 e CEI EN 50110-1."
+seoTitle: "Prove di isolamento AT/MT in sito fino a 80 kV"
+seoDescription: "Prove di isolamento in alta tensione fino a 80 kV con Megger HV Test: rampa controllata, corrente di fuga monitorata, personale qualificato CEI 11-27."
 ordine: 5
 area: "diagnostica"
 diagramma: "rampa-isolamento"

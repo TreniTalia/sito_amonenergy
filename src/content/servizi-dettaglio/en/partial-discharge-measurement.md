@@ -5,7 +5,7 @@ lead: "Partial discharge diagnostics to IEC 60270: apparent charge in picocoulom
 # Pexels photo, Magda Ehlers (https://www.pexels.com/photo/37517742/).
 copertina: "../../../assets/img/tech/cover/misure-scariche-parziali.jpg"
 copertinaAlt: "Coiled electrical cable on a wooden utility pole against a grey sky"
-seoTitle: "Partial discharge testing HV/MV: pC diagnostics"
+seoTitle: "Partial discharge testing on HV/MV assets"
 seoDescription: "Partial discharge measurement on HV/MV cables, switchgear and transformers to IEC 60270: apparent charge in pC, location with non-conventional methods."
 ordine: 2
 area: "diagnostica"

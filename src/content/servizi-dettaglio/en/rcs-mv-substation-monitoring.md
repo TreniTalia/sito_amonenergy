@@ -5,8 +5,8 @@ lead: "Our proprietary remote supervision system: real-time fault analysis, auto
 # Pexels photo, panumas nikhomkhai (https://www.pexels.com/photo/17489156/).
 copertina: "../../../assets/img/tech/cover/rcs-monitoraggio-cabina-mt.jpg"
 copertinaAlt: "Close-up of a server rack with blue indicator lights in a control room"
-seoTitle: "RCS: remote MV substation monitoring and control"
-seoDescription: "RCS, Amon Energy's proprietary system for MV substation monitoring: real-time fault analysis, automatic reclosing, SCADA integration and a Control Room active 24/7/365."
+seoTitle: "RCS: remote MV substation monitoring"
+seoDescription: "RCS, our proprietary MV substation monitoring system: real-time fault analysis, automatic reclosing, SCADA integration and a 24/7/365 Control Room."
 ordine: 6
 area: "controllo"
 diagramma: "catena-rcs"

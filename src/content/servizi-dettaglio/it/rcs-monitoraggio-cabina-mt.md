@@ -5,8 +5,8 @@ lead: "Il nostro sistema proprietario di supervisione da remoto: analisi del gua
 # Foto Pexels, panumas nikhomkhai (https://www.pexels.com/photo/17489156/).
 copertina: "../../../assets/img/tech/cover/rcs-monitoraggio-cabina-mt.jpg"
 copertinaAlt: "Dettaglio di un rack server con indicatori luminosi blu in una sala di controllo"
-seoTitle: "RCS: monitoraggio e controllo cabina MT da remoto"
-seoDescription: "RCS, il sistema proprietario Amon Energy per il monitoraggio di cabina MT: analisi guasti in tempo reale, richiusura automatica, integrazione SCADA e Control Room attiva 24/7/365."
+seoTitle: "RCS: monitoraggio e controllo cabina MT"
+seoDescription: "RCS, il nostro sistema proprietario per cabine MT: analisi guasti in tempo reale, richiusura automatica, integrazione SCADA e Control Room 24/7/365."
 ordine: 6
 area: "controllo"
 diagramma: "catena-rcs"

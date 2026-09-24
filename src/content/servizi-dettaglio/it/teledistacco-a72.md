@@ -6,7 +6,7 @@ lead: "Verifica e diagnostica dei dispositivi RIGEDI e Modem A72, assistenza tec
 copertina: "../../../assets/img/tech/cover/teledistacco-a72.jpg"
 copertinaAlt: "Turbine eoliche e tralicci elettrici in un paesaggio arido, con una sottostazione sullo sfondo"
 seoTitle: "Teledistacco A72: verifica RIGEDI e Modem"
-seoDescription: "Verifica e diagnostica dei dispositivi RIGEDI e Modem A72, messa in servizio, analisi delle prestazioni e integrazione SCADA per il teledistacco degli impianti di produzione secondo l'Allegato A.72."
+seoDescription: "Verifica e diagnostica di RIGEDI e Modem A72, messa in servizio, analisi delle prestazioni e integrazione SCADA per il teledistacco secondo l'Allegato A.72."
 ordine: 8
 area: "controllo"
 diagramma: "catena-a72"

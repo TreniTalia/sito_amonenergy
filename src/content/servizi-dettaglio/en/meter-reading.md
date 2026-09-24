@@ -5,8 +5,8 @@ lead: "Acquisition, validation and delivery of production and exchange data: the
 # Pexels photo, Brett Sayles (https://www.pexels.com/photo/4330787/).
 copertina: "../../../assets/img/tech/cover/lettura-contatori.jpg"
 copertinaAlt: "Fiber optic patch panel with turquoise cables and white connectors"
-seoTitle: "Meter reading: production and exchange telemetry"
-seoDescription: "Reading and remote reading of production and exchange meters: periodic acquisition, data validation and a consultation portal for wind and solar plants connected at MV."
+seoTitle: "Production and exchange meter reading"
+seoDescription: "Remote reading of production and exchange meters: periodic acquisition, data validation and a consultation portal for plants connected at MV."
 ordine: 9
 area: "controllo"
 diagramma: "catena-contatori"

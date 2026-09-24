@@ -5,7 +5,7 @@ lead: "Rapporto di trasformazione, resistenza degli avvolgimenti, tan delta: le 
 # Foto Pexels, Pixabay (https://www.pexels.com/photo/236089/).
 copertina: "../../../assets/img/tech/cover/verifiche-trasformatori-di-potenza.jpg"
 copertinaAlt: "Boccole e isolatori di un trasformatore di potenza contro un cielo azzurro"
-seoTitle: "Verifiche trasformatori di potenza: prove diagnostiche"
+seoTitle: "Verifiche sui trasformatori di potenza"
 seoDescription: "Verifiche su trasformatori di potenza: rapporto di trasformazione, resistenza degli avvolgimenti, tan delta e capacità con ISA T2000 e ISA STS5000 + TD500."
 ordine: 4
 area: "diagnostica"

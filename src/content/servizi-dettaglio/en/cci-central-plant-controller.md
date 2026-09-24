@@ -5,8 +5,8 @@ lead: "Installation, configuration and management of the Central Plant Controlle
 # Pexels photo, Neville Hawkins (https://www.pexels.com/photo/37061434/).
 copertina: "../../../assets/img/tech/cover/cci-controllore-centrale-impianto.jpg"
 copertinaAlt: "Solar farm with rows of panels and a technical cabin under a cloudy sky"
-seoTitle: "CCI Central Plant Controller: PF1, PF2, CEI 0-16"
-seoDescription: "Installation and management of the Central Plant Controller (CCI) in partnership with Teamware: PF1 observability and PF2 controllability functions compliant with CEI 0-16 V5 and ARERA Resolution 564/2025/R/eel."
+seoTitle: "CCI Central Plant Controller: PF1 and PF2"
+seoDescription: "We install and manage the CCI in partnership with Teamware: PF1 and PF2 functions compliant with CEI 0-16 V5 and ARERA Resolution 564/2025/R/eel."
 ordine: 7
 area: "controllo"
 diagramma: "osservabilita-controllabilita"

@@ -5,8 +5,8 @@ lead: "Acquisizione, validazione e messa a disposizione dei dati di produzione e
 # Foto Pexels, Brett Sayles (https://www.pexels.com/photo/4330787/).
 copertina: "../../../assets/img/tech/cover/lettura-contatori.jpg"
 copertinaAlt: "Pannello di permutazione in fibra ottica con cavi turchesi e connettori bianchi"
-seoTitle: "Lettura contatori: telelettura produzione e scambio"
-seoDescription: "Lettura e telelettura dei contatori di produzione e scambio: acquisizione periodica, validazione dei dati e portale di consultazione per impianti fotovoltaici ed eolici connessi in MT."
+seoTitle: "Lettura e telelettura contatori di produzione"
+seoDescription: "Telelettura dei contatori di produzione e scambio: acquisizione periodica, validazione dei dati e portale di consultazione per impianti connessi in MT."
 ordine: 9
 area: "controllo"
 diagramma: "catena-contatori"

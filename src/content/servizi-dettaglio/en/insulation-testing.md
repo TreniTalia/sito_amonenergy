@@ -5,8 +5,8 @@ lead: "A voltage ramp above operating levels with leakage current under control:
 # Pexels photo, Vladimir Srajber (https://www.pexels.com/photo/18373861/).
 copertina: "../../../assets/img/tech/cover/prove-isolamento.jpg"
 copertinaAlt: "String of glass disc insulators hanging from a high-voltage line against a deep blue sky"
-seoTitle: "HV/MV insulation testing: on-site dielectric strength"
-seoDescription: "High-voltage insulation testing with the Megger HV Test 80 kV: controlled voltage ramp, monitored leakage current, personnel qualified to CEI 11-27 and CEI EN 50110-1."
+seoTitle: "HV/MV insulation testing on site up to 80 kV"
+seoDescription: "High-voltage insulation testing up to 80 kV with the Megger HV Test: controlled ramp, monitored leakage current, staff qualified to CEI 11-27."
 ordine: 5
 area: "diagnostica"
 diagramma: "rampa-isolamento"

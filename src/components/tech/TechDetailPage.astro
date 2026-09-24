@@ -123,7 +123,7 @@ const faqPage = {
 };
 ---
 
-<Base title={d.seoTitle} description={d.seoDescription} structuredData={[service, faqPage]}>
+<Base title={d.seoTitle} description={d.seoDescription} structuredData={[service, faqPage]} breadcrumbName={d.titolo}>
   <PageHero eyebrow={t.eyebrowHero} h1={d.titolo} sub={d.lead} image={d.copertina} imageAlt={d.copertinaAlt} />
 
   <!-- Il problema, e accanto il grafico che lo mostra -->
@@ -217,7 +217,7 @@ const faqPage = {
                 <span class="ds-eyebrow-label">{t.inCampo}</span>
               </div>
               <h2 class="text-headline max-w-[22ch]" data-reveal style="--reveal-delay:80ms">
-                {progetto?.data.titolo ?? t.casoRealeFallback}
+                {(lingua === 'en' ? (progetto?.data.titoloEn ?? progetto?.data.titolo) : progetto?.data.titolo) ?? t.casoRealeFallback}
               </h2>
               <p class="measure text-body mt-5 text-ink/75" data-reveal style="--reveal-delay:130ms">{d.caso.testo}</p>
               <a href={hrefLavori} class="ds-btn-secondary mt-8 inline-flex" data-reveal style="--reveal-delay:180ms">

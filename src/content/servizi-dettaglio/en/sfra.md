@@ -5,7 +5,7 @@ lead: "Sweep frequency response analysis to IEC 60076-18: a non-destructive meas
 # Pexels photo, Matthias Schleiden (https://www.pexels.com/photo/11166542/).
 copertina: "../../../assets/img/tech/cover/sfra.jpg"
 copertinaAlt: "Pole-mounted transformer with wires and insulators against a blue, cloudy sky"
-seoTitle: "SFRA transformer test: frequency response analysis"
+seoTitle: "SFRA testing on power transformers"
 seoDescription: "SFRA testing on power transformers to IEC 60076-18: sweep from 20 Hz to 2 MHz, comparison against the reference signature, report on mechanical defects."
 ordine: 1
 area: "diagnostica"

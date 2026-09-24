@@ -5,8 +5,8 @@ lead: "Controlled injection of trip thresholds to CEI 0-16: the protection actua
 # Pexels photo, Vjanodic WERSOV (https://www.pexels.com/photo/38217230/).
 copertina: "../../../assets/img/tech/cover/verifica-protezioni-at-mt.jpg"
 copertinaAlt: "Corridor inside an electrical substation lined with rows of protection and control switchgear"
-seoTitle: "HV/MV protection testing: I> and I>> thresholds to standard"
-seoDescription: "HV/MV protection relay testing to CEI 0-16: controlled injection of the I> and I>> thresholds, trip times measured with DRTS/64 and ISA CBA 1000, threshold-by-threshold report."
+seoTitle: "HV/MV protection testing: I> and I>>"
+seoDescription: "HV/MV protection relay testing to CEI 0-16: injection of the I> and I>> thresholds, trip times measured with DRTS/64 and ISA CBA 1000."
 ordine: 3
 area: "diagnostica"
 diagramma: "curva-tempo-corrente"
