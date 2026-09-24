@@ -15,21 +15,20 @@ a chiedere accesso al repository per conto di un editor.
 
 GitHub → Settings → Developer settings → **OAuth Apps** → *New OAuth App*.
 
-| Campo | Valore (ambiente di test) |
+| Campo | Valore |
 | :--- | :--- |
-| Application name | `Amon Energy CMS (test)` (libero) |
-| Homepage URL | `https://test.amonenergy.it` |
-| Authorization callback URL | `https://test.amonenergy.it/oauth/callback` |
+| Application name | `Amon Energy CMS` (libero) |
+| Homepage URL | `https://amonenergy.it` |
+| Authorization callback URL | `https://amonenergy.it/oauth/callback` |
 
 Poi *Generate a new client secret*. **Il secret è visibile una volta sola**:
 copialo subito.
 
-> **Una OAuth App vale per un solo host.** GitHub accetta un'unica callback URL,
-> quindi al passaggio in produzione su `amonenergy.it` serve un secondo giro: o
-> aggiorni la callback di questa App (e il test smette di funzionare), o crei una
-> seconda App per il dominio di produzione e tieni le due credenziali negli
-> ambienti rispettivi. La seconda strada è preferibile: puoi continuare a
-> collaudare sul test dopo il go-live.
+> **Una OAuth App vale per un solo host.** GitHub accetta un'unica callback URL.
+> L'App in uso è stata creata per `test.amonenergy.it` e al go-live (24
+> settembre 2026) la sua callback è stata spostata su `amonenergy.it`. Se un
+> giorno servirà uno staging con il proprio pannello, crea una seconda App per
+> quell'host e passa le sue credenziali allo stack di staging.
 
 La callback URL deve combaciare **esattamente** con quella che `cms-auth`
 costruisce da `ALLOWED_ORIGIN` (`$ALLOWED_ORIGIN/oauth/callback`). Se le due
@@ -49,7 +48,7 @@ In Portainer → Stacks → `amonenergy` → *Environment variables*:
 | :--- | :--- |
 | `GITHUB_OAUTH_CLIENT_ID` | Client ID della OAuth App |
 | `GITHUB_OAUTH_CLIENT_SECRET` | il secret generato al punto 1 |
-| `ALLOWED_ORIGIN` | l'host da cui il sito è raggiunto: `https://test.amonenergy.it` in test, `https://amonenergy.it` in produzione |
+| `ALLOWED_ORIGIN` | l'host da cui il sito è raggiunto: `https://amonenergy.it` |
 
 Portainer conserva lui questi valori: non serve un file `.env` sull'host. Senza
 tutte e tre, `cms-auth` **non parte** e lo scrive nei log — è deliberato,
@@ -63,8 +62,8 @@ repository, quindi il valore va tenuto vincolato al dominio reale del sito.
 
 Non serve configurarlo: `base_url` in `public/admin/config.yml` viene **riscritto
 da nginx** sull'host della richiesta (`location = /admin/config.yml` in
-`docker/nginx.conf`). Su `test.amonenergy.it` il pannello riceve
-`https://test.amonenergy.it`, su `amonenergy.it` riceve `https://amonenergy.it`,
+`docker/nginx.conf`). Su `amonenergy.it` il pannello riceve
+`https://amonenergy.it`, su un eventuale staging riceve l'host dello staging,
 con la stessa immagine e nessuna variabile da cambiare.
 
 Se un giorno quella riscrittura venisse rimossa, sappi cosa c'è in mezzo:
@@ -80,7 +79,7 @@ solo per autenticarsi su `/admin`: non naviga il codice.
 
 ## Verifica end-to-end
 
-1. Vai su `https://test.amonenergy.it/admin` (in produzione: `https://amonenergy.it/admin`).
+1. Vai su `https://amonenergy.it/admin`.
 2. Accedi con l'account GitHub collaboratore: si apre una popup verso GitHub,
    che al ritorno si chiude da sola e ti lascia dentro al pannello.
 3. Modifica un testo (es. il sottotitolo della home) e salva. Sveltia crea un
@@ -102,7 +101,7 @@ Non serve nessuna purge di cache: nginx serve l'HTML `no-store` (vedi
 | `/oauth/auth` risponde 502 | Il container `cms-auth` è giù. Il sito pubblico resta online per costruzione: nginx risolve l'upstream a runtime. Controlla i log del servizio. |
 | La popup si apre, GitHub autorizza, ma il pannello non entra | `ALLOWED_ORIGIN` non coincide con l'origine da cui stai aprendo `/admin` — il `postMessage` con il token viene scartato dal browser. |
 | Il login va su `api.netlify.com` | Manca `base_url` in `config.yml`: non ha un default sull'origine corrente, ricade su Netlify. |
-| Il login va su un dominio diverso da quello che stai usando | La riscrittura di `base_url` non sta agendo. Verifica: `curl -s https://test.amonenergy.it/admin/config.yml \| grep base_url` deve restituire l'host da cui stai navigando. |
+| Il login va su un dominio diverso da quello che stai usando | La riscrittura di `base_url` non sta agendo. Verifica: `curl -s https://amonenergy.it/admin/config.yml \| grep base_url` deve restituire l'host da cui stai navigando. |
 
 ## Cosa NON è ancora stato validato
 

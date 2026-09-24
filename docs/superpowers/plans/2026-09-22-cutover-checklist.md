@@ -20,6 +20,36 @@ controlla quei pannelli.
 > Console) — se quelli sono tutti a posto, il calo è normale rumore di
 > transizione, non un problema da rincorrere.
 
+## Stato al 24 settembre 2026: switch eseguito
+
+Lo switch è stato fatto il 24 settembre 2026, su richiesta esplicita del
+cliente di non aspettare le 24 ore del TTL (il vecchio WordPress resta acceso
+su SiteGround, quindi chi aveva ancora in cache il vecchio IP vedeva il vecchio
+sito, non un errore). Architettura reale, diversa da quella ipotizzata sotto:
+DNS su SiteGround (nameserver `ns1/ns2.siteground.net`, posta su Microsoft 365
+tramite MX, da non toccare), nuovo host `108.128.213.53` con nginx dell'host
+che termina il TLS (certbot) e inoltra a `127.0.0.1:8082`.
+
+Fatto e verificato:
+
+- container: `Host: amonenergy.it` → `200` senza `X-Robots-Tag`,
+  `Host: www.amonenergy.it` → `301 https://amonenergy.it/`
+- vhost `/etc/nginx/sites-available/amonenergy-produzione` sull'host
+- crawl dei 28 vecchi URL + `/?lang=en` + i 4 invariati + `/wp-admin/` `410`:
+  34 controlli su 34 OK, contro il server nuovo con `Host: amonenergy.it`
+- record A di `amonenergy.it` e `www` → `108.128.213.53` (TTL 3600, il
+  minimo accettato da SiteGround); nessun AAAA né CAA che interferisse
+- certificato Let's Encrypt per `amonenergy.it` + `www` (scadenza 23/12/2026,
+  rinnovo automatico di certbot)
+- OAuth App spostata su `https://amonenergy.it/oauth/callback`,
+  `ALLOWED_ORIGIN=https://amonenergy.it` in Portainer, login `/admin` riuscito
+- `test.amonenergy.it` dismesso: record DNS, vhost e certificato rimossi
+
+Ancora aperti: i punti della sezione 0 (GA4, M5500, indirizzo, tre fatti),
+Search Console (punti 4 e 9 della sezione 3), i controlli della sezione 4.
+Ritocchi non bloccanti al vhost dell'host: `http2`, HSTS, e il doppio salto
+`http://www` → `https://www` → `https://amonenergy.it`.
+
 ## 0. Tre punti aperti, da chiudere prima del cutover (non rimandabili)
 
 Emersi durante il lavoro di migrazione SEO e mai risolti in codice perché

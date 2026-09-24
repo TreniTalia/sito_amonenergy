@@ -50,30 +50,38 @@ Lo stack ha due servizi:
 | `cms-auth` | `ghcr.io/trenitalia/sito_amonenergy-cms-auth` | Backend OAuth del pannello. Nessuna porta pubblicata: `web` gli fa da reverse proxy su `/oauth/`. |
 
 Davanti allo stack c'è il reverse proxy nginx dell'host, che termina il TLS e
-inoltra su `HTTP_PORT` (**8082**). Host attuale: **`test.amonenergy.it`**;
-a regime `amonenergy.it`. (Portainer sta su `container.amonenergy.it`, che non
-c'entra con il sito: è solo la sua interfaccia.)
+inoltra su `HTTP_PORT` (**8082**). Host: **`amonenergy.it`**, in produzione
+dal 24 settembre 2026; `www.amonenergy.it` fa 301 sul dominio nudo. Il vecchio
+ambiente di test `test.amonenergy.it` è stato dismesso lo stesso giorno (record
+DNS, vhost e certificato rimossi). (Portainer sta su `container.amonenergy.it`,
+che non c'entra con il sito: è solo la sua interfaccia.)
+
+La configurazione del reverse proxy dell'host sta in
+`/etc/nginx/sites-available/amonenergy-produzione` (collegata in
+`sites-enabled`): un blocco per `amonenergy.it` e `www.amonenergy.it` che
+inoltra a `127.0.0.1:8082` passando `Host` e `X-Forwarded-Proto`. Blocco HTTPS
+e redirect da HTTP li ha aggiunti certbot, che rinnova anche il certificato.
 
 ### Indicizzazione: solo il dominio di produzione
 
 `docker/nginx.conf` decide in base a `$host`: su `amonenergy.it` e
 `www.amonenergy.it` le pagine sono indicizzabili, su **qualunque altro host**
-(`test.amonenergy.it`, l'IP nudo, un futuro staging) l'HTML esce con
+(l'IP nudo, un futuro staging) l'HTML esce con
 `X-Robots-Tag: noindex, nofollow`. Serve a non ritrovarsi il sito duplicato in
-SERP mentre il test è online. È una whitelist del dominio vero, non una
-blacklist del test: al go-live non c'è alcun interruttore da girare.
+SERP se un altro host punta allo stesso server. È una whitelist del dominio
+vero, non una blacklist degli altri: non c'è alcun interruttore da girare.
 
 Un effetto collaterale voluto: `astro.config.mjs` ha `site: 'https://amonenergy.it'`,
-quindi anche sul test la sitemap elenca URL di produzione. È irrilevante finché
-il test è `noindex`, e vuol dire che l'immagine è la stessa in entrambi gli
-ambienti — nessuna build separata per il test.
+quindi anche su uno staging la sitemap elenca URL di produzione. È irrilevante
+finché lo staging è `noindex`, e vuol dire che l'immagine è la stessa in tutti
+gli ambienti — nessuna build separata.
 
 ### L'indirizzo di login del pannello segue l'host
 
 Stessa logica, altro meccanismo: nginx riscrive `base_url` in
 `/admin/config.yml` sull'host della richiesta (`location = /admin/config.yml`).
-Il pannello manda quindi il login sempre sull'host da cui è stato aperto, sia
-`test.amonenergy.it` sia `amonenergy.it`, senza variabili da cambiare.
+Il pannello manda quindi il login sempre sull'host da cui è stato aperto, senza
+variabili da cambiare se un giorno il sito gira anche su uno staging.
 
 Serve perché Sveltia esige `base_url` e, se lo si omette, non ricade
 sull'origine corrente ma su `https://api.netlify.com` — spedendo il login sui
@@ -87,13 +95,13 @@ punto tace.
 2. Compila le **Environment variables** (vedi `.env.example` per la descrizione
    di ciascuna):
 
-   | Variabile | Valore attuale (test) | A regime |
-   | :--- | :--- | :--- |
-   | `HTTP_PORT` | `8082` | `8082` |
-   | `ALLOWED_ORIGIN` | `https://test.amonenergy.it` | `https://amonenergy.it` |
-   | `GITHUB_OAUTH_CLIENT_ID` | dalla GitHub OAuth App — vedi `docs/CMS-SETUP.md` | OAuth App del dominio di produzione |
-   | `GITHUB_OAUTH_CLIENT_SECRET` | idem | idem |
-   | `IMAGE_TAG` | `latest` | `latest` |
+   | Variabile | Valore |
+   | :--- | :--- |
+   | `HTTP_PORT` | `8082` |
+   | `ALLOWED_ORIGIN` | `https://amonenergy.it` |
+   | `GITHUB_OAUTH_CLIENT_ID` | dalla GitHub OAuth App — vedi `docs/CMS-SETUP.md` |
+   | `GITHUB_OAUTH_CLIENT_SECRET` | idem |
+   | `IMAGE_TAG` | `latest` |
 
    `ALLOWED_ORIGIN` deve essere l'host da cui il sito è **effettivamente**
    raggiunto: da lì `cms-auth` deriva la `redirect_uri` che GitHub confronta con
