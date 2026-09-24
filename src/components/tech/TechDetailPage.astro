@@ -190,7 +190,9 @@ const faqPage = {
             <span class="ds-eyebrow-label">{t.normaRiferimento}</span>
           </div>
           <h2 class="text-headline mt-1" data-reveal style="--reveal-delay:80ms">{d.norma.codice}</h2>
-          <p class="text-title mt-2 text-ink/70" data-reveal style="--reveal-delay:110ms">{d.norma.titolo}</p>
+          {/* Il titolo ufficiale della norma si cita come è pubblicato, lineetta
+            compresa: è un nome proprio, non una pausa del nostro testo. */}
+        <p class="text-title mt-2 text-ink/70" data-reveal style="--reveal-delay:110ms"><cite class="not-italic" data-titolo-norma>{d.norma.titolo}</cite></p>
           <p class="measure text-body mt-5 text-ink/75" data-reveal style="--reveal-delay:150ms">{d.norma.note}</p>
         </div>
         <div class="flex flex-col gap-5" data-reveal style="--reveal-delay:200ms">

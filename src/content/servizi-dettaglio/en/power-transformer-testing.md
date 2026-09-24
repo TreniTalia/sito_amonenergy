@@ -64,7 +64,7 @@ assettoMisura:
 
 norma:
   codice: "IEC 60076-1"
-  titolo: "Power transformers, Part 1: General"
+  titolo: "Power transformers – Part 1: General"
   note: "Sets the general requirements for power transformers (rated power, voltage, vector group, nameplate data) and classifies tests into routine, type and special tests, referring to the later parts of the same family for specific tests: frequency response, for example, is standardised separately by IEC 60076-18. It's the base on which the routine checks we carry out on every machine build."
 
 faq:

@@ -74,7 +74,7 @@ assettoMisura:
 
 norma:
   codice: "IEC 60076-18"
-  titolo: "Power transformers, Part 18: Measurement of frequency response"
+  titolo: "Power transformers – Part 18: Measurement of frequency response"
   note: "Introdotta nel 2012, definisce come si misura e si documenta la risposta in frequenza di un trasformatore. Fissa l'intervallo di misura da 20 Hz a 2 MHz, tiene la tensione di prova sotto i 10 V RMS per non alterare lo stato magnetico della macchina, e prescrive cavi coassiali a doppia schermatura messi a terra con trecce piatte e larghe. La ripetibilità è il punto: la norma chiede di registrare le condizioni di prova perché la misura di oggi sia confrontabile con quella di fra cinque anni."
 
 caso:

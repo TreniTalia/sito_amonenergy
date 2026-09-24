@@ -60,7 +60,7 @@ assettoMisura:
 
 norma:
   codice: "IEC 60270 / CEI EN 60270"
-  titolo: "High-voltage test techniques: Partial discharge measurements"
+  titolo: "High-voltage test techniques – Partial discharge measurements"
   note: "Applies to partial discharge measurements in high voltage: the conventional method measures the apparent charge in picocoulombs (pC). There are also non-conventional methods (UHF, acoustic), which can't be calibrated in charge but are useful for locating the ignition point."
 
 faq:

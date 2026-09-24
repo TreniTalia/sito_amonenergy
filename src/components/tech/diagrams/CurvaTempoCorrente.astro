@@ -6,7 +6,7 @@
  * `ChartFrame`: fondo navy, reticolo a puntini, cornice con tacche d'angolo.
  * Il contenuto è la caratteristica calcolata dal modello di
  * `charts/models/iec60255.ts`: soglia selettiva I> a tempo inverso secondo la
- * curva "standard inverse" della IEC 60255-151, tagliata alle correnti di
+ * curva "standard inverse" della IEC 60255‑151, tagliata alle correnti di
  * cortocircuito dalla soglia di massima corrente I>> a tempo definito. I
  * punti verdi sono le iniezioni di prova ai multipli canonici della soglia,
  * con il tempo cronometrato che si discosta di pochi punti percentuali dalla
@@ -31,18 +31,18 @@ const num = (v: number) => (lingua === 'it' ? String(v).replace('.', ',') : Stri
 const TESTI = {
   it: {
     ariaLabel:
-      'Diagramma tempo-corrente su assi logaritmici: la soglia selettiva I> a tempo inverso secondo la IEC 60255-151, con il tempo di intervento che scende al crescere della corrente, tagliata alle correnti più alte dalla soglia di massima corrente I>> a tempo definito. Punti verdi segnano le correnti di prova iniettate e i tempi di intervento misurati, vicini alla curva teorica.',
+      'Diagramma tempo-corrente su assi logaritmici: la soglia selettiva I> a tempo inverso secondo la IEC 60255‑151, con il tempo di intervento che scende al crescere della corrente, tagliata alle correnti più alte dalla soglia di massima corrente I>> a tempo definito. Punti verdi segnano le correnti di prova iniettate e i tempi di intervento misurati, vicini alla curva teorica.',
     caption: 'Verifica della curva di intervento',
-    captionSub: 'Curva calcolata da modello · IEC 60255-151 standard inverse, Is 400 A, TMS 0,1, I>> 4 kA',
+    captionSub: 'Curva calcolata da modello · IEC 60255‑151 standard inverse, Is 400 A, TMS 0,1, I>> 4 kA',
     legendaCurva: 'Caratteristica I> tempo inverso',
     legendaSoglia: 'Soglia I>> tempo definito',
     legendaPunti: 'Punti di prova',
   },
   en: {
     ariaLabel:
-      'Time-current diagram on logarithmic axes: the selective threshold I> at inverse time under IEC 60255-151, with tripping time falling as current rises, cut off at higher currents by the definite-time overcurrent threshold I>>. Green points mark the injected test currents and the measured tripping times, close to the theoretical curve.',
+      'Time-current diagram on logarithmic axes: the selective threshold I> at inverse time under IEC 60255‑151, with tripping time falling as current rises, cut off at higher currents by the definite-time overcurrent threshold I>>. Green points mark the injected test currents and the measured tripping times, close to the theoretical curve.',
     caption: 'Tripping curve verification',
-    captionSub: 'Computed from a model · IEC 60255-151 standard inverse, Is 400 A, TMS 0.1, I>> 4 kA',
+    captionSub: 'Computed from a model · IEC 60255‑151 standard inverse, Is 400 A, TMS 0.1, I>> 4 kA',
     legendaCurva: 'I> inverse-time curve',
     legendaSoglia: 'I>> definite-time threshold',
     legendaPunti: 'Test points',

@@ -60,7 +60,7 @@ assettoMisura:
 
 norma:
   codice: "IEC 60270 / CEI EN 60270"
-  titolo: "High-voltage test techniques: Partial discharge measurements"
+  titolo: "High-voltage test techniques – Partial discharge measurements"
   note: "Si applica alle misure di scariche parziali in alta tensione: il metodo convenzionale misura la carica apparente in picocoulomb (pC). Esistono anche metodi non convenzionali (UHF, acustici) che non sono calibrabili in carica ma sono utili alla localizzazione del punto di innesco."
 
 faq:

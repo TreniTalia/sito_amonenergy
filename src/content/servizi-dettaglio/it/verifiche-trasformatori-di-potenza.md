@@ -64,7 +64,7 @@ assettoMisura:
 
 norma:
   codice: "IEC 60076-1"
-  titolo: "Power transformers, Part 1: General"
+  titolo: "Power transformers – Part 1: General"
   note: "Fissa le prescrizioni generali dei trasformatori di potenza (potenza nominale, tensione, gruppo di collegamento, dati di targa) e la classificazione delle prove in prove di routine, di tipo e speciali, rimandando alle parti successive della stessa famiglia per le prove specifiche: la risposta in frequenza, ad esempio, è normata a parte dalla IEC 60076-18. È la base su cui si innestano le verifiche di routine che eseguiamo su ogni macchina."
 
 faq:

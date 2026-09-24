@@ -68,7 +68,7 @@ assettoMisura:
 
 norma:
   codice: "IEC 60076-18"
-  titolo: "Power transformers, Part 18: Measurement of frequency response"
+  titolo: "Power transformers – Part 18: Measurement of frequency response"
   note: "Introduced in 2012, it defines how a transformer's frequency response is measured and documented. It sets the measurement range from 20 Hz to 2 MHz, keeps the test voltage below 10 V RMS to avoid altering the machine's magnetic state, and prescribes double-shielded coaxial cables earthed with flat, wide braids. Repeatability is the point: the standard requires recording the test conditions so that today's measurement is comparable with the one taken five years from now."
 
 caso:

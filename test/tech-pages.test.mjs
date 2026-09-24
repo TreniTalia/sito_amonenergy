@@ -210,6 +210,9 @@ describe('pagine tecniche', { skip }, () => {
     html
       .replace(/<!--[\s\S]*?-->/g, ' ')
       .replace(/<(script|style)\b[\s\S]*?<\/\1>/gi, ' ')
+      // Il titolo ufficiale di una norma si cita come è pubblicato: la sua
+      // lineetta fa parte del nome, non è una pausa del nostro testo.
+      .replace(/<cite\b[^>]*data-titolo-norma[^>]*>[\s\S]*?<\/cite>/gi, ' ')
       .replace(/<[^>]+>/g, ' ')
       .replace(/&mdash;|&#8212;|&#x2014;/gi, '—')
       .replace(/&ndash;|&#8211;|&#x2013;/gi, '–')
@@ -224,6 +227,27 @@ describe('pagine tecniche', { skip }, () => {
       }
     }
     assert.deepEqual(trovate, [], `lineette usate come pausa:\n${trovate.join('\n')}`);
+  });
+
+  test('i titoli ufficiali delle norme IEC restano citati come sono pubblicati', () => {
+    const attesi = {
+      sfra: 'Power transformers – Part 18: Measurement of frequency response',
+      'verifiche-trasformatori-di-potenza': 'Power transformers – Part 1: General',
+      'misure-scariche-parziali': 'High-voltage test techniques – Partial discharge measurements',
+    };
+    let trovati = 0;
+    for (const rotta of TECH_ROUTES) {
+      const atteso = attesi[slugDi('it', rotta)];
+      if (!atteso) continue;
+      for (const lato of ['it', 'en']) {
+        const html = readFileSync(fileDi(lato, rotta), 'utf8').replace(/&ndash;|&#8211;|&#x2013;/gi, '–');
+        const m = html.match(/<cite\b[^>]*data-titolo-norma[^>]*>([\s\S]*?)<\/cite>/);
+        assert.ok(m, `${hrefDi(lato, slugDi(lato, rotta))}: titolo della norma non marcato`);
+        assert.equal(m[1].trim(), atteso, `${hrefDi(lato, slugDi(lato, rotta))}: titolo della norma citato male`);
+        trovati++;
+      }
+    }
+    assert.equal(trovati, 6, 'attese tre norme IEC, in italiano e in inglese');
   });
 
   test('il testo alternativo dell og:image non separa il titolo con una lineetta', () => {
