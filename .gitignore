@@ -22,3 +22,11 @@ pnpm-debug.log*
 
 # jetbrains setting folder
 .idea/
+
+# materiali di riferimento del cliente (foto originali, video di esempio):
+# restano in locale, nel repo va solo quello che il sito usa
+info_utili/
+
+# cache locali di strumenti e agenti
+.impeccable/hook.cache.json
+.superpowers/
