@@ -1,66 +1,308 @@
 ---
-// Selettore di lingua: legge la pathname corrente e la gemella da
-// `src/i18n/routes.ts`, l'unica fonte delle coppie di URL. Non si mostra su
-// pagine senza gemella (`altra === null`) — oggi capita solo per rotte non
-// ancora presenti in ROTTE, non dovrebbe succedere sulle 15 coppie note.
+// Selettore di lingua: un globo che apre la scelta fra Italiano ed English.
+// Legge la pathname corrente e la gemella da `src/i18n/routes.ts`, l'unica
+// fonte delle coppie di URL. Le due voci sono link veri alla pagina gemella
+// (con `hreflang`), non un modulo: la scelta di lingua è navigazione.
+//
+// Due varianti con lo stesso comportamento:
+// - `desktop`: pulsante tondo in vetro nella navbar, la scelta si apre in un
+//   piccolo pannello di vetro sotto il globo;
+// - `mobile`: una riga del menu a scomparsa, la scelta si apre sotto la riga,
+//   dentro il menu stesso (un popover sopra un pannello a tutto schermo
+//   sarebbe un livello di troppo).
+// È il pattern "disclosure" (pulsante con `aria-expanded` + elenco di link),
+// non un `role="menu"`: le voci sono link di navigazione, e un menu ARIA
+// imporrebbe una tastiera da applicazione che qui nessuno si aspetta.
 import { gemella } from '../i18n/routes.ts';
 
 interface Props {
-  /** Variante compatta per la pillola nella navbar desktop (vetro, stessa
-   * ricetta del CTA telefonico); il pannello mobile usa lo stile di default. */
-  compact?: boolean;
+  variant?: 'desktop' | 'mobile';
 }
 
-const { compact = false } = Astro.props;
+const { variant = 'desktop' } = Astro.props;
 const { lingua, altra } = gemella(Astro.url.pathname);
+const qui = Astro.url.pathname;
+
+// Senza gemella (rotta non ancora in ROTTE) resta solo la lingua corrente.
+const voci = [
+  { codice: 'it', nome: 'Italiano', href: lingua === 'it' ? qui : altra },
+  { codice: 'en', nome: 'English', href: lingua === 'en' ? qui : altra },
+].filter((v): v is { codice: string; nome: string; href: string } => Boolean(v.href));
+
+const etichetta = lingua === 'en' ? 'Language' : 'Lingua';
+const corrente = lingua === 'en' ? 'English' : 'Italiano';
+const idElenco = `lang-list-${variant}`;
 ---
 
-{
-  altra && (
-    <a
-      href={altra}
-      hreflang={lingua === 'it' ? 'en' : 'it'}
-      rel="alternate"
-      class:list={['lang-switch', compact && 'lang-switch--compact']}
-      aria-label={lingua === 'it' ? 'Passa alla versione in inglese' : 'Switch to the Italian version'}
-    >
-      {lingua === 'it' ? 'EN' : 'IT'}
-    </a>
-  )
-}
+<div class:list={['lang-menu', `lang-menu--${variant}`]} data-lang-menu>
+  <button
+    type="button"
+    class:list={[variant === 'desktop' ? 'lang-globe' : 'lang-row']}
+    aria-expanded="false"
+    aria-controls={idElenco}
+    aria-label={variant === 'desktop' ? `${etichetta}: ${corrente}` : undefined}
+  >
+    <svg class="lang-globe__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+      <circle cx="12" cy="12" r="9.25" />
+      <ellipse cx="12" cy="12" rx="4.1" ry="9.25" />
+      <path d="M2.9 9h18.2M2.9 15h18.2" />
+    </svg>
+    {
+      variant === 'mobile' && (
+        <>
+          <span class="lang-row__label">{etichetta}</span>
+          <span class="lang-row__value">{corrente}</span>
+          <svg class="lang-row__chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M6 9l6 6 6-6" />
+          </svg>
+        </>
+      )
+    }
+  </button>
+
+  <ul id={idElenco} class="lang-list" hidden>
+    {
+      voci.map((v) => (
+        <li>
+          <a
+            href={v.href}
+            hreflang={v.codice}
+            lang={v.codice}
+            class="lang-option"
+            aria-current={v.codice === lingua ? 'true' : undefined}
+          >
+            <span>{v.nome}</span>
+            <svg class="lang-option__check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M5 12.5l4.5 4.5L19 7.5" />
+            </svg>
+          </a>
+        </li>
+      ))
+    }
+  </ul>
+</div>
+
+<script>
+  // Un solo gestore per tutte le istanze (navbar e menu mobile). Si chiude con
+  // Esc (e il focus torna sul globo), con un clic fuori o scegliendo una voce.
+  const menus = Array.from(document.querySelectorAll<HTMLElement>('[data-lang-menu]'));
+
+  const chiudi = (menu: HTMLElement, rimettiFocus = false) => {
+    const btn = menu.querySelector<HTMLButtonElement>('button');
+    const list = menu.querySelector<HTMLElement>('.lang-list');
+    if (!btn || !list || list.hidden) return;
+    btn.setAttribute('aria-expanded', 'false');
+    list.hidden = true;
+    if (rimettiFocus) btn.focus();
+  };
+
+  for (const menu of menus) {
+    const btn = menu.querySelector<HTMLButtonElement>('button');
+    const list = menu.querySelector<HTMLElement>('.lang-list');
+    if (!btn || !list) continue;
+
+    btn.addEventListener('click', () => {
+      const aperto = btn.getAttribute('aria-expanded') === 'true';
+      for (const altro of menus) if (altro !== menu) chiudi(altro);
+      btn.setAttribute('aria-expanded', String(!aperto));
+      list.hidden = aperto;
+    });
+
+    menu.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        e.stopPropagation();
+        chiudi(menu, true);
+      }
+      // Frecce su/giù fra le due voci: comodo, non obbligatorio (Tab funziona).
+      if ((e.key === 'ArrowDown' || e.key === 'ArrowUp') && !list.hidden) {
+        const link = Array.from(list.querySelectorAll<HTMLAnchorElement>('a'));
+        const i = link.indexOf(document.activeElement as HTMLAnchorElement);
+        const prossimo = e.key === 'ArrowDown' ? (i + 1) % link.length : (i - 1 + link.length) % link.length;
+        link[i === -1 ? 0 : prossimo]?.focus();
+        e.preventDefault();
+      }
+    });
+  }
+
+  document.addEventListener('click', (e) => {
+    for (const menu of menus) if (!menu.contains(e.target as Node)) chiudi(menu);
+  });
+</script>
 
 <style>
-  /* Stessa ricetta vetro dei pulsanti dell'header (.ds-header-cta): una
-     pillola chiara, leggibile sia sul navy trasparente in cima all'hero sia
-     sulla navbar "frosted" a scroll avvenuto. */
-  .lang-switch {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    min-width: 2.5rem;
-    white-space: nowrap;
-    font-family: var(--font-body);
-    font-weight: 600;
-    font-size: var(--fs-button);
-    color: var(--color-navy-950);
-    background: linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(255, 255, 255, 0.88));
-    border-radius: var(--radius-pill);
-    padding: 10px 16px;
-    text-decoration: none;
-    box-shadow: var(--shadow-sm), inset 0 1px 0 rgba(255, 255, 255, 0.9);
-    transition:
-      transform 0.2s var(--ease-signature),
-      box-shadow 0.3s var(--ease-signature);
-  }
-  .lang-switch:hover {
-    transform: translateY(-1px);
-    box-shadow: var(--shadow-md), var(--glow-signal);
+  .lang-menu {
+    position: relative;
   }
 
-  /* Nel pannello mobile la pillola sta su vetro scuro: bordo chiaro,
-     sfondo trasparente, come `.ds-btn-ghost` sullo stesso pannello. */
-  .lang-switch--compact {
-    padding: 8px 14px;
+  /* ---- Desktop: globo in vetro nella navbar --------------------------- */
+  /* Stesso vetro della pill della pagina attiva: rifrazione vera dove il
+     browser la supporta (`#liquid-glass-navpill`), blur semplice altrove —
+     la dichiarazione senza `url()` viene prima e fa da ripiego. */
+  .lang-globe {
+    display: grid;
+    place-items: center;
+    width: 2.625rem;
+    height: 2.625rem;
+    border-radius: var(--radius-pill);
+    color: var(--color-paper);
+    background:
+      radial-gradient(120% 160% at 30% -10%, rgba(255, 255, 255, 0.3), transparent 55%),
+      color-mix(in srgb, var(--color-paper) 12%, transparent);
+    border: 1px solid rgba(255, 255, 255, 0.24);
+    backdrop-filter: blur(10px) saturate(170%);
+    -webkit-backdrop-filter: blur(10px) saturate(170%);
+    backdrop-filter: url(#liquid-glass-navpill) blur(8px) saturate(170%);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.42),
+      inset 0 -6px 10px -8px rgba(4, 16, 28, 0.55),
+      0 4px 12px -6px rgba(4, 16, 28, 0.5);
+    cursor: pointer;
+    transition:
+      transform 0.2s var(--ease-signature),
+      background-color 0.2s var(--ease-signature),
+      box-shadow 0.3s var(--ease-signature);
+  }
+  .lang-globe:hover {
+    transform: translateY(-1px);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.5),
+      inset 0 -6px 10px -8px rgba(4, 16, 28, 0.55),
+      0 6px 16px -6px rgba(4, 16, 28, 0.55),
+      var(--glow-signal);
+  }
+  .lang-globe:active {
+    transform: scale(0.95);
+  }
+  .lang-globe[aria-expanded='true'] {
+    background:
+      radial-gradient(120% 160% at 30% -10%, rgba(255, 255, 255, 0.36), transparent 55%),
+      color-mix(in srgb, var(--color-paper) 22%, transparent);
+  }
+  .lang-globe:focus-visible,
+  .lang-row:focus-visible,
+  .lang-option:focus-visible {
+    outline: 2px solid var(--color-green-400);
+    outline-offset: 3px;
+  }
+  .lang-globe__icon {
+    width: 1.25rem;
+    height: 1.25rem;
+  }
+
+  .lang-menu--desktop .lang-list {
+    position: absolute;
+    top: calc(100% + 10px);
+    right: 0;
+    z-index: 60;
+    min-width: 11rem;
+    margin: 0;
+    padding: 6px;
+    list-style: none;
+    border-radius: 18px;
+    background:
+      radial-gradient(130% 120% at 15% -20%, rgba(255, 255, 255, 0.18), transparent 55%),
+      var(--glass-sheen),
+      color-mix(in srgb, var(--color-navy-950) 72%, transparent);
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    backdrop-filter: blur(22px) saturate(190%);
+    -webkit-backdrop-filter: blur(22px) saturate(190%);
+    backdrop-filter: url(#liquid-glass-btn) blur(18px) saturate(190%);
+    box-shadow:
+      0 18px 40px -16px rgba(4, 16, 28, 0.7),
+      inset 0 1px 0 rgba(255, 255, 255, 0.28),
+      inset 0 0 0 1px rgba(255, 255, 255, 0.04);
+    transform-origin: top right;
+    animation: lang-pop 0.22s var(--ease-signature);
+  }
+  @keyframes lang-pop {
+    from {
+      opacity: 0;
+      transform: translateY(-4px) scale(0.96);
+    }
+  }
+
+  .lang-option {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 10px 12px;
+    border-radius: 12px;
+    font-family: var(--font-body);
+    font-weight: 500;
     font-size: var(--fs-small);
+    color: var(--color-paper);
+    text-decoration: none;
+    transition: background-color 0.2s var(--ease-signature);
+  }
+  .lang-option:hover {
+    background: rgba(255, 255, 255, 0.1);
+  }
+  .lang-option[aria-current='true'] {
+    font-weight: 600;
+  }
+  .lang-option__check {
+    width: 1rem;
+    height: 1rem;
+    flex: none;
+    color: var(--color-green-400);
+    visibility: hidden;
+  }
+  .lang-option[aria-current='true'] .lang-option__check {
+    visibility: visible;
+  }
+
+  /* ---- Mobile: riga del menu a scomparsa ----------------------------- */
+  .lang-row {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    width: 100%;
+    padding: 14px 16px;
+    border-radius: 16px;
+    color: var(--color-paper);
+    background: rgb(255 255 255 / 0.06);
+    border: 1px solid rgb(255 255 255 / 0.16);
+    font-family: var(--font-body);
+    font-size: var(--fs-body);
+    text-align: left;
+    cursor: pointer;
+  }
+  .lang-row__label {
+    font-weight: 600;
+  }
+  .lang-row__value {
+    margin-left: auto;
+    color: rgb(255 255 255 / 0.7);
+  }
+  .lang-row__chevron {
+    width: 1.1rem;
+    height: 1.1rem;
+    flex: none;
+    transition: transform 0.25s var(--ease-signature);
+  }
+  .lang-row[aria-expanded='true'] .lang-row__chevron {
+    transform: rotate(180deg);
+  }
+  .lang-menu--mobile .lang-globe__icon {
+    flex: none;
+  }
+  .lang-menu--mobile .lang-list {
+    margin: 6px 0 0;
+    padding: 4px;
+    list-style: none;
+    border-radius: 16px;
+    background: rgb(255 255 255 / 0.05);
+    border: 1px solid rgb(255 255 255 / 0.12);
+  }
+  .lang-menu--mobile .lang-option {
+    padding: 12px 14px;
+    font-size: var(--fs-body);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .lang-menu--desktop .lang-list {
+      animation: none;
+    }
   }
 </style>

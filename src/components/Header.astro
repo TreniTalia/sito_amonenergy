@@ -62,7 +62,7 @@ const isActive = (href: string) => (href === homeHref ? currentPath === href : c
              pannello mobile, non anche qui — altrimenti comparirebbe due
              volte sullo stesso schermo. -->
         <div class="hidden md:block">
-          <LangSwitch compact />
+          <LangSwitch variant="desktop" />
         </div>
 
         <a href={contatti.telefonoHref} class="ds-header-cta" aria-label={`${ui.header.chiamaAria} ${contatti.telefono}`}>
@@ -119,7 +119,7 @@ const isActive = (href: string) => (href === homeHref ? currentPath === href : c
   </div>
 
   <div class="flex flex-col gap-3">
-    <LangSwitch />
+    <LangSwitch variant="mobile" />
     <a href={contatti.telefonoHref} class="ds-btn-on-dark w-full">
       <Icon name="fa6-solid:phone" class="text-[0.85rem]" />
       {ui.azioni.chiamaci}: {contatti.telefono}

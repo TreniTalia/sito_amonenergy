@@ -1,0 +1,220 @@
+---
+// Pulsante "torna su", solo da 1024px in su: su telefono e tablet il pollice
+// arriva in cima con un gesto, e un bottone fisso coprirebbe contenuto.
+//
+// Il vetro è costruito a strati, dal fondo verso l'alto:
+// 1. rifrazione vera del contenuto dietro (`#liquid-glass-btn`, la mappa di
+//    spostamento di Base.astro) con poco blur, perché la deformazione si veda;
+//    nei browser che non applicano filtri SVG al `backdrop-filter` resta la
+//    dichiarazione di ripiego, blur e saturazione soltanto;
+// 2. una tinta navy leggera, che tiene leggibile il chevron su foto chiare;
+// 3. `::before`, il riflesso speculare: un arco di luce che segue il
+//    puntatore (variabili --mx/--my aggiornate da JS), come la luce su una
+//    lente curva;
+// 4. `::after`, la caustica: la luce che la lente concentra sul bordo
+//    opposto, un bagliore in basso nel colore signal del sito;
+// 5. il bordo: ombre interne a strati (rim chiaro in alto, spessore scuro in
+//    basso, filo sottile tutt'intorno) più un'ombra esterna morbida.
+import { gemella } from '../i18n/routes.ts';
+
+const { lingua } = gemella(Astro.url.pathname);
+const etichetta = lingua === 'en' ? 'Back to top' : 'Torna su';
+---
+
+<button type="button" class="back-to-top" aria-label={etichetta} title={etichetta} data-back-to-top>
+  <svg class="back-to-top__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+    <path d="M12 19V5M6 11l6-6 6 6" />
+  </svg>
+</button>
+
+<script>
+  const btn = document.querySelector<HTMLButtonElement>('[data-back-to-top]');
+  const cookie = document.querySelector<HTMLElement>('#cookie-consent');
+  const desktop = window.matchMedia('(min-width: 1024px)');
+  const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)');
+
+  if (btn) {
+    // Compare dopo circa uno schermo di scorrimento.
+    let ticking = false;
+    const aggiorna = () => {
+      ticking = false;
+      btn.classList.toggle('is-visible', window.scrollY > window.innerHeight * 0.9);
+    };
+    window.addEventListener(
+      'scroll',
+      () => {
+        if (ticking) return;
+        ticking = true;
+        requestAnimationFrame(aggiorna);
+      },
+      { passive: true },
+    );
+    aggiorna();
+
+    // Il banner dei cookie occupa il fondo della pagina: finché è aperto il
+    // pulsante sale sopra di lui invece di coprirlo.
+    const sposta = () => {
+      const aperto = cookie?.classList.contains('is-visible');
+      const panel = cookie?.querySelector<HTMLElement>('.cookie-consent-panel');
+      btn.style.setProperty('--btt-lift', aperto && panel ? `${panel.offsetHeight + 16}px` : '0px');
+    };
+    if (cookie) new MutationObserver(sposta).observe(cookie, { attributes: true, attributeFilter: ['class'] });
+    sposta();
+
+    // Riflesso che segue il puntatore: coordinate relative al pulsante.
+    btn.addEventListener('pointermove', (e) => {
+      const r = btn.getBoundingClientRect();
+      btn.style.setProperty('--mx', `${(((e.clientX - r.left) / r.width) * 100).toFixed(1)}%`);
+      btn.style.setProperty('--my', `${(((e.clientY - r.top) / r.height) * 100).toFixed(1)}%`);
+    });
+    btn.addEventListener('pointerleave', () => {
+      btn.style.removeProperty('--mx');
+      btn.style.removeProperty('--my');
+    });
+
+    btn.addEventListener('click', () => {
+      window.scrollTo({ top: 0, behavior: prefersReduced.matches ? 'auto' : 'smooth' });
+      // Il focus torna in cima alla pagina, dove chi usa la tastiera se lo
+      // aspetta: `#main` lo riceve senza entrare nell'ordine di tabulazione.
+      const main = document.getElementById('main');
+      if (main) {
+        main.setAttribute('tabindex', '-1');
+        main.focus({ preventScroll: true });
+      }
+    });
+
+    desktop.addEventListener('change', aggiorna);
+  }
+</script>
+
+<style>
+  .back-to-top {
+    display: none;
+  }
+
+  @media (min-width: 1024px) {
+    .back-to-top {
+      --mx: 38%;
+      --my: 18%;
+      --btt-lift: 0px;
+      position: fixed;
+      right: 28px;
+      bottom: calc(28px + var(--btt-lift));
+      z-index: 45;
+      display: grid;
+      place-items: center;
+      width: 3.5rem;
+      height: 3.5rem;
+      padding: 0;
+      border: 0;
+      border-radius: 999px;
+      color: var(--color-paper);
+      cursor: pointer;
+      isolation: isolate;
+      background:
+        radial-gradient(90% 90% at 50% 0%, rgba(255, 255, 255, 0.16), transparent 60%),
+        color-mix(in srgb, var(--color-navy-950) 42%, transparent);
+      backdrop-filter: blur(4px) saturate(190%) brightness(1.06);
+      -webkit-backdrop-filter: blur(4px) saturate(190%) brightness(1.06);
+      backdrop-filter: url(#liquid-glass-btn) blur(2.5px) saturate(190%) brightness(1.06);
+      box-shadow:
+        inset 0 1.5px 0.5px rgba(255, 255, 255, 0.55),
+        inset 0 -2px 3px rgba(4, 16, 28, 0.35),
+        inset 0 -12px 18px -12px rgba(4, 16, 28, 0.55),
+        inset 0 0 0 1px rgba(255, 255, 255, 0.2),
+        0 14px 32px -12px rgba(4, 16, 28, 0.6),
+        0 2px 6px -2px rgba(4, 16, 28, 0.35);
+      opacity: 0;
+      transform: translateY(14px) scale(0.9);
+      pointer-events: none;
+      transition:
+        opacity 0.35s var(--ease-signature),
+        transform 0.45s var(--ease-signature),
+        bottom 0.45s var(--ease-signature),
+        box-shadow 0.3s var(--ease-signature);
+    }
+
+    /* Riflesso speculare: un arco di luce, non un cerchio pieno. La sua
+       posizione segue il puntatore; a riposo sta in alto a sinistra, dove
+       cade la luce in tutto il resto dell'interfaccia. */
+    .back-to-top::before {
+      content: '';
+      position: absolute;
+      inset: 1px;
+      z-index: -1;
+      border-radius: inherit;
+      background: radial-gradient(
+        60% 45% at var(--mx) var(--my),
+        rgba(255, 255, 255, 0.62),
+        rgba(255, 255, 255, 0.14) 45%,
+        transparent 70%
+      );
+      mix-blend-mode: screen;
+      transition: background-position 0.2s linear;
+    }
+
+    /* Caustica: la luce raccolta dalla lente sul bordo opposto. */
+    .back-to-top::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      z-index: -1;
+      border-radius: inherit;
+      background: radial-gradient(70% 40% at 50% 104%, color-mix(in srgb, var(--color-signal-400) 55%, transparent), transparent 70%);
+      mix-blend-mode: screen;
+      opacity: 0.75;
+      transition: opacity 0.3s var(--ease-signature);
+    }
+
+    .back-to-top.is-visible {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+      pointer-events: auto;
+    }
+
+    .back-to-top.is-visible:hover {
+      transform: translateY(-3px) scale(1.05);
+      box-shadow:
+        inset 0 1.5px 0.5px rgba(255, 255, 255, 0.65),
+        inset 0 -2px 3px rgba(4, 16, 28, 0.35),
+        inset 0 -12px 18px -12px rgba(4, 16, 28, 0.55),
+        inset 0 0 0 1px rgba(255, 255, 255, 0.26),
+        0 20px 40px -14px rgba(4, 16, 28, 0.65),
+        0 0 36px -8px color-mix(in srgb, var(--color-signal-400) 60%, transparent);
+    }
+    .back-to-top.is-visible:hover::after {
+      opacity: 1;
+    }
+    .back-to-top.is-visible:active {
+      transform: translateY(-1px) scale(0.95);
+    }
+
+    .back-to-top:focus-visible {
+      outline: 2px solid var(--color-green-400);
+      outline-offset: 4px;
+    }
+
+    .back-to-top__icon {
+      width: 1.35rem;
+      height: 1.35rem;
+      filter: drop-shadow(0 1px 1.5px rgba(4, 16, 28, 0.55));
+      transition: transform 0.35s var(--ease-signature);
+    }
+    .back-to-top.is-visible:hover .back-to-top__icon {
+      transform: translateY(-2px);
+    }
+  }
+
+  @media (min-width: 1024px) and (prefers-reduced-motion: reduce) {
+    .back-to-top,
+    .back-to-top__icon {
+      transition: opacity 0.2s linear;
+    }
+    .back-to-top,
+    .back-to-top.is-visible,
+    .back-to-top.is-visible:hover,
+    .back-to-top.is-visible:active {
+      transform: none;
+    }
+  }
+</style>
