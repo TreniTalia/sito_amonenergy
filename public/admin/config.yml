@@ -32,6 +32,14 @@ publish_mode: simple
 media_folder: "src/assets/img/progetti"
 public_folder: "/src/assets/img/progetti"
 
+# Un campo facoltativo lasciato vuoto non si scrive nel file: di default Sveltia
+# salva `titoloEn: ''`, e una stringa vuota non fa scattare il ripiego
+# sull'italiano (`??` nei componenti) — la card inglese di Erchie è andata
+# online senza titolo. Lo schema in src/content.config.ts tratta comunque il
+# vuoto come assente, per i file salvati prima di questa opzione.
+output:
+  omit_empty_optional_fields: true
+
 # Le foto si ridimensionano nel browser prima del caricamento: una foto da
 # telefono da 12 MB finirebbe tale e quale nel repository e in ogni build.
 # 2400px sul lato lungo coprono la foto più grande che il sito serve (le cover

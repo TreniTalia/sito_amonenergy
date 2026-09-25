@@ -2,13 +2,22 @@ import { defineCollection } from 'astro:content';
 import { glob } from 'astro/loaders';
 import { z } from 'astro/zod';
 
+// Un campo facoltativo lasciato vuoto nel pannello arriva come stringa vuota
+// (o lista vuota), non come campo assente: Sveltia lo scrive così finché non
+// si attiva `output.omit_empty_optional_fields`, e i file già salvati restano
+// com'erano. Ma i componenti ripiegano sull'italiano con `??`, che scatta
+// solo sull'assente: la card inglese di Erchie è andata online senza titolo.
+// Qui il vuoto torna assente prima di arrivare ai componenti.
+const facoltativo = <T extends z.ZodType>(schema: T) =>
+  z.preprocess((v) => (v === '' || v === null || (Array.isArray(v) && v.length === 0) ? undefined : v), schema.optional());
+
 const progetti = defineCollection({
   loader: glob({ pattern: '**/*.md', base: './src/content/progetti' }),
   schema: ({ image }) =>
     z.object({
       titolo: z.string(),
       kv: z.string(),
-      potenza: z.string().optional(),
+      potenza: facoltativo(z.string()),
       committente: z.string(),
       provincia: z.string(),
       tipologia: z.string(),
@@ -16,13 +25,13 @@ const progetti = defineCollection({
       // finché non arriva dal pannello: il componente mostra un placeholder,
       // mai uno schema unifilare (i clienti non ce li lasciano condividere) né
       // una foto stock spacciata per quella specifica realizzazione.
-      immagine: image().optional(),
+      immagine: facoltativo(image()),
       // Le altre foto della stazione, che il lightbox scorre dopo la cover
       // (vedi `fotoProgetto` in src/lib/progetti.ts). Il pannello le salva
       // come elenco di percorsi con un upload multiplo. In passato
       // `z.array(image())` dava un ImageMetadata senza `format`; con Astro 7
       // il difetto non si riproduce (verificato il 2026-09-25).
-      galleria: z.array(image()).optional(),
+      galleria: facoltativo(z.array(image())),
       immagineAlt: z.string(),
       ordine: z.number(),
       // Testo semplice nel frontmatter, non più corpo markdown: titoli ed
@@ -36,10 +45,10 @@ const progetti = defineCollection({
       // sotto — committente, provincia, kv, potenza — sono comuni alle due
       // lingue e per richiesta del cliente non vanno tradotti. Solo il testo
       // di marketing (titolo, tipologia, alt, descrizione) si traduce qui.
-      titoloEn: z.string().optional(),
-      tipologiaEn: z.string().optional(),
-      immagineAltEn: z.string().optional(),
-      descrizioneEn: z.string().optional(),
+      titoloEn: facoltativo(z.string()),
+      tipologiaEn: facoltativo(z.string()),
+      immagineAltEn: facoltativo(z.string()),
+      descrizioneEn: facoltativo(z.string()),
     }),
 });
 

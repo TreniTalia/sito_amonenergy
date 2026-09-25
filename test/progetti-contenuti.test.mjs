@@ -39,14 +39,24 @@ const campiPannello = [...bloccoProgetti.matchAll(/^\s+- \{ (.*) \}$/gm)].map(([
 
 // I campi dello schema zod della collection progetti.
 const bloccoSchema = SCHEMA.slice(SCHEMA.indexOf('const progetti'), SCHEMA.indexOf('const servizi'));
-const campiSchema = [...bloccoSchema.matchAll(/^\s+(\w+): (?:z\.|image\()/gm)].map(([, nome]) => nome);
+const campiSchema = [...bloccoSchema.matchAll(/^\s+(\w+): (?:z\.|image\(|facoltativo\()/gm)].map(([, nome]) => nome);
+
+// Valore YAML scalare su una riga. Il pannello scrive senza virgolette, e le
+// aggiunge singole solo quando servono (es. '[DATO DA CONFERMARE]', dove un
+// apice interno si raddoppia); i file scritti a mano usano le doppie. Le
+// virgolette non contano nella lunghezza del testo.
+const scalare = (v) => {
+  if (v.startsWith("'") && v.endsWith("'")) return v.slice(1, -1).replaceAll("''", "'");
+  if (v.startsWith('"') && v.endsWith('"')) return v.slice(1, -1);
+  return v;
+};
 
 // Frontmatter con valori scalari su una riga, come li scrive il pannello.
 const leggi = (file) => {
   const testo = readFileSync(path.join(DIR, file), 'utf8');
   const [, fm, corpo] = testo.match(/^---\r?\n([\s\S]*?)\r?\n---\r?\n?([\s\S]*)$/);
   const dati = Object.fromEntries(
-    [...fm.matchAll(/^(\w+): "?(.*?)"?$/gm)].map(([, k, v]) => [k, v]),
+    [...fm.matchAll(/^(\w+): (.*?)\s*$/gm)].map(([, k, v]) => [k, scalare(v)]),
   );
   return { dati, corpo: corpo.trim() };
 };
