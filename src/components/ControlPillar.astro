@@ -129,6 +129,9 @@ const ctaLabel = CTA_LABEL[lingua];
             <span class="text-micro font-display font-bold uppercase tracking-[0.14em] text-navy-100">Live · 24/7</span>
           </span>
         </div>
+        {/* `sizes` misurato, non stimato: da lg il pannello è il 41% della
+            viewport fino al tetto di wrap-wide (777px a 1920). Con 46vw un
+            desktop da 1350px scaricava la 900 per mostrarla a 547px. */}
         <Image
           src={controlRoom}
           alt={
@@ -138,7 +141,7 @@ const ctaLabel = CTA_LABEL[lingua];
           }
           class="aspect-[16/9] w-full object-cover"
           widths={[600, 900, 1200, 1672]}
-          sizes="(min-width: 1024px) 46vw, 100vw"
+          sizes="(min-width: 1920px) 777px, (min-width: 1024px) 41vw, 100vw"
         />
       </figure>
     </div>

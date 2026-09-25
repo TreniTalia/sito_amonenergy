@@ -10,7 +10,8 @@
      non `background` del canvas, perché un canvas è un elemento sostituito e
      non accetta pseudo-elementi né si lascia trasformare senza ricampionare. Un
      div separato si può scalare sul compositor, ed è ciò che regge la deriva
-     lenta qui sotto. -->
+     lenta qui sotto. Da 768px in su lo stesso elemento porta il fermo del
+     digital twin, per i browser senza GPU (vedi lo script). -->
 <div class="hero-photo absolute inset-0" aria-hidden="true"></div>
 
 <canvas class="hero-twin absolute inset-0 h-full w-full" aria-hidden="true"></canvas>
@@ -45,6 +46,31 @@
      mostrava più niente. */
   .hero-photo {
     display: none;
+  }
+
+  /* Da 768px in su senza GPU niente WebGL (vedi `graficaAccelerata` nello
+     script): il canvas esce e al suo posto c'è il fermo della stessa scena,
+     fotografato da scripts/poster-hero.mjs. Lo stesso fondale, solo fermo:
+     chi non ha la GPU non vede comparire una scena diversa. */
+  @media (min-width: 768px) {
+    .hero-photo[data-fondale='fermo'] {
+      display: block;
+    }
+    .hero-photo[data-fondale='fermo']::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background-image: url('../assets/img/photos/hero-desktop-twin.webp');
+      background-image: image-set(
+        url('../assets/img/photos/hero-desktop-twin.avif') type('image/avif'),
+        url('../assets/img/photos/hero-desktop-twin.webp') type('image/webp')
+      );
+      background-size: cover;
+      background-position: center;
+    }
+    .hero-photo[data-fondale='fermo'] + .hero-twin {
+      display: none;
+    }
   }
 
   @media (max-width: 767px) {
@@ -101,6 +127,7 @@
   // dinamico, come parametro di `mount` (type-space e value-space sono
   // namespace separati in TS: i due `THREE` non collidono).
   import type * as THREE from 'three';
+  import { graficaAccelerata } from '../lib/grafica.ts';
 
   // `three` (~600KB parsed/executed) non si scarica affatto sotto 768px: il
   // digital twin lì è un fermo-immagine CSS (vedi lo style qui sopra), e il
@@ -111,7 +138,10 @@
   const isMobile = matchMedia('(max-width: 767px)').matches;
 
   if (canvas && !isMobile && getComputedStyle(canvas).display !== 'none') {
-    import('three').then((THREE) => mount(canvas, THREE));
+    // Senza GPU la scena si disegna in software e blocca la pagina (vedi
+    // src/lib/grafica.ts): al suo posto il fermo, e `three` non si scarica.
+    if (graficaAccelerata()) import('three').then((THREE) => mount(canvas, THREE));
+    else document.querySelector('.hero-photo')?.setAttribute('data-fondale', 'fermo');
   }
 
   function mount(canvas: HTMLCanvasElement, THREE: typeof import('three')) {

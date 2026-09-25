@@ -20,12 +20,20 @@
  *    GL, e il fondale è la foto CSS. Da 768px in su il digital twin gira come
  *    sempre, `is-ready` compreso, anche con `prefers-reduced-motion`.
  *
+ * 4. WEBGL SOLO CON UNA GPU VERA. Senza accelerazione (qui: Chromium headless,
+ *    che disegna con SwiftShader) la scena costava ~200ms di CPU a
+ *    fotogramma: su PageSpeed Insights 10,7s di Total Blocking Time. Lì
+ *    `three` non si scarica, il canvas si nasconde e `.hero-photo` mostra il
+ *    fermo della stessa scena. Per provare il ramo con la GPU i test la
+ *    simulano (helpers/gpu-simulata.mjs).
+ *
  * Il test parte dal `dist` già costruito e si salta se non c'è, perche' `npm
  * test` deve restare eseguibile senza una build.
  */
 import { test, before, after, describe } from 'node:test';
 import assert from 'node:assert/strict';
 import { avviaServer, motivoSalto, playwright } from './helpers/dist-server.mjs';
+import { simulaGpu } from './helpers/gpu-simulata.mjs';
 
 const skip = motivoSalto();
 
@@ -49,8 +57,17 @@ describe('layout dell’hero su viewport reali', { skip }, () => {
   });
 
   /** Apre la home a una viewport data e restituisce le misure che ci interessano. */
-  const load = async (width, height, { reducedMotion = 'no-preference' } = {}) => {
+  const load = async (width, height, { reducedMotion = 'no-preference', gpu = true } = {}) => {
     const ctx = await browser.newContext({ viewport: { width, height }, deviceScaleFactor: 3, reducedMotion });
+    if (gpu) await ctx.addInitScript(simulaGpu);
+    // Tempo di blocco del thread principale, come lo conta il Total Blocking
+    // Time: di ogni attività lunga, la parte oltre i 50ms.
+    await ctx.addInitScript(() => {
+      window.__bloccoMs = 0;
+      new PerformanceObserver((l) => {
+        for (const e of l.getEntries()) window.__bloccoMs += Math.max(0, e.duration - 50);
+      }).observe({ type: 'longtask', buffered: true });
+    });
     const page = await ctx.newPage();
     let videoBytes = 0;
     let videoRequests = 0;
@@ -89,6 +106,7 @@ describe('layout dell’hero su viewport reali', { skip }, () => {
         photoDisplay: photo ? getComputedStyle(photo).display : 'assente',
         photoWidth: photo ? Math.round(photo.getBoundingClientRect().width) : 0,
         photoBeforeBg: photo ? getComputedStyle(photo, '::before').backgroundImage : 'none',
+        bloccoMs: Math.round(window.__bloccoMs),
       };
     });
     await ctx.close();
@@ -177,16 +195,44 @@ describe('layout dell’hero su viewport reali', { skip }, () => {
     });
   }
 
-  // Il digital twin non è un video: gira in WebGL da 768px in su, senza gating.
+  // Il digital twin non è un video: con la GPU gira in WebGL da 768px in su.
   for (const [w, h] of [
     [768, 800],
     [844, 390], // landscape corto: qui l'isola cresce a ~104px
     [1280, 900],
     [1920, 1080],
   ]) {
-    test(`${w}x${h}: il digital twin dipinge e l’occhiello resta libero`, async () => {
+    test(`${w}x${h} con GPU: il digital twin dipinge e l’occhiello resta libero`, async () => {
       const m = await load(w, h);
       assertDesktopBackdrop(m, w);
+      assert.ok(m.clearance > 0, `l’occhiello invade l’header di ${(-m.clearance).toFixed(1)}px`);
+    });
+  }
+
+  /** Da 768px in su senza GPU: niente three.js, il canvas si nasconde e
+   *  .hero-photo mostra il fermo della scena. */
+  const assertDesktopFermo = (m, width) => {
+    assertBackdrop(m);
+    assert.equal(m.threeRequests, 0, `three.js scaricato senza GPU (${m.threeRequests} richieste)`);
+    assert.equal(m.twinReady, false, 'il canvas ha dipinto un frame WebGL in software');
+    assert.equal(m.twinDisplay, 'none', 'senza GPU il canvas vuoto resterebbe davanti al fermo');
+    assert.equal(m.photoDisplay, 'block', 'senza GPU .hero-photo dovrebbe mostrare il fermo della scena');
+    assert.ok(
+      Math.abs(m.photoWidth - width) <= 1,
+      `il fermo non copre la larghezza dell’hero (${m.photoWidth}px su ${width}px)`,
+    );
+    assert.match(m.photoBeforeBg, /hero-desktop-twin/, `il fondale non è il fermo del digital twin: ${m.photoBeforeBg}`);
+    assert.ok(m.bloccoMs < 200, `thread principale bloccato per ${m.bloccoMs}ms senza GPU`);
+  };
+
+  for (const [w, h] of [
+    [768, 800],
+    [1280, 900],
+    [1920, 1080],
+  ]) {
+    test(`${w}x${h} senza GPU: fermo della scena, three.js non scaricato, pagina libera`, async () => {
+      const m = await load(w, h, { gpu: false });
+      assertDesktopFermo(m, w);
       assert.ok(m.clearance > 0, `l’occhiello invade l’header di ${(-m.clearance).toFixed(1)}px`);
     });
   }
