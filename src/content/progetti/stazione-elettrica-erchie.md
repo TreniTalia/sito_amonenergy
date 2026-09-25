@@ -12,7 +12,7 @@ galleria:
   - /src/assets/img/progetti/metka-stazione-erchie.webp
   - /src/assets/img/progetti/prova-cavi-clf-erchie.webp
   - /src/assets/img/progetti/sieyuan.webp
-ordine: 6
+ordine: 1
 descrizione: Stazione realizzata per impianti fotovoltaici nel territorio di Erchie.
 titoloEn: ''
 tipologiaEn: ''
