@@ -4,10 +4,11 @@
 // tutte le stazioni — con o senza foto reale — vivono nello stesso slider
 // invece di un misto di layout a coppie/full-bleed/schema tecnico.
 import { getImage, Image } from 'astro:assets';
-import { render, type CollectionEntry } from 'astro:content';
+import type { CollectionEntry } from 'astro:content';
 import { Icon } from 'astro-icon/components';
 import ProjectCardOverlay from './ProjectCardOverlay.astro';
 import type { Lingua } from '../i18n/routes.ts';
+import { fotoProgetto } from '../lib/progetti.ts';
 
 interface Props {
   entries: CollectionEntry<'progetti'>[];
@@ -16,8 +17,8 @@ interface Props {
 
 const { entries, lingua = 'it' } = Astro.props;
 const TESTI = {
-  it: { apriGalleria: 'Apri la galleria fotografica', fotoInArrivo: 'fotografia in arrivo', fotoInArrivoLabel: 'Foto in arrivo', precedente: 'Stazione precedente', successiva: 'Stazione successiva' },
-  en: { apriGalleria: 'Open photo gallery', fotoInArrivo: 'photo coming soon', fotoInArrivoLabel: 'Photo coming soon', precedente: 'Previous station', successiva: 'Next station' },
+  it: { apriGalleria: 'Apri la galleria fotografica', foto: 'foto', fotoInArrivo: 'fotografia in arrivo', fotoInArrivoLabel: 'Foto in arrivo', precedente: 'Stazione precedente', successiva: 'Stazione successiva' },
+  en: { apriGalleria: 'Open photo gallery', foto: 'photos', fotoInArrivo: 'photo coming soon', fotoInArrivoLabel: 'Photo coming soon', precedente: 'Previous station', successiva: 'Next station' },
 } as const;
 const t = TESTI[lingua];
 
@@ -32,9 +33,9 @@ const slides = await Promise.all(
       provincia,
       tipologia,
       tipologiaEn,
-      immagine,
       immagineAlt,
       immagineAltEn,
+      descrizione,
       descrizioneEn,
     } = entry.data;
 
@@ -44,26 +45,23 @@ const slides = await Promise.all(
     const titoloLocale = lingua === 'en' ? (titoloEn ?? titolo) : titolo;
     const tipologiaLocale = lingua === 'en' ? (tipologiaEn ?? tipologia) : tipologia;
     const immagineAltLocale = lingua === 'en' ? (immagineAltEn ?? immagineAlt) : immagineAlt;
-
-    // La descrizione (corpo Markdown) esiste solo in italiano nel file: se
-    // manca `descrizioneEn`, si rende comunque il Markdown italiano invece
-    // di lasciare la card vuota — stesso fallback degli altri campi.
-    const { Content } = await render(entry);
+    const descrizioneLocale = lingua === 'en' ? (descrizioneEn ?? descrizione) : descrizione;
     const indexLabel = String(i + 1).padStart(2, '0');
     const meta = [committente, provincia, tipologiaLocale].filter((v) => v && !/da confermare/i.test(v)).join(' · ');
 
-    // `fullPhotos` stays an array (not just the single `immagine`) so the
-    // modal in Lightbox.astro is already built to page through more than
-    // one photo per station — it just has one entry until the client
-    // uploads more of the same station via the admin panel.
-    //
-    // `immagine` (raw ImageMetadata) goes straight to the `<Image>`
-    // component in the template — it does its own optimization. Feeding it
-    // a `getImage()` result instead (a different, already-processed shape)
-    // is what threw "unsupported format undefined" here.
-    const fullPhotos = immagine
-      ? [{ src: (await getImage({ src: immagine, width: 1920 })).src, alt: immagineAltLocale }]
-      : [];
+    // Cover e galleria in un'unica sequenza: la prima foto va sulla card, e
+    // il lightbox (Lightbox.astro) le scorre tutte a partire da quella.
+    const foto = fotoProgetto(entry.data, { titolo: titoloLocale, altCopertina: immagineAltLocale, lingua });
+    const copertina = foto[0];
+
+    // La cover (ImageMetadata grezzo) va dritta al componente `<Image>` nel
+    // template, che fa la sua ottimizzazione. Passargli invece un risultato
+    // di `getImage()` (una forma diversa, già elaborata) è ciò che qui dava
+    // "unsupported format undefined". Il lightbox invece riceve URL già
+    // pronti, uno per foto.
+    const fullPhotos = await Promise.all(
+      foto.map(async (f) => ({ src: (await getImage({ src: f.src, width: 1920 })).src, alt: f.alt })),
+    );
 
     return {
       entry,
@@ -72,12 +70,9 @@ const slides = await Promise.all(
       kv,
       potenza,
       meta,
-      Content,
-      descrizioneEn,
-      immagine,
-      immagineAlt: immagineAltLocale,
+      descrizione: descrizioneLocale,
+      copertina,
       fullPhotos,
-      hasPhoto: !!immagine,
     };
   }),
 );
@@ -87,10 +82,10 @@ const slides = await Promise.all(
   <div class="ps-track" id="ps-track">
     {
       slides.map((s) => {
-        const Content = s.Content;
+        const nFoto = s.fullPhotos.length;
         return (
         <div class="ps-slide">
-          {s.hasPhoto ? (
+          {s.copertina ? (
             <button
               type="button"
               class="ps-card js-gallery-trigger"
@@ -99,26 +94,27 @@ const slides = await Promise.all(
               data-titolo={s.titolo}
               data-potenza={s.potenza ?? ''}
               data-meta={s.meta}
-              aria-label={`${t.apriGalleria}: ${s.titolo}`}
+              aria-label={`${t.apriGalleria}: ${s.titolo}${nFoto > 1 ? `, ${nFoto} ${t.foto}` : ''}`}
             >
               {/* Su telefono la card è alta e stretta e la foto, in object-cover
                   e più alta del riquadro per la parallasse, si mostra larga circa
                   il doppio dello schermo: `200vw` fa scegliere al browser la
                   versione giusta invece di una da 900px ingrandita. */}
               <Image
-                src={s.immagine}
-                alt={s.immagineAlt}
+                src={s.copertina.src}
+                alt={s.copertina.alt}
                 class="ps-photo"
                 data-parallax
-                widths={[480, 720, 900, 1400, 2000].filter((w) => w <= s.immagine.width)}
+                widths={[480, 720, 900, 1400, 2000].filter((w) => w <= s.copertina.src.width)}
                 sizes="(min-width: 1024px) 42vw, (min-width: 768px) 82vw, 200vw"
               />
               <span class="ps-scrim" aria-hidden="true" />
-              <ProjectCardOverlay indexLabel={s.indexLabel} titolo={s.titolo} potenza={s.potenza} meta={s.meta}>
-                {lingua === 'en' && s.descrizioneEn ? <p>{s.descrizioneEn}</p> : <Content />}
-              </ProjectCardOverlay>
+              <ProjectCardOverlay indexLabel={s.indexLabel} titolo={s.titolo} potenza={s.potenza} descrizione={s.descrizione} meta={s.meta} />
+              {/* Con più foto il pulsante dice quante: è l'unico segno, prima
+                  del clic, che dietro la card c'è una galleria. */}
               <span class="ps-expand" aria-hidden="true">
                 <Icon name="fa6-solid:expand" />
+                {nFoto > 1 && <span class="ps-expand-n">{nFoto}</span>}
               </span>
             </button>
           ) : (
@@ -127,9 +123,7 @@ const slides = await Promise.all(
                 <Icon name="fa6-regular:image" />
                 <span>{t.fotoInArrivoLabel}</span>
               </div>
-              <ProjectCardOverlay indexLabel={s.indexLabel} titolo={s.titolo} potenza={s.potenza} meta={s.meta}>
-                {lingua === 'en' && s.descrizioneEn ? <p>{s.descrizioneEn}</p> : <Content />}
-              </ProjectCardOverlay>
+              <ProjectCardOverlay indexLabel={s.indexLabel} titolo={s.titolo} potenza={s.potenza} descrizione={s.descrizione} meta={s.meta} />
             </div>
           )}
         </div>
@@ -386,15 +380,20 @@ const slides = await Promise.all(
     );
   }
 
+  /* Cerchio da 40px con la sola icona, pillola quando porta anche il numero
+     di foto. */
   .ps-expand {
     position: absolute;
     top: 1rem;
     right: 1rem;
     z-index: 3;
-    display: grid;
-    place-items: center;
-    width: 40px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.45rem;
+    min-width: 40px;
     height: 40px;
+    padding-inline: 0.8rem;
     border-radius: var(--radius-pill);
     color: var(--color-paper);
     font-size: var(--fs-small);
@@ -402,6 +401,12 @@ const slides = await Promise.all(
     border: 1px solid rgba(255, 255, 255, 0.2);
     backdrop-filter: blur(8px);
     -webkit-backdrop-filter: blur(8px);
+  }
+  .ps-expand-n {
+    font-family: var(--font-display);
+    font-variant-numeric: tabular-nums;
+    font-weight: 600;
+    line-height: 1;
   }
 
   .ps-placeholder-art {

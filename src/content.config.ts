@@ -12,16 +12,24 @@ const progetti = defineCollection({
       committente: z.string(),
       provincia: z.string(),
       tipologia: z.string(),
-      // Foto reale della stazione. Assente finché non arriva dal pannello:
-      // il componente mostra un placeholder, mai uno schema unifilare (i
-      // clienti non ce li lasciano condividere) né una foto stock spacciata
-      // per quella specifica realizzazione. `z.array(image())` risultava in
-      // un ImageMetadata senza `format` a build time (Astro non lo risolve
-      // correttamente dentro un array) — un solo campo opzionale copre i
-      // dati reali di oggi (0 o 1 foto a stazione) senza quel bug.
+      // Cover: la foto reale della stazione mostrata nello slider. Assente
+      // finché non arriva dal pannello: il componente mostra un placeholder,
+      // mai uno schema unifilare (i clienti non ce li lasciano condividere) né
+      // una foto stock spacciata per quella specifica realizzazione.
       immagine: image().optional(),
+      // Le altre foto della stazione, che il lightbox scorre dopo la cover
+      // (vedi `fotoProgetto` in src/lib/progetti.ts). Il pannello le salva
+      // come elenco di percorsi con un upload multiplo. In passato
+      // `z.array(image())` dava un ImageMetadata senza `format`; con Astro 7
+      // il difetto non si riproduce (verificato il 2026-09-25).
+      galleria: z.array(image()).optional(),
       immagineAlt: z.string(),
       ordine: z.number(),
+      // Testo semplice nel frontmatter, non più corpo markdown: titoli ed
+      // elenchi scritti nell'editor potevano rompere la card, e sul campo di
+      // testo il pannello può imporre il limite di lunghezza tarato sullo
+      // slider.
+      descrizione: z.string(),
       // Traduzioni inglesi, tutte opzionali con fallback all'italiano nei
       // componenti che le leggono (getTesto* in ProjectSlider.astro): la
       // collection non si biforca in due cartelle perché i dati di cantiere

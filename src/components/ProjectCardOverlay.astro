@@ -3,14 +3,22 @@
 // ProjectSlider — stesso identico recipe di `.ds-card-service--elevated`
 // (global.css): rifrazione SVG reale (`#liquid-glass-panel`, Base.astro),
 // frosted navy, sheen diagonale, ombre a strati.
+//
+// Il pannello è alto uguale su tutte le card: ogni riga ha uno spazio fisso
+// (titolo 2 righe, chip potenza, descrizione 2 righe su computer e 3 su
+// telefono, riga dati 1 e 2), riservato anche quando il testo è più corto o
+// manca. Prima cresceva col testo, e una descrizione lunga copriva più foto.
+// I `maxlength` del pannello /admin sono tarati per starci; il `line-clamp`
+// è solo la rete di sicurezza, se un testo più lungo arrivasse lo stesso.
 interface Props {
   indexLabel: string;
   titolo: string;
   potenza?: string;
+  descrizione: string;
   meta?: string;
 }
 
-const { indexLabel, titolo, potenza, meta } = Astro.props;
+const { indexLabel, titolo, potenza, descrizione, meta } = Astro.props;
 ---
 
 <div class="pco">
@@ -18,12 +26,10 @@ const { indexLabel, titolo, potenza, meta } = Astro.props;
     <span class="pco-dash"></span>
     {indexLabel}
   </p>
-  <h3 class="pco-titolo">{titolo}</h3>
-  {potenza && <span class="pco-potenza">{potenza}</span>}
-  <div class="pco-desc">
-    <slot />
-  </div>
-  {meta && <p class="pco-meta">{meta}</p>}
+  <h3 class="pco-titolo"><span class="pco-titolo-testo">{titolo}</span></h3>
+  {potenza ? <span class="pco-potenza">{potenza}</span> : <span class="pco-potenza is-vuoto" aria-hidden="true">&nbsp;</span>}
+  <p class="pco-desc">{descrizione}</p>
+  <p class="pco-meta">{meta}</p>
 </div>
 
 <style>
@@ -96,13 +102,34 @@ const { indexLabel, titolo, potenza, meta } = Astro.props;
     border-radius: 999px;
   }
 
+  /* Righe a numero fisso: `height` in `lh` riserva lo spazio anche per un
+     testo più corto, `line-clamp` taglia coi puntini quello più lungo. */
+  .pco-titolo-testo,
+  .pco-desc,
+  .pco-meta {
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  /* Il titolo di una riga (quasi sempre, su computer) scende in fondo al suo
+     spazio: il vuoto resta sotto l'indice e titolo, chip e descrizione
+     stanno insieme, invece di aprire un buco fra titolo e chip. */
   .pco-titolo {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
     margin-top: 0.4rem;
     font-family: var(--font-display);
     font-weight: 700;
     font-size: var(--fs-title);
     letter-spacing: -0.015em;
     line-height: var(--lh-title);
+    height: 2lh;
+  }
+  .pco-titolo-testo {
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
   }
 
   .pco-potenza {
@@ -117,18 +144,26 @@ const { indexLabel, titolo, potenza, meta } = Astro.props;
     line-height: var(--lh-label);
     font-weight: 600;
   }
+  /* Senza potenza il chip resta, invisibile: tiene la riga e quindi l'altezza
+     del pannello uguale a quella delle altre card. */
+  .pco-potenza.is-vuoto {
+    visibility: hidden;
+  }
 
   .pco-desc {
     margin-top: 0.5rem;
     font-size: var(--fs-small);
     line-height: var(--lh-small);
     color: color-mix(in srgb, var(--color-paper) 82%, transparent);
-  }
-  .pco-desc :global(p) {
-    margin: 0;
+    height: 2lh;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
   }
 
   .pco-meta {
+    /* `content-box`: l'altezza in righe non deve mangiarsi padding e bordo
+       che separano la riga dati dalla descrizione. */
+    box-sizing: content-box;
     margin-top: 0.55rem;
     padding-top: 0.5rem;
     border-top: 1px solid rgba(255, 255, 255, 0.14);
@@ -136,5 +171,23 @@ const { indexLabel, titolo, potenza, meta } = Astro.props;
     line-height: var(--lh-label);
     letter-spacing: 0.02em;
     color: color-mix(in srgb, var(--color-paper) 60%, transparent);
+    height: 1lh;
+    -webkit-line-clamp: 1;
+    line-clamp: 1;
+  }
+
+  /* Telefono: stesso breakpoint della card verticale di ProjectSlider. La
+     colonna è larga circa metà, e le stesse frasi vanno a capo di più. */
+  @media (max-width: 767px) {
+    .pco-desc {
+      height: 3lh;
+      -webkit-line-clamp: 3;
+      line-clamp: 3;
+    }
+    .pco-meta {
+      height: 2lh;
+      -webkit-line-clamp: 2;
+      line-clamp: 2;
+    }
   }
 </style>

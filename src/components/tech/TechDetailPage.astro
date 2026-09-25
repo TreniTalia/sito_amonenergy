@@ -18,6 +18,7 @@ import TechFaq from '../../components/tech/TechFaq.astro';
 import CtaBand from '../../components/CtaBand.astro';
 import ServiceCard from '../../components/ServiceCard.astro';
 import { DIAGRAMMI } from '../../components/tech/diagrams/index.ts';
+import { fotoProgetto } from '../../lib/progetti.ts';
 import { contatti } from '../../data/contatti.ts';
 import type { Lingua } from '../../i18n/routes.ts';
 
@@ -86,6 +87,16 @@ const TESTI = {
 const { voce, correlati, progetto, lingua, hrefLavori } = Astro.props;
 const d = voce.data;
 const t = TESTI[lingua];
+
+// La foto del progetto collegato: la sua cover, o la prima della galleria
+// se la cover non c'è, come sulla card dello slider.
+const copertinaCaso = progetto
+  ? fotoProgetto(progetto.data, {
+      titolo: lingua === 'en' ? (progetto.data.titoloEn ?? progetto.data.titolo) : progetto.data.titolo,
+      altCopertina: lingua === 'en' ? (progetto.data.immagineAltEn ?? progetto.data.immagineAlt) : progetto.data.immagineAlt,
+      lingua,
+    })[0]
+  : undefined;
 
 const Diagramma = DIAGRAMMI[d.diagramma as keyof typeof DIAGRAMMI];
 if (!Diagramma) throw new Error(`servizi/${voce.id}: diagramma "${d.diagramma}" non in DIAGRAMMI`);
@@ -210,7 +221,7 @@ const faqPage = {
     d.caso && (
       <section class={fondo('caso')}>
         <div class="wrap-wide py-20 lg:py-28">
-          <div class:list={['grid items-center gap-12 lg:gap-16', progetto?.data.immagine && 'lg:grid-cols-[1.05fr_0.95fr]']}>
+          <div class:list={['grid items-center gap-12 lg:gap-16', copertinaCaso && 'lg:grid-cols-[1.05fr_0.95fr]']}>
             <div>
               <div class="ds-eyebrow" data-reveal>
                 <span class="ds-eyebrow-dash" />
@@ -224,11 +235,11 @@ const faqPage = {
                 {t.guardaOpere}
               </a>
             </div>
-            {progetto?.data.immagine && (
+            {copertinaCaso && (
               <figure class="tech-figure" data-reveal style="--reveal-delay:120ms">
                 <Image
-                  src={progetto.data.immagine}
-                  alt={lingua === 'en' ? (progetto.data.immagineAltEn ?? progetto.data.immagineAlt) : progetto.data.immagineAlt}
+                  src={copertinaCaso.src}
+                  alt={copertinaCaso.alt}
                   class="tech-figure__img"
                   widths={[600, 900, 1200]}
                   sizes="(min-width: 1024px) 44vw, 100vw"

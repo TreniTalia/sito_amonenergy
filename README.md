@@ -156,16 +156,29 @@ eliminato: con nginx non farebbe nulla e resterebbe una falsa fonte di verità.
 
 ## Pannello /admin (editing contenuti)
 
-Un editor non tecnico può aggiungere progetti alla galleria e modificare i testi
+Un editor non tecnico può aggiungere progetti allo slider di `/lavori/` e modificare i testi
 delle pagine da `/admin`, senza toccare codice o git:
 
 1. Vai su `https://amonenergy.it/admin` e accedi con il tuo account GitHub
    (deve essere collaboratore della repository — vedi `docs/CMS-SETUP.md` per il
    setup una tantum richiesto prima che questo funzioni).
-2. **Per aggiungere un progetto alla galleria**: collection "Progetti" → New Progetto
-   → compila titolo, kV, committente, provincia, tipologia, carica la foto, scrivi
-   2-3 righe di descrizione, imposta l'ordine → Salva. Il progetto compare in fondo
-   alla galleria rispettando automaticamente il ritmo editoriale della griglia.
+2. **Per aggiungere un progetto**: collection "Progetti" → New Progetto → compila
+   titolo, kV, potenza, committente, provincia, tipologia e una frase di
+   descrizione, imposta l'ordine → Salva. Le foto:
+   - **Cover**: la foto della card nello slider (orizzontale, almeno 1600px).
+   - **Altre foto (galleria)**: si selezionano più foto insieme e si riordinano
+     trascinandole. Cliccando la card si apre la galleria: prima la cover, poi
+     queste. Il testo alternativo si genera da solo.
+   - Senza cover fa da cover la prima foto della galleria; senza nessuna foto la
+     card mostra "Foto in arrivo" e il progetto non compare in home.
+   - Il pannello riduce le foto a 2400px prima del caricamento.
+
+   I campi di testo hanno un contatore e un limite (titolo 45 caratteri,
+   descrizione 100, committente e tipologia 30): sono tarati per stare nel
+   pannello in vetro della card, uguale su tutte (titolo in 2 righe, descrizione
+   in 2 righe su computer e 3 su telefono). Oltre il limite il pannello non salva.
+   L'ordine decide la posizione nello slider; i primi 3 progetti con una foto
+   compaiono anche in home.
 3. **Per cambiare un testo della home** (o di Azienda/Contatti/hub Servizi):
    collection "Pagine" → scegli la pagina → modifica il campo → Salva.
 4. Ogni salvataggio crea un commit diretto su `main` (nessun flusso di revisione:

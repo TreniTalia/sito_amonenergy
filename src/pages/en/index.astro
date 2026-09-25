@@ -15,6 +15,7 @@ import ClientMarquee from '../../components/ClientMarquee.astro';
 import CtaBand from '../../components/CtaBand.astro';
 import CoverageMap from '../../components/CoverageMap.astro';
 import { contatti } from '../../data/contatti.ts';
+import { fotoProgetto } from '../../lib/progetti.ts';
 
 const home = await getEntry('pagine', 'en/home');
 if (!home || home.data.pagina !== 'home') throw new Error('pagine/en/home.yaml missing or malformed');
@@ -30,21 +31,23 @@ const serviziAnchor: Record<string, string> = {
   costruzioni: '/en/services/#costruzione-e-gestione',
   'gestione-e-manutenzione': '/en/services/#costruzione-e-gestione',
 };
+// Primi tre progetti con una foto, come nella home italiana.
 const progettiPreview = (await getCollection('progetti'))
   .sort((a, b) => a.data.ordine - b.data.ordine)
-  .slice(0, 3)
   // Traduzioni con fallback all'italiano, stessa regola di ProjectSlider.astro:
   // i campi *En sono opzionali, e queste card della home inglese leggevano
   // finora sempre e solo i campi italiani (titolo, tipologia, immagineAlt).
-  .map((p) => ({
-    ...p,
-    data: {
-      ...p.data,
-      titolo: p.data.titoloEn ?? p.data.titolo,
-      tipologia: p.data.tipologiaEn ?? p.data.tipologia,
-      immagineAlt: p.data.immagineAltEn ?? p.data.immagineAlt,
-    },
-  }));
+  .map((p) => {
+    const titolo = p.data.titoloEn ?? p.data.titolo;
+    const altCopertina = p.data.immagineAltEn ?? p.data.immagineAlt;
+    return {
+      ...p,
+      data: { ...p.data, titolo, tipologia: p.data.tipologiaEn ?? p.data.tipologia },
+      copertina: fotoProgetto(p.data, { titolo, altCopertina, lingua: 'en' })[0],
+    };
+  })
+  .filter((p) => p.copertina)
+  .slice(0, 3);
 ---
 
 <Base
@@ -164,21 +167,21 @@ const progettiPreview = (await getCollection('progetti'))
     <div class="grid gap-5 sm:grid-cols-2 lg:grid-cols-3 lg:gap-6">
       {
         progettiPreview.map((p, i) => (
-          <a href="/en/projects/" class="group block" data-reveal style={`--reveal-delay:${i * 90}ms`}>
+          <a href="/en/projects/" class="progetto-preview group block" data-reveal style={`--reveal-delay:${i * 90}ms`}>
             <div class="relative overflow-hidden rounded-[var(--radius-card)] border border-navy-100 shadow-[var(--shadow-sm)] transition-shadow duration-300 group-hover:shadow-[var(--shadow-lg)]" style="aspect-ratio: 16 / 11;">
               <Image
-                src={p.data.immagine}
-                alt={p.data.immagineAlt}
+                src={p.copertina.src}
+                alt={p.copertina.alt}
                 class="h-full w-full object-cover transition-transform duration-700 group-hover:scale-[1.05]"
                 style="transition-timing-function: var(--ease-signature);"
                 widths={[400, 800, 1200]}
                 sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"
               />
               <span class="pointer-events-none absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-navy-950/50 to-transparent"></span>
-              <span class="ds-chip-kv absolute left-3 top-3">{p.data.kv}</span>
+              {!/da confermare/i.test(p.data.kv) && <span class="ds-chip-kv absolute left-3 top-3">{p.data.kv}</span>}
             </div>
             <div class="mt-4">
-              <h3 class="text-title text-ink">{p.data.titolo}</h3>
+              <h3 class="text-title h-[2lh] line-clamp-2 text-ink">{p.data.titolo}</h3>
               <p class="text-small mt-1 text-ink/70">{p.data.tipologia} · {p.data.provincia} province</p>
             </div>
           </a>
