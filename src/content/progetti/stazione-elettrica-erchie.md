@@ -1,7 +1,7 @@
 ---
 titolo: Stazione elettrica Erchie
-kv: 150/20
-potenza: '60'
+kv: 150/20 kV
+potenza: 60 MW
 committente: METKA EGN ITALY S.R.L.
 provincia: BR
 tipologia: Sottostazione AT/MT
