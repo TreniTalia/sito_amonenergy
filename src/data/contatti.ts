@@ -6,7 +6,7 @@ export const contatti = {
   email: "info@amonenergy.it",
   pec: "amonenergy@pec.it",
   piva: "03042590640",
-  codiceFE: "KRRH6B9",
+  codiceFE: "T04ZHR3",
   linkedin: "https://www.linkedin.com/company/amonenergy",
   mapsUrl: "https://maps.google.com/?q=Amon+Energy+Srl+Castelluccio+dei+Sauri",
 } as const;

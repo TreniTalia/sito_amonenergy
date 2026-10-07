@@ -215,7 +215,7 @@ export const contatti = {
   email: "info@amonenergy.it",
   pec: "amonenergy@pec.it",
   piva: "03042590640",
-  codiceFE: "KRRH6B9",
+  codiceFE: "T04ZHR3",
   linkedin: "https://www.linkedin.com/company/amonenergy",
   mapsUrl: "https://maps.google.com/?q=Amon+Energy+Srl+Castelluccio+dei+Sauri",
 } as const;
@@ -559,7 +559,7 @@ Layout a due colonne (stack su mobile):
   - 📞 **Chiamaci — 0881 377590** (`tel:+390881377590`) — sotto, in piccolo: "Lun–Ven 8:30–18:00 · Reperibilità guasti 24/7"
   - ✉️ **Scrivici — info@amonenergy.it** (`mailto:info@amonenergy.it?subject=Richiesta%20informazioni`)
 - Riga secondaria: PEC amonenergy@pec.it · LinkedIn.
-- Dati fiscali in piccolo: P.IVA 03042590640 · Codice FE KRRH6B9.
+- Dati fiscali in piccolo: P.IVA 03042590640 · Codice FE T04ZHR3.
 
 **Colonna destra — MapFacade:**
 - Indirizzo ben visibile: **Via Roma 105, 71025 Castelluccio dei Sauri (FG)**.
